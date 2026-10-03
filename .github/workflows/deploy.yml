@@ -58,18 +58,15 @@ jobs:
 
             touch .env.production
             chmod 600 .env.production
-            if ! grep -q '^DB_PASSWORD=' .env.production; then printf 'DB_PASSWORD=%s
-' "$(openssl rand -hex 32)" >> .env.production; fi
-            if ! grep -q '^CRON_SECRET=' .env.production; then printf 'CRON_SECRET=%s
-' "$(openssl rand -hex 32)" >> .env.production; fi
+            if ! grep -q '^DB_PASSWORD=' .env.production; then printf 'DB_PASSWORD=%s\\n' "$(openssl rand -hex 32)" >> .env.production; fi
+            if ! grep -q '^CRON_SECRET=' .env.production; then printf 'CRON_SECRET=%s\\n' "$(openssl rand -hex 32)" >> .env.production; fi
 
             upsert_env() {
               key="$1"; value="$2"
               if [ -n "$value" ]; then
                 tmp="$(mktemp)"
                 grep -v "^$key=" .env.production > "$tmp" || true
-                printf '%s=%s
-' "$key" "$value" >> "$tmp"
+                printf '%s=%s\\n' "$key" "$value" >> "$tmp"
                 mv "$tmp" .env.production
                 chmod 600 .env.production
               fi
