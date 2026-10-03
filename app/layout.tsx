@@ -12,6 +12,7 @@ import "./admin-builder.css";
 import "./pro-extra.css";
 import "./feature-extra.css";
 import "./design-2026.css";
+import "./admin-settings.css";
 import ServiceWorker from "./ServiceWorker";
 
 export const metadata: Metadata = {
