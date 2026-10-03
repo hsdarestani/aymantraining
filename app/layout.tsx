@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./product.css";
+import "./admin-extra.css";
 
 export const metadata: Metadata = {
   title: "BE DIFFERENT",
