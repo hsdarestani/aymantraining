@@ -15,8 +15,15 @@ export default function Admin(){
       <Link href="/" className="brand">BE <span>DIFFERENT</span></Link>
       <div className="coach-mini"><div>A</div><span>COACH<br/><strong>AYMAN</strong></span></div>
       <nav>
-        <a className="active">Attention Queue</a><a>Kunden</a><a>Trainingspläne</a><a>Übungen</a>
-        <a>Tests</a><a>Inbox</a><a>Rules &amp; Score</a><a>Push Campaigns</a><a>Subscriptions</a>
+        <Link className="active" href="/admin">Attention Queue</Link>
+        <a>Kunden</a>
+        <Link href="/admin/plans">Trainingspläne</Link>
+        <Link href="/admin/exercises">Übungen</Link>
+        <a>Tests</a>
+        <Link href="/admin/inbox">Inbox</Link>
+        <Link href="/admin/rules">Rules &amp; Score</Link>
+        <a>Push Campaigns</a>
+        <a>Subscriptions</a>
       </nav>
       <Link className="back-link" href="/">← Athlete View</Link>
     </aside>
@@ -24,7 +31,7 @@ export default function Admin(){
     <section className="admin-content">
       <header className="admin-header">
         <div><span className="eyebrow">COACH COMMAND CENTER</span><h1>Wer braucht heute Aufmerksamkeit?</h1></div>
-        <button className="primary compact">+ NEUER PLAN</button>
+        <Link href="/admin/plans" className="primary compact">+ NEUER PLAN</Link>
       </header>
 
       <div className="kpis">
@@ -36,7 +43,7 @@ export default function Admin(){
 
       <div className="admin-cols">
         <article className="panel">
-          <div className="panel-head"><div><span className="eyebrow">PRIORITY INBOX</span><h2>Attention Queue</h2></div><span className="tag">LIVE</span></div>
+          <div className="panel-head"><div><span className="eyebrow">PRIORITY INBOX</span><h2>Attention Queue</h2></div><Link href="/admin/inbox" className="tag">LIVE</Link></div>
           <div className="athlete-table">
             {athletes.map(a=><div className="athlete-row" key={a.name}>
               <i className={"risk "+a.status}/><strong>{a.name}</strong><span>Score {a.score}</span><span>Recovery {a.recovery}</span><small>{a.issue}</small><button>OPEN</button>
@@ -52,7 +59,7 @@ export default function Admin(){
               <span>{name}</span><div className="weight-track"><i style={{width:value*4+"%"}}/></div><strong>{value}%</strong>
             </div>)}
           </div>
-          <button className="secondary" style={{width:"100%"}}>REGELN BEARBEITEN</button>
+          <Link className="secondary full" href="/admin/rules">REGELN BEARBEITEN</Link>
         </article>
       </div>
     </section>
