@@ -19,6 +19,12 @@ enum UserRole {
   ADMIN
 }
 
+enum MessageKind {
+  TEXT
+  VOICE
+  VIDEO
+}
+
 model User {
   id               String           @id @default(cuid())
   email            String           @unique
@@ -43,11 +49,13 @@ model Goal {
 }
 
 model TrainingPlan {
-  id        String    @id @default(cuid())
-  name      String
-  active    Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  workouts  Workout[]
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workouts    Workout[]
 }
 
 model Workout {
@@ -69,11 +77,18 @@ model Exercise {
   nameEn      String?
   category    String
   equipment   String?
+  primaryMuscles String?
+  secondaryMuscles String?
   level       Int      @default(1)
+  coachCue1   String?
+  coachCue2   String?
+  coachCue3   String?
+  commonMistakes Json?
   videoUrl    String?
   imageStart  String?
   imageMiddle String?
   imageEnd    String?
+  trackingType String?
   freeAccess  Boolean  @default(false)
   sets        SetLog[]
 }
@@ -111,6 +126,90 @@ model DailyCheck {
   @@unique([userId, date])
 }
 
+model BodyMetric {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  weightKg  Float?
+  waistCm   Float?
+  chestCm   Float?
+  bodyFat   Float?
+  createdAt DateTime @default(now())
+
+  @@index([userId, date])
+}
+
+model ProgressPhoto {
+  id        String   @id @default(cuid())
+  userId    String
+  url       String
+  takenAt   DateTime
+  private   Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([userId, takenAt])
+}
+
+model WearableDaily {
+  id             String   @id @default(cuid())
+  userId         String
+  date           DateTime @db.Date
+  source         String
+  steps          Int?
+  activeCalories Float?
+  totalCalories  Float?
+  restingHr      Float?
+  hrv            Float?
+  sleepMinutes   Int?
+  sleepStages    Json?
+  vo2max         Float?
+  workouts       Json?
+  completeness   Int      @default(0)
+
+  @@unique([userId, date, source])
+}
+
+model NutritionDaily {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime @db.Date
+  calories    Float?
+  proteinG    Float?
+  carbsG      Float?
+  fatG        Float?
+  waterMl     Int?
+  fruitVegServings Float?
+  addedSugarG Float?
+  source      String?
+  fuelScore   Int?
+
+  @@unique([userId, date])
+}
+
+model PerformanceTest {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  scheduledAt DateTime?
+  completedAt DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+  results     TestResult[]
+
+  @@index([userId, completedAt])
+}
+
+model TestResult {
+  id        String   @id @default(cuid())
+  testId    String
+  metric    String
+  value     Float
+  unit      String
+  videoUrl  String?
+  createdAt DateTime @default(now())
+  test      PerformanceTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+}
+
 model ScoreSnapshot {
   id          String   @id @default(cuid())
   userId      String
@@ -123,6 +222,7 @@ model ScoreSnapshot {
   recovery    Int?
   fuel        Int?
   consistency Int?
+  completeness Int @default(100)
   explanation Json?
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -138,4 +238,96 @@ model CoachingRule {
   conditions Json
   action     Json
   updatedAt  DateTime @updatedAt
+}
+
+model Recommendation {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime @db.Date
+  severity    String
+  title       String
+  explanation String
+  action      String
+  sourceRule  String?
+  coachStatus String     @default("PENDING")
+  createdAt   DateTime   @default(now())
+
+  @@index([userId, date])
+}
+
+model Message {
+  id          String      @id @default(cuid())
+  athleteId   String
+  coachId     String
+  senderId    String
+  kind        MessageKind @default(TEXT)
+  text        String?
+  mediaUrl    String?
+  durationSec Int?
+  createdAt   DateTime    @default(now())
+  readAt      DateTime?
+
+  @@index([athleteId, createdAt])
+}
+
+model VideoFeedback {
+  id          String   @id @default(cuid())
+  athleteId   String
+  coachId     String
+  videoUrl    String
+  annotations Json?
+  status      String   @default("OPEN")
+  createdAt   DateTime @default(now())
+  reviewedAt  DateTime?
+
+  @@index([athleteId, createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  category  String
+  title     String
+  body      String
+  sendAt    DateTime?
+  sentAt    DateTime?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model Subscription {
+  id          String           @id @default(cuid())
+  userId      String
+  tier        SubscriptionTier
+  provider    String
+  externalId  String?
+  status      String
+  trialEndsAt DateTime?
+  renewsAt    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, status])
+}
+
+model Badge {
+  id          String   @id @default(cuid())
+  userId      String
+  key         String
+  name        String
+  unlockedAt  DateTime @default(now())
+
+  @@unique([userId, key])
+}
+
+model Challenge {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  proOnly     Boolean  @default(false)
+  startsAt    DateTime
+  endsAt      DateTime
+  createdAt   DateTime @default(now())
 }
