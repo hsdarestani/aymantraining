@@ -12,7 +12,7 @@ export default function WorkoutSession({workoutId,exercises,existing,previous}:{
   const [rest,setRest]=useState<{seconds:number;total:number}|null>(null);
 
   useEffect(()=>{fetch(`/api/workouts/${workoutId}`,{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({action:"start"})}).catch(()=>undefined);const online=()=>flushOffline();window.addEventListener("online",online);flushOffline();return()=>window.removeEventListener("online",online)},[workoutId]);
-  useEffect(()=>{if(!rest||rest.seconds<=0)return;const timer=window.setInterval(()=>setRest(x=>x?{...x,seconds:Math.max(0,x.seconds-1)}:x),1000);return()=>clearInterval(timer)},[rest?.seconds>0]);
+  useEffect(()=>{if(!rest||rest.seconds<=0)return;const timer=window.setInterval(()=>setRest(x=>x?{...x,seconds:Math.max(0,x.seconds-1)}:x),1000);return()=>clearInterval(timer)},[rest]);
 
   async function saveSet(exerciseId:string,setNumber:number,restSeconds:number,form:HTMLFormElement){
     const data=new FormData(form);const key=`${exerciseId}:${setNumber}`;setBusy(key);
