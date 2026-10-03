@@ -9,6 +9,7 @@ import "./auth.css";
 import "./member-extra.css";
 import "./admin-extra2.css";
 import "./admin-builder.css";
+import "./pro-extra.css";
 
 export const metadata: Metadata = {
   title: "BE DIFFERENT",
