@@ -1,0 +1,104 @@
+:root{
+  --bd-bg:#050606;
+  --bd-panel:#0c0e0e;
+  --bd-panel-2:#111414;
+  --bd-ink:#f5f6f2;
+  --bd-dim:#8b918d;
+  --bd-volt:#d7ff00;
+  --bd-line:rgba(255,255,255,.10);
+  --bd-line-strong:rgba(215,255,0,.32);
+  --bd-radius:28px;
+}
+html{scroll-behavior:smooth;background:var(--bd-bg)}
+body{background:
+  linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),
+  radial-gradient(circle at 78% 6%,rgba(215,255,0,.10),transparent 28rem),
+  radial-gradient(circle at 5% 42%,rgba(255,88,28,.055),transparent 26rem),
+  var(--bd-bg);
+  background-size:46px 46px,46px 46px,auto,auto,auto;
+  color:var(--bd-ink);
+}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.24'/%3E%3C/svg%3E")}
+::selection{background:var(--bd-volt);color:#050606}
+.brand,.app-wordmark{font-weight:1000;letter-spacing:-.075em}.brand span,.app-wordmark b{color:var(--bd-volt);font-weight:1000}
+.panel{position:relative;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.012) 45%),var(--bd-panel);border-color:var(--bd-line);border-radius:var(--bd-radius);box-shadow:0 22px 80px rgba(0,0,0,.22)}
+.panel:before{content:"";position:absolute;left:20px;right:20px;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);pointer-events:none}
+.primary{position:relative;overflow:hidden;border-radius:16px;background:var(--bd-volt);box-shadow:0 8px 32px rgba(215,255,0,.10);transition:transform .22s ease,box-shadow .22s ease}
+.primary:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(215,255,0,.18)}
+.primary:after{content:"";position:absolute;inset:-2px;transform:translateX(-120%) skewX(-20deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);transition:transform .5s ease}
+.primary:hover:after{transform:translateX(120%) skewX(-20deg)}
+.secondary,.ghost{transition:border-color .2s ease,background .2s ease,transform .2s ease}
+.secondary:hover,.ghost:hover{border-color:var(--bd-line-strong);background:rgba(215,255,0,.045);transform:translateY(-1px)}
+.eyebrow{color:#a3aaa5;letter-spacing:.19em}
+.hero h1,.page-hero h1,.auth-card h1,.onboard-card h1,.checkin-form h1,.locked-feature h1{font-weight:1000;text-transform:uppercase}
+.hero h1 em{color:var(--bd-volt);-webkit-text-stroke:0}
+.hero{position:relative}.hero:after{content:"DIFFERENT";position:absolute;right:-1vw;bottom:1.5rem;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.035);font-size:clamp(90px,16vw,250px);font-weight:1000;letter-spacing:-.09em;pointer-events:none}
+.score-ring{animation:scoreIn .9s cubic-bezier(.2,.8,.2,1) both}
+.panel,.pillar,.day,.test-card{animation:panelIn .52s cubic-bezier(.2,.8,.2,1) both}
+.grid>.panel:nth-child(2),.progress-cards>.panel:nth-child(2),.pillar:nth-child(2){animation-delay:.06s}
+.grid>.panel:nth-child(3),.pillar:nth-child(3){animation-delay:.12s}
+.grid>.panel:nth-child(4),.pillar:nth-child(4){animation-delay:.18s}
+.live i,.online{animation:pulseLive 2s ease-in-out infinite}
+.bar i,.weight-track i{transform-origin:left;animation:barGrow .9s cubic-bezier(.2,.8,.2,1) both}
+.app-mobile-top,.app-bottom-nav,.app-drawer,.admin-mobile-top,.admin-mobile-sheet{display:none}
+
+.auth-shell{position:relative;overflow:hidden}.auth-shell:before{content:"BUILD YOUR\AATHLETE.";white-space:pre;position:absolute;left:max(5vw,30px);top:16vh;font-size:clamp(70px,13vw,210px);font-weight:1000;line-height:.76;letter-spacing:-.09em;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.05);pointer-events:none}
+.auth-card{backdrop-filter:blur(16px);background:linear-gradient(160deg,rgba(255,255,255,.055),rgba(10,12,12,.92));box-shadow:0 30px 100px rgba(0,0,0,.44)}
+.auth-card input,.auth-card select,.input-grid input,.input-grid select,.field-label textarea,.field-label input,.composer input,.set-grid input,.mini-form input,.mini-form textarea,.mini-form select{border-radius:14px;background:#111414;border-color:var(--bd-line)}
+.auth-card input:focus,.auth-card select:focus,.input-grid input:focus,.input-grid select:focus,.composer input:focus{border-color:var(--bd-volt);box-shadow:0 0 0 3px rgba(215,255,0,.07)}
+.onboard-card{position:relative;overflow:hidden;background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(255,255,255,.01)),#090b0b;border-radius:32px;box-shadow:0 40px 120px rgba(0,0,0,.34)}
+.onboard-card:after{content:"BD";position:absolute;right:-30px;bottom:-70px;font-size:240px;font-weight:1000;letter-spacing:-.12em;color:rgba(255,255,255,.018);pointer-events:none}
+.steps{grid-template-columns:repeat(6,1fr)}
+.goals button,.wearables button{border-radius:16px;min-height:58px;transition:.2s ease}
+.goals button.selected,.wearables button.selected{background:var(--bd-volt);color:#080908;box-shadow:0 12px 40px rgba(215,255,0,.10)}
+.goals button.selected b{color:#080908}
+
+@keyframes panelIn{from{opacity:0;transform:translateY(12px) scale(.992)}to{opacity:1;transform:none}}
+@keyframes scoreIn{from{opacity:0;transform:scale(.86) rotate(-8deg)}to{opacity:1;transform:none}}
+@keyframes barGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes pulseLive{0%,100%{opacity:.65}50%{opacity:1;filter:drop-shadow(0 0 8px currentColor)}}
+
+@media(max-width:980px){
+  body{background-size:34px 34px,34px 34px,auto,auto,auto}
+  .shell,.sub-shell{padding:0 16px calc(112px + env(safe-area-inset-bottom))}
+  .topbar,.sub-top{display:none}
+  .mobile-nav{display:none!important}
+  .app-mobile-top{position:sticky;top:0;z-index:65;height:68px;margin:0 -16px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,rgba(5,6,6,.97),rgba(5,6,6,.76));border-bottom:1px solid rgba(255,255,255,.07);backdrop-filter:blur(22px)}
+  .app-mobile-top .app-wordmark{font-size:18px}.app-mobile-top button,.drawer-head button{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--bd-line);border-radius:50%;background:rgba(255,255,255,.035);color:#fff}
+  .app-bottom-nav{position:fixed;left:12px;right:12px;bottom:max(10px,env(safe-area-inset-bottom));z-index:70;height:72px;display:grid;grid-template-columns:repeat(5,1fr);padding:7px;background:rgba(12,14,14,.91);border:1px solid rgba(255,255,255,.10);border-radius:24px;box-shadow:0 20px 70px rgba(0,0,0,.5);backdrop-filter:blur(24px)}
+  .app-bottom-nav a{position:relative;display:grid;place-items:center;align-content:center;gap:4px;color:#767c78;border-radius:17px;transition:.2s ease}
+  .app-bottom-nav a small{font-size:7px;font-weight:950;letter-spacing:.08em}
+  .app-bottom-nav a.active{color:#090a09;background:var(--bd-volt);box-shadow:0 8px 24px rgba(215,255,0,.12)}
+  .app-bottom-nav a.active .nav-icon{animation:navPop .3s cubic-bezier(.2,.9,.2,1)}
+  .app-drawer{position:fixed;inset:0;z-index:100;display:block;pointer-events:none}
+  .drawer-backdrop{position:absolute;inset:0;border:0;background:rgba(0,0,0,.66);opacity:0;transition:.3s ease}
+  .app-drawer aside{position:absolute;top:0;right:0;width:min(88vw,390px);height:100%;padding:24px 22px calc(24px + env(safe-area-inset-bottom));background:#080a09;border-left:1px solid var(--bd-line);transform:translateX(102%);transition:.36s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+  .app-drawer.open{pointer-events:auto}.app-drawer.open .drawer-backdrop{opacity:1}.app-drawer.open aside{transform:none}
+  .drawer-head{display:flex;justify-content:space-between;align-items:center}.drawer-identity{padding:62px 0 30px;border-bottom:1px solid var(--bd-line);display:grid}.drawer-identity span{font-size:12px;color:var(--bd-dim);letter-spacing:.18em;font-weight:900}.drawer-identity strong{font-size:52px;line-height:.9;letter-spacing:-.07em}
+  .drawer-links{display:grid;margin-top:18px}.drawer-links a{display:flex;justify-content:space-between;align-items:center;padding:17px 2px;border-bottom:1px solid var(--bd-line);font-size:14px;font-weight:850}.drawer-links b{color:var(--bd-volt)}
+  .app-drawer aside>p{margin-top:auto;color:var(--bd-volt);font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+  .hero{padding:28px 0 46px;gap:28px}.hero h1{font-size:clamp(56px,17vw,86px);line-height:.78;margin:18px 0 18px}.hero p{font-size:13px;line-height:1.65}.hero:after{display:none}
+  .score-ring{width:min(260px,72vw)}.score-inner strong{font-size:68px}
+  .grid{gap:12px}.panel{padding:19px;border-radius:22px}.panel h2{font-size:23px}.panel h3{font-size:24px}
+  .metrics{grid-template-columns:repeat(2,1fr);gap:8px}.metrics div{min-height:102px;border-radius:18px}.metrics strong{font-size:26px}
+  .page-hero{padding:34px 0 30px;gap:22px}.page-hero h1{font-size:clamp(44px,13vw,64px);line-height:.88}.hero-stat{width:190px;margin:0 0 12px auto}
+  .content-grid,.progress-cards,.coach-layout,.athlete-grid{gap:12px}
+  .week-strip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px}.day{min-width:92px;scroll-snap-align:start;border-radius:18px}
+  .exercise-row{padding:14px 0}.exercise-row .secondary{border-radius:12px}
+  .fake-chart{height:210px}.test-timeline{display:flex;overflow-x:auto}.test-card{min-width:160px}
+  .coach-profile{padding-top:30px}.chat-panel{min-height:500px}
+  .onboard-shell{display:block;padding:78px 12px 40px}.onboard-shell>.brand{top:24px;left:18px}.onboard-card{width:100%;padding:25px 18px;border-radius:26px}.onboard-card h1{font-size:42px;line-height:.9}.goals{gap:8px}
+  .admin-mobile-top{position:sticky;top:0;z-index:85;height:64px;display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:12px;padding:0 16px;background:rgba(5,6,6,.94);border-bottom:1px solid var(--bd-line);backdrop-filter:blur(20px)}
+  .admin-mobile-top>span{font-size:8px;color:var(--bd-volt);letter-spacing:.16em;font-weight:950}.admin-mobile-top button{width:38px;height:38px;border-radius:50%;border:1px solid var(--bd-line);background:transparent;color:#fff;font-size:18px}
+  .admin-mobile-sheet{position:fixed;top:64px;left:0;right:0;z-index:84;display:grid;padding:10px 16px 20px;background:#080a09;border-bottom:1px solid var(--bd-line);transform:translateY(-120%);opacity:0;transition:.3s ease;max-height:calc(100vh - 64px);overflow:auto}.admin-mobile-sheet.open{transform:none;opacity:1}
+  .admin-mobile-sheet a{display:flex;justify-content:space-between;padding:15px 4px;border-bottom:1px solid var(--bd-line);font-size:13px;font-weight:850}.admin-mobile-sheet a b,.admin-mobile-sheet a.active{color:var(--bd-volt)}
+  .admin-shell{display:block}.sidebar{display:none!important}.admin-content{padding:18px 14px 100px}.admin-header{margin-bottom:18px}.kpis{display:flex;overflow-x:auto;gap:8px;margin:0 -14px 14px;padding:0 14px}.kpis div{min-width:145px;border-radius:18px}.admin-cols{gap:12px}.athlete-row{grid-template-columns:12px minmax(0,1fr) auto}.athlete-row strong{overflow:hidden;text-overflow:ellipsis}
+}
+@media(max-width:560px){
+  .pillar-grid{grid-template-columns:1fr 1fr;gap:8px}.pillar{padding:14px}.pillar span{font-size:7px}.pillar strong{font-size:20px}
+  .panel-head{gap:10px}.tag{white-space:nowrap}.number{font-size:56px}.workout-visual{min-height:170px;padding:16px}.workout-visual:after{opacity:.5}
+  .coach-actions{display:grid;grid-template-columns:1fr 1fr}.coach-actions .secondary{text-align:center}
+}
+@keyframes navPop{0%{transform:scale(.75)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
