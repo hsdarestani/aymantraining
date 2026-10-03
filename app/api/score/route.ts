@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {calculateScore,levelForScore,type ScoreInput} from "@/lib/score";
+import {calculateScore,levelForScore,type ScoreInput} from "../../../lib/score";
 
 export async function POST(request:Request){
   const body=await request.json() as {input:ScoreInput};
