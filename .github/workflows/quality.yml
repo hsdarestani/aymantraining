@@ -1,0 +1,66 @@
+name: Product Quality Gate
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: bedifferent-quality
+  cancel-in-progress: true
+
+jobs:
+  web-e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: bedifferent_test
+          POSTGRES_USER: bedifferent
+          POSTGRES_PASSWORD: bedifferent_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bedifferent -d bedifferent_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://bedifferent:bedifferent_test@127.0.0.1:5432/bedifferent_test?schema=public
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      REVENUECAT_WEBHOOK_SECRET: test-revenuecat-secret
+      CRON_SECRET: test-cron-secret
+      DATA_DIR: /tmp/bedifferent-e2e
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm install
+      - name: Validate schema and TypeScript
+        run: npm run check
+      - name: Prepare database
+        run: |
+          npx prisma db push
+          npm run db:seed
+      - name: Production build
+        run: npm run build
+      - name: Start app
+        run: |
+          NODE_ENV=production npm start > /tmp/bedifferent-next.log 2>&1 &
+          echo $! > /tmp/bedifferent-next.pid
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:3000/api/ready >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/bedifferent-next.log
+          exit 1
+      - name: End to end smoke
+        run: node scripts/e2e-smoke.mjs
+      - name: Print server log on failure
+        if: failure()
+        run: cat /tmp/bedifferent-next.log || true
