@@ -6,6 +6,7 @@ import "./pricing.css";
 import "./engagement.css";
 import "./onboarding-extra.css";
 import "./auth.css";
+import "./member-extra.css";
 
 export const metadata: Metadata = {
   title: "BE DIFFERENT",
