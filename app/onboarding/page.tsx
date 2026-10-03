@@ -36,7 +36,9 @@ export default function Onboarding(){
   const [birthDate,setBirthDate]=useState("");
   const [sex,setSex]=useState("prefer_not_to_say");
   const [height,setHeight]=useState(180);
-  const [weight,setWeight]=useState(80);\n  const [trainingExperience,setTrainingExperience]=useState<"STARTER"|"REGULAR"|"ADVANCED">("STARTER");\n  const [availabilityPerWeek,setAvailabilityPerWeek]=useState(3);
+  const [weight,setWeight]=useState(80);
+  const [trainingExperience,setTrainingExperience]=useState<"STARTER"|"REGULAR"|"ADVANCED">("STARTER");
+  const [availabilityPerWeek,setAvailabilityPerWeek]=useState(3);
   const [pushups,setPushups]=useState(20);
   const [plank,setPlank]=useState(60);
   const [run,setRun]=useState<number|null>(null);
