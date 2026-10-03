@@ -528,3 +528,46 @@ model AnalyticsEvent {
   @@index([name, createdAt])
   @@index([userId, createdAt])
 }
+
+
+model WeeklyCheckIn {
+  id           String   @id @default(cuid())
+  userId       String
+  weekStart    DateTime @db.Date
+  weightKg     Float?
+  energy       Int?
+  recovery     Int?
+  training     Int?
+  note         String?
+  questions    String?
+  photoMediaId String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, weekStart])
+  @@index([userId, createdAt])
+}
+
+model ChallengeEntry {
+  id          String   @id @default(cuid())
+  challengeId String
+  userId      String
+  progress    Float    @default(0)
+  completedAt DateTime?
+  joinedAt    DateTime @default(now())
+
+  @@unique([challengeId, userId])
+  @@index([userId, joinedAt])
+}
+
+model Referral {
+  id             String   @id @default(cuid())
+  referrerUserId String
+  referredUserId String?  @unique
+  code           String   @unique
+  status         String   @default("OPEN")
+  rewardGrantedAt DateTime?
+  createdAt      DateTime @default(now())
+
+  @@index([referrerUserId, createdAt])
+}
