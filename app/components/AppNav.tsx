@@ -51,12 +51,18 @@ export default function AppNav(){
         <div className="drawer-head"><span className="app-wordmark">BE <b>DIFFERENT</b></span><button onClick={()=>setOpen(false)}><Icon name="close"/></button></div>
         <div className="drawer-identity"><span>BUILD YOUR</span><strong>ATHLETE.</strong></div>
         <div className="drawer-links">
-          <Link href="/report" onClick={()=>setOpen(false)}>Weekly Report <b>↗</b></Link>\n          <Link href="/plans" onClick={()=>setOpen(false)}>Trainingspläne <b>↗</b></Link>\n          <Link href="/library" onClick={()=>setOpen(false)}>Übungsbibliothek <b>↗</b></Link>\n          <Link href="/lifestyle" onClick={()=>setOpen(false)}>Lifestyle <b>↗</b></Link>\n          <Link href="/fuel" onClick={()=>setOpen(false)}>BE FUEL <b>↗</b></Link>
+          <Link href="/report" onClick={()=>setOpen(false)}>Weekly Report <b>↗</b></Link>
+          <Link href="/plans" onClick={()=>setOpen(false)}>Trainingspläne <b>↗</b></Link>
+          <Link href="/library" onClick={()=>setOpen(false)}>Übungsbibliothek <b>↗</b></Link>
+          <Link href="/lifestyle" onClick={()=>setOpen(false)}>Lifestyle <b>↗</b></Link>
+          <Link href="/fuel" onClick={()=>setOpen(false)}>BE FUEL <b>↗</b></Link>
           <Link href="/tests" onClick={()=>setOpen(false)}>BE DIFFERENT Test <b>↗</b></Link>
           <Link href="/checkin" onClick={()=>setOpen(false)}>Weekly Check In <b>↗</b></Link>
           <Link href="/community" onClick={()=>setOpen(false)}>Community <b>↗</b></Link>
           <Link href="/pricing" onClick={()=>setOpen(false)}>Membership <b>↗</b></Link>
-          <Link href="/settings" onClick={()=>setOpen(false)}>Settings <b>↗</b></Link>\n          <Link href="/legal/privacy" onClick={()=>setOpen(false)}>Datenschutz <b>↗</b></Link>\n          <Link href="/legal/impressum" onClick={()=>setOpen(false)}>Impressum <b>↗</b></Link>
+          <Link href="/settings" onClick={()=>setOpen(false)}>Settings <b>↗</b></Link>
+          <Link href="/legal/privacy" onClick={()=>setOpen(false)}>Datenschutz <b>↗</b></Link>
+          <Link href="/legal/impressum" onClick={()=>setOpen(false)}>Impressum <b>↗</b></Link>
         </div>
         <p>Normal is boring.</p>
       </aside>
