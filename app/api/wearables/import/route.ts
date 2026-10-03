@@ -5,6 +5,7 @@ import { prisma } from "../../../../lib/db";
 import { errorJson, isSameOrigin, requireApiUser, dateOnly } from "../../../../lib/http";
 import { recomputeScoreForUser } from "../../../../lib/scoring";
 import { evaluateRecommendations } from "../../../../lib/recommendations";
+import { hasFeature } from "../../../../lib/entitlements";
 
 const schema = z.object({
   source: z.enum(["apple_health", "health_connect", "manual_import"]),
@@ -37,7 +38,14 @@ export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return errorJson("Ungültige Health-Daten.", 422);
 
-  const { date: rawDate, sleepStages, workouts, ...values } = parsed.data;
+  const advanced = await hasFeature(user.subscriptionTier, "wearable_advanced");
+  const { date: rawDate, sleepStages, workouts, ...rawValues } = parsed.data;
+  const values = advanced ? rawValues : {
+    source: rawValues.source,
+    steps: rawValues.steps,
+    activeCalories: rawValues.activeCalories,
+    totalCalories: rawValues.totalCalories
+  };
   const day = dateOnly(new Date(rawDate));
   const fields = [
     values.steps,
@@ -50,8 +58,8 @@ export async function POST(request: Request) {
     values.weightKg
   ];
   const completeness = Math.round(fields.filter((v) => v != null).length / fields.length * 100);
-  const jsonSleep = sleepStages as Prisma.InputJsonValue | undefined;
-  const jsonWorkouts = workouts as Prisma.InputJsonValue | undefined;
+  const jsonSleep = advanced ? sleepStages as Prisma.InputJsonValue | undefined : undefined;
+  const jsonWorkouts = advanced ? workouts as Prisma.InputJsonValue | undefined : undefined;
 
   const item = await prisma.wearableDaily.upsert({
     where: { userId_date_source: { userId: user.id, date: day, source: values.source } },
@@ -75,5 +83,5 @@ export async function POST(request: Request) {
     recomputeScoreForUser(user.id),
     evaluateRecommendations(user.id)
   ]);
-  return NextResponse.json({ ok: true, item, score, recommendations });
+  return NextResponse.json({ ok: true, item, score, recommendations: advanced ? recommendations : [], advanced });
 }
