@@ -15,10 +15,22 @@ jobs:
     steps:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          FIREBASE_SERVICE_ACCOUNT_B64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_B64 }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          REVENUECAT_WEBHOOK_SECRET: ${{ secrets.REVENUECAT_WEBHOOK_SECRET }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         with:
           host: ${{ secrets.HOST }}
           username: root
           password: ${{ secrets.PASS }}
+          envs: FIREBASE_SERVICE_ACCOUNT_B64,R2_ACCOUNT_ID,R2_ACCESS_KEY_ID,R2_SECRET_ACCESS_KEY,R2_BUCKET,REVENUECAT_WEBHOOK_SECRET,RESEND_API_KEY,EMAIL_FROM,POSTHOG_KEY,SENTRY_DSN
           script_stop: false
           command_timeout: 30m
           script: |
@@ -46,12 +58,32 @@ jobs:
 
             touch .env.production
             chmod 600 .env.production
-            if ! grep -q '^DB_PASSWORD=' .env.production; then
-              printf 'DB_PASSWORD=%s\n' "$(openssl rand -hex 32)" >> .env.production
-            fi
-            if ! grep -q '^CRON_SECRET=' .env.production; then
-              printf 'CRON_SECRET=%s\n' "$(openssl rand -hex 32)" >> .env.production
-            fi
+            if ! grep -q '^DB_PASSWORD=' .env.production; then printf 'DB_PASSWORD=%s
+' "$(openssl rand -hex 32)" >> .env.production; fi
+            if ! grep -q '^CRON_SECRET=' .env.production; then printf 'CRON_SECRET=%s
+' "$(openssl rand -hex 32)" >> .env.production; fi
+
+            upsert_env() {
+              key="$1"; value="$2"
+              if [ -n "$value" ]; then
+                tmp="$(mktemp)"
+                grep -v "^$key=" .env.production > "$tmp" || true
+                printf '%s=%s
+' "$key" "$value" >> "$tmp"
+                mv "$tmp" .env.production
+                chmod 600 .env.production
+              fi
+            }
+            upsert_env FIREBASE_SERVICE_ACCOUNT_B64 "$FIREBASE_SERVICE_ACCOUNT_B64"
+            upsert_env R2_ACCOUNT_ID "$R2_ACCOUNT_ID"
+            upsert_env R2_ACCESS_KEY_ID "$R2_ACCESS_KEY_ID"
+            upsert_env R2_SECRET_ACCESS_KEY "$R2_SECRET_ACCESS_KEY"
+            upsert_env R2_BUCKET "$R2_BUCKET"
+            upsert_env REVENUECAT_WEBHOOK_SECRET "$REVENUECAT_WEBHOOK_SECRET"
+            upsert_env RESEND_API_KEY "$RESEND_API_KEY"
+            upsert_env EMAIL_FROM "$EMAIL_FROM"
+            upsert_env POSTHOG_KEY "$POSTHOG_KEY"
+            upsert_env SENTRY_DSN "$SENTRY_DSN"
 
             docker compose --env-file .env.production up -d db
             docker compose --env-file .env.production run --rm migrate
@@ -59,7 +91,7 @@ jobs:
 
             mkdir -p /etc/nginx/ssl/bedifferent
             if [ ! -s /etc/nginx/ssl/bedifferent/fullchain.pem ] || [ ! -s /etc/nginx/ssl/bedifferent/privkey.pem ]; then
-              openssl req -x509 -nodes -newkey rsa:2048 -days 825                 -keyout /etc/nginx/ssl/bedifferent/privkey.pem                 -out /etc/nginx/ssl/bedifferent/fullchain.pem                 -subj "/CN=bedifferent.smarbiz.sbs"
+              openssl req -x509 -nodes -newkey rsa:2048 -days 825 -keyout /etc/nginx/ssl/bedifferent/privkey.pem -out /etc/nginx/ssl/bedifferent/fullchain.pem -subj "/CN=bedifferent.smarbiz.sbs"
             fi
 
             cat >/etc/nginx/sites-available/bedifferent.smarbiz.sbs <<'NGINX'
@@ -68,7 +100,6 @@ jobs:
               listen [::]:80;
               server_name bedifferent.smarbiz.sbs;
               client_max_body_size 110m;
-
               location / {
                 proxy_pass http://127.0.0.1:3100;
                 proxy_http_version 1.1;
@@ -80,22 +111,18 @@ jobs:
                 proxy_set_header Connection "upgrade";
               }
             }
-
             server {
               listen 443 ssl;
               listen [::]:443 ssl;
               http2 on;
               server_name bedifferent.smarbiz.sbs;
               client_max_body_size 110m;
-
               ssl_certificate /etc/nginx/ssl/bedifferent/fullchain.pem;
               ssl_certificate_key /etc/nginx/ssl/bedifferent/privkey.pem;
               ssl_protocols TLSv1.2 TLSv1.3;
-
               add_header X-Content-Type-Options "nosniff" always;
               add_header Referrer-Policy "strict-origin-when-cross-origin" always;
               add_header Permissions-Policy "camera=(self), microphone=(self), geolocation=()" always;
-
               location / {
                 proxy_pass http://127.0.0.1:3100;
                 proxy_http_version 1.1;
@@ -114,7 +141,6 @@ jobs:
             rm -f /etc/nginx/sites-enabled/default
             nginx -t
             systemctl restart nginx
-
             sleep 4
             curl -fsS http://127.0.0.1:3100/api/health
             curl -fsS http://127.0.0.1:3100/api/ready
@@ -130,9 +156,7 @@ jobs:
         run: |
           set -e
           for i in 1 2 3 4 5; do
-            if curl -kfsS --connect-timeout 10 https://bedifferent.smarbiz.sbs/api/ready; then
-              exit 0
-            fi
+            if curl -kfsS --connect-timeout 10 https://bedifferent.smarbiz.sbs/api/ready; then exit 0; fi
             sleep 5
           done
           exit 1
