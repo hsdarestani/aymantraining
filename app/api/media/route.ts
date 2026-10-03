@@ -7,7 +7,7 @@ import {putPrivateObject} from "../../../lib/storage";
 
 const allowed={
   PROGRESS_PHOTO:{mime:/^image\/(jpeg|png|webp)$/,max:12*1024*1024},
-  TECHNIQUE_VIDEO:{mime:/^video\/(mp4|quicktime|webm)$/,max:100*1024*1024},
+  TECHNIQUE_VIDEO:{mime:/^video\/(mp4|quicktime|webm)$/,max:100*1024*1024},\n  TEST_VIDEO:{mime:/^video\/(mp4|quicktime|webm)$/,max:100*1024*1024},
   VOICE_MESSAGE:{mime:/^audio\/(mpeg|mp4|webm|ogg|wav|x-m4a)$/,max:25*1024*1024},
   EXERCISE_IMAGE:{mime:/^image\/(jpeg|png|webp)$/,max:12*1024*1024},
   EXERCISE_VIDEO:{mime:/^video\/(mp4|quicktime|webm)$/,max:100*1024*1024}
