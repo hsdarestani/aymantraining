@@ -24,7 +24,7 @@ try{
   await expect("/api/auth/register",{method:"POST",body:{email,password:"VeryStrong123!",name:"E2E Athlete",goal:"Athletik"}},200);
   const me0=await expect("/api/auth/me",{},200);assert(me0.user.email===email,"auth/me email");
 
-  await expect("/api/onboarding/complete",{method:"POST",body:{goal:"Athletik",birthDate:"1995-05-10",sex:"prefer_not_to_say",heightCm:180,weightKg:80,healthConsent:true,privacyConsent:true,termsConsent:true,pushups:25,plankSeconds:75}},200);
+  await expect("/api/onboarding/complete",{method:"POST",body:{goal:"Athletik",birthDate:"1995-05-10",sex:"prefer_not_to_say",heightCm:180,weightKg:80,trainingExperience:"REGULAR",availabilityPerWeek:4,healthConsent:true,privacyConsent:true,termsConsent:true,pushups:25,plankSeconds:75}},200);
 
   const workouts=await expect("/api/workouts?history=1",{},200);assert(workouts.workouts.length>=1,"starter workout missing");
   const workout=workouts.workouts.find(x=>x.exercises?.length)||workouts.workouts[0];
@@ -45,6 +45,9 @@ try{
   const trial=await expect("/api/subscription/trial",{method:"POST"},200);assert(trial.trialEndsAt,"trial missing");
   const ent=await expect("/api/entitlements",{},200);assert(ent.tier==="PRO","trial did not grant PRO");
   await expect("/api/checkin",{method:"POST",body:{weightKg:79.5,energy:8,recovery:7,training:8,note:"E2E"}},200);
+  await expect("/api/nutrition",{method:"POST",body:{calories:2200,proteinG:140,carbsG:220,fatG:70,waterMl:2600,fruitVegServings:5,addedSugarG:20,processedFoodScore:20,source:"manual"}},200);
+  const templates=await expect("/api/plans/templates",{},200);assert(templates.items.length>=3,"templates missing");
+  await expect(`/api/plans/templates/${templates.items[0].id}/start`,{method:"POST"},200);
   const proHealth=await expect("/api/wearables/import",{method:"POST",body:{source:"manual_import",date:new Date().toISOString().slice(0,10),steps:9100,activeCalories:510,hrv:73,restingHr:50,sleepMinutes:480,vo2max:47}},200);assert(proHealth.item.hrv!=null,"PRO advanced health not stored");
 
   await expect("/api/consent",{method:"POST",body:{type:"media_processing",version:"1.0",granted:true}},200);
@@ -73,6 +76,7 @@ try{
   cookie="";
   await expect("/api/auth/login",{method:"POST",body:{email:adminEmail,password:"AdminStrong123!"}},200);
   await expect("/api/admin/settings",{},200);
+  await expect("/api/admin/engine-settings",{},200);
   await expect("/api/admin/score-settings",{method:"PATCH",body:{strength:20,endurance:15,athleticism:15,mobility:10,recovery:15,fuel:10,consistency:15}},200);
   const plan=await expect("/api/admin/plans",{method:"POST",body:{name:"E2E Plan",description:"Automated QA",proOnly:false}},200);assert(plan.item.id,"admin plan");
   await prisma.user.delete({where:{id:admin.id}});
