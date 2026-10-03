@@ -56,7 +56,7 @@ export default function AppNav(){
           <Link href="/checkin" onClick={()=>setOpen(false)}>Weekly Check In <b>↗</b></Link>
           <Link href="/community" onClick={()=>setOpen(false)}>Community <b>↗</b></Link>
           <Link href="/pricing" onClick={()=>setOpen(false)}>Membership <b>↗</b></Link>
-          <Link href="/settings" onClick={()=>setOpen(false)}>Settings <b>↗</b></Link>
+          <Link href="/settings" onClick={()=>setOpen(false)}>Settings <b>↗</b></Link>\n          <Link href="/legal/privacy" onClick={()=>setOpen(false)}>Datenschutz <b>↗</b></Link>\n          <Link href="/legal/impressum" onClick={()=>setOpen(false)}>Impressum <b>↗</b></Link>
         </div>
         <p>Normal is boring.</p>
       </aside>
