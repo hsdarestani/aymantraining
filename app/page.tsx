@@ -62,7 +62,7 @@ export default function Home(){
             <span className="signal">TODAY'S CALL</span>
             <h3>Kein Maximaltraining.</h3>
             <p>Deine Leistung steigt, aber die Recovery fällt. Heute Fokus auf Mobility und leichtes Conditioning.</p>
-            <button className="secondary">PLAN ANPASSEN</button>
+            <Link href="/training" className="secondary">PLAN ANSEHEN</Link>
           </div>
         </div>
       </article>
@@ -76,7 +76,7 @@ export default function Home(){
           <span className="number">01</span>
           <div><span className="signal">NEXT EXERCISE</span><h3>Incline Dumbbell Press</h3><p>4 Sätze · 8–10 Wdh. · RPE 8</p></div>
         </div>
-        <button className="primary">START WORKOUT <b>→</b></button>
+        <Link href="/training" className="primary">START WORKOUT <b>→</b></Link>
       </article>
 
       <article className="panel">
@@ -92,12 +92,12 @@ export default function Home(){
       <article className="panel coach">
         <div className="coach-head"><div className="coach-pic">A</div><div><span className="eyebrow">YOUR COACH</span><h2>Ayman</h2></div><span className="online">ONLINE</span></div>
         <blockquote>“Recovery is training too. Heute reduzieren wir das Volumen und gewinnen morgen Leistung.”</blockquote>
-        <div className="coach-actions"><button>VOICE MESSAGE</button><button>CHECK IN</button></div>
+        <div className="coach-actions"><Link href="/coach" className="secondary">VOICE MESSAGE</Link><Link href="/coach" className="secondary">CHECK IN</Link></div>
       </article>
     </section>
 
     <section className="pillars">
-      <div className="section-head"><div><span className="eyebrow">YOUR ATHLETE</span><h2>Du trainierst nicht. Du entwickelst dich.</h2></div><span className="week">THIS WEEK +3%</span></div>
+      <div className="section-head"><div><span className="eyebrow">YOUR ATHLETE</span><h2>Du trainierst nicht. Du entwickelst dich.</h2></div><Link href="/progress" className="week">THIS WEEK +3%</Link></div>
       <div className="pillar-grid">
         {pillars.map(([name,value,delta])=><div className="pillar" key={name}>
           <div><span>{name}</span><strong>{value}</strong></div>
@@ -108,7 +108,11 @@ export default function Home(){
     </section>
 
     <nav className="mobile-nav">
-      <a className="active">HOME</a><a>TRAINING</a><a>PROGRESS</a><a>COACH</a><a>ATHLETE</a>
+      <Link className="active" href="/">HOME</Link>
+      <Link href="/training">TRAINING</Link>
+      <Link href="/progress">PROGRESS</Link>
+      <Link href="/coach">COACH</Link>
+      <Link href="/athlete">ATHLETE</Link>
     </nav>
   </main>;
 }
