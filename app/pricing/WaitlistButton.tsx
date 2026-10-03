@@ -1,0 +1,2 @@
+"use client";import {useState} from "react";
+export default function WaitlistButton(){const [status,setStatus]=useState("");async function join(){const r=await fetch("/api/subscription/waitlist",{method:"POST"});const j=await r.json().catch(()=>({}));setStatus(r.ok?"Du bist auf der PRO Warteliste.":j.error||"Warteliste konnte nicht aktualisiert werden.");}return <div><button className="primary" onClick={join}>AUF DIE WARTELISTE →</button>{status&&<small className="muted" style={{display:"block",marginTop:10}}>{status}</small>}</div>}
