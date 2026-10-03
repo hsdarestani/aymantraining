@@ -1,6 +1,6 @@
 import {NextResponse} from "next/server";
-import {prisma} from "../../../../../lib/db";
-import {errorJson,isSameOrigin,requireApiUser,dateOnly} from "../../../../../lib/http";
+import {prisma} from "../../../../../../lib/db";
+import {errorJson,isSameOrigin,requireApiUser,dateOnly} from "../../../../../../lib/http";
 export async function POST(request:Request,{params}:{params:Promise<{id:string}>}){
   if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
   const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
