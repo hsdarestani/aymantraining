@@ -75,8 +75,9 @@ jobs:
             }
 
             server {
-              listen 443 ssl http2;
-              listen [::]:443 ssl http2;
+              listen 443 ssl;
+              listen [::]:443 ssl;
+              http2 on;
               server_name bedifferent.smarbiz.sbs;
 
               ssl_certificate /etc/nginx/ssl/bedifferent/fullchain.pem;
@@ -103,17 +104,24 @@ jobs:
             systemctl restart nginx
 
             sleep 3
-            echo "=== listeners ==="
-            ss -ltnp | grep -E ':(80|443|3100) ' || true
-            echo "=== local app ==="
             curl -fsS http://127.0.0.1:3100/api/health
-            echo
-            echo "=== nginx http ==="
             curl -fsS -H 'Host: bedifferent.smarbiz.sbs' http://127.0.0.1/api/health
-            echo
-            echo "=== nginx https ==="
             curl -kfsS -H 'Host: bedifferent.smarbiz.sbs' https://127.0.0.1/api/health
-            echo
-            echo "=== public ip ==="
-            curl -4fsS https://api.ipify.org || true
-            echo
+
+      - name: Verify origin from outside
+        env:
+          ORIGIN_HOST: ${{ secrets.HOST }}
+        run: |
+          set -e
+          curl -kfsS --connect-timeout 10 --resolve bedifferent.smarbiz.sbs:443:$ORIGIN_HOST https://bedifferent.smarbiz.sbs/api/health
+
+      - name: Verify through Cloudflare
+        run: |
+          set -e
+          for i in 1 2 3 4 5; do
+            if curl -kfsS --connect-timeout 10 https://bedifferent.smarbiz.sbs/api/health; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
