@@ -22,6 +22,15 @@ export async function POST(request:Request){
   if(!(file instanceof File)||!allowed[kind])return errorJson("Datei oder Typ ungültig.",422);
   if((kind==="EXERCISE_IMAGE"||kind==="EXERCISE_VIDEO")&&!["COACH","ADMIN"].includes(user.role))return errorJson("Keine Berechtigung.",403);
   if(user.role==="ATHLETE"&&(kind==="VOICE_MESSAGE"||kind==="TECHNIQUE_VIDEO")&&!await hasFeature(user.subscriptionTier,"coach_chat"))return errorJson("Coach Media ist PRO.",403);
+  if(user.role==="ATHLETE"&&kind==="TECHNIQUE_VIDEO"){
+    const row=await prisma.systemSetting.findUnique({where:{key:"app_settings"}});
+    const limit=Math.max(0,Number((row?.value as any)?.videoAnalysesPerMonth??2));
+    if(limit>0){
+      const start=new Date();start.setUTCDate(1);start.setUTCHours(0,0,0,0);
+      const used=await prisma.mediaAsset.count({where:{relatedUserId:user.id,kind:"TECHNIQUE_VIDEO",createdAt:{gte:start}}});
+      if(used>=limit)return errorJson(`Dein Kontingent von ${limit} Videoanalysen für diesen Monat ist erreicht.`,403);
+    }
+  }
   if(kind==="PROGRESS_PHOTO"&&user.subscriptionTier==="FREE"){
     const count=await prisma.mediaAsset.count({where:{relatedUserId:user.id,kind:"PROGRESS_PHOTO"}});
     if(count>=3)return errorJson("Im FREE Plan sind maximal 3 Fortschrittsbilder möglich.",403);
