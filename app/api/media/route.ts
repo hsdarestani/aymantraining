@@ -38,7 +38,7 @@ export async function POST(request:Request){
   const rule=allowed[kind];
   if(!rule.mime.test(file.type)||file.size<=0||file.size>rule.max)return errorJson("Dateiformat oder Größe nicht erlaubt.",422);
   if(relatedUserId!==user.id&&!["COACH","ADMIN"].includes(user.role))return errorJson("Keine Berechtigung.",403);
-  if(kind==="PROGRESS_PHOTO"||kind==="TECHNIQUE_VIDEO"){
+  if(kind==="PROGRESS_PHOTO"||kind==="TECHNIQUE_VIDEO"||kind==="TEST_VIDEO"){
     const consent=await prisma.consentRecord.findFirst({where:{userId:relatedUserId,type:"media_processing"},orderBy:{grantedAt:"desc"}});
     if(!consent?.granted)return errorJson("Bitte bestätige zuerst die Verarbeitung privater Fotos/Videos.",403);
   }
