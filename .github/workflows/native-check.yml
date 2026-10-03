@@ -1,0 +1,31 @@
+name: Native App Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "mobile/**"
+      - ".github/workflows/native-check.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: bedifferent-native-check
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package.json
+      - name: Install native dependencies
+        run: npm install
+      - name: TypeScript check
+        run: npm run typecheck
