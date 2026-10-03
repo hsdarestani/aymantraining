@@ -20,15 +20,14 @@ jobs:
           username: root
           password: ${{ secrets.PASS }}
           script_stop: false
-          command_timeout: 25m
+          command_timeout: 30m
           script: |
             set -euo pipefail
             export DEBIAN_FRONTEND=noninteractive
 
             apt-get update
             apt-get install -y git nginx openssl curl docker.io docker-compose-v2 || true
-            systemctl enable --now docker
-            systemctl enable --now nginx
+            systemctl enable --now docker nginx
 
             if command -v ufw >/dev/null 2>&1; then
               ufw allow 22/tcp || true
@@ -45,11 +44,18 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
 
-            if docker compose version >/dev/null 2>&1; then
-              docker compose up -d --build --remove-orphans
-            else
-              docker-compose up -d --build --remove-orphans
+            touch .env.production
+            chmod 600 .env.production
+            if ! grep -q '^DB_PASSWORD=' .env.production; then
+              printf 'DB_PASSWORD=%s\n' "$(openssl rand -hex 32)" >> .env.production
             fi
+            if ! grep -q '^CRON_SECRET=' .env.production; then
+              printf 'CRON_SECRET=%s\n' "$(openssl rand -hex 32)" >> .env.production
+            fi
+
+            docker compose --env-file .env.production up -d db
+            docker compose --env-file .env.production run --rm migrate
+            docker compose --env-file .env.production up -d --build --remove-orphans web scheduler
 
             mkdir -p /etc/nginx/ssl/bedifferent
             if [ ! -s /etc/nginx/ssl/bedifferent/fullchain.pem ] || [ ! -s /etc/nginx/ssl/bedifferent/privkey.pem ]; then
@@ -61,6 +67,7 @@ jobs:
               listen 80;
               listen [::]:80;
               server_name bedifferent.smarbiz.sbs;
+              client_max_body_size 110m;
 
               location / {
                 proxy_pass http://127.0.0.1:3100;
@@ -79,11 +86,15 @@ jobs:
               listen [::]:443 ssl;
               http2 on;
               server_name bedifferent.smarbiz.sbs;
+              client_max_body_size 110m;
 
               ssl_certificate /etc/nginx/ssl/bedifferent/fullchain.pem;
               ssl_certificate_key /etc/nginx/ssl/bedifferent/privkey.pem;
               ssl_protocols TLSv1.2 TLSv1.3;
-              client_max_body_size 100m;
+
+              add_header X-Content-Type-Options "nosniff" always;
+              add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+              add_header Permissions-Policy "camera=(self), microphone=(self), geolocation=()" always;
 
               location / {
                 proxy_pass http://127.0.0.1:3100;
@@ -94,6 +105,7 @@ jobs:
                 proxy_set_header X-Forwarded-Proto https;
                 proxy_set_header Upgrade $http_upgrade;
                 proxy_set_header Connection "upgrade";
+                proxy_read_timeout 180s;
               }
             }
             NGINX
@@ -103,23 +115,22 @@ jobs:
             nginx -t
             systemctl restart nginx
 
-            sleep 3
+            sleep 4
             curl -fsS http://127.0.0.1:3100/api/health
-            curl -fsS -H 'Host: bedifferent.smarbiz.sbs' http://127.0.0.1/api/health
-            curl -kfsS -H 'Host: bedifferent.smarbiz.sbs' https://127.0.0.1/api/health
+            curl -fsS http://127.0.0.1:3100/api/ready
 
       - name: Verify origin from outside
         env:
           ORIGIN_HOST: ${{ secrets.HOST }}
         run: |
           set -e
-          curl -kfsS --connect-timeout 10 --resolve bedifferent.smarbiz.sbs:443:$ORIGIN_HOST https://bedifferent.smarbiz.sbs/api/health
+          curl -kfsS --connect-timeout 10 --resolve bedifferent.smarbiz.sbs:443:$ORIGIN_HOST https://bedifferent.smarbiz.sbs/api/ready
 
       - name: Verify through Cloudflare
         run: |
           set -e
           for i in 1 2 3 4 5; do
-            if curl -kfsS --connect-timeout 10 https://bedifferent.smarbiz.sbs/api/health; then
+            if curl -kfsS --connect-timeout 10 https://bedifferent.smarbiz.sbs/api/ready; then
               exit 0
             fi
             sleep 5

@@ -25,18 +25,75 @@ enum MessageKind {
   VIDEO
 }
 
+enum MediaKind {
+  PROGRESS_PHOTO
+  TECHNIQUE_VIDEO
+  VOICE_MESSAGE
+  EXERCISE_IMAGE
+  EXERCISE_VIDEO
+}
+
 model User {
-  id               String           @id @default(cuid())
-  email            String           @unique
-  name             String?
-  role             UserRole         @default(ATHLETE)
-  subscriptionTier SubscriptionTier @default(FREE)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  goals            Goal[]
-  workouts         Workout[]
-  scoreSnapshots   ScoreSnapshot[]
-  dailyChecks      DailyCheck[]
+  id                  String           @id @default(cuid())
+  email               String           @unique
+  passwordHash        String
+  name                String?
+  birthDate           DateTime?
+  sex                 String?
+  heightCm            Float?
+  timezone            String           @default("Europe/Berlin")
+  locale              String           @default("de")
+  role                UserRole         @default(ATHLETE)
+  subscriptionTier    SubscriptionTier @default(FREE)
+  onboardingCompleted Boolean          @default(false)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  goals               Goal[]
+  workouts            Workout[]
+  scoreSnapshots      ScoreSnapshot[]
+  dailyChecks         DailyCheck[]
+  sessions            AuthSession[]
+  consents            ConsentRecord[]
+  assignments         PlanAssignment[]
+  pushPreferences     PushPreference[]
+  deviceTokens        DeviceToken[]
+}
+
+model AuthSession {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model AuthThrottle {
+  id          String   @id @default(cuid())
+  identifier  String
+  windowStart DateTime
+  attempts    Int      @default(0)
+  blockedUntil DateTime?
+  updatedAt   DateTime @updatedAt
+
+  @@unique([identifier, windowStart])
+}
+
+model ConsentRecord {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  version   String
+  granted   Boolean
+  grantedAt DateTime @default(now())
+  ipHash    String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
 }
 
 model Goal {
@@ -49,48 +106,109 @@ model Goal {
 }
 
 model TrainingPlan {
-  id          String    @id @default(cuid())
+  id          String             @id @default(cuid())
   name        String
   description String?
-  active      Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  isTemplate  Boolean            @default(true)
+  active      Boolean            @default(true)
+  proOnly     Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
   workouts    Workout[]
+  items       TrainingPlanItem[]
+  assignments PlanAssignment[]
+}
+
+model TrainingPlanItem {
+  id           String       @id @default(cuid())
+  planId       String
+  exerciseId   String
+  dayIndex     Int          @default(0)
+  orderIndex   Int
+  targetSets   Int          @default(3)
+  targetReps   String?
+  targetRpe    Int?
+  restSeconds  Int          @default(90)
+  notes        String?
+  plan         TrainingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  exercise     Exercise     @relation(fields: [exerciseId], references: [id])
+
+  @@index([planId, dayIndex, orderIndex])
+}
+
+model PlanAssignment {
+  id        String       @id @default(cuid())
+  userId    String
+  planId    String
+  active    Boolean      @default(true)
+  startsAt  DateTime     @default(now())
+  endsAt    DateTime?
+  createdAt DateTime     @default(now())
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan      TrainingPlan @relation(fields: [planId], references: [id])
+
+  @@index([userId, active])
 }
 
 model Workout {
-  id             String        @id @default(cuid())
+  id             String            @id @default(cuid())
   userId         String
   trainingPlanId String?
   title          String
   scheduledAt    DateTime?
+  startedAt      DateTime?
   completedAt    DateTime?
   rpe            Int?
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  trainingPlan   TrainingPlan? @relation(fields: [trainingPlanId], references: [id])
+  notes          String?
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingPlan   TrainingPlan?     @relation(fields: [trainingPlanId], references: [id])
   sets           SetLog[]
+  exercises      WorkoutExercise[]
+
+  @@index([userId, scheduledAt])
+}
+
+model WorkoutExercise {
+  id          String   @id @default(cuid())
+  workoutId   String
+  exerciseId  String
+  orderIndex  Int
+  targetSets  Int      @default(3)
+  targetReps  String?
+  targetRpe   Int?
+  restSeconds Int      @default(90)
+  notes       String?
+  workout     Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise    Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@unique([workoutId, orderIndex])
 }
 
 model Exercise {
-  id          String   @id
-  nameDe      String
-  nameEn      String?
-  category    String
-  equipment   String?
-  primaryMuscles String?
+  id               String             @id
+  nameDe           String
+  nameEn           String?
+  category         String
+  equipment        String?
+  primaryMuscles   String?
   secondaryMuscles String?
-  level       Int      @default(1)
-  coachCue1   String?
-  coachCue2   String?
-  coachCue3   String?
-  commonMistakes Json?
-  videoUrl    String?
-  imageStart  String?
-  imageMiddle String?
-  imageEnd    String?
-  trackingType String?
-  freeAccess  Boolean  @default(false)
-  sets        SetLog[]
+  level            Int                @default(1)
+  coachCue1        String?
+  coachCue2        String?
+  coachCue3        String?
+  commonMistakes   Json?
+  easierExerciseId String?
+  harderExerciseId String?
+  videoUrl         String?
+  imageStart       String?
+  imageMiddle      String?
+  imageEnd         String?
+  trackingType     String?
+  freeAccess       Boolean            @default(false)
+  active           Boolean            @default(true)
+  sets             SetLog[]
+  planItems        TrainingPlanItem[]
+  workoutExercises WorkoutExercise[]
 }
 
 model SetLog {
@@ -102,9 +220,12 @@ model SetLog {
   weightKg   Float?
   durationS  Int?
   distanceM  Float?
-  createdAt  DateTime @default(now())
+  rpe        Int?
+  completedAt DateTime @default(now())
   workout    Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
   exercise   Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@unique([workoutId, exerciseId, setNumber])
 }
 
 model DailyCheck {
@@ -139,17 +260,6 @@ model BodyMetric {
   @@index([userId, date])
 }
 
-model ProgressPhoto {
-  id        String   @id @default(cuid())
-  userId    String
-  url       String
-  takenAt   DateTime
-  private   Boolean  @default(true)
-  createdAt DateTime @default(now())
-
-  @@index([userId, takenAt])
-}
-
 model WearableDaily {
   id             String   @id @default(cuid())
   userId         String
@@ -164,67 +274,71 @@ model WearableDaily {
   sleepStages    Json?
   vo2max         Float?
   workouts       Json?
+  weightKg       Float?
   completeness   Int      @default(0)
+  createdAt      DateTime @default(now())
 
   @@unique([userId, date, source])
+  @@index([userId, date])
 }
 
 model NutritionDaily {
-  id          String   @id @default(cuid())
-  userId      String
-  date        DateTime @db.Date
-  calories    Float?
-  proteinG    Float?
-  carbsG      Float?
-  fatG        Float?
-  waterMl     Int?
-  fruitVegServings Float?
-  addedSugarG Float?
-  source      String?
-  fuelScore   Int?
+  id                String   @id @default(cuid())
+  userId            String
+  date              DateTime @db.Date
+  calories          Float?
+  proteinG          Float?
+  carbsG            Float?
+  fatG              Float?
+  waterMl           Int?
+  fruitVegServings  Float?
+  addedSugarG       Float?
+  processedFoodScore Int?
+  source            String?
+  fuelScore         Int?
 
   @@unique([userId, date])
 }
 
 model PerformanceTest {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   userId      String
   name        String
   scheduledAt DateTime?
   completedAt DateTime?
   notes       String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime     @default(now())
   results     TestResult[]
 
   @@index([userId, completedAt])
 }
 
 model TestResult {
-  id        String   @id @default(cuid())
+  id        String          @id @default(cuid())
   testId    String
   metric    String
   value     Float
   unit      String
   videoUrl  String?
-  createdAt DateTime @default(now())
+  createdAt DateTime        @default(now())
   test      PerformanceTest @relation(fields: [testId], references: [id], onDelete: Cascade)
 }
 
 model ScoreSnapshot {
-  id          String   @id @default(cuid())
-  userId      String
-  date        DateTime @db.Date
-  total       Int
-  strength    Int?
-  endurance   Int?
-  athleticism Int?
-  mobility    Int?
-  recovery    Int?
-  fuel        Int?
-  consistency Int?
-  completeness Int @default(100)
-  explanation Json?
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  userId       String
+  date         DateTime @db.Date
+  total        Int
+  strength     Int?
+  endurance    Int?
+  athleticism  Int?
+  mobility     Int?
+  recovery     Int?
+  fuel         Int?
+  consistency  Int?
+  completeness Int      @default(0)
+  explanation  Json?
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
 }
@@ -249,8 +363,8 @@ model Recommendation {
   explanation String
   action      String
   sourceRule  String?
-  coachStatus String     @default("PENDING")
-  createdAt   DateTime   @default(now())
+  coachStatus String   @default("PENDING")
+  createdAt   DateTime @default(now())
 
   @@index([userId, date])
 }
@@ -262,7 +376,7 @@ model Message {
   senderId    String
   kind        MessageKind @default(TEXT)
   text        String?
-  mediaUrl    String?
+  mediaId     String?
   durationSec Int?
   createdAt   DateTime    @default(now())
   readAt      DateTime?
@@ -274,7 +388,7 @@ model VideoFeedback {
   id          String   @id @default(cuid())
   athleteId   String
   coachId     String
-  videoUrl    String
+  mediaId     String
   annotations Json?
   status      String   @default("OPEN")
   createdAt   DateTime @default(now())
@@ -283,18 +397,60 @@ model VideoFeedback {
   @@index([athleteId, createdAt])
 }
 
+model MediaAsset {
+  id            String    @id @default(cuid())
+  ownerId       String
+  relatedUserId String?
+  kind          MediaKind
+  storageKey    String    @unique
+  originalName  String
+  mimeType      String
+  sizeBytes     Int
+  createdAt     DateTime  @default(now())
+
+  @@index([ownerId, createdAt])
+  @@index([relatedUserId, createdAt])
+}
+
 model Notification {
   id        String   @id @default(cuid())
   userId    String
   category  String
   title     String
   body      String
+  data      Json?
   sendAt    DateTime?
   sentAt    DateTime?
   readAt    DateTime?
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
+  @@index([sendAt, sentAt])
+}
+
+model PushPreference {
+  id        String @id @default(cuid())
+  userId    String
+  category  String
+  enabled   Boolean @default(true)
+  quietFrom String?
+  quietTo   String?
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
+}
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  userId    String
+  platform  String
+  token     String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, active])
 }
 
 model Subscription {
@@ -306,18 +462,18 @@ model Subscription {
   status      String
   trialEndsAt DateTime?
   renewsAt    DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
   @@index([userId, status])
 }
 
 model Badge {
-  id          String   @id @default(cuid())
-  userId      String
-  key         String
-  name        String
-  unlockedAt  DateTime @default(now())
+  id         String   @id @default(cuid())
+  userId     String
+  key        String
+  name       String
+  unlockedAt DateTime @default(now())
 
   @@unique([userId, key])
 }
@@ -330,4 +486,45 @@ model Challenge {
   startsAt    DateTime
   endsAt      DateTime
   createdAt   DateTime @default(now())
+}
+
+model SystemSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model FeatureFlag {
+  key       String @id
+  free      Boolean @default(false)
+  pro       Boolean @default(true)
+  elite     Boolean @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model ReferenceNorm {
+  id        String   @id @default(cuid())
+  metric    String
+  sex       String?
+  minAge    Int?
+  maxAge    Int?
+  minWeight Float?
+  maxWeight Float?
+  lowValue  Float
+  highValue Float
+  higherIsBetter Boolean @default(true)
+  updatedAt DateTime @updatedAt
+
+  @@index([metric])
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  name      String
+  properties Json?
+  createdAt DateTime @default(now())
+
+  @@index([name, createdAt])
+  @@index([userId, createdAt])
 }

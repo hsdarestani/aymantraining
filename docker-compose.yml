@@ -1,11 +1,77 @@
 services:
+  db:
+    image: postgres:17-alpine
+    container_name: bedifferent-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: bedifferent
+      POSTGRES_USER: bedifferent
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bedifferent -d bedifferent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - bedifferent-postgres:/var/lib/postgresql/data
+    networks: [internal]
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrator
+    environment:
+      DATABASE_URL: postgresql://bedifferent:${DB_PASSWORD}@db:5432/bedifferent?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [internal]
+    restart: "no"
+
   web:
     build:
       context: .
       dockerfile: Dockerfile
+      target: runner
     container_name: bedifferent-web
     restart: unless-stopped
     ports:
       - "127.0.0.1:3100:3000"
     environment:
       NODE_ENV: production
+      DATABASE_URL: postgresql://bedifferent:${DB_PASSWORD}@db:5432/bedifferent?schema=public
+      CRON_SECRET: ${CRON_SECRET}
+      DATA_DIR: /app/data
+      NEXT_PUBLIC_APP_URL: https://bedifferent.smarbiz.sbs
+    volumes:
+      - bedifferent-data:/app/data
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks: [internal]
+
+  scheduler:
+    image: curlimages/curl:8.12.1
+    container_name: bedifferent-scheduler
+    restart: unless-stopped
+    environment:
+      CRON_SECRET: ${CRON_SECRET}
+    command:
+      - /bin/sh
+      - -c
+      - |
+        while true; do
+          sleep 3600
+          curl -fsS -X POST -H "x-cron-secret: $$CRON_SECRET" http://web:3000/api/internal/maintenance || true
+        done
+    depends_on:
+      - web
+    networks: [internal]
+
+networks:
+  internal:
+
+volumes:
+  bedifferent-postgres:
+  bedifferent-data:
