@@ -1,0 +1,84 @@
+name: Deploy BE DIFFERENT
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: bedifferent-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: root
+          password: ${{ secrets.PASS }}
+          script_stop: true
+          command_timeout: 20m
+          script: |
+            set -euo pipefail
+
+            if ! command -v git >/dev/null 2>&1; then
+              apt-get update
+              apt-get install -y git
+            fi
+
+            if ! command -v docker >/dev/null 2>&1; then
+              apt-get update
+              apt-get install -y docker.io docker-compose-v2 || apt-get install -y docker.io docker-compose-plugin
+              systemctl enable --now docker
+            fi
+
+            if ! command -v nginx >/dev/null 2>&1; then
+              apt-get update
+              apt-get install -y nginx
+              systemctl enable --now nginx
+            fi
+
+            if [ ! -d /opt/bedifferent/.git ]; then
+              rm -rf /opt/bedifferent
+              git clone https://github.com/hsdarestani/aymantraining.git /opt/bedifferent
+            fi
+
+            cd /opt/bedifferent
+            git fetch origin main
+            git reset --hard origin/main
+
+            if docker compose version >/dev/null 2>&1; then
+              docker compose up -d --build --remove-orphans
+            else
+              docker-compose up -d --build --remove-orphans
+            fi
+
+            cat >/etc/nginx/sites-available/bedifferent.smarbiz.sbs <<'NGINX'
+            server {
+              listen 80;
+              listen [::]:80;
+              server_name bedifferent.smarbiz.sbs;
+              client_max_body_size 100m;
+
+              location / {
+                proxy_pass http://127.0.0.1:3100;
+                proxy_http_version 1.1;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+              }
+            }
+            NGINX
+
+            ln -sfn /etc/nginx/sites-available/bedifferent.smarbiz.sbs /etc/nginx/sites-enabled/bedifferent.smarbiz.sbs
+            nginx -t
+            systemctl reload nginx
+
+            sleep 4
+            curl -fsS http://127.0.0.1:3100/api/health
