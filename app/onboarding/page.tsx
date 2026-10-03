@@ -36,7 +36,7 @@ export default function Onboarding(){
   const [birthDate,setBirthDate]=useState("");
   const [sex,setSex]=useState("prefer_not_to_say");
   const [height,setHeight]=useState(180);
-  const [weight,setWeight]=useState(80);
+  const [weight,setWeight]=useState(80);\n  const [trainingExperience,setTrainingExperience]=useState<"STARTER"|"REGULAR"|"ADVANCED">("STARTER");\n  const [availabilityPerWeek,setAvailabilityPerWeek]=useState(3);
   const [pushups,setPushups]=useState(20);
   const [plank,setPlank]=useState(60);
   const [run,setRun]=useState<number|null>(null);
@@ -78,12 +78,12 @@ export default function Onboarding(){
     setBusy(true);setError("");
     try{
       const r=await fetch("/api/onboarding/complete",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({
-        goal,birthDate,sex,heightCm:height,weightKg:weight,healthConsent:health,privacyConsent:privacy,termsConsent:terms,
+        goal,birthDate,sex,heightCm:height,weightKg:weight,trainingExperience,availabilityPerWeek,healthConsent:health,privacyConsent:privacy,termsConsent:terms,
         pushups,plankSeconds:plank,run5kMinutes:run??undefined
       })});
       const j=await r.json().catch(()=>({}));
       if(!r.ok){setError(j.error||"Onboarding konnte nicht abgeschlossen werden.");return;}
-      location.href="/dashboard";
+      location.href="/pricing?onboarding=1";
     }catch{
       setError("Verbindung fehlgeschlagen. Bitte versuche es erneut.");
     }finally{setBusy(false);}
