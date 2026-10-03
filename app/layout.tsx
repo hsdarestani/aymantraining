@@ -10,6 +10,8 @@ import "./member-extra.css";
 import "./admin-extra2.css";
 import "./admin-builder.css";
 import "./pro-extra.css";
+import "./feature-extra.css";
+import ServiceWorker from "./ServiceWorker";
 
 export const metadata: Metadata = {
   title: "BE DIFFERENT",
@@ -17,5 +19,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({children}:{children:React.ReactNode}) {
-  return <html lang="de"><body>{children}</body></html>;
+  return <html lang="de"><body><ServiceWorker/>{children}</body></html>;
 }
