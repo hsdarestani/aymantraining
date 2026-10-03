@@ -1,0 +1,34 @@
+.sub-shell{max-width:1480px;margin:auto;padding:0 42px 100px;min-height:100vh}
+.sub-top{height:84px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.sub-top nav{display:flex;gap:22px}.sub-top nav a{color:var(--ash);font-size:10px;font-weight:900;letter-spacing:.12em}.sub-top nav a.active{color:var(--volt)}
+.page-hero{min-height:360px;display:grid;grid-template-columns:1.25fr .75fr;align-items:center;gap:30px;border-bottom:1px solid var(--line)}.page-hero.compact-hero{min-height:300px}
+.page-hero h1{font-size:clamp(44px,6vw,84px);letter-spacing:-.06em;line-height:.95;margin:12px 0 18px}.page-hero p{max-width:720px;color:var(--ash);line-height:1.65}
+.hero-stat{margin-left:auto;width:min(290px,100%);aspect-ratio:1;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;align-content:center;gap:5px;background:radial-gradient(circle,rgba(212,255,0,.08),transparent 70%)}
+.hero-stat span,.hero-stat small{color:var(--ash);font-size:9px;font-weight:900;letter-spacing:.14em}.hero-stat strong{font-size:62px;letter-spacing:-.06em;color:var(--volt)}
+.week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin:22px 0}.day{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--graphite);display:grid;gap:6px;text-align:center}
+.day span,.day small{color:var(--ash);font-size:9px;font-weight:900;letter-spacing:.12em}.day strong{font-size:25px}.day.today{border-color:var(--volt);box-shadow:inset 0 0 0 1px rgba(212,255,0,.12)}.day.today small{color:var(--volt)}
+.content-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}.stack{display:grid;gap:18px}.callout{background:linear-gradient(180deg,rgba(212,255,0,.06),rgba(255,255,255,.012)),var(--graphite)}.big-panel{min-height:530px}
+.exercise-list{margin-top:20px}.exercise-row{display:grid;grid-template-columns:54px 1.5fr .7fr .6fr auto;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
+.exercise-nr{font-size:28px;font-weight:950;color:rgba(255,255,255,.12)}.exercise-row div{display:grid;gap:5px}.exercise-row small,.exercise-row>span:not(.exercise-nr){color:var(--ash);font-size:11px}
+.exercise-row button{background:transparent;color:var(--volt);border:1px solid rgba(212,255,0,.25);border-radius:8px;padding:8px 10px;font-size:9px;font-weight:900}
+.rpe-scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:16px}.rpe-scale button{padding:10px;border:1px solid var(--line);background:var(--steel);color:#fff;border-radius:8px}
+.progress-cards{display:grid;grid-template-columns:1.3fr .7fr;gap:18px;margin:22px 0}.fake-chart{height:260px;display:flex;align-items:flex-end;gap:12px;padding:28px 10px 0;border-bottom:1px solid var(--line)}
+.fake-chart i{flex:1;background:linear-gradient(180deg,var(--volt),rgba(212,255,0,.28));border-radius:8px 8px 0 0}.chart-labels{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;color:var(--ash);font-size:9px;text-align:center;margin-top:8px}
+.body-stats{display:grid;gap:10px;margin-top:22px}.body-stats div{padding:16px;border-radius:12px;background:var(--steel);display:grid;gap:6px}.body-stats span,.body-stats small{color:var(--ash);font-size:9px;letter-spacing:.1em}.body-stats strong{font-size:26px}
+.test-timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}.test-card{padding:18px;border:1px solid var(--line);border-radius:14px;display:grid;gap:5px}.test-card span,.test-card small{color:var(--ash);font-size:9px}.test-card strong{font-size:40px}.test-card b{color:var(--green);font-size:11px}
+.coach-layout{display:grid;grid-template-columns:.65fr 1.35fr;gap:18px;margin-top:22px}.coach-profile{text-align:center;display:grid;justify-items:center;align-content:start;gap:10px}
+.coach-pic.large{width:110px;height:110px;font-size:38px;margin-bottom:8px}.coach-profile h1{font-size:42px;margin:0}.coach-profile p{max-width:360px}.full{width:100%}
+.chat-panel{min-height:560px;display:flex;flex-direction:column}.messages{flex:1;display:flex;flex-direction:column;gap:10px;padding:20px 0}
+.message{max-width:74%;padding:13px 15px;border-radius:16px;font-size:13px;line-height:1.5}.message.coach{background:var(--steel);align-self:flex-start}.message.you{background:var(--volt);color:#090a09;align-self:flex-end}
+.composer{display:grid;grid-template-columns:1fr auto;gap:8px}.composer input{background:var(--steel);border:1px solid var(--line);border-radius:10px;padding:13px;color:#fff;outline:none}
+.composer button{background:var(--volt);border:0;border-radius:10px;padding:0 18px;font-size:10px;font-weight:950;color:#090a09}
+.checkin{margin-top:18px;display:flex;justify-content:space-between;align-items:center;gap:18px}
+.athlete-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:18px;margin-top:22px}.silhouette-panel{text-align:center}
+.silhouette{height:300px;position:relative;margin:20px 0;background:radial-gradient(circle at 50% 35%,rgba(212,255,0,.16),transparent 36%)}
+.silhouette i:nth-child(1){position:absolute;width:72px;height:72px;border:1px solid rgba(212,255,0,.5);border-radius:50%;left:50%;top:18px;transform:translateX(-50%)}
+.silhouette i:nth-child(2){position:absolute;width:145px;height:165px;border:1px solid rgba(212,255,0,.42);border-radius:46% 46% 38% 38%;left:50%;top:92px;transform:translateX(-50%)}
+.silhouette i:nth-child(3){position:absolute;width:210px;height:1px;background:rgba(212,255,0,.18);left:50%;top:174px;transform:translateX(-50%)}
+.athlete-bars{display:grid;gap:16px;margin-top:24px}.athlete-bars>div{display:grid;grid-template-columns:120px 1fr 42px;gap:12px;align-items:center}
+.athlete-bars span{font-size:9px;color:var(--ash);font-weight:900;letter-spacing:.11em}.athlete-bars strong{text-align:right}.share-card{margin-top:18px;display:flex;justify-content:space-between;align-items:center;gap:18px}
+@media(max-width:980px){.sub-shell{padding:0 20px 110px}.sub-top nav{display:none}.page-hero,.content-grid,.progress-cards,.coach-layout,.athlete-grid{grid-template-columns:1fr}.hero-stat{margin:0 auto 30px}.week-strip{grid-template-columns:repeat(4,1fr)}.test-timeline{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.page-hero{min-height:auto;padding:50px 0}.page-hero h1{font-size:48px}.week-strip{grid-template-columns:repeat(3,1fr)}.exercise-row{grid-template-columns:42px 1fr auto}.exercise-row>span:nth-of-type(2),.exercise-row>span:nth-of-type(3){display:none}.test-timeline{grid-template-columns:1fr 1fr}.checkin,.share-card{align-items:flex-start;flex-direction:column}.athlete-bars>div{grid-template-columns:95px 1fr 34px}}
