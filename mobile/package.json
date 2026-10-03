@@ -1,14 +1,21 @@
 {
   "name":"bedifferent-mobile",
   "private":true,
-  "version":"0.1.0",
+  "version":"0.2.0",
   "main":"expo-router/entry",
-  "scripts":{"start":"expo start","android":"expo run:android","ios":"expo run:ios"},
+  "scripts":{"start":"expo start --dev-client","android":"expo run:android","ios":"expo run:ios","prebuild":"expo prebuild","doctor":"npx expo-doctor","typecheck":"tsc --noEmit"},
   "dependencies":{
-    "expo":"~53.0.0",
-    "expo-router":"~5.0.0",
-    "expo-status-bar":"~2.2.0",
+    "@kingstinct/react-native-healthkit":"13.4.0",
+    "@react-native-async-storage/async-storage":"2.1.2",
+    "expo":"~53.0.27",
+    "expo-notifications":"~0.31.5",
+    "expo-router":"~5.1.4",
+    "expo-secure-store":"~14.2.3",
+    "expo-status-bar":"~2.2.3",
     "react":"19.0.0",
-    "react-native":"0.79.2"
-  }
+    "react-native":"0.79.5",
+    "react-native-health-connect":"4.4.1",
+    "react-native-nitro-modules":"0.35.6"
+  },
+  "devDependencies":{"@types/react":"~19.0.10","typescript":"~5.8.3"}
 }

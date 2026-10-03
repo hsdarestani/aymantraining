@@ -3,11 +3,29 @@
     "name":"BE DIFFERENT",
     "slug":"be-different",
     "scheme":"bedifferent",
-    "version":"0.1.0",
+    "version":"0.2.0",
     "orientation":"portrait",
     "userInterfaceStyle":"dark",
-    "ios":{"bundleIdentifier":"com.smarbiz.bedifferent"},
-    "android":{"package":"com.smarbiz.bedifferent"},
-    "plugins":["expo-router"]
+    "newArchEnabled":true,
+    "ios":{
+      "bundleIdentifier":"com.smarbiz.bedifferent",
+      "infoPlist":{
+        "NSHealthShareUsageDescription":"BE DIFFERENT nutzt freigegebene Health-Daten für Score, Recovery und persönliche Trainingsempfehlungen.",
+        "NSHealthUpdateUsageDescription":"BE DIFFERENT kann von dir gewählte Fitnessdaten in Apple Health speichern.",
+        "NSMicrophoneUsageDescription":"Das Mikrofon wird nur für Voice Messages an deinen Coach verwendet.",
+        "NSCameraUsageDescription":"Die Kamera wird nur für freiwillige Fortschritts- und Technikvideos verwendet."
+      }
+    },
+    "android":{
+      "package":"com.smarbiz.bedifferent",
+      "permissions":["android.permission.ACTIVITY_RECOGNITION","android.permission.POST_NOTIFICATIONS","android.permission.RECORD_AUDIO","android.permission.CAMERA"]
+    },
+    "plugins":[
+      "expo-router",
+      "expo-secure-store",
+      "expo-notifications",
+      ["react-native-health-connect",{"healthConnectPermissions":["android.permission.health.READ_STEPS","android.permission.health.READ_ACTIVE_CALORIES_BURNED","android.permission.health.READ_TOTAL_CALORIES_BURNED","android.permission.health.READ_RESTING_HEART_RATE","android.permission.health.READ_HEART_RATE_VARIABILITY","android.permission.health.READ_SLEEP","android.permission.health.READ_VO2_MAX","android.permission.health.READ_WEIGHT","android.permission.health.READ_EXERCISE"]}]
+    ],
+    "extra":{"apiUrl":"https://bedifferent.smarbiz.sbs"}
   }
 }

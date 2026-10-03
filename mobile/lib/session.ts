@@ -1,0 +1,1 @@
+import * as SecureStore from "expo-secure-store";const KEY="bd_session_token";export const getSession=()=>SecureStore.getItemAsync(KEY);export const setSession=(v:string)=>SecureStore.setItemAsync(KEY,v,{keychainAccessible:SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY});export const clearSession=()=>SecureStore.deleteItemAsync(KEY);
