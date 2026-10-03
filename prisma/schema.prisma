@@ -41,6 +41,8 @@ model User {
   birthDate           DateTime?
   sex                 String?
   heightCm            Float?
+  trainingExperience  String?
+  availabilityPerWeek Int?
   timezone            String           @default("Europe/Berlin")
   locale              String           @default("de")
   role                UserRole         @default(ATHLETE)
@@ -307,6 +309,7 @@ model PerformanceTest {
   scheduledAt DateTime?
   completedAt DateTime?
   notes       String?
+  definition  Json?
   createdAt   DateTime     @default(now())
   results     TestResult[]
 
