@@ -15,6 +15,7 @@ import "./design-2026.css";
 import "./admin-settings.css";
 import "./onboarding-ux.css";
 import "./mobile-viewport-fix.css";
+import "./completion.css";
 import ServiceWorker from "./ServiceWorker";
 
 export const metadata: Metadata = {
