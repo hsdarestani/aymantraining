@@ -1,2 +1,31 @@
-import fs from "node:fs/promises";import path from "node:path";import {NextResponse} from "next/server";import {prisma} from "../../../../lib/db";import {errorJson,isSameOrigin,requireApiUser} from "../../../../lib/http";
-export async function DELETE(request:Request){if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);const id=user.id;const assets=await prisma.mediaAsset.findMany({where:{OR:[{ownerId:id},{relatedUserId:id}]},select:{storageKey:true}});await prisma.$transaction([prisma.message.deleteMany({where:{OR:[{athleteId:id},{coachId:id},{senderId:id}]}}),prisma.videoFeedback.deleteMany({where:{OR:[{athleteId:id},{coachId:id}]}}),prisma.mediaAsset.deleteMany({where:{OR:[{ownerId:id},{relatedUserId:id}]}}),prisma.notification.deleteMany({where:{userId:id}}),prisma.subscription.deleteMany({where:{userId:id}}),prisma.badge.deleteMany({where:{userId:id}}),prisma.challengeEntry.deleteMany({where:{userId:id}}),prisma.referral.deleteMany({where:{OR:[{referrerUserId:id},{referredUserId:id}]}}),prisma.weeklyCheckIn.deleteMany({where:{userId:id}}),prisma.recommendation.deleteMany({where:{userId:id}}),prisma.nutritionDaily.deleteMany({where:{userId:id}}),prisma.wearableDaily.deleteMany({where:{userId:id}}),prisma.bodyMetric.deleteMany({where:{userId:id}}),prisma.performanceTest.deleteMany({where:{userId:id}}),prisma.analyticsEvent.deleteMany({where:{userId:id}}),prisma.user.delete({where:{id}})]);const dir=path.join(process.env.DATA_DIR||"/app/data","uploads");await Promise.allSettled(assets.map(a=>fs.unlink(path.join(dir,a.storageKey))));const response=NextResponse.json({ok:true});response.cookies.set("bd_session","",{path:"/",maxAge:0});return response;}
+import {NextResponse} from "next/server";
+import {prisma} from "../../../../lib/db";
+import {errorJson,isSameOrigin,requireApiUser} from "../../../../lib/http";
+import {deletePrivateObject} from "../../../../lib/storage";
+export async function DELETE(request:Request){
+  if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
+  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
+  const id=user.id;
+  const assets=await prisma.mediaAsset.findMany({where:{OR:[{ownerId:id},{relatedUserId:id}]},select:{storageKey:true}});
+  await prisma.$transaction([
+    prisma.message.deleteMany({where:{OR:[{athleteId:id},{coachId:id},{senderId:id}]}}),
+    prisma.videoFeedback.deleteMany({where:{OR:[{athleteId:id},{coachId:id}]}}),
+    prisma.mediaAsset.deleteMany({where:{OR:[{ownerId:id},{relatedUserId:id}]}}),
+    prisma.notification.deleteMany({where:{userId:id}}),
+    prisma.subscription.deleteMany({where:{userId:id}}),
+    prisma.badge.deleteMany({where:{userId:id}}),
+    prisma.challengeEntry.deleteMany({where:{userId:id}}),
+    prisma.referral.deleteMany({where:{OR:[{referrerUserId:id},{referredUserId:id}]}}),
+    prisma.weeklyCheckIn.deleteMany({where:{userId:id}}),
+    prisma.passwordResetToken.deleteMany({where:{userId:id}}),
+    prisma.recommendation.deleteMany({where:{userId:id}}),
+    prisma.nutritionDaily.deleteMany({where:{userId:id}}),
+    prisma.wearableDaily.deleteMany({where:{userId:id}}),
+    prisma.bodyMetric.deleteMany({where:{userId:id}}),
+    prisma.performanceTest.deleteMany({where:{userId:id}}),
+    prisma.analyticsEvent.deleteMany({where:{userId:id}}),
+    prisma.user.delete({where:{id}})
+  ]);
+  await Promise.allSettled(assets.map(a=>deletePrivateObject(a.storageKey)));
+  const response=NextResponse.json({ok:true});response.cookies.set("bd_session","",{path:"/",maxAge:0});return response;
+}

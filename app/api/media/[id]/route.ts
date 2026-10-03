@@ -1,2 +1,26 @@
-import {createReadStream} from "node:fs";import {stat} from "node:fs/promises";import path from "node:path";import {Readable} from "node:stream";import {prisma} from "../../../../lib/db";import {errorJson,requireApiUser} from "../../../../lib/http";
-export async function GET(request:Request,{params}:{params:Promise<{id:string}>}){const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);const {id}=await params;const asset=await prisma.mediaAsset.findUnique({where:{id}});if(!asset)return errorJson("Datei nicht gefunden.",404);const allowed=asset.ownerId===user.id||asset.relatedUserId===user.id||["COACH","ADMIN"].includes(user.role)||["EXERCISE_IMAGE","EXERCISE_VIDEO"].includes(asset.kind);if(!allowed)return errorJson("Keine Berechtigung.",403);const filePath=path.join(process.env.DATA_DIR||"/app/data","uploads",asset.storageKey);try{const info=await stat(filePath);const range=request.headers.get("range");let start=0,end=info.size-1,status=200;if(range){const match=/bytes=(\d*)-(\d*)/.exec(range);if(match){start=match[1]?Number(match[1]):0;end=match[2]?Number(match[2]):end;if(start>end||end>=info.size)return new Response(null,{status:416,headers:{"content-range":`bytes */${info.size}`}});status=206;}}const stream=createReadStream(filePath,{start,end});const headers:Record<string,string>={"content-type":asset.mimeType,"content-length":String(end-start+1),"accept-ranges":"bytes","cache-control":["EXERCISE_IMAGE","EXERCISE_VIDEO"].includes(asset.kind)?"private, max-age=604800":"private, no-store","content-disposition":`inline; filename="${encodeURIComponent(asset.originalName)}"`};if(status===206)headers["content-range"]=`bytes ${start}-${end}/${info.size}`;if(["EXERCISE_IMAGE","EXERCISE_VIDEO"].includes(asset.kind))headers["x-bd-exercise-media"]="1";return new Response(Readable.toWeb(stream) as ReadableStream,{status,headers});}catch{return errorJson("Datei nicht verfügbar.",404);}}
+import {prisma} from "../../../../lib/db";
+import {errorJson,requireApiUser} from "../../../../lib/http";
+import {getPrivateObject} from "../../../../lib/storage";
+
+export async function GET(request:Request,{params}:{params:Promise<{id:string}>}){
+  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
+  const {id}=await params;const asset=await prisma.mediaAsset.findUnique({where:{id}});
+  if(!asset)return errorJson("Datei nicht gefunden.",404);
+  const allowed=asset.ownerId===user.id||asset.relatedUserId===user.id||["COACH","ADMIN"].includes(user.role)||["EXERCISE_IMAGE","EXERCISE_VIDEO"].includes(asset.kind);
+  if(!allowed)return errorJson("Keine Berechtigung.",403);
+  try{
+    const range=request.headers.get("range");
+    const object=await getPrivateObject(asset.storageKey,range);
+    if(!object.body)return errorJson("Datei nicht verfügbar.",404);
+    const headers:Record<string,string>={
+      "content-type":object.contentType||asset.mimeType,
+      "accept-ranges":"bytes",
+      "cache-control":["EXERCISE_IMAGE","EXERCISE_VIDEO"].includes(asset.kind)?"private, max-age=604800":"private, no-store",
+      "content-disposition":`inline; filename="${encodeURIComponent(asset.originalName)}"`
+    };
+    if(object.size!=null)headers["content-length"]=String(object.size);
+    if(object.contentRange)headers["content-range"]=object.contentRange;
+    if(["EXERCISE_IMAGE","EXERCISE_VIDEO"].includes(asset.kind))headers["x-bd-exercise-media"]="1";
+    return new Response(object.body,{status:object.contentRange?206:200,headers});
+  }catch{return errorJson("Datei nicht verfügbar.",404);}
+}
