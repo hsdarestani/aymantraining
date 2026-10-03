@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "./db";
 
@@ -22,9 +22,7 @@ export function hashToken(token: string) {
 export async function createSession(userId: string) {
   const token = crypto.randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
-  await prisma.authSession.create({
-    data: { tokenHash: hashToken(token), userId, expiresAt }
-  });
+  await prisma.authSession.create({ data: { tokenHash: hashToken(token), userId, expiresAt } });
   return { token, expiresAt };
 }
 
@@ -47,24 +45,28 @@ export function sessionCookie(expiresAt: Date) {
   };
 }
 
-export async function getCurrentUser() {
+async function currentToken() {
+  const headerStore = await headers();
+  const authorization = headerStore.get("authorization");
+  if (authorization?.startsWith("Bearer ")) {
+    const bearer = authorization.slice(7).trim();
+    if (bearer) return bearer;
+  }
   const store = await cookies();
-  const token = store.get(SESSION_COOKIE)?.value;
+  return store.get(SESSION_COOKIE)?.value ?? null;
+}
+
+export async function getCurrentUser() {
+  const token = await currentToken();
   if (!token) return null;
   const tokenHash = hashToken(token);
-  const session = await prisma.authSession.findUnique({
-    where: { tokenHash },
-    include: { user: true }
-  });
+  const session = await prisma.authSession.findUnique({ where: { tokenHash }, include: { user: true } });
   if (!session || session.expiresAt <= new Date()) {
     if (session) await prisma.authSession.delete({ where: { id: session.id } }).catch(() => undefined);
     return null;
   }
   if (session.lastSeenAt.getTime() < Date.now() - 6 * 60 * 60 * 1000) {
-    await prisma.authSession.update({
-      where: { id: session.id },
-      data: { lastSeenAt: new Date() }
-    }).catch(() => undefined);
+    await prisma.authSession.update({ where: { id: session.id }, data: { lastSeenAt: new Date() } }).catch(() => undefined);
   }
   return session.user;
 }
