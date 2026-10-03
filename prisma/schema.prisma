@@ -586,3 +586,15 @@ model PasswordResetToken {
 
   @@index([userId, expiresAt])
 }
+
+
+model WaitlistEntry {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  status    String   @default("WAITING")
+  joinedAt  DateTime @default(now())
+  invitedAt DateTime?
+  notes     String?
+
+  @@index([status, joinedAt])
+}
