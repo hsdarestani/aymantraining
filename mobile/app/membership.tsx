@@ -7,13 +7,13 @@ import {C,radius} from "../theme";
 import Brand from "../components/Brand";
 
 export default function Membership(){
-  const [packages,setPackages]=useState<any[]>([]);
+  const [packages,setPackages]=useState<any[]>([]);\n  const [availability,setAvailability]=useState<any>(null);
   const [loading,setLoading]=useState(true);
   const [status,setStatus]=useState("");
 
   useEffect(()=>{(async()=>{
     try{
-      const d:any=await api("/api/mobile/dashboard");
+      const d:any=await api("/api/mobile/dashboard");\n      const availabilityData:any=await api("/api/subscription/availability");setAvailability(availabilityData);
       if(await configureBilling(d.user.id))setPackages(await availablePackages());
     }finally{setLoading(false)}
   })()},[]);
@@ -27,7 +27,7 @@ export default function Membership(){
     }catch(e:any){setStatus(e.message||"Trial nicht verfügbar.");}
   }
 
-  async function buy(p:any){
+  async function joinWaitlist(){setStatus("Warteliste…");try{await api("/api/subscription/waitlist",{method:"POST"});setStatus("Du bist auf der PRO Warteliste.")}catch(e:any){setStatus(e.message||"Nicht verfügbar.")}}\n\n  async function buy(p:any){
     setStatus("Kauf wird verarbeitet…");
     try{
       await purchasePackage(p);
