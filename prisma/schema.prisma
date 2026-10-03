@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SubscriptionTier {
+  FREE
+  PRO
+  ELITE
+}
+
+enum UserRole {
+  ATHLETE
+  COACH
+  ADMIN
+}
+
+model User {
+  id               String           @id @default(cuid())
+  email            String           @unique
+  name             String?
+  role             UserRole         @default(ATHLETE)
+  subscriptionTier SubscriptionTier @default(FREE)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  goals            Goal[]
+  workouts         Workout[]
+  scoreSnapshots   ScoreSnapshot[]
+  dailyChecks      DailyCheck[]
+}
+
+model Goal {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TrainingPlan {
+  id        String    @id @default(cuid())
+  name      String
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  workouts  Workout[]
+}
+
+model Workout {
+  id             String        @id @default(cuid())
+  userId         String
+  trainingPlanId String?
+  title          String
+  scheduledAt    DateTime?
+  completedAt    DateTime?
+  rpe            Int?
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingPlan   TrainingPlan? @relation(fields: [trainingPlanId], references: [id])
+  sets           SetLog[]
+}
+
+model Exercise {
+  id          String   @id
+  nameDe      String
+  nameEn      String?
+  category    String
+  equipment   String?
+  level       Int      @default(1)
+  videoUrl    String?
+  imageStart  String?
+  imageMiddle String?
+  imageEnd    String?
+  freeAccess  Boolean  @default(false)
+  sets        SetLog[]
+}
+
+model SetLog {
+  id         String   @id @default(cuid())
+  workoutId  String
+  exerciseId String
+  setNumber  Int
+  reps       Int?
+  weightKg   Float?
+  durationS  Int?
+  distanceM  Float?
+  createdAt  DateTime @default(now())
+  workout    Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+}
+
+model DailyCheck {
+  id         String   @id @default(cuid())
+  userId     String
+  date       DateTime @db.Date
+  energy     Int?
+  soreness   Int?
+  mood       Int?
+  stress     Int?
+  sleepHours Float?
+  restingHr  Float?
+  hrv        Float?
+  steps      Int?
+  waterMl    Int?
+  proteinG   Float?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model ScoreSnapshot {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime @db.Date
+  total       Int
+  strength    Int?
+  endurance   Int?
+  athleticism Int?
+  mobility    Int?
+  recovery    Int?
+  fuel        Int?
+  consistency Int?
+  explanation Json?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model CoachingRule {
+  id         String   @id @default(cuid())
+  key        String   @unique
+  title      String
+  enabled    Boolean  @default(true)
+  priority   Int      @default(100)
+  conditions Json
+  action     Json
+  updatedAt  DateTime @updatedAt
+}
