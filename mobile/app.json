@@ -1,0 +1,13 @@
+{
+  "expo":{
+    "name":"BE DIFFERENT",
+    "slug":"be-different",
+    "scheme":"bedifferent",
+    "version":"0.1.0",
+    "orientation":"portrait",
+    "userInterfaceStyle":"dark",
+    "ios":{"bundleIdentifier":"com.smarbiz.bedifferent"},
+    "android":{"package":"com.smarbiz.bedifferent"},
+    "plugins":["expo-router"]
+  }
+}
