@@ -33,16 +33,16 @@ export default function Workout(){
 
  if(!w)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
  return <SafeAreaView style={s.safe}>
-  <View style={s.top}><Pressable onPress={()=>router.back()}><ChevronLeft color={C.ink}/></Pressable><Text style={s.topText}>WORKOUT MODE</Text><Text style={s.ready}>● LIVE</Text></View>
-  {rest>0&&<View style={s.restTimer}><Text style={s.restLabel}>REST</Text><Text style={s.restValue}>{Math.floor(rest/60)}:{String(rest%60).padStart(2,"0")}</Text><Pressable onPress={()=>setRest(0)}><Text style={s.skip}>SKIP</Text></Pressable></View>}
+  <View style={s.top}><Pressable onPress={()=>router.back()}><ChevronLeft color={C.ink}/></Pressable><Text style={s.topText}>TRAININGSMODUS</Text><Text style={s.ready}>● AKTIV</Text></View>
+  {rest>0&&<View style={s.restTimer}><Text style={s.restLabel}>PAUSE</Text><Text style={s.restValue}>{Math.floor(rest/60)}:{String(rest%60).padStart(2,"0")}</Text><Pressable onPress={()=>setRest(0)}><Text style={s.skip}>ÜBERSPRINGEN</Text></Pressable></View>}
   <ScrollView contentContainerStyle={s.content}>
-   <Text style={s.title}>{w.title}</Text><Text style={s.meta}>{w.exercises.length} EXERCISES · TRACK EVERY SET</Text>
+   <Text style={s.title}>{w.title}</Text><Text style={s.meta}>{w.exercises.length} ÜBUNGEN · JEDEN SATZ ERFASSEN</Text>
    {w.exercises.map((we:any,index:number)=><View style={s.exercise} key={we.id}>
     <Text style={s.nr}>{String(index+1).padStart(2,"0")}</Text><Text style={s.name}>{we.exercise.nameDe}</Text><Text style={s.cue}>{we.exercise.coachCue1||"Kontrolliert und sauber ausführen."}</Text><View style={s.mediaRow}>{[we.exercise.imageStart,we.exercise.imageMiddle,we.exercise.imageEnd].map((u:any,i:number)=>u?<Image key={u} source={{uri:media[u]||(u.startsWith("http")?u:API+u)}} style={s.media}/>:<View key={i} style={s.mediaEmpty}><Text style={s.mediaEmptyText}>{["START","MITTE","ENDE"][i]}</Text></View>)}</View><Pressable style={s.technique} onPress={()=>router.push({pathname:"/exercise/[id]",params:{id:we.exerciseId}})}><Text style={s.techniqueText}>TECHNIK & VIDEO →</Text></Pressable>
-    {Array.from({length:we.targetSets},(_,i)=>{const n=i+1,key=`${we.exerciseId}:${n}`,x=sets[key]||{};return <View style={s.set} key={key}><Text style={s.setNr}>{n}</Text><TextInput style={s.input} value={x.weightKg||""} onChangeText={v=>setSets({...sets,[key]:{...x,weightKg:v}})} keyboardType="decimal-pad" placeholder="kg" placeholderTextColor="#555"/><TextInput style={s.input} value={x.reps||""} onChangeText={v=>setSets({...sets,[key]:{...x,reps:v}})} keyboardType="number-pad" placeholder="reps" placeholderTextColor="#555"/><TextInput style={s.rpe} value={x.rpe||""} onChangeText={v=>setSets({...sets,[key]:{...x,rpe:v}})} keyboardType="number-pad" placeholder="RPE" placeholderTextColor="#555"/><Pressable style={[s.done,x.done&&s.doneOn]} onPress={()=>save(we.exerciseId,n,we.restSeconds)}><Text style={[s.doneText,x.done&&s.doneTextOn]}>{x.queued?"Q":x.done?"✓":"SAVE"}</Text></Pressable></View>})}
-    <Text style={s.rest}>REST {we.restSeconds}s</Text>
+    {Array.from({length:we.targetSets},(_,i)=>{const n=i+1,key=`${we.exerciseId}:${n}`,x=sets[key]||{};return <View style={s.set} key={key}><Text style={s.setNr}>{n}</Text><TextInput style={s.input} value={x.weightKg||""} onChangeText={v=>setSets({...sets,[key]:{...x,weightKg:v}})} keyboardType="decimal-pad" placeholder="kg" placeholderTextColor="#555"/><TextInput style={s.input} value={x.reps||""} onChangeText={v=>setSets({...sets,[key]:{...x,reps:v}})} keyboardType="number-pad" placeholder="Wdh" placeholderTextColor="#555"/><TextInput style={s.rpe} value={x.rpe||""} onChangeText={v=>setSets({...sets,[key]:{...x,rpe:v}})} keyboardType="number-pad" placeholder="RPE" placeholderTextColor="#555"/><Pressable style={[s.done,x.done&&s.doneOn]} onPress={()=>save(we.exerciseId,n,we.restSeconds)}><Text style={[s.doneText,x.done&&s.doneTextOn]}>{x.queued?"W":x.done?"✓":"SPEICHERN"}</Text></Pressable></View>})}
+    <Text style={s.rest}>PAUSE {we.restSeconds}s</Text>
    </View>)}
-   <Pressable style={s.finish} onPress={finish} disabled={finishing}><Text style={s.finishText}>{finishing?"SYNCING…":"FINISH WORKOUT →"}</Text></Pressable>
+   <Pressable style={s.finish} onPress={finish} disabled={finishing}><Text style={s.finishText}>{finishing?"WIRD SYNCHRONISIERT…":"TRAINING ABSCHLIESSEN →"}</Text></Pressable>
   </ScrollView>
  </SafeAreaView>
 }
