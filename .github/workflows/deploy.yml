@@ -30,11 +30,13 @@ jobs:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          CLOUDFLARE_ORIGIN_CERT_B64: ${{ secrets.CLOUDFLARE_ORIGIN_CERT_B64 }}
+          CLOUDFLARE_ORIGIN_KEY_B64: ${{ secrets.CLOUDFLARE_ORIGIN_KEY_B64 }}
         with:
           host: ${{ secrets.HOST }}
           username: root
           password: ${{ secrets.PASS }}
-          envs: FIREBASE_SERVICE_ACCOUNT_B64,R2_ACCOUNT_ID,R2_ACCESS_KEY_ID,R2_SECRET_ACCESS_KEY,R2_BUCKET,REVENUECAT_WEBHOOK_SECRET,REVENUECAT_SECRET_API_KEY,REVENUECAT_PRO_ENTITLEMENT,REVENUECAT_ELITE_ENTITLEMENT,EXPO_PUSH_ACCESS_TOKEN,RESEND_API_KEY,EMAIL_FROM,POSTHOG_KEY,SENTRY_DSN
+          envs: FIREBASE_SERVICE_ACCOUNT_B64,R2_ACCOUNT_ID,R2_ACCESS_KEY_ID,R2_SECRET_ACCESS_KEY,R2_BUCKET,REVENUECAT_WEBHOOK_SECRET,REVENUECAT_SECRET_API_KEY,REVENUECAT_PRO_ENTITLEMENT,REVENUECAT_ELITE_ENTITLEMENT,EXPO_PUSH_ACCESS_TOKEN,RESEND_API_KEY,EMAIL_FROM,POSTHOG_KEY,SENTRY_DSN,CLOUDFLARE_ORIGIN_CERT_B64,CLOUDFLARE_ORIGIN_KEY_B64
           script_stop: false
           command_timeout: 30m
           script: |
@@ -95,7 +97,11 @@ jobs:
             docker compose --env-file .env.production up -d --build --remove-orphans web scheduler
 
             mkdir -p /etc/nginx/ssl/bedifferent
-            if [ ! -s /etc/nginx/ssl/bedifferent/fullchain.pem ] || [ ! -s /etc/nginx/ssl/bedifferent/privkey.pem ]; then
+            if [ -n "$CLOUDFLARE_ORIGIN_CERT_B64" ] && [ -n "$CLOUDFLARE_ORIGIN_KEY_B64" ]; then
+              printf '%s' "$CLOUDFLARE_ORIGIN_CERT_B64" | base64 -d > /etc/nginx/ssl/bedifferent/fullchain.pem
+              printf '%s' "$CLOUDFLARE_ORIGIN_KEY_B64" | base64 -d > /etc/nginx/ssl/bedifferent/privkey.pem
+              chmod 600 /etc/nginx/ssl/bedifferent/privkey.pem
+            elif [ ! -s /etc/nginx/ssl/bedifferent/fullchain.pem ] || [ ! -s /etc/nginx/ssl/bedifferent/privkey.pem ]; then
               openssl req -x509 -nodes -newkey rsa:2048 -days 825 -keyout /etc/nginx/ssl/bedifferent/privkey.pem -out /etc/nginx/ssl/bedifferent/fullchain.pem -subj "/CN=bedifferent.smarbiz.sbs"
             fi
 
