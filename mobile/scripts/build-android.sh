@@ -18,7 +18,7 @@ fi
 
 test -f "$ANDROID_KEYSTORE_PATH"
 
-npm ci
+npm ci --include=dev
 npx expo install --check
 node ./scripts/prepare-native-config.mjs --require-android
 npx expo prebuild --platform android --clean --non-interactive
