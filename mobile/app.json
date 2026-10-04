@@ -48,7 +48,21 @@
           }
         }
       ],
-      "react-native-iap"
+      "react-native-iap",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "BE DIFFERENT benötigt dein Mikrofon für Sprachnachrichten an deinen Trainer."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "BE DIFFERENT benötigt Zugriff auf deine Mediathek für Technikvideos und Fortschrittsbilder.",
+          "cameraPermission": "BE DIFFERENT benötigt deine Kamera für Technikvideos und Fortschrittsbilder.",
+          "microphonePermission": "BE DIFFERENT benötigt dein Mikrofon für Technikvideos."
+        }
+      ]
     ],
     "extra": {
       "apiUrl": "https://bedifferent.smarbiz.sbs"
