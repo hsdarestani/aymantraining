@@ -10,7 +10,7 @@ import {C,radius} from "../../theme";
 
 function CoachVideo({uri}:{uri:string}){
   const player=useVideoPlayer(uri,p=>{p.loop=true;p.muted=true;p.play()});
-  return <View style={s.videoWrap}><VideoView style={s.videoView} player={player} nativeControls contentFit="cover"/><Text style={s.videoHint}>LOOP · STANDARDMÄSSIG OHNE TON</Text></View>;
+  return <View style={s.videoWrap}><VideoView style={s.videoView} player={player} nativeControls contentFit="cover"/><Text style={s.videoHint}>WIEDERHOLUNG · TON STANDARDMÄSSIG AUS</Text></View>;
 }
 
 export default function Exercise(){
@@ -32,14 +32,14 @@ export default function Exercise(){
   const video=x.videoUrl?media[x.videoUrl]||(x.videoUrl.startsWith("http")?x.videoUrl:API+x.videoUrl):null;
 
   return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
-    <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}>BACK</Text></Pressable></View>
-    <Eyebrow>{x.id} · LEVEL {x.level}</Eyebrow>
+    <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}>ZURÜCK</Text></Pressable></View>
+    <Eyebrow>{x.id} · STUFE {x.level}</Eyebrow>
     <Text style={s.title}>{x.nameDe}</Text>
-    <Text style={s.meta}>{x.category.toUpperCase()} · {x.equipment||"NO EQUIPMENT"}</Text>
+    <Text style={s.meta}>{x.category.toUpperCase()} · {x.equipment||"OHNE GERÄTE"}</Text>
     <View style={s.images}>{images.map((uri:any,i:number)=>uri?<Image key={uri} source={{uri:media[uri]||(uri.startsWith("http")?uri:API+uri)}} style={s.image}/>:<View key={i} style={s.placeholder}><Text style={s.placeholderText}>{["START","MITTE","ENDE"][i]}</Text></View>)}</View>
     {video&&<CoachVideo uri={video}/>}
     <Card><Eyebrow>ZIELMUSKELN</Eyebrow><SectionTitle>{x.primaryMuscles||"—"}</SectionTitle>{x.secondaryMuscles?<Text style={s.secondary}>{x.secondaryMuscles}</Text>:null}</Card>
-    <Card><Eyebrow>COACH CUES</Eyebrow><SectionTitle>Sauber ausführen.</SectionTitle>{[x.coachCue1,x.coachCue2,x.coachCue3].filter(Boolean).map((c:string,i:number)=><View style={s.cue} key={c}><Text style={s.cueNr}>{i+1}</Text><Text style={s.cueText}>{c}</Text></View>)}</Card>
+    <Card><Eyebrow>TRAINER HINWEISE</Eyebrow><SectionTitle>Sauber ausführen.</SectionTitle>{[x.coachCue1,x.coachCue2,x.coachCue3].filter(Boolean).map((c:string,i:number)=><View style={s.cue} key={c}><Text style={s.cueNr}>{i+1}</Text><Text style={s.cueText}>{c}</Text></View>)}</Card>
     <Card><Eyebrow>HÄUFIGE FEHLER</Eyebrow>{mistakes.map((m:string)=><Text style={s.error} key={m}>× {m}</Text>)}</Card>
     {(x.easierExerciseId||x.harderExerciseId)&&<Card><Eyebrow>ALTERNATIVEN</Eyebrow><View style={s.alternatives}>{x.easierExerciseId&&<Pressable style={s.alt} onPress={()=>router.replace({pathname:"/exercise/[id]",params:{id:x.easierExerciseId}})}><Text style={s.altLabel}>LEICHTER</Text><Text style={s.altText}>{x.easierExerciseId}</Text></Pressable>}{x.harderExerciseId&&<Pressable style={s.alt} onPress={()=>router.replace({pathname:"/exercise/[id]",params:{id:x.harderExerciseId}})}><Text style={s.altLabel}>SCHWERER</Text><Text style={s.altText}>{x.harderExerciseId}</Text></Pressable>}</View></Card>}
   </ScrollView></SafeAreaView>;
