@@ -2,6 +2,8 @@
 
 This document contains names and setup requirements only. Never commit real secret values.
 
+Validation marker: final native lockfile state.
+
 ## Automated gates
 
 A release is acceptable only when all are green:
