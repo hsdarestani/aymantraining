@@ -1,9 +1,15 @@
 export function integrationStatus(){
+  const firebase=Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_B64||(process.env.FIREBASE_PROJECT_ID&&process.env.FIREBASE_CLIENT_EMAIL&&process.env.FIREBASE_PRIVATE_KEY));
+  const appleBilling=Boolean(process.env.APPLE_IAP_ISSUER_ID&&process.env.APPLE_IAP_KEY_ID&&process.env.APPLE_IAP_PRIVATE_KEY_B64);
+  const googleBilling=Boolean(process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_B64);
   return {
-    firebase:Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_B64||(process.env.FIREBASE_PROJECT_ID&&process.env.FIREBASE_CLIENT_EMAIL&&process.env.FIREBASE_PRIVATE_KEY)),
-    r2:Boolean(process.env.R2_ACCOUNT_ID&&process.env.R2_ACCESS_KEY_ID&&process.env.R2_SECRET_ACCESS_KEY&&process.env.R2_BUCKET),
-    revenuecat:Boolean(process.env.REVENUECAT_WEBHOOK_SECRET),
-    email:Boolean(process.env.RESEND_API_KEY&&process.env.EMAIL_FROM),
+    firebase,
+    push:firebase,
+    storage:true,
+    appleBilling,
+    googleBilling,
+    storeBilling:appleBilling&&googleBilling,
+    email:Boolean(process.env.SMTP_HOST&&process.env.SMTP_PORT&&process.env.SMTP_USER&&process.env.SMTP_PASSWORD&&process.env.EMAIL_FROM),
     posthog:Boolean(process.env.POSTHOG_KEY),
     sentry:Boolean(process.env.SENTRY_DSN)
   };
