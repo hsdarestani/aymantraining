@@ -33,7 +33,6 @@
     "react-native": "0.79.5",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-health-connect": "4.0.0",
-    "react-native-iap": "14.7.15",
     "react-native-nitro-modules": "0.35.6",
     "react-native-reanimated": "~3.17.4",
     "react-native-svg": "15.11.2",
