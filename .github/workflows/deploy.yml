@@ -17,17 +17,16 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
         env:
           FIREBASE_SERVICE_ACCOUNT_B64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_B64 }}
-          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_BUCKET: ${{ secrets.R2_BUCKET }}
-          REVENUECAT_WEBHOOK_SECRET: ${{ secrets.REVENUECAT_WEBHOOK_SECRET }}
-          REVENUECAT_IOS_PUBLIC_API_KEY: ${{ secrets.REVENUECAT_IOS_PUBLIC_API_KEY }}
-          REVENUECAT_ANDROID_PUBLIC_API_KEY: ${{ secrets.REVENUECAT_ANDROID_PUBLIC_API_KEY }}
-          REVENUECAT_PRO_ENTITLEMENT: ${{ secrets.REVENUECAT_PRO_ENTITLEMENT }}
-          REVENUECAT_ELITE_ENTITLEMENT: ${{ secrets.REVENUECAT_ELITE_ENTITLEMENT }}
-          EXPO_PUSH_ACCESS_TOKEN: ${{ secrets.EXPO_PUSH_ACCESS_TOKEN }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          APPLE_IAP_ISSUER_ID: ${{ secrets.APPLE_IAP_ISSUER_ID }}
+          APPLE_IAP_KEY_ID: ${{ secrets.APPLE_IAP_KEY_ID }}
+          APPLE_IAP_PRIVATE_KEY_B64: ${{ secrets.APPLE_IAP_PRIVATE_KEY_B64 }}
+          GOOGLE_PLAY_SERVICE_ACCOUNT_B64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_B64 }}
+          GOOGLE_RTDN_WEBHOOK_SECRET: ${{ secrets.GOOGLE_RTDN_WEBHOOK_SECRET }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_SECURE: ${{ secrets.SMTP_SECURE }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
@@ -37,7 +36,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: root
           password: ${{ secrets.PASS }}
-          envs: FIREBASE_SERVICE_ACCOUNT_B64,R2_ACCOUNT_ID,R2_ACCESS_KEY_ID,R2_SECRET_ACCESS_KEY,R2_BUCKET,REVENUECAT_WEBHOOK_SECRET,REVENUECAT_IOS_PUBLIC_API_KEY,REVENUECAT_ANDROID_PUBLIC_API_KEY,REVENUECAT_PRO_ENTITLEMENT,REVENUECAT_ELITE_ENTITLEMENT,EXPO_PUSH_ACCESS_TOKEN,RESEND_API_KEY,EMAIL_FROM,POSTHOG_KEY,SENTRY_DSN,CLOUDFLARE_ORIGIN_CERT_B64,CLOUDFLARE_ORIGIN_KEY_B64
+          envs: FIREBASE_SERVICE_ACCOUNT_B64,APPLE_IAP_ISSUER_ID,APPLE_IAP_KEY_ID,APPLE_IAP_PRIVATE_KEY_B64,GOOGLE_PLAY_SERVICE_ACCOUNT_B64,GOOGLE_RTDN_WEBHOOK_SECRET,SMTP_HOST,SMTP_PORT,SMTP_SECURE,SMTP_USER,SMTP_PASSWORD,EMAIL_FROM,POSTHOG_KEY,SENTRY_DSN,CLOUDFLARE_ORIGIN_CERT_B64,CLOUDFLARE_ORIGIN_KEY_B64
           script_stop: false
           command_timeout: 30m
           script: |
@@ -63,40 +62,59 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
 
+            mkdir -p /opt/bedifferent/backups
+            chmod 700 /opt/bedifferent/backups
+
             touch .env.production
             chmod 600 .env.production
-            if ! grep -q '^DB_PASSWORD=' .env.production; then printf 'DB_PASSWORD=%s\\n' "$(openssl rand -hex 32)" >> .env.production; fi
-            if ! grep -q '^CRON_SECRET=' .env.production; then printf 'CRON_SECRET=%s\\n' "$(openssl rand -hex 32)" >> .env.production; fi
+            if ! grep -q '^DB_PASSWORD=' .env.production; then printf 'DB_PASSWORD=%s\n' "$(openssl rand -hex 32)" >> .env.production; fi
+            if ! grep -q '^CRON_SECRET=' .env.production; then printf 'CRON_SECRET=%s\n' "$(openssl rand -hex 32)" >> .env.production; fi
+            if ! grep -q '^BACKUP_DIR=' .env.production; then printf 'BACKUP_DIR=/opt/bedifferent/backups\n' >> .env.production; fi
 
+            remove_env() {
+              key="$1"
+              tmp="$(mktemp)"
+              grep -v "^$key=" .env.production > "$tmp" || true
+              mv "$tmp" .env.production
+              chmod 600 .env.production
+            }
             upsert_env() {
               key="$1"; value="$2"
               if [ -n "$value" ]; then
                 tmp="$(mktemp)"
                 grep -v "^$key=" .env.production > "$tmp" || true
-                printf '%s=%s\\n' "$key" "$value" >> "$tmp"
+                printf '%s=%s\n' "$key" "$value" >> "$tmp"
                 mv "$tmp" .env.production
                 chmod 600 .env.production
               fi
             }
+
+            for stale in R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET REVENUECAT_WEBHOOK_SECRET REVENUECAT_IOS_PUBLIC_API_KEY REVENUECAT_ANDROID_PUBLIC_API_KEY REVENUECAT_PRO_ENTITLEMENT REVENUECAT_ELITE_ENTITLEMENT EXPO_PUSH_ACCESS_TOKEN RESEND_API_KEY; do
+              remove_env "$stale"
+            done
+
             upsert_env FIREBASE_SERVICE_ACCOUNT_B64 "$FIREBASE_SERVICE_ACCOUNT_B64"
-            upsert_env R2_ACCOUNT_ID "$R2_ACCOUNT_ID"
-            upsert_env R2_ACCESS_KEY_ID "$R2_ACCESS_KEY_ID"
-            upsert_env R2_SECRET_ACCESS_KEY "$R2_SECRET_ACCESS_KEY"
-            upsert_env R2_BUCKET "$R2_BUCKET"
-            upsert_env REVENUECAT_WEBHOOK_SECRET "$REVENUECAT_WEBHOOK_SECRET"
-            upsert_env REVENUECAT_IOS_PUBLIC_API_KEY "$REVENUECAT_IOS_PUBLIC_API_KEY"
-            upsert_env REVENUECAT_ANDROID_PUBLIC_API_KEY "$REVENUECAT_ANDROID_PUBLIC_API_KEY"
-            upsert_env REVENUECAT_PRO_ENTITLEMENT "$REVENUECAT_PRO_ENTITLEMENT"
-            upsert_env REVENUECAT_ELITE_ENTITLEMENT "$REVENUECAT_ELITE_ENTITLEMENT"
-            upsert_env EXPO_PUSH_ACCESS_TOKEN "$EXPO_PUSH_ACCESS_TOKEN"
-            upsert_env RESEND_API_KEY "$RESEND_API_KEY"
+            upsert_env APPLE_BUNDLE_ID "com.smarbiz.bedifferent"
+            upsert_env APPLE_IAP_ISSUER_ID "$APPLE_IAP_ISSUER_ID"
+            upsert_env APPLE_IAP_KEY_ID "$APPLE_IAP_KEY_ID"
+            upsert_env APPLE_IAP_PRIVATE_KEY_B64 "$APPLE_IAP_PRIVATE_KEY_B64"
+            upsert_env GOOGLE_PLAY_PACKAGE_NAME "com.smarbiz.bedifferent"
+            upsert_env GOOGLE_PLAY_SERVICE_ACCOUNT_B64 "$GOOGLE_PLAY_SERVICE_ACCOUNT_B64"
+            upsert_env GOOGLE_RTDN_WEBHOOK_SECRET "$GOOGLE_RTDN_WEBHOOK_SECRET"
+            upsert_env STORE_PRODUCT_PRO_MONTHLY "bd_pro_monthly"
+            upsert_env STORE_PRODUCT_PRO_YEARLY "bd_pro_yearly"
+            upsert_env SMTP_HOST "$SMTP_HOST"
+            upsert_env SMTP_PORT "${SMTP_PORT:-587}"
+            upsert_env SMTP_SECURE "${SMTP_SECURE:-false}"
+            upsert_env SMTP_USER "$SMTP_USER"
+            upsert_env SMTP_PASSWORD "$SMTP_PASSWORD"
             upsert_env EMAIL_FROM "$EMAIL_FROM"
             upsert_env POSTHOG_KEY "$POSTHOG_KEY"
             upsert_env SENTRY_DSN "$SENTRY_DSN"
 
             docker compose --env-file .env.production up -d db
             docker compose --env-file .env.production run --rm migrate
-            docker compose --env-file .env.production up -d --build --remove-orphans web scheduler
+            docker compose --env-file .env.production up -d --build --remove-orphans web scheduler backup
 
             mkdir -p /etc/nginx/ssl/bedifferent
             if [ -n "$CLOUDFLARE_ORIGIN_CERT_B64" ] && [ -n "$CLOUDFLARE_ORIGIN_KEY_B64" ]; then
@@ -133,6 +151,7 @@ jobs:
               ssl_certificate /etc/nginx/ssl/bedifferent/fullchain.pem;
               ssl_certificate_key /etc/nginx/ssl/bedifferent/privkey.pem;
               ssl_protocols TLSv1.2 TLSv1.3;
+              add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
               add_header X-Content-Type-Options "nosniff" always;
               add_header Referrer-Policy "strict-origin-when-cross-origin" always;
               add_header Permissions-Policy "camera=(self), microphone=(self), geolocation=()" always;
