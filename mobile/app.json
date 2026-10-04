@@ -44,11 +44,10 @@
             "compileSdkVersion": 36,
             "targetSdkVersion": 36,
             "minSdkVersion": 26,
-            "kotlinVersion": "2.2.10"
+            "kotlinVersion": "2.1.20"
           }
         }
       ],
-      "react-native-iap",
       [
         "expo-audio",
         {
