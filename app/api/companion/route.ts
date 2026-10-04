@@ -28,16 +28,16 @@ export async function GET(){
 
 export async function POST(request:Request){
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
- const p=schema.safeParse(await request.json().catch(()=>null));if(!p.success)return errorJson("Ungültige Watch Aktion.",422);
- const workout=await prisma.workout.findFirst({where:{id:p.data.workoutId,userId:user.id},include:{exercises:true}});
+ const p=schema.safeParse(await request.json().catch(()=>null));if(!p.success)return errorJson("Ungültige Uhr Aktion.",422);const data=p.data;
+ const workout=await prisma.workout.findFirst({where:{id:data.workoutId,userId:user.id},include:{exercises:true}});
  if(!workout)return errorJson("Training nicht gefunden.",404);
- if(p.data.action==="set"){
-  if(!workout.exercises.some(x=>x.exerciseId===p.data.exerciseId))return errorJson("Übung gehört nicht zu diesem Training.",422);
-  const set=await prisma.setLog.upsert({where:{workoutId_exerciseId_setNumber:{workoutId:workout.id,exerciseId:p.data.exerciseId,setNumber:p.data.setNumber}},update:{reps:p.data.reps,weightKg:p.data.weightKg,rpe:p.data.rpe,completedAt:new Date()},create:{workoutId:workout.id,exerciseId:p.data.exerciseId,setNumber:p.data.setNumber,reps:p.data.reps,weightKg:p.data.weightKg,rpe:p.data.rpe}});
+ if(data.action==="set"){
+  if(!workout.exercises.some(x=>x.exerciseId===data.exerciseId))return errorJson("Übung gehört nicht zu diesem Training.",422);
+  const set=await prisma.setLog.upsert({where:{workoutId_exerciseId_setNumber:{workoutId:workout.id,exerciseId:data.exerciseId,setNumber:data.setNumber}},update:{reps:data.reps,weightKg:data.weightKg,rpe:data.rpe,completedAt:new Date()},create:{workoutId:workout.id,exerciseId:data.exerciseId,setNumber:data.setNumber,reps:data.reps,weightKg:data.weightKg,rpe:data.rpe}});
   if(!workout.startedAt)await prisma.workout.update({where:{id:workout.id},data:{startedAt:new Date()}});
   return NextResponse.json({ok:true,set});
  }
- const completed=await prisma.workout.update({where:{id:workout.id},data:{completedAt:new Date(),rpe:p.data.rpe??workout.rpe}});
+ const completed=await prisma.workout.update({where:{id:workout.id},data:{completedAt:new Date(),rpe:data.rpe??workout.rpe}});
  await recomputeScoreForUser(user.id);
  return NextResponse.json({ok:true,workout:completed});
 }
