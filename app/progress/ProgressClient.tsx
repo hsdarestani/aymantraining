@@ -10,7 +10,7 @@ export default function ProgressClient(){
     setStatus(r.ok?"Gespeichert.":"Speichern fehlgeschlagen.");if(r.ok)setTimeout(()=>location.reload(),350);
   }
   async function photo(e:FormEvent<HTMLFormElement>){
-    e.preventDefault();if(!consent){setStatus("Bitte bestätige zuerst die private Fotoverarbeitung.");return;}
+    e.preventDefault();if(!consent){setStatus("Bitte bestätige zuerst die persönliche Fotoverarbeitung.");return;}
     await fetch("/api/consent",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({type:"media_processing",version:"1.0",granted:true})});
     const f=new FormData(e.currentTarget);f.set("kind","PROGRESS_PHOTO");
     const r=await fetch("/api/media",{method:"POST",body:f});const j=await r.json().catch(()=>({}));
