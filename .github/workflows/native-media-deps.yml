@@ -1,0 +1,39 @@
+name: Install Native Media Modules
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/native-media-deps.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Select Expo compatible modules
+        env:
+          CI: "1"
+        run: npx expo install expo-file-system expo-network expo-camera expo-video
+      - name: Commit package changes
+        working-directory: .
+        run: |
+          git config user.name "bedifferent-ci"
+          git config user.email "ci@bedifferent.local"
+          git add mobile/package.json mobile/package-lock.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "build: install Expo native media modules"
+          git push origin HEAD:main
