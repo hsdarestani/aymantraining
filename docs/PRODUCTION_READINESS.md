@@ -148,3 +148,13 @@ iOS macOS agent:
 - `APPLE_TEAM_ID`
 - optional `IOS_SCHEME`
 - optional unattended provisioning: `ASC_KEY_PATH`, `ASC_KEY_ID`, `ASC_ISSUER_ID`
+
+
+## Remote Publisher build trigger
+
+After the BE DIFFERENT app record exists in Publisher, set these GitHub Secrets in this repository:
+
+- `PUBLISHER_URL` = the Publisher base URL, for example `https://publisher.smarbiz.sbs`
+- `PUBLISHER_AUTOMATION_TOKEN` = the same long random token configured as `PUBLISHER_AUTOMATION_TOKEN` in the Publisher server environment
+
+`release-request.json` is intentionally committed with `"enabled": false`. To queue a build, set a new version/build number and `"enabled": true`, then commit it. The GitHub workflow calls Publisher and queues Android and iOS build jobs for the exact commit.
