@@ -17,6 +17,7 @@ if [ -z "${ASC_KEY_PATH:-}" ] && [ -n "${ASC_PRIVATE_KEY_B64:-}" ] && [ -n "${AS
 fi
 
 npm ci
+npx expo install --check
 export APPLE_PUSH_ENV=production
 node ./scripts/prepare-native-config.mjs --require-ios
 npx expo prebuild --platform ios --clean --non-interactive
