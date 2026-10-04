@@ -10,3 +10,4 @@ npm-debug.log*
 mobile/firebase/
 mobile/android/
 mobile/ios/
+mobile/.publisher-secrets/
