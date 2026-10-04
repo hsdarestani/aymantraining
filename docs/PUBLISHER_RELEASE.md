@@ -20,21 +20,23 @@ Publisher automatically provides `APP_VERSION_NAME` and `APP_BUILD_NUMBER`; `mob
 
 ## Native build environment
 
-Set these values in the Publisher app build config `env` because they are build-time public identifiers/SDK keys:
+Set these values in the Publisher app build config `env`. They are build-time SDK identifiers and are expected inside the binary:
 
 - `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY`
 - `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY`
 - `EXPO_PUBLIC_EAS_PROJECT_ID`
 
-Do not put App Store Connect private keys, Google service-account JSON, RevenueCat secret API keys, webhook secrets, keystore passwords, or server secrets in this build-config JSON.
+Do not put App Store Connect private keys, Google service-account JSON, RevenueCat secret API keys, webhook secrets, keystore passwords, or signing certificates in the app build-config JSON.
 
-## Recommended Android build config
+## Android build
 
-The Linux build agent needs Node 22, JDK 17, Android SDK, and the normal React Native/Expo Android toolchain.
+The Linux agent needs Node 22, JDK 17, Android SDK and the React Native / Expo Android toolchain.
+
+Use:
 
 ```json
 {
-  "android_command": "cd mobile && npm ci && npx expo prebuild --platform android --clean --non-interactive && cd android && chmod +x gradlew && ./gradlew bundleRelease",
+  "android_command": "bash mobile/scripts/build-android.sh",
   "android_artifact": "mobile/android/app/build/outputs/bundle/release/*.aab",
   "env": {
     "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "SET_IN_PUBLISHER",
@@ -44,36 +46,83 @@ The Linux build agent needs Node 22, JDK 17, Android SDK, and the normal React N
 }
 ```
 
-The Android release signing key must be installed on the Android build agent before the first production build. Do not commit the keystore.
+The following **secrets live only on the Linux build agent environment**, not in Git or build_config:
 
-## Recommended iOS bootstrap
+- `ANDROID_KEYSTORE_PATH`
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
 
-The macOS agent needs Node 22 and a current Xcode. On the first iOS build:
+`build-android.sh` performs a clean Expo prebuild, injects release signing into the generated Gradle project, and produces a signed AAB.
 
-1. Clone the repository on the Mac agent.
-2. Run `cd mobile && npm ci && npx expo prebuild --platform ios --clean --non-interactive`.
-3. Open the generated workspace once in Xcode.
-4. Select the BE DIFFERENT target, the correct Apple Team and automatic signing.
-5. Confirm bundle ID `com.smarbiz.bedifferent`, HealthKit capability and Push Notifications capability.
-6. Build/archive once successfully on that Mac.
+## iOS build
 
-After this bootstrap, set the Publisher iOS build command to the archive/export command used by that Mac agent. Publisher can then upload the resulting IPA with its App Store Connect credentials.
+The macOS agent needs Node 22, CocoaPods and a current Xcode accepted by App Store Connect.
+
+Use:
+
+```json
+{
+  "ios_command": "bash mobile/scripts/build-ios.sh",
+  "ios_artifact": "mobile/ios/build/export/*.ipa",
+  "env": {
+    "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "SET_IN_PUBLISHER",
+    "EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY": "SET_IN_PUBLISHER",
+    "EXPO_PUBLIC_EAS_PROJECT_ID": "SET_IN_PUBLISHER"
+  }
+}
+```
+
+Required on the macOS build-agent environment:
+
+- `APPLE_TEAM_ID`
+- optional `IOS_SCHEME` if automatic scheme detection does not select the correct scheme
+
+For fully unattended provisioning, install the App Store Connect API private key on the macOS agent and provide:
+
+- `ASC_KEY_PATH`
+- `ASC_KEY_ID`
+- `ASC_ISSUER_ID`
+
+Alternatively, bootstrap signing once in Xcode with automatic signing and keep the distribution certificate/private key and provisioning setup in the build-agent keychain.
+
+## Publisher Store Accounts
+
+Publisher already encrypts Store Account credentials in its database.
+
+### Apple Store Account
+
+Enter in Publisher:
+
+- Apple Issuer ID
+- Apple Key ID
+- App Store Connect private key contents from the downloaded `.p8`
+- Apple Team ID
+- Vendor Number only if report synchronization is desired
+
+The key needs enough App Store Connect permissions for app metadata, builds and submissions.
+
+### Google Store Account
+
+Create a Google Cloud service account and download its JSON key. In Publisher, store the **whole JSON credentials object** as the Google Store Account credential. The service account email must also be invited in Play Console with the app permissions required for publishing. The Google Play Developer API must be enabled in the Cloud project used by that service account.
 
 ## Store products
 
-Create these subscription products before enabling live billing:
+Create these auto-renewable subscription products before enabling live billing:
 
 - `bd_pro_monthly`
 - `bd_pro_yearly`
 
-Both must grant the RevenueCat entitlement `pro`. Configure the 7 day trial in App Store Connect / Google Play, not only in application code.
+Both grant RevenueCat entitlement `pro`. Configure the 7 day trial at store level.
 
 RevenueCat webhook:
+
 `https://bedifferent.smarbiz.sbs/api/webhooks/revenuecat`
 
-Use an Authorization header:
+Authorization header:
+
 `Bearer <REVENUECAT_WEBHOOK_SECRET>`
 
 ## Review account
 
-Create a dedicated review Athlete account after production secrets are connected. Complete onboarding and make sure the account can demonstrate FREE screens. A separate PRO review account can be enabled for coach, wearable-detail and subscription-dependent screens if the store review notes require it.
+Create a dedicated review Athlete account after production integrations are connected. Complete onboarding and make sure the account can demonstrate FREE screens. Keep a separate PRO review account if the review team needs to inspect coach, advanced wearable and subscription-only functionality.
