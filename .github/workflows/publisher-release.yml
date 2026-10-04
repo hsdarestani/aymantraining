@@ -7,6 +7,10 @@ on:
       - "release-request.json"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+
 concurrency:
   group: bedifferent-publisher-trigger
   cancel-in-progress: false
@@ -16,20 +20,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Read release request
         id: request
         run: |
           enabled="$(jq -r '.enabled // false' release-request.json)"
           echo "enabled=$enabled" >> "$GITHUB_OUTPUT"
+
       - name: Queue Publisher builds
         if: steps.request.outputs.enabled == 'true'
         env:
-          PUBLISHER_URL: ${{ secrets.PUBLISHER_URL }}
-          PUBLISHER_AUTOMATION_TOKEN: ${{ secrets.PUBLISHER_AUTOMATION_TOKEN }}
+          PUBLISHER_URL: https://publisher.smarbiz.sbs
         run: |
           set -euo pipefail
-          : "${PUBLISHER_URL:?PUBLISHER_URL secret is required}"
-          : "${PUBLISHER_AUTOMATION_TOKEN:?PUBLISHER_AUTOMATION_TOKEN secret is required}"
+          token_response="$(curl -fsS             -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https%3A%2F%2Fpublisher.smarbiz.sbs")"
+          oidc_token="$(printf '%s' "$token_response" | jq -r '.value')"
+          test -n "$oidc_token"
           payload="$(jq --arg sha "$GITHUB_SHA" '.source_commit = $sha | del(.enabled)' release-request.json)"
-          curl -fsS             -X POST "${PUBLISHER_URL%/}/apps/automation/release/"             -H "Authorization: Bearer $PUBLISHER_AUTOMATION_TOKEN"             -H "Content-Type: application/json"             --data "$payload" | tee /tmp/publisher-response.json
+          curl -fsS             -X POST "${PUBLISHER_URL%/}/apps/automation/release/"             -H "X-GitHub-OIDC: $oidc_token"             -H "Content-Type: application/json"             --data "$payload" | tee /tmp/publisher-response.json
           jq -e '.ok == true' /tmp/publisher-response.json >/dev/null
