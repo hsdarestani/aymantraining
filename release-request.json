@@ -2,12 +2,12 @@
   "enabled": true,
   "app_identifier": "com.smarbiz.bedifferent",
   "version_name": "1.0.0",
-  "build_number": 4,
+  "build_number": 5,
   "platforms": [
     "android",
     "ios"
   ],
   "android_track": "internal",
   "auto_submit": true,
-  "release_notes": "Production QA fixes: native signup, offline workout sync, session logout, media playback, FREE entitlement filtering and activity targets"
+  "release_notes": "QA fixes including wearable unit conversion and sleep interval normalization"
 }

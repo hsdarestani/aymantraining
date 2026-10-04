@@ -48,6 +48,8 @@ jobs:
         run: node scripts/test-media-ranges.mjs
       - name: Native offline queue regression
         run: node scripts/test-native-outbox.mjs
+      - name: Health normalization regression
+        run: node scripts/test-health-values.mjs
       - name: Navigation coverage
         run: node scripts/check-navigation.mjs
       - name: Validate schema and TypeScript
