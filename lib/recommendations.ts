@@ -147,6 +147,40 @@ export async function evaluateRecommendations(userId:string){
     sourceRule:"subjective_energy_low"
   });
 
+  const athleteContext=await prisma.athleteContext.findUnique({where:{userId}});
+  if(athleteContext?.nextMatchAt){
+    const hours=(athleteContext.nextMatchAt.getTime()-context.now.getTime())/3600000;
+    if(hours>=0&&hours<=48)out.unshift({
+      severity:"info",title:"Spieltag steht bevor",
+      explanation:"Dein eingetragener Spieltag liegt in den nächsten zwei Tagen.",
+      action:"Trainingsvolumen reduzieren und Technik, Beweglichkeit und Frische priorisieren.",
+      sourceRule:"match_day_taper"
+    });
+    if(hours<0&&hours>=-30)out.unshift({
+      severity:"info",title:"Regeneration nach dem Spiel",
+      explanation:"Dein eingetragener Spieltag war vor kurzem.",
+      action:"Regeneration, Schlaf, Flüssigkeit und lockere Bewegung priorisieren. Dein Trainer entscheidet über die nächste Belastung.",
+      sourceRule:"match_day_recovery"
+    });
+  }
+  if(athleteContext?.travelModeUntil&&athleteContext.travelModeUntil>context.now)out.push({
+    severity:"info",title:"Reisemodus aktiv",
+    explanation:"Du hast Training auf Reisen aktiviert.",
+    action:"Heute Übungen ohne Geräte und kurze Einheiten priorisieren.",
+    sourceRule:"travel_mode"
+  });
+  if(athleteContext?.cycleTrackingEnabled&&athleteContext.cycleStartDate){
+    const length=Math.max(20,athleteContext.cycleLengthDays||28);
+    const days=Math.max(0,Math.floor((dateOnly(context.now).getTime()-dateOnly(athleteContext.cycleStartDate).getTime())/86400000));
+    const cycleDay=days%length+1;
+    if(cycleDay<=5)out.push({
+      severity:"info",title:"Zyklus Kontext aktiv",
+      explanation:`Du hast Zyklustag ${cycleDay} als Kontext freigegeben.`,
+      action:"Subjektives Befinden und Regeneration heute besonders beachten. Die Funktion ist keine medizinische Bewertung.",
+      sourceRule:"cycle_context"
+    });
+  }
+
   const today=dateOnly(context.now);
   await prisma.recommendation.deleteMany({where:{userId,date:today,coachStatus:"PENDING"}});
   for(const rec of out)await prisma.recommendation.create({data:{userId,date:today,...rec}});
