@@ -28,14 +28,19 @@ export default function Onboarding(){
   const [experience,setExperience]=useState<"STARTER"|"REGULAR"|"ADVANCED">("STARTER");
   const [availability,setAvailability]=useState(3);
   const [health,setHealth]=useState(false);
+  const [pushups,setPushups]=useState("");
+  const [plank,setPlank]=useState("");
+  const [run5k,setRun5k]=useState("");
   const [error,setError]=useState("");
 
   async function finish(){
+    if(!Number(pushups)||!Number(plank)){setError("Bitte Liegestütze und Unterarmstütz eintragen.");setStep(4);return;}
     try{
       await api("/api/onboarding/complete",{method:"POST",body:JSON.stringify({
         goal,birthDate:birthToIso(birth),sex:"prefer_not_to_say",heightCm:Number(height),weightKg:Number(weight),
         trainingExperience:experience,availabilityPerWeek:availability,healthConsent:health,privacyConsent:true,termsConsent:true
       })});
+      await api("/api/performance-tests",{method:"POST",body:JSON.stringify({name:"STARTTEST",results:[{metric:"pushups",value:Number(pushups),unit:"Wdh"},{metric:"plank",value:Number(plank),unit:"Sekunden"},...(Number(run5k)>0?[{metric:"5k_time",value:Number(run5k),unit:"Minuten"}]:[])]})}).catch(()=>undefined);
       if(health)await syncHealth().catch(()=>{});
       router.replace("/membership?onboarding=1");
     }catch(e:any){setError(e.message||"Einrichtung fehlgeschlagen.")}
@@ -43,7 +48,7 @@ export default function Onboarding(){
 
   return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
     <Brand/>
-    <View style={s.progress}>{[1,2,3,4].map(x=><View key={x} style={[s.bar,x<=step&&s.barOn]}/>)}</View>
+    <View style={s.progress}>{[1,2,3,4,5].map(x=><View key={x} style={[s.bar,x<=step&&s.barOn]}/>)}</View>
 
     {step===1&&<><Text style={s.kicker}>01 · ZIEL</Text><Text style={s.title}>WAS WILLST{"\n"}DU ERREICHEN?</Text><View style={s.goals}>{goals.map(g=><Pressable key={g} onPress={()=>setGoal(g)} style={[s.goal,goal===g&&s.goalOn]}><Text style={[s.goalText,goal===g&&s.goalTextOn]}>{g}</Text><Text style={[s.arrow,goal===g&&s.goalTextOn]}>{goal===g?"✓":"→"}</Text></Pressable>)}</View></>}
 
@@ -59,9 +64,11 @@ export default function Onboarding(){
 
     {step===3&&<><Text style={s.kicker}>03 · DATEN</Text><Text style={s.title}>GESUNDHEIT{"\n"}VERBINDEN.</Text><Text style={s.copy}>Schlaf, HRV, Ruhepuls, Schritte, VO2max und Gewicht werden nur nach deiner Einwilligung genutzt.</Text><View style={s.switch}><Text style={s.switchText}>GESUNDHEITSDATEN ERLAUBEN</Text><Switch value={health} onValueChange={setHealth} trackColor={{true:C.volt}} thumbColor={health?C.bg:"#eee"}/></View></>}
 
-    {step===4&&<><Text style={s.kicker}>04 · BEREIT</Text><Text style={s.title}>WERDE{"\n"}ANDERS.</Text><Text style={s.copy}>Dein erster Leistungswert entsteht nur aus echten Daten. Fehlende Werte bleiben sichtbar unvollständig.</Text>{error?<Text style={s.error}>{error}</Text>:null}</>}
+    {step===4&&<><Text style={s.kicker}>04 · STARTTEST</Text><Text style={s.title}>DEIN ERSTER{"\n"}MESSPUNKT.</Text><Text style={s.copy}>Führe zwei einfache Tests sauber aus. Der 5 km Lauf ist optional.</Text><TextInput style={s.input} value={pushups} onChangeText={setPushups} keyboardType="number-pad" placeholder="Liegestütze Wiederholungen" placeholderTextColor="#555"/><TextInput style={s.input} value={plank} onChangeText={setPlank} keyboardType="number-pad" placeholder="Unterarmstütz Sekunden" placeholderTextColor="#555"/><TextInput style={s.input} value={run5k} onChangeText={setRun5k} keyboardType="decimal-pad" placeholder="5 km Lauf Minuten optional" placeholderTextColor="#555"/>{error?<Text style={s.error}>{error}</Text>:null}</>}
 
-    <Pressable style={s.next} onPress={()=>step<4?setStep(step+1):finish()}><Text style={s.nextText}>{step<4?"WEITER →":"SYSTEM ÖFFNEN →"}</Text></Pressable>
+    {step===5&&<><Text style={s.kicker}>05 · BEREIT</Text><Text style={s.title}>WERDE{"\n"}ANDERS.</Text><Text style={s.copy}>Dein erster Leistungswert entsteht nur aus echten Daten. Fehlende Werte bleiben sichtbar unvollständig.</Text>{error?<Text style={s.error}>{error}</Text>:null}</>}
+
+    <Pressable style={s.next} onPress={()=>step<5?setStep(step+1):finish()}><Text style={s.nextText}>{step<5?"WEITER →":"SYSTEM ÖFFNEN →"}</Text></Pressable>
     {step>1&&<Pressable onPress={()=>setStep(step-1)}><Text style={s.back}>← ZURÜCK</Text></Pressable>}
   </ScrollView></SafeAreaView>;
 }
