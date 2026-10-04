@@ -60,6 +60,13 @@ model User {
   assignments         PlanAssignment[]
   pushPreferences     PushPreference[]
   deviceTokens        DeviceToken[]
+  coachAssignments     CoachAssignment[] @relation("AthleteCoach")
+  coachedAthletes      CoachAssignment[] @relation("CoachAthlete")
+  athleteContext       AthleteContext?
+  wearableConnections WearableConnection[]
+  eventRegistrations  EventRegistration[]
+  aiMessages           AiMessage[]
+  coachBriefs          CoachBrief[] @relation("CoachBriefAuthor")
 }
 
 model AuthSession {
@@ -601,4 +608,114 @@ model WaitlistEntry {
   notes     String?
 
   @@index([status, joinedAt])
+}
+
+
+model CoachAssignment {
+  id        String   @id @default(cuid())
+  athleteId String
+  coachId   String
+  active    Boolean  @default(true)
+  startsAt  DateTime @default(now())
+  endsAt    DateTime?
+  createdAt DateTime @default(now())
+  athlete   User     @relation("AthleteCoach", fields: [athleteId], references: [id], onDelete: Cascade)
+  coach     User     @relation("CoachAthlete", fields: [coachId], references: [id], onDelete: Cascade)
+
+  @@index([athleteId, active])
+  @@index([coachId, active])
+}
+
+model AthleteContext {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  nextMatchAt           DateTime?
+  travelModeUntil       DateTime?
+  cycleTrackingEnabled  Boolean  @default(false)
+  cycleStartDate        DateTime?
+  cycleLengthDays       Int      @default(28)
+  targetScore           Int?
+  targetDate            DateTime?
+  bedtimeTarget         String?
+  stepTarget            Int      @default(10000)
+  waterTargetMl         Int      @default(2500)
+  proteinTargetG        Float    @default(130)
+  preferredMorningHour  Int      @default(8)
+  updatedAt             DateTime @updatedAt
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WearableConnection {
+  id             String   @id @default(cuid())
+  userId         String
+  provider       String
+  externalUserId String?
+  status         String   @default("CONNECTED")
+  metadata       Json?
+  connectedAt    DateTime @default(now())
+  lastSyncAt     DateTime?
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@index([provider, externalUserId])
+}
+
+model CoachBrief {
+  id           String           @id @default(cuid())
+  coachId      String
+  title        String
+  body         String?
+  mediaId      String?
+  audienceTier SubscriptionTier @default(PRO)
+  publishAt    DateTime         @default(now())
+  expiresAt    DateTime?
+  createdAt    DateTime         @default(now())
+  coach        User             @relation("CoachBriefAuthor", fields: [coachId], references: [id], onDelete: Cascade)
+
+  @@index([publishAt])
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  type        String   @default("MEETUP")
+  startsAt    DateTime
+  endsAt      DateTime?
+  location    String?
+  meetingUrl  String?
+  capacity    Int?
+  minTier     String   @default("FREE")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  registrations EventRegistration[]
+
+  @@index([startsAt, active])
+}
+
+model EventRegistration {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  status    String   @default("REGISTERED")
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([userId, createdAt])
+}
+
+model AiMessage {
+  id              String   @id @default(cuid())
+  userId          String
+  role            String
+  content         String
+  sourceContext   Json?
+  coachReviewedAt DateTime?
+  coachId         String?
+  createdAt       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
