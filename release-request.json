@@ -2,12 +2,12 @@
   "enabled": true,
   "app_identifier": "com.smarbiz.bedifferent",
   "version_name": "1.0.0",
-  "build_number": 2,
+  "build_number": 3,
   "platforms": [
     "android",
     "ios"
   ],
   "android_track": "internal",
-  "auto_submit": false,
-  "release_notes": "BE DIFFERENT 1.0.0 build 2 final Publisher retry with iOS CocoaPods Firebase linking fix"
+  "auto_submit": true,
+  "release_notes": "BE DIFFERENT 1.0.0 build 3 final store release with Firebase new architecture and signing fixes"
 }
