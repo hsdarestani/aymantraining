@@ -28,7 +28,6 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-notifications",
       "expo-camera",
       "@kingstinct/react-native-healthkit",
       "react-native-health-connect",
@@ -42,7 +41,8 @@
           }
         }
       ],
-      "./plugins/withRevenueCatAndroid"
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging"
     ],
     "extra": {
       "apiUrl": "https://bedifferent.smarbiz.sbs"
