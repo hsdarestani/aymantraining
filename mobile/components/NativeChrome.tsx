@@ -22,10 +22,11 @@ const links=[
 export default function NativeChrome(){
   const segments=useSegments();
   const [open,setOpen]=useState(false);
-  const inTabs=segments[0]==="(tabs)";
-  const root=segments.length===0;
-  const onboarding=segments[0]==="onboarding";
-  const auth=["login","register","forgot-password","reset-password"].includes(String(segments[0]||""));
+  const first=String((segments as readonly string[])[0]||"");
+  const inTabs=first==="(tabs)";
+  const root=first==="";
+  const onboarding=first==="onboarding";
+  const auth=["login","register","forgot-password","reset-password"].includes(first);
   if(inTabs||root||onboarding||auth)return null;
 
   function go(path:any){setOpen(false);Haptics.selectionAsync().catch(()=>undefined);router.push(path)}
