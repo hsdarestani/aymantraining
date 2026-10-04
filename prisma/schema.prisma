@@ -133,6 +133,7 @@ model TrainingPlanItem {
   targetRpe    Int?
   restSeconds  Int          @default(90)
   notes        String?
+  progressionRule Json?
   plan         TrainingPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
   exercise     Exercise     @relation(fields: [exerciseId], references: [id])
 
@@ -208,6 +209,7 @@ model Exercise {
   imageEnd         String?
   trackingType     String?
   freeAccess       Boolean            @default(false)
+  tags             String[]           @default([])
   active           Boolean            @default(true)
   sets             SetLog[]
   planItems        TrainingPlanItem[]
