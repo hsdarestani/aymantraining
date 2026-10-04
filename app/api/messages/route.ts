@@ -18,7 +18,7 @@ export async function POST(request:Request){
   const p=schema.safeParse(await request.json().catch(()=>null));if(!p.success)return errorJson("Ungültige Nachricht.",422);
   const athleteId=user.role==="ATHLETE"?user.id:p.data.athleteId;if(!athleteId)return errorJson("Athlet fehlt.",422);
   const athlete=await prisma.user.findFirst({where:{id:athleteId,role:"ATHLETE"}});if(!athlete)return errorJson("Athlet nicht gefunden.",404);
-  let coachId=user.role==="ATHLETE"?"unassigned":user.id;if(user.role==="ATHLETE"){const coach=await prisma.user.findFirst({where:{role:{in:["COACH","ADMIN"]}},orderBy:{createdAt:"asc"}});coachId=coach?.id??"unassigned";}
+  let coachId=user.role==="ATHLETE"?"unassigned":user.id;if(user.role==="ATHLETE"){const assignment=await prisma.coachAssignment.findFirst({where:{athleteId:user.id,active:true},orderBy:{createdAt:"desc"}});if(assignment)coachId=assignment.coachId;else{const coach=await prisma.user.findFirst({where:{role:{in:["COACH","ADMIN"]}},orderBy:{createdAt:"asc"}});coachId=coach?.id??"unassigned";}}
   const message=await prisma.message.create({data:{athleteId,coachId,senderId:user.id,text:p.data.text,mediaId:p.data.mediaId,kind:p.data.kind,durationSec:p.data.durationSec}});
   if(user.role!=="ATHLETE")await queueNotification({userId:athleteId,category:"coach_message",title:"Dein Coach hat dir geschrieben",body:p.data.kind==="VOICE"?"Neue Voice Message":p.data.kind==="VIDEO"?"Neues Video-Feedback":p.data.text?.slice(0,160)||"Neue Nachricht",urgent:true});
   return NextResponse.json({ok:true,message});
