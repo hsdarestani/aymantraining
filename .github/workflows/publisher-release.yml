@@ -1,0 +1,35 @@
+name: Trigger Publisher Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "release-request.json"
+  workflow_dispatch:
+
+concurrency:
+  group: bedifferent-publisher-trigger
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read release request
+        id: request
+        run: |
+          enabled="$(jq -r '.enabled // false' release-request.json)"
+          echo "enabled=$enabled" >> "$GITHUB_OUTPUT"
+      - name: Queue Publisher builds
+        if: steps.request.outputs.enabled == 'true'
+        env:
+          PUBLISHER_URL: ${{ secrets.PUBLISHER_URL }}
+          PUBLISHER_AUTOMATION_TOKEN: ${{ secrets.PUBLISHER_AUTOMATION_TOKEN }}
+        run: |
+          set -euo pipefail
+          : "${PUBLISHER_URL:?PUBLISHER_URL secret is required}"
+          : "${PUBLISHER_AUTOMATION_TOKEN:?PUBLISHER_AUTOMATION_TOKEN secret is required}"
+          payload="$(jq --arg sha "$GITHUB_SHA" '.source_commit = $sha | del(.enabled)' release-request.json)"
+          curl -fsS             -X POST "${PUBLISHER_URL%/}/apps/automation/release/"             -H "Authorization: Bearer $PUBLISHER_AUTOMATION_TOKEN"             -H "Content-Type: application/json"             --data "$payload" | tee /tmp/publisher-response.json
+          jq -e '.ok == true' /tmp/publisher-response.json >/dev/null
