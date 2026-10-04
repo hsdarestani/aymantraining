@@ -1,10 +1,52 @@
-import {useCallback,useEffect,useState} from "react";import {ActivityIndicator,Pressable,RefreshControl,ScrollView,StyleSheet,Text,View} from "react-native";import {router,useFocusEffect} from "expo-router";import {Card,Eyebrow,SectionTitle} from "../../components/Card";import Brand from "../../components/Brand";import {api} from "../../lib/api";import {registerPush} from "../../lib/push";import {syncHealth} from "../../lib/health";import {C,radius} from "../../theme";
-export default function Home(){const [d,setD]=useState<any>(null),[refreshing,setRefreshing]=useState(false),[syncing,setSyncing]=useState(false);const load=useCallback(async()=>{const x:any=await api("/api/mobile/dashboard");setD(x);registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});},[]);useFocusEffect(useCallback(()=>{load().catch(()=>{})},[load]));async function refresh(){setRefreshing(true);await load().catch(()=>{});setRefreshing(false)}async function health(){setSyncing(true);await syncHealth().then(load).catch(()=>{});setSyncing(false)}if(!d)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;const score=d.score;return <ScrollView style={s.safe} contentContainerStyle={s.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
-<View style={s.top}><Brand compact/><Text style={s.plan}>{d.user.tier}</Text></View>
-<View style={s.hero}><Text style={s.eyebrow}>GUTEN MORGEN, {(d.user.name||"ATHLET").toUpperCase()}</Text><Text style={s.title}>BAUE DEINEN{"\n"}ATHLETEN.</Text><Text style={s.copy}>Daten werden zu einer klaren Entscheidung für heute.</Text></View>
-<Card style={s.scoreCard}><Eyebrow>BE DIFFERENT LEISTUNGSWERT</Eyebrow><Text style={s.score}>{score?.total??0}<Text style={s.percent}>%</Text></Text><Text style={s.level}>{score?.level||"NORMAL"}</Text><View style={s.track}><View style={[s.fill,{width:`${score?.total??0}%`}]}/></View><Text style={s.data}>DATEN {score?.completeness??0}% VOLLSTÄNDIG</Text></Card>
-<Card><View style={s.cardHead}><View><Eyebrow>TRAINER RADAR</Eyebrow><SectionTitle>{d.recommendations?.[0]?.title||"Daten sammeln."}</SectionTitle></View><Text style={s.live}>● AKTIV</Text></View><Text style={s.cardCopy}>{d.recommendations?.[0]?.action||"Verbinde Gesundheitsdaten oder mach deinen Tagescheck."}</Text></Card>
-<Pressable onPress={()=>d.nextWorkout&&router.push(`/workout/${d.nextWorkout.id}`)}><Card style={s.workout}><Eyebrow>HEUTIGES TRAINING</Eyebrow><Text style={s.workoutTitle}>{d.nextWorkout?.title||"REGENERATIONSTAG"}</Text><Text style={s.cardCopy}>{d.nextWorkout?.scheduledAt?new Date(d.nextWorkout.scheduledAt).toLocaleString("de-DE"):"Regeneration gehört zum Training."}</Text><Text style={s.arrow}>{d.nextWorkout?"STARTEN →":"BEWUSST ERHOLEN."}</Text></Card></Pressable>
-<Pressable style={({pressed})=>[s.sync,pressed&&{opacity:.75}]} onPress={health}><Text style={s.syncText}>{syncing?"GESUNDHEITSDATEN WERDEN SYNCHRONISIERT…":"GESUNDHEITSDATEN SYNCHRONISIEREN"}</Text></Pressable>
-</ScrollView>}
-const s=StyleSheet.create({safe:{flex:1,backgroundColor:C.bg},content:{padding:16,paddingBottom:112,gap:12},center:{flex:1,backgroundColor:C.bg,alignItems:"center",justifyContent:"center"},top:{height:56,flexDirection:"row",justifyContent:"space-between",alignItems:"center"},plan:{color:C.volt,fontSize:8,fontWeight:"900",letterSpacing:1.8,borderWidth:1,borderColor:"#D7FF0040",borderRadius:20,paddingVertical:7,paddingHorizontal:10},hero:{paddingVertical:20},eyebrow:{color:C.volt,fontSize:9,fontWeight:"900",letterSpacing:2.2},title:{color:C.ink,fontSize:58,lineHeight:49,fontWeight:"900",letterSpacing:-3.6,marginTop:12},copy:{color:C.dim,fontSize:13,lineHeight:20,maxWidth:310,marginTop:16},scoreCard:{alignItems:"center",paddingVertical:28},score:{color:C.ink,fontSize:88,fontWeight:"900",letterSpacing:-6,marginTop:8},percent:{fontSize:34,color:C.volt},level:{color:C.volt,fontSize:10,fontWeight:"900",letterSpacing:2},track:{height:4,backgroundColor:"#252928",width:"100%",marginTop:22,overflow:"hidden"},fill:{height:"100%",backgroundColor:C.volt},data:{color:C.dim,fontSize:8,fontWeight:"800",letterSpacing:1.4,marginTop:9},cardHead:{flexDirection:"row",justifyContent:"space-between",gap:10},live:{color:C.green,fontSize:8,fontWeight:"900",letterSpacing:1.2},cardCopy:{color:C.dim,fontSize:13,lineHeight:20,marginTop:10},workout:{minHeight:180,justifyContent:"flex-end",backgroundColor:"#10150C"},workoutTitle:{color:C.ink,fontSize:32,fontWeight:"900",letterSpacing:-1.5,marginTop:8},arrow:{color:C.volt,fontSize:10,fontWeight:"900",letterSpacing:1.5,marginTop:18},sync:{height:50,borderRadius:radius.md,borderWidth:1,borderColor:C.line,alignItems:"center",justifyContent:"center"},syncText:{color:C.ink,fontSize:9,fontWeight:"900",letterSpacing:1.5}});
+import {useCallback,useState} from "react";
+import {ActivityIndicator,Pressable,RefreshControl,ScrollView,StyleSheet,Text,View} from "react-native";
+import {router,useFocusEffect} from "expo-router";
+import {Card,Eyebrow,SectionTitle} from "../../components/Card";
+import Brand from "../../components/Brand";
+import {api} from "../../lib/api";
+import {registerPush} from "../../lib/push";
+import {syncHealth} from "../../lib/health";
+import {C,radius} from "../../theme";
+
+function Bar({value,max}:{value:number;max:number}){const pct=Math.max(0,Math.min(100,max?value/max*100:0));return <View style={s.metricTrack}><View style={[s.metricFill,{width:`${pct}%`}]}/></View>}
+
+export default function Home(){
+ const [d,setD]=useState<any>(null),[refreshing,setRefreshing]=useState(false),[syncing,setSyncing]=useState(false);
+ const load=useCallback(async()=>{const x:any=await api("/api/mobile/dashboard");setD(x);registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});},[]);
+ useFocusEffect(useCallback(()=>{load().catch(()=>{})},[load]));
+ async function refresh(){setRefreshing(true);await load().catch(()=>{});setRefreshing(false)}
+ async function health(){setSyncing(true);await syncHealth().then(load).catch(()=>{});setSyncing(false)}
+ if(!d)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
+ const score=d.score,a=d.activity||{};
+ return <ScrollView style={s.safe} contentContainerStyle={s.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
+  <View style={s.top}><Brand compact/><Text style={s.plan}>{d.user.tier}</Text></View>
+  <View style={s.hero}><Text style={s.eyebrow}>GUTEN MORGEN, {(d.user.name||"ATHLET").toUpperCase()}</Text><Text style={s.title}>BAUE DEINEN{"
+"}ATHLETEN.</Text><Text style={s.copy}>Daten werden zu einer klaren Entscheidung für heute.</Text></View>
+  <Card style={s.scoreCard}><Eyebrow>BE DIFFERENT SCORE</Eyebrow><Text style={s.score}>{score?.total??0}<Text style={s.percent}>%</Text></Text><Text style={s.level}>{score?.level||"NORMAL"}</Text><View style={s.track}><View style={[s.fill,{width:`${score?.total??0}%`}]}/></View><Text style={s.data}>DATEN {score?.completeness??0}% VOLLSTÄNDIG</Text></Card>
+
+  <Card>
+   <View style={s.cardHead}><View><Eyebrow>COACH RADAR</Eyebrow><SectionTitle>{d.recommendations?.[0]?.title||"Daten sammeln."}</SectionTitle></View><Text style={s.live}>{d.radarLocked?"◆ PRO":"● AKTIV"}</Text></View>
+   <Text style={s.cardCopy}>{d.recommendations?.[0]?.action||"Verbinde Gesundheitsdaten oder mach deinen Tagescheck."}</Text>
+   {d.radarLocked?<Pressable style={s.radarCta} onPress={()=>router.push("/membership")}><Text style={s.radarCtaText}>COACH RADAR FREISCHALTEN →</Text></Pressable>:null}
+  </Card>
+
+  <Pressable onPress={()=>d.nextWorkout&&router.push(`/workout/${d.nextWorkout.id}`)}><Card style={s.workout}><Eyebrow>HEUTIGES TRAINING</Eyebrow><Text style={s.workoutTitle}>{d.nextWorkout?.title||"REGENERATIONSTAG"}</Text><Text style={s.cardCopy}>{d.nextWorkout?.scheduledAt?new Date(d.nextWorkout.scheduledAt).toLocaleString("de-DE"):"Regeneration gehört zum Training."}</Text><Text style={s.arrow}>{d.nextWorkout?"STARTEN →":"BEWUSST ERHOLEN."}</Text></Card></Pressable>
+
+  <Card><Eyebrow>HEUTE</Eyebrow><SectionTitle>Aktivität und Versorgung</SectionTitle>
+   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}>SCHRITTE</Text><Text style={s.metricValue}>{Number(a.steps||0).toLocaleString("de-DE")} / {Number(a.stepTarget||10000).toLocaleString("de-DE")}</Text></View><Bar value={a.steps||0} max={a.stepTarget||10000}/></View>
+   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}>WASSER</Text><Text style={s.metricValue}>{a.waterMl||0} / {a.waterTargetMl||2500} ml</Text></View><Bar value={a.waterMl||0} max={a.waterTargetMl||2500}/></View>
+   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}>PROTEIN</Text><Text style={s.metricValue}>{Math.round(a.proteinG||0)} / {a.proteinTargetG||130} g</Text></View><Bar value={a.proteinG||0} max={a.proteinTargetG||130}/></View>
+   <Text style={s.calories}>AKTIVE KALORIEN {Math.round(a.activeCalories||0)}</Text>
+  </Card>
+
+  <Pressable style={({pressed})=>[s.sync,pressed&&{opacity:.75}]} onPress={health}><Text style={s.syncText}>{syncing?"GESUNDHEITSDATEN WERDEN SYNCHRONISIERT…":"GESUNDHEITSDATEN SYNCHRONISIEREN"}</Text></Pressable>
+ </ScrollView>;
+}
+const s=StyleSheet.create({
+ safe:{flex:1,backgroundColor:C.bg},content:{padding:16,paddingBottom:112,gap:12},center:{flex:1,backgroundColor:C.bg,alignItems:"center",justifyContent:"center"},top:{height:56,flexDirection:"row",justifyContent:"space-between",alignItems:"center"},plan:{color:C.volt,fontSize:8,fontWeight:"900",letterSpacing:1.8,borderWidth:1,borderColor:"#D7FF0040",borderRadius:20,paddingVertical:7,paddingHorizontal:10},
+ hero:{paddingVertical:20},eyebrow:{color:C.volt,fontSize:9,fontWeight:"900",letterSpacing:2.2},title:{color:C.ink,fontSize:58,lineHeight:49,fontWeight:"900",letterSpacing:-3.6,marginTop:12},copy:{color:C.dim,fontSize:13,lineHeight:20,maxWidth:310,marginTop:16},scoreCard:{alignItems:"center",paddingVertical:28},score:{color:C.ink,fontSize:88,fontWeight:"900",letterSpacing:-6,marginTop:8},percent:{fontSize:34,color:C.volt},level:{color:C.volt,fontSize:10,fontWeight:"900",letterSpacing:2},track:{height:4,backgroundColor:"#252928",width:"100%",marginTop:22,overflow:"hidden"},fill:{height:"100%",backgroundColor:C.volt},data:{color:C.dim,fontSize:8,fontWeight:"800",letterSpacing:1.4,marginTop:9},
+ cardHead:{flexDirection:"row",justifyContent:"space-between",gap:10},live:{color:C.green,fontSize:8,fontWeight:"900",letterSpacing:1.2},cardCopy:{color:C.dim,fontSize:13,lineHeight:20,marginTop:10},radarCta:{height:44,borderRadius:radius.md,borderWidth:1,borderColor:"#D7FF0055",alignItems:"center",justifyContent:"center",marginTop:14},radarCtaText:{color:C.volt,fontSize:8,fontWeight:"900",letterSpacing:1},
+ workout:{minHeight:180,justifyContent:"flex-end",backgroundColor:"#10150C"},workoutTitle:{color:C.ink,fontSize:32,fontWeight:"900",letterSpacing:-1.5,marginTop:8},arrow:{color:C.volt,fontSize:10,fontWeight:"900",letterSpacing:1.5,marginTop:18},
+ metric:{marginTop:15},metricHead:{flexDirection:"row",justifyContent:"space-between",alignItems:"center"},metricName:{color:C.dim,fontSize:8,fontWeight:"900",letterSpacing:1.1},metricValue:{color:C.ink,fontSize:9,fontWeight:"900"},metricTrack:{height:5,backgroundColor:C.panel2,borderRadius:4,overflow:"hidden",marginTop:7},metricFill:{height:"100%",backgroundColor:C.volt},calories:{color:C.dim,fontSize:8,fontWeight:"900",letterSpacing:1.1,marginTop:15},
+ sync:{height:50,borderRadius:radius.md,borderWidth:1,borderColor:C.line,alignItems:"center",justifyContent:"center"},syncText:{color:C.ink,fontSize:9,fontWeight:"900",letterSpacing:1.5}
+});
