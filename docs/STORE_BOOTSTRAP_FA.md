@@ -66,9 +66,12 @@
 4. entitlement با شناسه `pro` بسازید.
 5. محصولات ماهانه و سالانه Apple و Google را import و هر چهار product را به entitlement `pro` وصل کنید.
 6. یک Current Offering بسازید و Monthly و Annual package را داخل آن بگذارید.
-7. Public SDK key هر platform را برای Publisher build env بردارید.
-8. Secret API key سمت سرور را برای GitHub Secret بردارید.
-9. Webhook به آدرس backend تنظیم شود و Authorization برابر Bearer secret باشد.
+7. Public SDK key هر platform را بردارید:
+   - iOS public SDK key
+   - Android public SDK key
+   همین دو مقدار هم داخل Publisher build env قرار می‌گیرند و هم برای sync سمت سرور در GitHub Secrets ذخیره می‌شوند.
+8. برای webhook یک secret تصادفی مستقل و طولانی بسازید. این secret از RevenueCat API key جداست.
+9. Webhook به آدرس backend تنظیم شود و Authorization برابر `Bearer <REVENUECAT_WEBHOOK_SECRET>` باشد.
 
 ## Expo / Push
 
