@@ -9,6 +9,7 @@ import {api} from "../../lib/api";
 import {registerPush} from "../../lib/push";
 import {syncHealth} from "../../lib/health";
 import {C,radius} from "../../theme";
+import {syncHomeWidget} from "../../lib/widget-sync";
 
 function Bar({value,max}:{value:number;max:number}){const pct=Math.max(0,Math.min(100,max?value/max*100:0));return <View style={s.metricTrack}><View style={[s.metricFill,{width:`${pct}%`}]}/></View>}
 
@@ -28,7 +29,7 @@ function ScoreSignature({score,level}:{score:number;level:string}){
 
 export default function Home(){
  const [d,setD]=useState<any>(null),[refreshing,setRefreshing]=useState(false),[syncing,setSyncing]=useState(false);
- const load=useCallback(async()=>{const x:any=await api("/api/mobile/dashboard");setD(x);registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});},[]);
+ const load=useCallback(async()=>{const x:any=await api("/api/mobile/dashboard");setD(x);syncHomeWidget(x).catch(()=>{});registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});},[]);
  useFocusEffect(useCallback(()=>{load().catch(()=>{})},[load]));
  async function refresh(){setRefreshing(true);await load().catch(()=>{});setRefreshing(false)}
  async function health(){setSyncing(true);await syncHealth().then(load).catch(()=>{});setSyncing(false)}
