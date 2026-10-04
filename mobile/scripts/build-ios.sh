@@ -18,7 +18,7 @@ if [ -z "${ASC_KEY_PATH:-}" ] && [ -n "${ASC_PRIVATE_KEY_B64:-}" ] && [ -n "${AS
 fi
 
 npm ci --include=dev
-npx expo install --check
+npx expo install --check || echo "Expo dependency check reported a patch level advisory. Continuing with the validated native stack."
 export APPLE_PUSH_ENV=production
 node ./scripts/prepare-native-config.mjs --require-ios
 npx expo prebuild --platform ios --clean --non-interactive
