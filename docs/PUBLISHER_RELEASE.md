@@ -23,9 +23,12 @@ Publisher auto-bootstraps the BE DIFFERENT app record when the first authenticat
 
 ## Android cloud builder
 
+The Firebase Android client config is committed at `mobile/firebase/google-services.json`.
+
+Publisher keeps the Android signing material encrypted. No Firebase client config secret is required for Android builds.
+
 Publisher GitHub repository secrets:
 
-- `BEDIFFERENT_FIREBASE_ANDROID_GOOGLE_SERVICES_B64`
 - `BEDIFFERENT_ANDROID_KEYSTORE_B64`
 - `BEDIFFERENT_ANDROID_KEYSTORE_PASSWORD`
 - `BEDIFFERENT_ANDROID_KEY_ALIAS`
@@ -35,15 +38,18 @@ The Linux cloud agent reconstructs `google-services.json` and the upload keystor
 
 ## iOS cloud builder
 
+The Firebase iOS client config is committed at `mobile/firebase/GoogleService-Info.plist`.
+
+Publisher uses its connected Apple Store account and signing automation for the iOS build.
+
 Publisher GitHub repository secrets:
 
-- `BEDIFFERENT_FIREBASE_IOS_GOOGLE_SERVICE_INFO_B64`
 - `BEDIFFERENT_APPLE_TEAM_ID`
 - `BEDIFFERENT_ASC_KEY_ID`
 - `BEDIFFERENT_ASC_ISSUER_ID`
 - `BEDIFFERENT_ASC_PRIVATE_KEY_B64`
 
-The macOS cloud agent reconstructs `GoogleService-Info.plist` and the App Store Connect Team API key for the build. Xcode automatic signing is used.
+The macOS cloud agent uses the committed `GoogleService-Info.plist` and the connected App Store Connect account. Xcode automatic signing is used.
 
 ## Store accounts inside Publisher
 
