@@ -17,7 +17,7 @@ if [ -z "${ASC_KEY_PATH:-}" ] && [ -n "${ASC_PRIVATE_KEY_B64:-}" ] && [ -n "${AS
   chmod 600 "$ASC_KEY_PATH"
 fi
 
-npm ci
+npm ci --include=dev
 npx expo install --check
 export APPLE_PUSH_ENV=production
 node ./scripts/prepare-native-config.mjs --require-ios
