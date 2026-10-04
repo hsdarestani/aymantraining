@@ -60,9 +60,9 @@ export default function RegisterPage() {
   return <main className="auth-shell">
     <Link className="brand" href="/">BE <span>DIFFERENT</span></Link>
     <form className="auth-card" onSubmit={submit}>
-      <span className="eyebrow">START DIFFERENT</span>
-      <h1>Dein Athlete beginnt hier.</h1>
-      <p>Du startest im FREE Plan. PRO kann später freigeschaltet werden.</p>
+      <span className="eyebrow">ANDERS STARTEN</span>
+      <h1>Dein Athlet beginnt hier.</h1>
+      <p>Du startest im kostenlosen Tarif. PRO kann später freigeschaltet werden.</p>
 
       <label>Name<input name="name" autoComplete="name" minLength={2} required /></label>
       <label>E Mail<input name="email" type="email" autoComplete="email" required /></label>
