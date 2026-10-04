@@ -8,6 +8,7 @@ import {dispatchPendingPushes} from "../../../../lib/push";
 import {zonedParts} from "../../../../lib/timezone";
 import {hasFeature} from "../../../../lib/entitlements";
 import {gamificationSnapshot} from "../../../../lib/gamification";
+import {syncStorePurchase} from "../../../../lib/store-billing";
 
 async function alreadyQueued(userId:string,category:string,since:Date){
   return Boolean(await prisma.notification.findFirst({where:{userId,category,createdAt:{gte:since}},select:{id:true}}));
@@ -29,6 +30,24 @@ export async function POST(request:Request){
     const other=await prisma.subscription.findFirst({where:{userId:s.userId,status:"active",OR:[{renewsAt:null},{renewsAt:{gt:now}}]}});
     if(!other)await prisma.user.update({where:{id:s.userId},data:{subscriptionTier:"FREE"}}).catch(()=>undefined);
   }
+
+  const storeRows=await prisma.subscription.findMany({
+    where:{
+      provider:{in:["app_store","google_play"]},
+      status:{in:["active","canceled","billing_retry"]},
+      updatedAt:{lt:new Date(now.getTime()-45*60000)}
+    },
+    orderBy:{updatedAt:"asc"},
+    take:100
+  });
+  const storeSyncResults=await Promise.allSettled(
+    storeRows.filter(row=>Boolean(row.externalId)).map(row=>syncStorePurchase(row.provider as "app_store"|"google_play",row.externalId!))
+  );
+  const storeSync={
+    checked:storeSyncResults.length,
+    ok:storeSyncResults.filter(x=>x.status==="fulfilled").length,
+    failed:storeSyncResults.filter(x=>x.status==="rejected").length
+  };
 
   const users=await prisma.user.findMany({where:{role:"ATHLETE",onboardingCompleted:true},select:{id:true,name:true,timezone:true,subscriptionTier:true}});
   let processed=0,queued=0;
@@ -103,5 +122,5 @@ export async function POST(request:Request){
   }
 
   const push=await dispatchPendingPushes();
-  return NextResponse.json({ok:true,processed,queued,expiredSubscriptions:expired.length,push,at:now.toISOString()});
+  return NextResponse.json({ok:true,processed,queued,expiredSubscriptions:expired.length,storeSync,push,at:now.toISOString()});
 }
