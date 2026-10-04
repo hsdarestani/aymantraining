@@ -27,7 +27,7 @@ export default async function AthletePage(){
   const projection=Math.max(0,Math.min(100,Math.round((score?.total??0)+daily*84)));
 
   return <main className="sub-shell">
-    <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard">START</Link><Link href="/training">TRAINING</Link><Link href="/progress">FORTSCHRITT</Link><Link href="/coach">TRAINER</Link><Link className="active" href="/athlete">ATHLET</Link></nav></header>
+    <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard">BEGINN</Link><Link href="/training">TRAINING</Link><Link href="/progress">FORTSCHRITT</Link><Link href="/coach">TRAINER</Link><Link className="active" href="/athlete">ATHLET</Link></nav></header>
     <section className="page-hero"><div><span className="eyebrow">ATHLETENPROFIL</span><h1>Von Training zu Identität.</h1><p>Deine Entwicklung über alle Säulen. Prognosen werden als Trend und nie als Garantie dargestellt.</p></div><div className="hero-stat"><span>STUFE</span><strong>{score?.total??0}%</strong><small>{levelForScore(score?.total??0)}</small></div></section>
 
     <section className="athlete-grid">
@@ -40,13 +40,13 @@ export default async function AthletePage(){
           </svg>
           {!digital&&<div className="radar-lock">PRO</div>}
         </div>
-        <h2>ATHLETE DIGITALES ABBILD</h2>
+        <h2>DIGITALES ATHLETENABBILD</h2>
         <p className="muted">{digital?`Wenn dein aktueller Trend stabil bleibt, liegt die 12 Wochen Projektion bei ca. ${projection} %. Das ist eine Trendanzeige, keine Garantie.`:"Radar, Verlauf, Zielprofil und Trend Projektion sind PRO."}</p>
         {!digital&&<Link href="/pricing" className="secondary">PRO TESTEN</Link>}
       </article>
 
       <article className="panel"><span className="eyebrow">DEINE LEISTUNGSBEREICHE</span><h2>Leistungsprofil</h2>
-        {details?<div className="athlete-bars">{rows.map(([name,val])=><div key={name}><span>{name}</span><div className="weight-track"><i style={{width:`${val??0}%`}}/></div><strong>{val??"—"}</strong></div>)}</div>:<div className="locked-copy"><p className="muted">KOSTENLOS zeigt deinen Gesamtwert. Teilwerte und Erklärungen werden mit PRO freigeschaltet.</p><Link href="/pricing" className="secondary">DETAILS FREISCHALTEN</Link></div>}
+        {details?<div className="athlete-bars">{rows.map(([name,val])=><div key={name}><span>{name}</span><div className="weight-track"><i style={{width:`${val??0}%`}}/></div><strong>{val??"Keine Angabe"}</strong></div>)}</div>:<div className="locked-copy"><p className="muted">KOSTENLOS zeigt deinen Gesamtwert. Teilwerte und Erklärungen werden mit PRO freigeschaltet.</p><Link href="/pricing" className="secondary">DETAILS FREISCHALTEN</Link></div>}
       </article>
     </section>
 
