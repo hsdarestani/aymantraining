@@ -19,13 +19,13 @@ export default function Fuel(){
  const inputs=[["calories","Kalorien"],["proteinG","Protein g"],["carbsG","Kohlenhydrate g"],["fatG","Fett g"],["fruitVegServings","Obst und Gemüse Portionen"],["addedSugarG","Zugesetzter Zucker g"],["processedFoodScore","Verarbeitete Lebensmittel 0 bis 100"]] as const;
  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
   <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}>ZURÜCK</Text></Pressable></View>
-  <Eyebrow>BE FUEL</Eyebrow><Text style={s.title}>ERNÄHRE{"\n"}DEN ATHLETEN.</Text>
+  <Eyebrow>ERNÄHRUNG</Eyebrow><Text style={s.title}>ERNÄHRE{"\n"}DEN ATHLETEN.</Text>
   <Card style={s.gradeCard}><View><Eyebrow>HEUTE</Eyebrow><Text style={s.grade}>{grade}</Text></View><View style={s.scoreWrap}><Text style={s.score}>{today?.fuelScore??0}</Text><Text style={s.scoreLabel}>VON 100</Text></View></Card>
   <Card><Eyebrow>TAGESZIELE</Eyebrow><View style={s.targets}><Text style={s.target}>KALORIEN {targets.calories}</Text><Text style={s.target}>PROTEIN {Math.round(targets.proteinG)} g</Text><Text style={s.target}>WASSER {targets.waterMl} ml</Text></View></Card>
   <Pressable style={s.scan} onPress={()=>router.push("/barcode")}><Text style={s.scanText}>STRICHCODE ERFASSEN →</Text></Pressable>
   <Card><Eyebrow>WASSER</Eyebrow><SectionTitle>{Number(form.waterMl)||today?.waterMl||0} ml</SectionTitle><View style={s.waterRow}>{[250,500,750].map(n=><Pressable key={n} style={s.water} onPress={()=>water(n)}><Text style={s.waterText}>+ {n} ml</Text></Pressable>)}</View></Card>
   <Card><Eyebrow>TAGESWERTE</Eyebrow><View style={s.grid}>{inputs.map(([k,label])=><TextInput key={k} style={s.input} value={(form as any)[k]} onChangeText={x=>setForm({...form,[k]:x})} keyboardType="decimal-pad" placeholder={label} placeholderTextColor="#626864"/>)}</View><Pressable style={s.primary} onPress={()=>save()}><Text style={s.primaryText}>SPEICHERN →</Text></Pressable></Card>
-  <Card><Eyebrow>BEWERTUNG</Eyebrow><Text style={s.copy}>BE FUEL bewertet deinen Tag nach Zielkalorien, Protein, Wasser, Obst und Gemüse, Zucker und Anteil stark verarbeiteter Lebensmittel. Es ist eine eigene Tagesbewertung und kein offizieller Produkt Nutri Score.</Text></Card>
+  <Card><Eyebrow>BEWERTUNG</Eyebrow><Text style={s.copy}>Die Ernährungsbewertung berücksichtigt Zielkalorien, Protein, Wasser, Obst und Gemüse, Zucker und den Anteil stark verarbeiteter Lebensmittel. Sie ist eine eigene Tagesbewertung und keine offizielle Produktbewertung.</Text></Card>
   {status?<Text style={s.status}>{status}</Text>:null}
  </ScrollView></SafeAreaView>;
 }
