@@ -8,7 +8,7 @@ export const STORE_PRODUCT_IDS=["bd_pro_monthly","bd_pro_yearly"];
 export function useStoreBilling(){
   const [status,setStatus]=useState("");
   const processed=useRef(new Set<string>());
-  const finishRef=useRef<((args:any)=>Promise<void>)|null>(null);
+  const finishRef=useRef<((args:any)=>Promise<any>)|null>(null);
 
   const verifyPurchase=useCallback(async(purchase:Purchase)=>{
     const key=String(purchase.transactionId||purchase.purchaseToken||purchase.id);
@@ -38,7 +38,7 @@ export function useStoreBilling(){
   const iap=useIAP({
     onPurchaseSuccess:async purchase=>{await verifyPurchase(purchase).catch(()=>undefined)},
     onPurchaseError:error=>{
-      if(error.code===ErrorCode.UserCancelled){setStatus("Kauf abgebrochen.");return}
+      if(error.code===ErrorCode.E_USER_CANCELLED){setStatus("Kauf abgebrochen.");return}
       setStatus(error.message||"Kauf konnte nicht abgeschlossen werden.");
     }
   });
