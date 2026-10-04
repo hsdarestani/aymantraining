@@ -8,7 +8,7 @@ import {dispatchPendingPushes} from "../../../../lib/push";
 import {zonedParts} from "../../../../lib/timezone";
 import {hasFeature} from "../../../../lib/entitlements";
 import {gamificationSnapshot} from "../../../../lib/gamification";
-import {syncStorePurchase} from "../../../../lib/store-billing";
+import {syncStorePurchase} from "../../../../lib/store-billing";\nimport {encryptPrivateObjectIfNeeded} from "../../../../lib/storage";
 
 async function alreadyQueued(userId:string,category:string,since:Date){
   return Boolean(await prisma.notification.findFirst({where:{userId,category,createdAt:{gte:since}},select:{id:true}}));
@@ -127,5 +127,5 @@ export async function POST(request:Request){
   }
 
   const push=await dispatchPendingPushes();
-  return NextResponse.json({ok:true,processed,queued,expiredSubscriptions:expired.length,storeSync,push,at:now.toISOString()});
+  return NextResponse.json({ok:true,processed,queued,encryptedLegacyMedia,expiredSubscriptions:expired.length,storeSync,push,at:now.toISOString()});
 }
