@@ -53,7 +53,7 @@ export async function POST(request:Request){
     if(!consent?.granted)return errorJson("Bitte bestätige zuerst die Verarbeitung privater Fotos/Videos.",403);
   }
   const key=`media/${new Date().getUTCFullYear()}/${crypto.randomUUID()}`;
-  await putPrivateObject(key,Buffer.from(await file.arrayBuffer()),file.type);
+  const sensitive=!["EXERCISE_IMAGE","EXERCISE_VIDEO"].includes(kind);\n  await putPrivateObject(key,Buffer.from(await file.arrayBuffer()),file.type,sensitive);
   const asset=await prisma.mediaAsset.create({data:{ownerId:user.id,relatedUserId,kind,storageKey:key,originalName:file.name.slice(0,240),mimeType:file.type,sizeBytes:file.size}});
   return NextResponse.json({ok:true,asset:{id:asset.id,kind:asset.kind,sizeBytes:asset.sizeBytes}});
 }
