@@ -30,7 +30,11 @@
     "react-native-svg": "15.11.2",
     "react-native-iap": "14.7.20",
     "@react-native-firebase/app": "26.4.0",
-    "@react-native-firebase/messaging": "26.4.0"
+    "@react-native-firebase/messaging": "26.4.0",
+    "react-native-reanimated": "~3.17.4",
+    "react-native-gesture-handler": "~2.24.0",
+    "expo-linear-gradient": "~14.1.5",
+    "expo-haptics": "~14.1.4"
   },
   "devDependencies": {
     "@types/react": "~19.0.10",
