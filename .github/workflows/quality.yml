@@ -42,6 +42,8 @@ jobs:
         run: npm ci
       - name: Production dependency audit
         run: npm audit --omit=dev --audit-level=high
+      - name: Visible copy policy
+        run: node scripts/check-visible-copy.mjs
       - name: Validate schema and TypeScript
         run: npm run check
       - name: Prepare database
