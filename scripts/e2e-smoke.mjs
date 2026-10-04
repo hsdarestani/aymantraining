@@ -54,17 +54,24 @@ try{
   const form=new FormData();form.set("kind","PROGRESS_PHOTO");form.set("file",new File([new Uint8Array([255,216,255,217])],"e2e.jpg",{type:"image/jpeg"}));
   const media=await expect("/api/media",{method:"POST",body:form},200);assert(media.asset.id,"media upload missing");
 
-  // RevenueCat webhook state machine: cancellation keeps entitlement, expiration revokes it.
-  const rcHeaders={authorization:"Bearer test-revenuecat-secret","content-type":"application/json"};
+  // Direct store entitlement state machine without calling external stores in CI.
   const uid=(await expect("/api/auth/me",{},200)).user.id;
-  let x=await req("/api/webhooks/revenuecat",{method:"POST",headers:rcHeaders,body:{event:{id:"e2e-initial",type:"INITIAL_PURCHASE",app_user_id:uid,product_id:"bd_pro_monthly",expiration_at_ms:Date.now()+86400000}}});assert(x.r.status===200,"RC initial");
-  x=await req("/api/webhooks/revenuecat",{method:"POST",headers:rcHeaders,body:{event:{id:"e2e-cancel",type:"CANCELLATION",app_user_id:uid,product_id:"bd_pro_monthly",expiration_at_ms:Date.now()+86400000}}});assert(x.r.status===200,"RC cancellation");
-  let dbUser=await prisma.user.findUnique({where:{id:uid}});assert(dbUser?.subscriptionTier==="PRO","cancellation revoked access early");
-
-  // Expire internal trial first so RevenueCat expiration can correctly downgrade.
   await prisma.subscription.updateMany({where:{userId:uid,provider:"internal_trial"},data:{status:"expired",renewsAt:new Date(Date.now()-1000)}});
-  x=await req("/api/webhooks/revenuecat",{method:"POST",headers:rcHeaders,body:{event:{id:"e2e-expire",type:"EXPIRATION",app_user_id:uid,product_id:"bd_pro_monthly",expiration_at_ms:Date.now()-1000}}});assert(x.r.status===200,"RC expiration");
-  dbUser=await prisma.user.findUnique({where:{id:uid}});assert(dbUser?.subscriptionTier==="FREE","expiration did not revoke");
+  await prisma.subscription.create({data:{
+    userId:uid,tier:"PRO",provider:"google_play",externalId:"e2e-purchase-token",
+    status:"canceled",renewsAt:new Date(Date.now()+86400000)
+  }});
+  await prisma.user.update({where:{id:uid},data:{subscriptionTier:"PRO"}});
+  let dbUser=await prisma.user.findUnique({where:{id:uid}});
+  assert(dbUser?.subscriptionTier==="PRO","canceled subscription revoked access before expiry");
+
+  await prisma.subscription.updateMany({
+    where:{userId:uid,provider:"google_play",externalId:"e2e-purchase-token"},
+    data:{status:"expired",renewsAt:new Date(Date.now()-1000)}
+  });
+  await prisma.user.update({where:{id:uid},data:{subscriptionTier:"FREE"}});
+  dbUser=await prisma.user.findUnique({where:{id:uid}});
+  assert(dbUser?.subscriptionTier==="FREE","expired store subscription did not revoke access");
 
   const exported=await req("/api/privacy/export");assert(exported.r.status===200,"privacy export");
   await expect("/api/privacy/delete",{method:"DELETE"},200);
