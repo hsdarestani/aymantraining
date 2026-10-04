@@ -4,6 +4,7 @@ import {prisma} from "../../../../lib/db";
 import {requireRole} from "../../../../lib/auth";
 import {errorJson,isSameOrigin} from "../../../../lib/http";
 import {integrationStatus} from "../../../../lib/integrations";
+import {APP_SETTINGS_DEFAULTS} from "../../../../lib/app-settings";
 
 const schema=z.object({
   proMonthly:z.number().min(0).max(999),
@@ -26,16 +27,10 @@ const schema=z.object({
   vatId:z.string().max(120)
 });
 
-export const APP_DEFAULTS={
-  proMonthly:39.99,proYearly:399,proCapacity:50,waitlist:true,videoAnalysesPerMonth:2,coachResponseHours:24,
-  nutritionMode:"manual",brandName:"BE DIFFERENT",accent:"#D7FF00",supportEmail:"",
-  legalName:"",legalAddress:"",legalEmail:"",legalPhone:"",managingDirector:"",registerCourt:"",registerNumber:"",vatId:""
-};
-
 export async function GET(){
   await requireRole(["COACH","ADMIN"]);
   const row=await prisma.systemSetting.findUnique({where:{key:"app_settings"}});
-  return NextResponse.json({ok:true,value:{...APP_DEFAULTS,...((row?.value as object)||{})},integrations:integrationStatus()});
+  return NextResponse.json({ok:true,value:{...APP_SETTINGS_DEFAULTS,...((row?.value as object)||{})},integrations:integrationStatus()});
 }
 export async function PATCH(request:Request){
   await requireRole(["COACH","ADMIN"]);
