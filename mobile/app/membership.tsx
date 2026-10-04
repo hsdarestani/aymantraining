@@ -1,65 +1,43 @@
 import {useEffect,useState} from "react";
 import {ActivityIndicator,Pressable,SafeAreaView,ScrollView,StyleSheet,Text} from "react-native";
 import {router} from "expo-router";
-import {availablePackages,billingConfigured,configureBilling,purchasePackage,restorePurchases} from "../lib/billing";
+import {useStoreBilling} from "../lib/billing";
 import {api} from "../lib/api";
 import {C,radius} from "../theme";
 import Brand from "../components/Brand";
 
 export default function Membership(){
-  const [packages,setPackages]=useState<any[]>([]);
   const [availability,setAvailability]=useState<any>(null);
   const [loading,setLoading]=useState(true);
-  const [status,setStatus]=useState("");
+  const billing=useStoreBilling();
 
   useEffect(()=>{(async()=>{
     try{
-      const d:any=await api("/api/mobile/dashboard");
       const availabilityData:any=await api("/api/subscription/availability");
       setAvailability(availabilityData);
-      if(await configureBilling(d.user.id))setPackages(await availablePackages());
+      await api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>undefined);
     }finally{setLoading(false)}
   })()},[]);
 
-  async function trial(){
-    setStatus("Trial wird aktiviert…");
-    try{
-      await api("/api/subscription/trial",{method:"POST"});
-      setStatus("PRO Trial aktiv.");
-      setTimeout(()=>router.replace("/(tabs)"),500);
-    }catch(e:any){setStatus(e.message||"Trial nicht verfügbar.");}
-  }
-
   async function joinWaitlist(){
-    setStatus("Warteliste…");
+    billing.setStatus("Warteliste…");
     try{
       await api("/api/subscription/waitlist",{method:"POST"});
-      setStatus("Du bist auf der PRO Warteliste.");
-    }catch(e:any){setStatus(e.message||"Nicht verfügbar.");}
+      billing.setStatus("Du bist auf der PRO Warteliste.");
+    }catch(e:any){billing.setStatus(e.message||"Nicht verfügbar.")}
   }
 
-  async function buy(p:any){
-    setStatus("Kauf wird verarbeitet…");
-    try{
-      await purchasePackage(p);
-      setStatus("PRO aktiviert.");
-      setTimeout(()=>router.replace("/(tabs)"),700);
-    }catch(e:any){
-      if(String(e?.userCancelled||"")==="true")setStatus("Kauf abgebrochen.");
-      else setStatus("Kauf nicht abgeschlossen.");
-    }
+  async function buy(product:any){
+    try{await billing.buy(product)}
+    catch{}
   }
-
   async function restore(){
-    setStatus("Käufe werden wiederhergestellt…");
     try{
-      await restorePurchases();
-      setStatus("Käufe synchronisiert.");
-      setTimeout(()=>router.replace("/(tabs)"),700);
-    }catch{setStatus("Wiederherstellung fehlgeschlagen.");}
+      await billing.restore();
+      setTimeout(()=>router.replace("/(tabs)"),900);
+    }catch{billing.setStatus("Wiederherstellung fehlgeschlagen.")}
   }
 
-  const connected=billingConfigured();
   const full=availability&&!availability.available&&availability.waitlist;
 
   return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
@@ -70,13 +48,13 @@ export default function Membership(){
 
     {loading?<ActivityIndicator color={C.volt}/>:
       full?<Pressable style={s.primary} onPress={joinWaitlist}><Text style={s.primaryText}>PRO WARTELISTE →</Text></Pressable>:
-      packages.length?packages.map((p:any)=><Pressable style={s.primary} key={p.identifier} onPress={()=>buy(p)}><Text style={s.primaryText}>{p.product?.title||p.identifier} · {p.product?.priceString||""}</Text></Pressable>):
-      <Pressable style={s.primary} onPress={trial}><Text style={s.primaryText}>7 TAGE PRO TESTEN →</Text></Pressable>}
+      billing.products.length?billing.products.map((p:any)=><Pressable style={s.primary} key={p.id} onPress={()=>buy(p)}><Text style={s.primaryText}>{p.title||p.id} · {p.displayPrice||""}</Text></Pressable>):
+      <Text style={s.unavailable}>Store Produkte sind noch nicht verfügbar. Prüfe Product IDs und Store Freigabe.</Text>}
 
-    {connected&&<Pressable style={s.restore} onPress={restore}><Text style={s.restoreText}>KÄUFE WIEDERHERSTELLEN</Text></Pressable>}
-    <Text style={s.note}>{connected?"STORE BILLING CONNECTED":"Store Keys fehlen noch. Bis dahin ist nur der interne Testmodus aktiv."}</Text>
+    {billing.connected&&<Pressable style={s.restore} onPress={restore}><Text style={s.restoreText}>KÄUFE WIEDERHERSTELLEN</Text></Pressable>}
+    <Text style={s.note}>{billing.connected?"APPLE / GOOGLE STORE CONNECTED":"Store Verbindung wird hergestellt…"}</Text>
     {availability&&<Text style={s.note}>PRO Plätze: {availability.active} / {availability.capacity||"∞"}</Text>}
-    {status?<Text style={s.status}>{status}</Text>:null}
+    {billing.status?<Text style={s.status}>{billing.status}</Text>:null}
     <Pressable onPress={()=>router.back()}><Text style={s.back}>← BACK</Text></Pressable>
   </ScrollView></SafeAreaView>
 }
@@ -90,6 +68,7 @@ const s=StyleSheet.create({
   primaryText:{color:C.bg,fontSize:9,fontWeight:"900",letterSpacing:1,textAlign:"center"},
   restore:{minHeight:48,borderRadius:radius.md,borderWidth:1,borderColor:C.line,alignItems:"center",justifyContent:"center",marginTop:9},
   restoreText:{color:C.ink,fontSize:9,fontWeight:"900",letterSpacing:1},
+  unavailable:{color:C.dim,borderWidth:1,borderColor:C.line,borderRadius:radius.md,padding:14,fontSize:11,lineHeight:18},
   note:{color:C.dim,fontSize:9,lineHeight:14,marginTop:14},
   status:{color:C.green,fontSize:11,marginTop:10},
   back:{color:C.dim,fontSize:9,fontWeight:"900",letterSpacing:1.1,textAlign:"center",marginTop:24}
