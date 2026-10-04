@@ -10,7 +10,12 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
   const publicExercise=["EXERCISE_IMAGE","EXERCISE_VIDEO"].includes(asset.kind);
   if(!publicExercise){
     const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
-    const allowed=asset.ownerId===user.id||asset.relatedUserId===user.id||["COACH","ADMIN"].includes(user.role);
+    let allowed=asset.ownerId===user.id||asset.relatedUserId===user.id||["COACH","ADMIN"].includes(user.role);
+    if(!allowed&&asset.kind==="VOICE_MESSAGE"){
+      const brief=await prisma.coachBrief.findFirst({where:{mediaId:asset.id,publishAt:{lte:new Date()},OR:[{expiresAt:null},{expiresAt:{gt:new Date()}}]},orderBy:{publishAt:"desc"}});
+      const rank:Record<string,number>={FREE:0,PRO:1,ELITE:2};
+      if(brief&&(rank[user.subscriptionTier]??0)>=(rank[brief.audienceTier]??0))allowed=true;
+    }
     if(!allowed)return errorJson("Keine Berechtigung.",403);
   }
 
