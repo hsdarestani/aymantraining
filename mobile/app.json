@@ -22,7 +22,7 @@
           "group.com.smarbiz.bedifferent"
         ]
       },
-      "buildNumber": "1"
+      "buildNumber": "2"
     },
     "android": {
       "package": "com.smarbiz.bedifferent",
@@ -37,7 +37,7 @@
         "foregroundImage": "./assets/favicon.png",
         "backgroundColor": "#D7FF00"
       },
-      "versionCode": 1
+      "versionCode": 2
     },
     "plugins": [
       "expo-router",
