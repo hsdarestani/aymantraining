@@ -1,1 +1,14 @@
-"use client";import {useState} from "react";export default function TrialButton(){const [status,setStatus]=useState("");async function start(){setStatus("Aktiviere…");const r=await fetch("/api/subscription/trial",{method:"POST"});const j=await r.json();if(r.ok){setStatus("PRO ist 7 Tage aktiv.");setTimeout(()=>location.href="/dashboard",500);}else setStatus(j.error||"Aktivierung fehlgeschlagen.");}return <div><button className="primary" onClick={start}>7 TAGE PRO TESTEN →</button>{status&&<small className="muted" style={{display:"block",marginTop:10}}>{status}</small>}</div>}
+"use client";
+import {useState} from "react";
+
+export default function TrialButton(){
+  const [status,setStatus]=useState("");
+  function openApp(){
+    setStatus("Öffne BE DIFFERENT und starte den 7 Tage Test im App Store oder Play Store.");
+    window.location.href="bedifferent://membership";
+  }
+  return <div>
+    <button className="primary" onClick={openApp}>7 TAGE PRO IN DER APP TESTEN →</button>
+    {status&&<small className="muted" style={{display:"block",marginTop:10}}>{status}</small>}
+  </div>;
+}
