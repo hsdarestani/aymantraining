@@ -22,8 +22,9 @@ export async function putPrivateObject(key:string,data:Buffer,mimeType:string){
     return "r2" as const;
   }
   const dir=path.join(process.env.DATA_DIR||"/app/data","uploads");
-  await fs.mkdir(dir,{recursive:true});
-  await fs.writeFile(path.join(dir,key),data);
+  const filePath=path.join(dir,key);
+  await fs.mkdir(path.dirname(filePath),{recursive:true});
+  await fs.writeFile(filePath,data);
   return "local" as const;
 }
 
