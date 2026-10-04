@@ -39,7 +39,8 @@ Required for a fully connected production launch:
 ### RevenueCat
 
 - `REVENUECAT_WEBHOOK_SECRET`
-- `REVENUECAT_SECRET_API_KEY`
+- `REVENUECAT_IOS_PUBLIC_API_KEY`
+- `REVENUECAT_ANDROID_PUBLIC_API_KEY`
 - `REVENUECAT_PRO_ENTITLEMENT` = `pro`
 - `REVENUECAT_ELITE_ENTITLEMENT` = `elite` only when ELITE is activated
 
