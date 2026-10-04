@@ -18,9 +18,10 @@ export default async function Subscriptions(){
  const eligible30=users.filter(x=>x.createdAt<=d30),retained30=eligible30.filter(x=>x.sessions.some(s=>s.lastSeenAt>=new Date(x.createdAt.getTime()+30*86400000))).length;
  const pro=users.filter(x=>x.subscriptionTier==="PRO"||x.subscriptionTier==="ELITE").length;
  const trialUsers=new Set(subs.filter(s=>s.provider==="internal_trial").map(s=>s.userId));
- const paidUsers=new Set(subs.filter(s=>s.provider==="revenuecat"&&s.status==="active").map(s=>s.userId));
+ const storeSubs=subs.filter(s=>["app_store","google_play"].includes(s.provider));
+ const paidUsers=new Set(storeSubs.filter(s=>["active","canceled"].includes(s.status)&&(!s.renewsAt||s.renewsAt>now)).map(s=>s.userId));
  const trialPaid=[...trialUsers].filter(id=>paidUsers.has(id)).length;
- const expired30=subs.filter(s=>s.provider==="revenuecat"&&s.status==="expired"&&s.updatedAt>=d30).length;
+ const expired30=storeSubs.filter(s=>["expired","revoked"].includes(s.status)&&s.updatedAt>=d30).length;
  const activePaid=paidUsers.size;
  const athleteMessages=messages.filter(m=>m.senderId===m.athleteId);
  const coachMessages=messages.filter(m=>m.senderId!==m.athleteId);
