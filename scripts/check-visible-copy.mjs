@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
 
-const roots=["app","mobile/app","mobile/components"];
+const roots=["app","mobile/app","mobile/components","mobile/lib"];
 const ignored=["app/api"];
 const visibleAttrs=new Set(["placeholder","aria-label","alt","title"]);
 const forbidden=[
@@ -11,6 +11,7 @@ const forbidden=[
   "weekly","report","recovery","fuel","lifestyle","back","free","live","reset","join","found","camera","permission",
   "data","complete","build","your","voice","message","workout","exercise","body","current","weight","waist","photos",
   "performance","twin","level","health","wearable","morning","brief","daily","scan","start","finish","save","next",
+  "exercises","sets","rest","skip",
   "current","status","sync","connected","offline","online"
 ];
 
@@ -61,6 +62,7 @@ function visibleExpression(file,sf,node){
   }
   if(ts.isParenthesizedExpression(node)){visibleExpression(file,sf,node.expression);return}
   if(ts.isArrayLiteralExpression(node)){for(const x of node.elements)visibleExpression(file,sf,x);return}
+  if(ts.isElementAccessExpression(node)){visibleExpression(file,sf,node.expression);return}
 }
 
 for(const file of files){
@@ -80,6 +82,13 @@ for(const file of files){
     }
 
     if(ts.isJsxExpression(node)){visibleExpression(file,sf,node.expression);return}
+    if(ts.isCallExpression(node)){
+      const callee=node.expression.getText(sf);
+      const visibleCalls=new Set(["window.prompt","window.alert","window.confirm","alert","confirm","setStatus"]);
+      if(visibleCalls.has(callee)||callee.endsWith(".setStatus")){
+        for(const arg of node.arguments)visibleExpression(file,sf,arg);
+      }
+    }
     ts.forEachChild(node,visit);
   }
   visit(sf);
