@@ -1,5 +1,5 @@
 import {useEffect} from "react";
-import {StyleSheet,Text,View} from "react-native";
+import {Image,StyleSheet,Text,View} from "react-native";
 import {LinearGradient} from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import Animated,{
@@ -76,7 +76,9 @@ export default function LaunchIntro({onDone}:{onDone:()=>void}){
     </Animated.View>
 
     <Animated.View style={[s.copy,titleStyle]}>
-      <Text style={s.brand}>BE <Text style={s.brandVolt}>DIFFERENT</Text></Text>
+      <Animated.View style={[s.logoPlate,titleStyle]}>
+        <Image source={require("../assets/black-logo.png")} resizeMode="contain" style={s.logoImage}/>
+      </Animated.View>
       <Text style={s.title}>BAUE DEINEN ATHLETEN.</Text>
       <Animated.View style={[s.line,lineStyle]}/>
       <Text style={s.sub}>Training · Regeneration · Ernährung · Fortschritt</Text>
@@ -103,7 +105,8 @@ const s=StyleSheet.create({
   scoreLabel:{color:C.volt,fontSize:8,fontWeight:"900",letterSpacing:2.2,textAlign:"center",marginTop:4},
   tick:{position:"absolute",width:3,height:18,borderRadius:4,backgroundColor:C.volt,top:131,left:148},
   copy:{alignItems:"center",paddingHorizontal:26,marginTop:24},
-  brand:{color:C.ink,fontSize:24,fontWeight:"900",letterSpacing:-1},brandVolt:{color:C.volt},
+  logoPlate:{width:214,height:76,borderRadius:18,backgroundColor:C.volt,alignItems:"center",justifyContent:"center",paddingHorizontal:18},
+  logoImage:{width:"100%",height:"100%"},
   title:{color:C.ink,fontSize:27,fontWeight:"900",letterSpacing:-1.3,marginTop:12,textAlign:"center"},
   line:{height:2,width:190,backgroundColor:C.volt,marginVertical:16},
   sub:{color:C.dim,fontSize:10,fontWeight:"800",letterSpacing:.5,textAlign:"center"},
