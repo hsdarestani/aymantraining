@@ -5,17 +5,21 @@ import {usePathname} from "next/navigation";
 import {useState} from "react";
 
 const links=[
-  ["/admin","Attention Queue"],
+  ["/admin","Aufmerksamkeit"],
   ["/admin/customers","Kunden"],
   ["/admin/plans","Trainingspläne"],
   ["/admin/exercises","Übungen"],
   ["/admin/tests","Tests"],
-  ["/admin/inbox","Inbox"],
-  ["/admin/rules","Rules & Score"],
-  ["/admin/norms","Reference Norms"],
-  ["/admin/campaigns","Push Campaigns"],
-  ["/admin/subscriptions","Subscriptions"],
-  ["/admin/settings","App Settings"]
+  ["/admin/inbox","Nachrichten"],
+  ["/admin/rules","Regeln und Score"],
+  ["/admin/norms","Referenzwerte"],
+  ["/admin/campaigns","Push Kampagnen"],
+  ["/admin/subscriptions","Abos"],
+  ["/admin/team","Trainer Team"],
+  ["/admin/events","Events und Video Calls"],
+  ["/admin/briefs","Morgenübersicht"],
+  ["/admin/ai","Different AI"],
+  ["/admin/settings","App Einstellungen"]
 ];
 
 export default function AdminMobileNav(){
