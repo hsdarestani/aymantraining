@@ -68,7 +68,8 @@
           "microphonePermission": "BE DIFFERENT benötigt dein Mikrofon für Technikvideos."
         }
       ],
-      "@bacons/apple-targets"
+      "@bacons/apple-targets",
+      "./plugins/with-android-widget"
     ],
     "extra": {
       "apiUrl": "https://bedifferent.smarbiz.sbs"
