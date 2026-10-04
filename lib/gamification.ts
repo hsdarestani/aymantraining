@@ -13,7 +13,7 @@ export async function gamificationSnapshot(userId:string){
   const now=new Date(),since=new Date(Date.now()-120*dayMs);
   const [workouts,checks,wearables,tests,score,badges,entries]=await Promise.all([
     prisma.workout.findMany({where:{userId,completedAt:{gte:since}},select:{completedAt:true,sets:true}}),
-    prisma.dailyCheck.findMany({where:{userId,date:{gte:since}},select:{date:true,recovery:true,sleepHours:true}}),
+    prisma.dailyCheck.findMany({where:{userId,date:{gte:since}},select:{date:true,energy:true,mood:true,stress:true,soreness:true,sleepHours:true}}),
     prisma.wearableDaily.findMany({where:{userId,date:{gte:new Date(Date.now()-14*dayMs)}},select:{date:true,sleepMinutes:true}}),
     prisma.performanceTest.findMany({where:{userId,completedAt:{not:null}},include:{results:true}}),
     prisma.scoreSnapshot.findFirst({where:{userId},orderBy:{date:"desc"}}),
@@ -63,7 +63,7 @@ export async function gamificationSnapshot(userId:string){
       progress=Math.min(100,(pushups+setReps)/100*100);
     }
     if(entry.challengeId==="challenge-recovery-pro"){
-      const recoveryDays=checks.filter(c=>(c.recovery??0)>=7).length;
+      const recoveryDays=checks.filter(c=>{const parts=[c.energy,c.mood,c.stress==null?null:11-c.stress,c.soreness==null?null:11-c.soreness].filter((v):v is number=>v!=null);const score=parts.length?parts.reduce((a,b)=>a+b,0)/parts.length:0;return score>=7;}).length;
       progress=Math.min(100,recoveryDays/7*100);
     }
     await prisma.challengeEntry.update({where:{id:entry.id},data:{progress,completedAt:progress>=100?(entry.completedAt??new Date()):null}});
