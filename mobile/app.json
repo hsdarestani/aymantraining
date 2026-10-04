@@ -13,7 +13,7 @@
         "NSHealthShareUsageDescription": "BE DIFFERENT nutzt freigegebene Health-Daten für Score, Recovery und persönliche Trainingsempfehlungen.",
         "NSHealthUpdateUsageDescription": "BE DIFFERENT kann von dir gewählte Fitnessdaten in Apple Health speichern.",
         "NSMicrophoneUsageDescription": "Das Mikrofon wird nur für Voice Messages an deinen Coach verwendet.",
-        "NSCameraUsageDescription": "Die Kamera wird nur für freiwillige Fortschritts- und Technikvideos verwendet."
+        "NSCameraUsageDescription": "Die Kamera wird für freiwillige Fortschritts- und Technikvideos sowie den BE FUEL Barcode Scan verwendet."
       }
     },
     "android": {
@@ -29,6 +29,7 @@
       "expo-router",
       "expo-secure-store",
       "expo-notifications",
+      "expo-camera",
       "@kingstinct/react-native-healthkit",
       "react-native-health-connect",
       [
