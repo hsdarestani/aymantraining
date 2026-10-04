@@ -3,8 +3,5 @@ module.exports = config => ({
   type: "watch",
   icon: "../../assets/favicon.png",
   colors: { $accent: "#D7FF00" },
-  deploymentTarget: "10.0",
-  entitlements: {
-    "com.apple.security.application-groups": ["group.com.smarbiz.bedifferent.watch"]
-  }
+  deploymentTarget: "10.0"
 });
