@@ -23,7 +23,7 @@ export async function availablePackages(){
 }
 
 async function syncEntitlement(){
-  return api<{ok:boolean;tier:string}>("/api/subscription/sync",{method:"POST"});
+  return api<{ok:boolean;tier:string}>("/api/subscription/sync",{method:"POST",body:JSON.stringify({platform:Platform.OS==="ios"?"ios":"android"})});
 }
 
 export async function purchasePackage(pkg:any){
