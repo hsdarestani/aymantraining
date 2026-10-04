@@ -37,12 +37,14 @@
           "android": {
             "compileSdkVersion": 36,
             "targetSdkVersion": 36,
-            "minSdkVersion": 26
+            "minSdkVersion": 26,
+            "kotlinVersion": "2.1.20"
           }
         }
       ],
       "@react-native-firebase/app",
-      "@react-native-firebase/messaging"
+      "@react-native-firebase/messaging",
+      "react-native-iap"
     ],
     "extra": {
       "apiUrl": "https://bedifferent.smarbiz.sbs"
