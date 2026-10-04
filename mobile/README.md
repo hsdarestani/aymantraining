@@ -18,3 +18,6 @@ Still requires external account/configuration before store release:
 - Google Play signing/project
 - FCM/APNs credentials
 - RevenueCat public SDK keys/products
+
+
+Release validation marker: publisher signing, RevenueCat singleTop, offline media and current lockfile.
