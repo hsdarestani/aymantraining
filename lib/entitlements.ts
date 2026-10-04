@@ -19,7 +19,9 @@ export const DEFAULT_FLAGS: Record<string, { free: boolean; pro: boolean; elite:
   weekly_report_full: { free: false, pro: true, elite: true },
   performance_timeline: { free: false, pro: true, elite: true },
   digital_twin: { free: false, pro: true, elite: true },
-  pro_challenges: { free: false, pro: true, elite: true }
+  pro_challenges: { free: false, pro: true, elite: true },
+  different_ai: { free: false, pro: true, elite: true },
+  elite_video_calls: { free: false, pro: false, elite: true }
 };
 
 export async function hasFeature(tier: SubscriptionTier, key: string) {
