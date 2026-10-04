@@ -3,7 +3,7 @@ import path from "node:path";
 import ts from "typescript";
 
 const roots=["app","mobile/app","mobile/components"];
-const ignored=["app/admin","app/api"];
+const ignored=["app/api"];
 const visibleAttrs=new Set(["placeholder","aria-label","alt","title"]);
 const forbidden=[
   "home","progress","coach","athlete","community","settings","membership","history","ready","open","today","private",
