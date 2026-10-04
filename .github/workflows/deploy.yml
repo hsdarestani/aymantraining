@@ -113,8 +113,9 @@ jobs:
             upsert_env SENTRY_DSN "$SENTRY_DSN"
 
             docker compose --env-file .env.production up -d db
+            docker compose --env-file .env.production build migrate web scheduler backup
             docker compose --env-file .env.production run --rm migrate
-            docker compose --env-file .env.production up -d --build --remove-orphans web scheduler backup
+            docker compose --env-file .env.production up -d --remove-orphans web scheduler backup
 
             mkdir -p /etc/nginx/ssl/bedifferent
             if [ -n "$CLOUDFLARE_ORIGIN_CERT_B64" ] && [ -n "$CLOUDFLARE_ORIGIN_KEY_B64" ]; then
