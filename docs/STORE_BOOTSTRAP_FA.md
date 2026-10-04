@@ -1,95 +1,85 @@
-# راه‌اندازی اولیه Store برای BE DIFFERENT
+# BE DIFFERENT · Store Setup ادامه کار
 
-این فایل هیچ Secret واقعی نگه نمی‌دارد.
-
-## شناسه‌های ثابت
-
-- Android package: `com.smarbiz.bedifferent`
-- iOS bundle ID: `com.smarbiz.bedifferent`
-- App name: `BE DIFFERENT`
-- Privacy: `https://bedifferent.smarbiz.sbs/legal/privacy`
-- Support: `https://bedifferent.smarbiz.sbs/`
+App Recordها در Apple و Google ساخته شده‌اند. شناسه ثابت هر دو:
+`com.smarbiz.bedifferent`
 
 ## Apple
 
-1. در Apple Developer وارد Certificates, Identifiers & Profiles شوید.
-2. یک Explicit App ID با Bundle ID برابر `com.smarbiz.bedifferent` بسازید.
-3. برای همان App ID قابلیت‌های HealthKit و Push Notifications را فعال کنید. In-App Purchase برای Explicit App ID در دسترس است.
-4. در App Store Connect بخش Apps روی + و New App بزنید.
-5. Platform را iOS انتخاب کنید.
-6. Name را BE DIFFERENT قرار دهید.
-7. Primary language را German یا زبان اصلی موردنظر انتخاب کنید.
-8. Bundle ID همان `com.smarbiz.bedifferent` باشد.
-9. SKU پیشنهادی: `bedifferent-ios-001`.
-10. App را Create کنید. قبل از upload build باید این record وجود داشته باشد.
-11. Privacy URL و اطلاعات پایه را ثبت کنید.
-12. چون دسته Health & Fitness است، وضعیت regulated medical device را با واقعیت محصول تکمیل کنید. اپ فعلی به عنوان coaching/lifestyle طراحی شده و تشخیص پزشکی ارائه نمی‌کند.
-13. در Monetization > Subscriptions یک Subscription Group مثل `BE DIFFERENT PRO` بسازید.
-14. دو Auto-Renewable Subscription داخل همان group بسازید:
-    - `bd_pro_monthly` با مدت 1 Month
-    - `bd_pro_yearly` با مدت 1 Year
-15. قیمت‌ها و localization را تنظیم کنید.
-16. برای Trial، Introductory Offer از نوع Free با مدت 7 Days برای storefrontهای موردنظر فعال کنید.
-17. اولین subscription همراه اولین نسخه اپ برای review ارسال می‌شود.
-18. در Users and Access > Integrations برای App Store Connect API دسترسی بگیرید و Team API Key بسازید.
-19. این چهار مقدار را برای Publisher آماده کنید:
-    - Issuer ID
-    - Key ID
-    - فایل خصوصی `.p8`
-    - Team ID
+### 1. Subscription
+در App Store Connect یک Subscription Group برای PRO بساز و داخل آن:
+- `bd_pro_monthly` · 1 Month
+- `bd_pro_yearly` · 1 Year
 
-## Google Play
+برای هر دو قیمت و localization ثبت کن و Introductory Offer رایگان 7 روزه را فعال کن.
 
-1. وارد Play Console شوید و Home > Create app را بزنید.
-2. Default language، نام BE DIFFERENT، نوع App و Free را انتخاب کنید.
-3. Support email را وارد کنید.
-4. Declarationها و Play App Signing terms را قبول و Create app را بزنید.
-5. Package name بعد از upload اولین AAB باید `com.smarbiz.bedifferent` باشد؛ این شناسه را عوض نکنید.
-6. App content، Data safety، Health/fitness declarations، privacy URL، age/content rating و Store Listing را تکمیل کنید.
-7. برای Publisher یک Google Cloud Project بسازید.
-8. در Google Cloud، Google Play Developer API را Enable کنید.
-9. یک Service Account بسازید و JSON key آن را دانلود کنید.
-10. در Play Console > Users and permissions > Invite new users، ایمیل Service Account را دعوت کنید و دسترسی همین App و permissionهای لازم برای release/publishing را بدهید.
-11. برای RevenueCat/Billing دسترسی‌های View financial data/orders/cancellation survey responses و Manage orders and subscriptions نیز لازم می‌شوند.
-12. در Monetize with Play > Products > Subscriptions محصولات را بسازید:
-    - subscription/product ID مورد استفاده: `bd_pro_monthly`
-    - subscription/product ID مورد استفاده: `bd_pro_yearly`
-13. Base planهای auto-renewing مربوط به ماهانه و سالانه را فعال کنید و قیمت/region را تنظیم کنید.
-14. Trial هفت روزه را به عنوان offer در Play تنظیم کنید.
-15. JSON کامل Service Account را در Google Store Account داخل Publisher وارد کنید.
+### 2. App Store Connect Team API Key برای Publisher
+در Users and Access > Integrations یک Team API Key با دسترسی لازم برای build/upload بساز.
+لازم داریم:
+- Issuer ID
+- Key ID
+- Team ID
+- فایل `.p8`
 
-## RevenueCat
+### 3. In-App Purchase API Key برای backend
+در Users and Access > Integrations > In-App Purchase یک IAP key بساز.
+لازم داریم:
+- IAP Issuer ID
+- IAP Key ID
+- IAP `.p8`
 
-1. یک Project به نام BE DIFFERENT بسازید.
-2. یک Apple App با Bundle ID بالا و یک Google App با package بالا اضافه کنید.
-3. credentialهای Store را طبق RevenueCat متصل کنید.
-4. entitlement با شناسه `pro` بسازید.
-5. محصولات ماهانه و سالانه Apple و Google را import و هر چهار product را به entitlement `pro` وصل کنید.
-6. یک Current Offering بسازید و Monthly و Annual package را داخل آن بگذارید.
-7. Public SDK key هر platform را بردارید:
-   - iOS public SDK key
-   - Android public SDK key
-   همین دو مقدار هم داخل Publisher build env قرار می‌گیرند و هم برای sync سمت سرور در GitHub Secrets ذخیره می‌شوند.
-8. برای webhook یک secret تصادفی مستقل و طولانی بسازید. این secret از RevenueCat API key جداست.
-9. Webhook به آدرس backend تنظیم شود و Authorization برابر `Bearer <REVENUECAT_WEBHOOK_SECRET>` باشد.
+این key برای سرور است و با Team API key Publisher یکی فرض نمی‌شود.
 
-## Expo / Push
+### 4. Server Notifications
+App Store Server Notifications V2:
+`https://bedifferent.smarbiz.sbs/api/webhooks/apple`
+را برای Production و Sandbox تنظیم کن.
 
-1. یک project در expo.dev بسازید یا repo را با `eas init` به project متصل کنید.
-2. UUID project را به عنوان `EXPO_PUBLIC_EAS_PROJECT_ID` بردارید.
-3. اگر Enhanced Push Security را فعال کردید، Access Token را به عنوان `EXPO_PUSH_ACCESS_TOKEN` در GitHub Secrets قرار دهید.
-4. credentialهای APNs/FCM مربوط به Expo project روی اکانت Expo تنظیم شوند تا Expo Push Token روی build واقعی کار کند.
+### 5. Firebase / Push
+در Firebase همان project مورد استفاده برای Push:
+- iOS app با bundle `com.smarbiz.bedifferent`
+- `GoogleService-Info.plist` دانلود کن
+- در Firebase Cloud Messaging، APNs Auth Key اپل را برای iOS app وصل کن
 
-## Publisher
+## Google
 
-بعد از ساخت App Recordهای Apple و Google:
+### 1. Subscription
+در Play Console:
+- `bd_pro_monthly`
+- `bd_pro_yearly`
 
-- App: BE DIFFERENT
-- Platform: Android + iOS
-- Framework: React Native
-- Repo: `https://github.com/hsdarestani/aymantraining`
-- Branch: `main`
-- Package: `com.smarbiz.bedifferent`
-- Bundle ID: `com.smarbiz.bedifferent`
+برای هر کدام base plan فعال و pricing/regions را تنظیم کن و offer هفت روزه بساز.
 
-Build commands و signing در `docs/PUBLISHER_RELEASE.md` مشخص شده‌اند.
+### 2. Service Account
+Google Play Developer API را در Cloud project فعال کن.
+یک Service Account بساز و JSON key بگیر.
+همان service-account email را در Play Console برای BE DIFFERENT دعوت کن و دسترسی لازم برای release و subscriptions/orders بده.
+
+JSON برای دو مصرف استفاده می‌شود:
+- Publisher upload به Google Play
+- backend verification خرید
+
+### 3. Firebase / Push
+در Firebase:
+- Android app با package `com.smarbiz.bedifferent`
+- `google-services.json` دانلود کن
+- Firebase Admin service-account JSON برای backend بگیر
+
+### 4. Real-time Developer Notifications
+یک Pub/Sub topic و push subscription بساز و RTDN Play را به آن topic وصل کن.
+Push endpoint:
+`https://bedifferent.smarbiz.sbs/api/webhooks/google-play?token=<random-secret>`
+
+## Android signing
+
+برای اولین AAB یک upload keystore ثابت لازم است. Publisher می‌تواند آن را در هر ephemeral Linux build از Base64 بازسازی کند. اصل keystore و رمزهایش باید دائمی و امن نگهداری شوند.
+
+## Email
+
+بعد از ساخت mailbox روی Strato فقط SMTP host/port/user/password/from لازم است. Backend مستقیم SMTP می‌فرستد.
+
+## Build
+
+وقتی credentialها ست شدند:
+- Publisher app record در اولین release request خودکار ساخته/به‌روزرسانی می‌شود
+- `release-request.json` از false به true تغییر می‌کند
+- Publisher Android AAB و iOS IPA را queue می‌کند
