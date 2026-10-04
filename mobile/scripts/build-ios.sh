@@ -3,7 +3,11 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-: "${APPLE_TEAM_ID:?APPLE_TEAM_ID is required on the Publisher macOS agent}"
+export APPLE_TEAM_ID="${APPLE_TEAM_ID:-${IOS_TEAM_ID:-}}"
+export ASC_KEY_PATH="${ASC_KEY_PATH:-${APPLE_API_KEY_PATH:-}}"
+export ASC_KEY_ID="${ASC_KEY_ID:-${APPLE_KEY_ID:-}}"
+export ASC_ISSUER_ID="${ASC_ISSUER_ID:-${APPLE_ISSUER_ID:-}}"
+: "${APPLE_TEAM_ID:?APPLE_TEAM_ID or IOS_TEAM_ID is required on the Publisher macOS agent}"
 
 mkdir -p .publisher-secrets
 if [ -z "${ASC_KEY_PATH:-}" ] && [ -n "${ASC_PRIVATE_KEY_B64:-}" ] && [ -n "${ASC_KEY_ID:-}" ]; then
@@ -51,8 +55,50 @@ if [ -n "${ASC_KEY_PATH:-}" ] && [ -n "${ASC_KEY_ID:-}" ] && [ -n "${ASC_ISSUER_
   )
 fi
 
-xcodebuild   -workspace "$workspace"   -scheme "$scheme"   -configuration Release   -destination "generic/platform=iOS"   -archivePath "$archive"   DEVELOPMENT_TEAM="$APPLE_TEAM_ID"   CODE_SIGN_STYLE=Automatic   -allowProvisioningUpdates   "${extraAuth[@]}"   archive
+signingStyle="${IOS_SIGNING_STYLE:-Automatic}"
+archiveSigning=(
+  DEVELOPMENT_TEAM="$APPLE_TEAM_ID"
+  CODE_SIGN_STYLE="$signingStyle"
+)
 
+if [ "$signingStyle" = "Manual" ]; then
+  : "${IOS_CODE_SIGN_IDENTITY:?IOS_CODE_SIGN_IDENTITY is required for manual signing}"
+  : "${IOS_PROVISIONING_PROFILE_SPECIFIER:?IOS_PROVISIONING_PROFILE_SPECIFIER is required for manual signing}"
+  archiveSigning+=(
+    CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY"
+    PROVISIONING_PROFILE_SPECIFIER="$IOS_PROVISIONING_PROFILE_SPECIFIER"
+  )
+  if [ -n "${IOS_SIGNING_KEYCHAIN:-}" ]; then
+    archiveSigning+=(OTHER_CODE_SIGN_FLAGS="--keychain $IOS_SIGNING_KEYCHAIN")
+  fi
+fi
+
+xcodebuild \
+  -workspace "$workspace" \
+  -scheme "$scheme" \
+  -configuration Release \
+  -destination "generic/platform=iOS" \
+  -archivePath "$archive" \
+  "${archiveSigning[@]}" \
+  "${extraAuth[@]}" \
+  archive
+
+if [ "$signingStyle" = "Manual" ]; then
+cat > "$PWD/build/ExportOptions.plist" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>method</key><string>app-store-connect</string>
+<key>teamID</key><string>$APPLE_TEAM_ID</string>
+<key>signingStyle</key><string>manual</string>
+<key>signingCertificate</key><string>${IOS_CODE_SIGN_IDENTITY}</string>
+<key>provisioningProfiles</key><dict>
+<key>${IOS_BUNDLE_ID:-com.smarbiz.bedifferent}</key><string>${IOS_PROVISIONING_PROFILE_SPECIFIER}</string>
+</dict>
+<key>uploadSymbols</key><true/>
+</dict></plist>
+PLIST
+else
 cat > "$PWD/build/ExportOptions.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -63,7 +109,13 @@ cat > "$PWD/build/ExportOptions.plist" <<PLIST
 <key>uploadSymbols</key><true/>
 </dict></plist>
 PLIST
+fi
 
-xcodebuild   -exportArchive   -archivePath "$archive"   -exportPath "$exportDir"   -exportOptionsPlist "$PWD/build/ExportOptions.plist"   -allowProvisioningUpdates   "${extraAuth[@]}"
+xcodebuild \
+  -exportArchive \
+  -archivePath "$archive" \
+  -exportPath "$exportDir" \
+  -exportOptionsPlist "$PWD/build/ExportOptions.plist" \
+  "${extraAuth[@]}"
 
 test -n "$(find "$exportDir" -name '*.ipa' -print -quit)"
