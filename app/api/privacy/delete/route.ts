@@ -3,7 +3,7 @@ import {prisma} from "../../../../lib/db";
 import {errorJson,isSameOrigin,requireApiUser} from "../../../../lib/http";
 import {deletePrivateObject} from "../../../../lib/storage";
 export async function DELETE(request:Request){
-  if(!isSameOrigin(request)&&request.headers.get("x-bd-client")!=="mobile")return errorJson("Ungültige Anfrage.",403);
+  if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
   const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
   const id=user.id;
   const assets=await prisma.mediaAsset.findMany({where:{OR:[{ownerId:id},{relatedUserId:id}]},select:{storageKey:true}});

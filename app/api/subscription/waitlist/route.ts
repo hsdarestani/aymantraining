@@ -2,7 +2,7 @@ import {NextResponse} from "next/server";
 import {prisma} from "../../../../lib/db";
 import {errorJson,isSameOrigin,requireApiUser} from "../../../../lib/http";
 export async function POST(request:Request){
- if(!isSameOrigin(request)&&request.headers.get("x-bd-client")!=="mobile")return errorJson("Ungültige Anfrage.",403);
+ if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
  const row=await prisma.systemSetting.findUnique({where:{key:"app_settings"}});
  const settings={proCapacity:50,waitlist:true,...((row?.value as any)||{})};

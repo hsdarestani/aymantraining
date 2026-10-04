@@ -16,7 +16,7 @@ export async function GET(){
  return NextResponse.json({ok:true,items,provider:Boolean(process.env.OPENAI_API_KEY)});
 }
 export async function POST(request:Request){
- if(!isSameOrigin(request)&&request.headers.get("x-bd-client")!=="mobile")return errorJson("Ungültige Anfrage.",403);
+ if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
  if(!await hasFeature(user.subscriptionTier,"different_ai"))return errorJson("Different AI ist PRO.",403);
  const p=schema.safeParse(await request.json().catch(()=>null));if(!p.success)return errorJson("Ungültige Nachricht.",422);

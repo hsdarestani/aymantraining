@@ -24,7 +24,7 @@ export async function GET(request:Request){
 }
 
 export async function POST(request:Request){
-  if(!isSameOrigin(request)&&request.headers.get("x-bd-client")!=="mobile")return errorJson("Ungültige Anfrage.",403);
+  if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
   const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
   const form=await request.formData();const file=form.get("file");
   const kind=String(form.get("kind")||"") as keyof typeof allowed;

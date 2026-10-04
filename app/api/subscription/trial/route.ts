@@ -3,7 +3,7 @@ import {prisma} from "../../../../lib/db";
 import {errorJson,isSameOrigin,requireApiUser} from "../../../../lib/http";
 
 export async function POST(request:Request){
-  if(!isSameOrigin(request)&&request.headers.get("x-bd-client")!=="mobile")return errorJson("Ungültige Anfrage.",403);
+  if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
   const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
   if(process.env.ENABLE_INTERNAL_TRIAL!=="true")return errorJson("Der PRO Test wird direkt über App Store oder Google Play gestartet.",409);
   const used=await prisma.subscription.findFirst({where:{userId:user.id,provider:"internal_trial"}});

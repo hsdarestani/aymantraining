@@ -12,7 +12,7 @@ export async function GET(request:Request){
   const items=await prisma.message.findMany({where:{athleteId},orderBy:{createdAt:"asc"},take:300});return NextResponse.json({ok:true,items});
 }
 export async function POST(request:Request){
-  if(!isSameOrigin(request)&&request.headers.get("x-bd-client")!=="mobile")return errorJson("Ungültige Anfrage.",403);
+  if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
   const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
   if(user.role==="ATHLETE"&&!await hasFeature(user.subscriptionTier,"coach_chat"))return errorJson("Coach Chat ist PRO.",403);
   const p=schema.safeParse(await request.json().catch(()=>null));if(!p.success)return errorJson("Ungültige Nachricht.",422);

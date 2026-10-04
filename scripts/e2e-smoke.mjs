@@ -7,7 +7,7 @@ const email=`e2e-${Date.now()}@example.invalid`;
 let cookie="";
 const assert=(ok,msg)=>{if(!ok)throw new Error(msg)};
 async function req(path,{method="GET",body,headers={}}={}){
-  const h={...headers,origin};
+  const h={origin,...headers};
   if(cookie)h.cookie=cookie;
   if(body!==undefined && !(body instanceof FormData)){h["content-type"]="application/json";body=JSON.stringify(body)}
   const r=await fetch(base+path,{method,headers:h,body,redirect:"manual"});
@@ -34,7 +34,10 @@ try{
 
   await expect("/api/daily-check",{method:"POST",body:{energy:7,soreness:3,mood:8,stress:4,sleepHours:7.4,steps:8000,waterMl:2300,proteinG:120}},200);
   await expect("/api/body-metrics",{method:"POST",body:{weightKg:79.8,waistCm:82}},200);
-  const score=await expect("/api/score",{},200);assert(typeof score.score?.total==="number","score missing");
+  const score=await expect("/api/score",{},200);assert(typeof score.score?.total==="number","score missing");assert(!("strength" in score.score),"FREE score details leaked");
+  await expect("/api/daily-check",{method:"POST",headers:{origin:"https://untrusted.invalid","x-bd-client":"mobile"},body:{energy:7,soreness:3,mood:8,stress:4}},403);
+  await expect("/api/athlete-context",{method:"POST",body:{stepTarget:12000,waterTargetMl:3000,proteinTargetG:150}},200);
+  const dashboard=await expect("/api/mobile/dashboard");assert(dashboard.activity.stepTarget===12000&&dashboard.activity.waterTargetMl===3000&&dashboard.activity.proteinTargetG===150,"custom activity targets ignored");
 
   const freeHealth=await expect("/api/wearables/import",{method:"POST",body:{source:"manual_import",date:new Date().toISOString().slice(0,10),steps:9000,activeCalories:500,hrv:72,restingHr:51,sleepMinutes:470,vo2max:46}},200);
   assert(freeHealth.item.hrv==null && freeHealth.item.sleepMinutes==null,"FREE advanced health leaked");
@@ -43,7 +46,7 @@ try{
   await expect("/api/performance-tests",{method:"POST",body:{name:"EXTRA TEST",results:[{metric:"pushups",value:30,unit:"reps"}]}},403);
 
   const trial=await expect("/api/subscription/trial",{method:"POST"},200);assert(trial.trialEndsAt,"trial missing");
-  const ent=await expect("/api/entitlements",{},200);assert(ent.tier==="PRO","trial did not grant PRO");
+  const ent=await expect("/api/entitlements",{},200);assert(ent.tier==="PRO","trial did not grant PRO");assert("strength" in (await expect("/api/score")).score,"PRO score details missing");
   await expect("/api/checkin",{method:"POST",body:{weightKg:79.5,energy:8,recovery:7,training:8,note:"E2E"}},200);
   await expect("/api/nutrition",{method:"POST",body:{calories:2200,proteinG:140,carbsG:220,fatG:70,waterMl:2600,fruitVegServings:5,addedSugarG:20,processedFoodScore:20,source:"manual"}},200);
   const templates=await expect("/api/plans/templates",{},200);assert(templates.items.length>=3,"templates missing");
@@ -74,6 +77,11 @@ try{
   assert(dbUser?.subscriptionTier==="FREE","expired store subscription did not revoke access");
 
   const exported=await req("/api/privacy/export");assert(exported.r.status===200,"privacy export");
+  const mobileLogin=await expect("/api/auth/login",{method:"POST",headers:{"x-bd-client":"mobile"},body:{email,password:"VeryStrong123!"}},200);
+  assert(mobileLogin.sessionToken,"mobile session missing");
+  await expect("/api/auth/logout",{method:"POST",headers:{"x-bd-client":"mobile",authorization:`Bearer ${mobileLogin.sessionToken}`}},200);
+  await expect("/api/auth/me",{headers:{authorization:`Bearer ${mobileLogin.sessionToken}`}},401);
+  await expect("/api/auth/login",{method:"POST",body:{email,password:"VeryStrong123!"}},200);
   await expect("/api/privacy/delete",{method:"DELETE"},200);
   assert(!(await prisma.user.findUnique({where:{email}})),"privacy delete left user");
 

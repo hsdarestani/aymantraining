@@ -2,12 +2,12 @@
   "enabled": true,
   "app_identifier": "com.smarbiz.bedifferent",
   "version_name": "1.0.0",
-  "build_number": 3,
+  "build_number": 4,
   "platforms": [
     "android",
     "ios"
   ],
   "android_track": "internal",
   "auto_submit": true,
-  "release_notes": "BE DIFFERENT 1.0.0 build 3 retry Android after Publisher scoped Linux signing auth fix"
+  "release_notes": "Production QA fixes: native signup, offline workout sync, session logout, media playback, FREE entitlement filtering and activity targets"
 }

@@ -2,7 +2,7 @@ import {useEffect,useState} from "react";
 import {ActivityIndicator,AppState,Image,Modal,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,TextInput,View,Vibration} from "react-native";
 import {router,useLocalSearchParams} from "expo-router";
 import {ChevronLeft} from "lucide-react-native";
-import {API,api} from "../../lib/api";
+import {API,api,ApiError} from "../../lib/api";
 import {enqueue,flushOutbox} from "../../lib/offline";import {localMediaUri,preloadCurrentPlanMedia} from "../../lib/media-cache";
 import Animated,{FadeIn,FadeInDown,FadeInUp,ZoomIn} from "react-native-reanimated";
 import {useVideoPlayer,VideoView} from "expo-video";
@@ -23,6 +23,7 @@ function TechniqueModal({item,media,onClose}:{item:any;media:Record<string,strin
 export default function Workout(){
  const {id}=useLocalSearchParams<{id:string}>();
  const [w,setW]=useState<any>(null);
+ const [loadError,setLoadError]=useState("");
  const [sets,setSets]=useState<Record<string,{weightKg?:string;reps?:string;rpe?:string;done?:boolean;queued?:boolean}>>({});
  const [finishing,setFinishing]=useState(false);
  const [rest,setRest]=useState(0);
@@ -34,23 +35,24 @@ export default function Workout(){
  const [achievement,setAchievement]=useState("");
  const [technique,setTechnique]=useState<any>(null);
 
- useEffect(()=>{api<any>(`/api/workouts/${id}`).then(async x=>{setW(x.workout);setPrevious(x.previousSets||{});const init:any={};for(const we of x.workout.exercises){for(let i=1;i<=we.targetSets;i++){const key=`${we.exerciseId}:${i}`,old=x.previousSets?.[key];init[key]={weightKg:old?.weightKg==null?"":String(old.weightKg),reps:old?.reps==null?"":String(old.reps),rpe:"",done:false};}}for(const s of x.workout.sets)init[`${s.exerciseId}:${s.setNumber}`]={weightKg:String(s.weightKg??""),reps:String(s.reps??""),rpe:String(s.rpe??""),done:true};setSets(init);const urls=x.workout.exercises.flatMap((we:any)=>[we.exercise.imageStart,we.exercise.imageMiddle,we.exercise.imageEnd,we.exercise.videoUrl]).filter(Boolean);const pairs=await Promise.all(urls.map(async (u:string)=>[u,await localMediaUri(u)] as const));setMedia(Object.fromEntries(pairs));});api(`/api/workouts/${id}`,{method:"PATCH",body:JSON.stringify({action:"start"})}).catch(()=>{});flushOutbox();preloadCurrentPlanMedia().catch(()=>undefined);const sub=AppState.addEventListener("change",state=>{if(state==="active"){flushOutbox();preloadCurrentPlanMedia().catch(()=>undefined)}});return()=>sub.remove()},[id]);
+ useEffect(()=>{api<any>(`/api/workouts/${id}`).then(async x=>{setW(x.workout);setPrevious(x.previousSets||{});const init:any={};for(const we of x.workout.exercises){for(let i=1;i<=we.targetSets;i++){const key=`${we.exerciseId}:${i}`,old=x.previousSets?.[key];init[key]={weightKg:old?.weightKg==null?"":String(old.weightKg),reps:old?.reps==null?"":String(old.reps),rpe:"",done:false};}}for(const s of x.workout.sets)init[`${s.exerciseId}:${s.setNumber}`]={weightKg:String(s.weightKg??""),reps:String(s.reps??""),rpe:String(s.rpe??""),done:true};setSets(init);const urls=x.workout.exercises.flatMap((we:any)=>[we.exercise.imageStart,we.exercise.imageMiddle,we.exercise.imageEnd,we.exercise.videoUrl]).filter(Boolean);const pairs=await Promise.all(urls.map(async (u:string)=>[u,await localMediaUri(u)] as const));setMedia(Object.fromEntries(pairs));}).catch(e=>setLoadError(e.message||"Training konnte nicht geladen werden."));api(`/api/workouts/${id}`,{method:"PATCH",body:JSON.stringify({action:"start"})}).catch(()=>{});flushOutbox();preloadCurrentPlanMedia().catch(()=>undefined);const sub=AppState.addEventListener("change",state=>{if(state==="active"){flushOutbox();preloadCurrentPlanMedia().catch(()=>undefined)}});return()=>sub.remove()},[id]);
  useEffect(()=>{if(rest<=0)return;const t=setInterval(()=>setRest(x=>Math.max(0,x-1)),1000);return()=>clearInterval(t)},[rest]);
 
  async function save(exId:string,n:number,restSeconds:number){
    const key=`${exId}:${n}`,x=sets[key]||{};
-   const body={exerciseId:exId,setNumber:n,weightKg:Number(x.weightKg)||undefined,reps:Number(x.reps)||undefined,rpe:Number(x.rpe)||undefined};
+   const body={exerciseId:exId,setNumber:n,weightKg:x.weightKg?.trim()?Number(x.weightKg.replace(",",".")):undefined,reps:x.reps?.trim()?Number(x.reps):undefined,rpe:x.rpe?.trim()?Number(x.rpe):undefined};
    try{const result:any=await api(`/api/workouts/${id}/sets`,{method:"POST",body:JSON.stringify(body)});setSets(current=>({...current,[key]:{...x,done:true,queued:false}}));if(result.personalRecord){setAchievement("NEUER PERSÖNLICHER REKORD");Vibration.vibrate([100,60,170,60,230]);setTimeout(()=>setAchievement(""),2800)}else Vibration.vibrate(35)}
-   catch{await enqueue(`/api/workouts/${id}/sets`,body);setSets(current=>({...current,[key]:{...x,done:true,queued:true}}));Vibration.vibrate(35)}
+   catch(error){if(error instanceof ApiError&&error.status<500){setAchievement(error.message);return}await enqueue(`/api/workouts/${id}/sets`,body);setSets(current=>({...current,[key]:{...x,done:true,queued:true}}));Vibration.vibrate(35)}
    setRest(restSeconds);
  }
 
  async function finish(){
    setFinishing(true);const flushed=await flushOutbox();
    if(flushed.remaining){setFinishing(false);setAchievement("OFFLINE DATEN WERDEN NOCH GESPEICHERT");return}
-   await api(`/api/workouts/${id}`,{method:"PATCH",body:JSON.stringify({action:"complete",rpe:finishRpe,notes:finishNote||undefined})}).then(()=>{Vibration.vibrate([80,50,130]);router.replace("/(tabs)")}).catch(()=>setFinishing(false));
+   await api(`/api/workouts/${id}`,{method:"PATCH",body:JSON.stringify({action:"complete",rpe:finishRpe,notes:finishNote||undefined})}).then(()=>{Vibration.vibrate([80,50,130]);router.replace("/(tabs)")}).catch(error=>{setFinishing(false);setAchievement(error.message||"Training konnte nicht abgeschlossen werden.")});
  }
 
+ if(loadError)return <SafeAreaView style={s.center}><Text style={s.cue}>{loadError}</Text><Pressable onPress={()=>router.back()}><Text style={s.skip}>ZURÜCK</Text></Pressable></SafeAreaView>;
  if(!w)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
  return <SafeAreaView style={s.safe}><TechniqueModal item={technique} media={media} onClose={()=>setTechnique(null)}/>
   <Animated.View entering={FadeInDown.duration(380)} style={s.top}><Pressable onPress={()=>router.back()}><ChevronLeft color={C.ink}/></Pressable><Text style={s.topText}>TRAININGSMODUS</Text><Text style={s.ready}>● AKTIV</Text></Animated.View>

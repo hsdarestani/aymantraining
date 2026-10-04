@@ -15,7 +15,7 @@ export async function GET(){
 
 const schema=z.object({code:z.string().min(4).max(30).transform(v=>v.trim().toUpperCase())});
 export async function POST(request:Request){
- if(!isSameOrigin(request)&&request.headers.get("x-bd-client")!=="mobile")return errorJson("Ungültige Anfrage.",403);
+ if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
  const p=schema.safeParse(await request.json().catch(()=>null));if(!p.success)return errorJson("Ungültiger Code.",422);
  const ref=await prisma.referral.findUnique({where:{code:p.data.code}});

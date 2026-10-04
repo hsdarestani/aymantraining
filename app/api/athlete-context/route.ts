@@ -25,7 +25,7 @@ export async function GET(){
  return NextResponse.json({ok:true,item:item??{userId:user.id,cycleTrackingEnabled:false,cycleLengthDays:28,stepTarget:10000,waterTargetMl:2500,proteinTargetG:130,preferredMorningHour:8}});
 }
 export async function POST(request:Request){
- if(!isSameOrigin(request)&&request.headers.get("x-bd-client")!=="mobile")return errorJson("Ungültige Anfrage.",403);
+ if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
  const p=schema.safeParse(await request.json().catch(()=>null));if(!p.success)return errorJson("Ungültiger Trainingskontext.",422);
  const d=p.data;

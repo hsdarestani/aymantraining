@@ -3,7 +3,7 @@ import {prisma} from "../../../../../lib/db";
 import {errorJson,isSameOrigin,requireApiUser} from "../../../../../lib/http";
 const rank:Record<string,number>={FREE:0,PRO:1,ELITE:2};
 export async function POST(request:Request,{params}:{params:Promise<{id:string}>}){
- if(!isSameOrigin(request)&&request.headers.get("x-bd-client")!=="mobile")return errorJson("Ungültige Anfrage.",403);
+ if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
  const {id}=await params;const event=await prisma.event.findUnique({where:{id},include:{registrations:true}});
  if(!event||!event.active)return errorJson("Event nicht gefunden.",404);

@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';import fs from 'node:fs/promises';import ts from 'typescript';
+const data=new Map(),calls=[];let owner='athlete-a',token='token-a',hold;
+const mock={AsyncStorage:{getItem:async k=>data.get(k)||null,setItem:async(k,v)=>{data.set(k,v)}},getSessionUser:async()=>owner,getSession:async()=>token,api:async(p,init)=>{calls.push({p,token:init.headers.authorization});if(hold){const wait=hold;hold=null;await wait}}};
+globalThis.__bdOfflineTest=mock;
+let source=await fs.readFile('mobile/lib/offline.ts','utf8');source=source.replace(/^import .*;\n/gm,'');source='const {AsyncStorage,api,getSession,getSessionUser}=globalThis.__bdOfflineTest;\n'+source;
+const js=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ES2022,target:ts.ScriptTarget.ES2022}}).outputText;
+const q=await import('data:text/javascript;base64,'+Buffer.from(js).toString('base64'));
+await Promise.all(Array.from({length:20},(_,i)=>q.enqueue('/set/'+i,{i})));assert.equal((await q.getOutbox()).length,20);
+await Promise.all([q.flushOutbox(),q.flushOutbox()]);assert.equal(calls.length,20);assert.equal((await q.getOutbox()).length,0);
+await q.enqueue('/set/a',{});owner='athlete-b';token='token-b';assert.equal((await q.getOutbox()).length,0);await q.enqueue('/set/b',{});await q.flushOutbox();assert.equal(calls.at(-1).p,'/set/b');assert.equal(calls.at(-1).token,'Bearer token-b');
+owner='athlete-a';token='token-a';assert.equal((await q.getOutbox()).length,1);
+let release;hold=new Promise(resolve=>{release=resolve});const flushing=q.flushOutbox();await new Promise(resolve=>setTimeout(resolve,0));const queued=q.enqueue('/set/new',{});owner='athlete-b';token='token-b';release();await Promise.all([flushing,queued]);assert.equal(calls.at(-1).token,'Bearer token-a');owner='athlete-a';token='token-a';assert.equal((await q.getOutbox()).length,1);await q.flushOutbox();assert.equal(calls.at(-1).p,'/set/new');
+console.log('NATIVE_OUTBOX_TESTS_OK');delete globalThis.__bdOfflineTest;

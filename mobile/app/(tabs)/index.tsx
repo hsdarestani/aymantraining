@@ -37,7 +37,7 @@ export default function Home(){
  const score=d.score,a=d.activity||{};
  return <ScrollView style={s.safe} contentContainerStyle={s.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
   <View style={s.top}><Brand compact/><Text style={s.plan}>{d.user.tier}</Text></View>
-  <View style={s.hero}><Text style={s.eyebrow}>GUTEN MORGEN, {(d.user.name||"ATHLET").toUpperCase()}</Text><Text style={s.title}>BAUE DEINEN{"\\n"}ATHLETEN.</Text><Text style={s.copy}>Daten werden zu einer klaren Entscheidung für heute.</Text></View>
+  <View style={s.hero}><Text style={s.eyebrow}>GUTEN MORGEN, {(d.user.name||"ATHLET").toUpperCase()}</Text><Text style={s.title}>BAUE DEINEN{"\n"}ATHLETEN.</Text><Text style={s.copy}>Daten werden zu einer klaren Entscheidung für heute.</Text></View>
   <Card style={s.scoreCard}><Eyebrow>BE DIFFERENT LEISTUNGSWERT</Eyebrow><ScoreSignature score={score?.total??0} level={score?.level||"NORMAL"}/><View style={s.track}><View style={[s.fill,{width:`${score?.total??0}%`}]}/></View><Text style={s.data}>DATEN {score?.completeness??0}% VOLLSTÄNDIG</Text></Card>
 
   <Card>

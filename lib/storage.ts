@@ -38,17 +38,28 @@ function decrypt(data:Buffer){
   const decipher=crypto.createDecipheriv("aes-256-gcm",encryptionKey(),iv);decipher.setAuthTag(tag);
   return Buffer.concat([decipher.update(body),decipher.final()]);
 }
+export class InvalidMediaRange extends Error {
+  constructor(public readonly size: number) { super("Unsatisfiable media range"); }
+}
 function rangeFor(size:number,range?:string|null){
   let start=0,end=Math.max(0,size-1),contentRange:undefined|string;
-  if(range&&size){
+  if(range){
     const m=/^bytes=(\d*)-(\d*)$/.exec(range.trim());
-    if(m){
-      if(m[1])start=Math.min(size-1,Number(m[1]));
-      if(m[2])end=Math.min(size-1,Number(m[2]));
-      if(!m[1]&&m[2])start=Math.max(0,size-Number(m[2]));
-      if(end<start)end=start;
-      contentRange=`bytes ${start}-${end}/${size}`;
+    if(!m||(!m[1]&&!m[2])||!size)throw new InvalidMediaRange(size);
+    if(!m[1]){
+      const suffix=Number(m[2]);
+      if(!Number.isSafeInteger(suffix)||suffix<=0)throw new InvalidMediaRange(size);
+      start=Math.max(0,size-suffix);
+    }else{
+      start=Number(m[1]);
+      if(!Number.isSafeInteger(start)||start>=size)throw new InvalidMediaRange(size);
+      if(m[2]){
+        const requestedEnd=Number(m[2]);
+        if(!Number.isSafeInteger(requestedEnd)||requestedEnd<start)throw new InvalidMediaRange(size);
+        end=Math.min(size-1,requestedEnd);
+      }
     }
+    contentRange=`bytes ${start}-${end}/${size}`;
   }
   return {start,end,contentRange};
 }

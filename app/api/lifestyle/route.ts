@@ -1,3 +1,4 @@
+import {scoreView} from "../../../lib/score-view";
 import {NextResponse} from "next/server";
 import {prisma} from "../../../lib/db";
 import {errorJson,requireApiUser} from "../../../lib/http";
@@ -35,7 +36,7 @@ export async function GET(){
  if(score?.recovery!=null&&score.recovery<60)tips.push("Reduziere hohe Belastung und priorisiere aktive Regeneration.");
  if(!tips.length)tips.push("Deine Schlafbasis ist stabil. Halte deine Routine konstant.");
  return NextResponse.json({
-  ok:true,advanced,score,
+  ok:true,advanced,score:scoreView(score,await hasFeature(user.subscriptionTier,"score_details")),
   sleep:{
    hoursLatest:sleepHours[0]??checks[0]?.sleepHours??null,average7,average30,
    change7:trend(average7,avg(prior7)),regularity,score:scoreSleep,stages:advanced?stages:null,

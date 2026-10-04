@@ -2,7 +2,7 @@ import {NextResponse} from "next/server";
 import {prisma} from "../../../../../../lib/db";
 import {errorJson,isSameOrigin,requireApiUser,dateOnly} from "../../../../../../lib/http";
 export async function POST(request:Request,{params}:{params:Promise<{id:string}>}){
-  if(!isSameOrigin(request)&&request.headers.get("x-bd-client")!=="mobile")return errorJson("Ungültige Anfrage.",403);
+  if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
   const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
   const {id}=await params;
   const plan=await prisma.trainingPlan.findFirst({where:{id,active:true,isTemplate:true,...(user.subscriptionTier==="FREE"?{proOnly:false}:{})},include:{items:{orderBy:[{dayIndex:"asc"},{orderIndex:"asc"}]}}});

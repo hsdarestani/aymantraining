@@ -1,6 +1,6 @@
 import {prisma} from "../../../../lib/db";
 import {errorJson,requireApiUser} from "../../../../lib/http";
-import {getPrivateObject} from "../../../../lib/storage";
+import {getPrivateObject,InvalidMediaRange} from "../../../../lib/storage";
 
 export async function GET(request:Request,{params}:{params:Promise<{id:string}>}){
   const {id}=await params;
@@ -33,5 +33,8 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
     if(object.contentRange)headers["content-range"]=object.contentRange;
     if(publicExercise)headers["x-bd-exercise-media"]="1";
     return new Response(object.body,{status:object.contentRange?206:200,headers});
-  }catch{return errorJson("Datei nicht verfügbar.",404);}
+  }catch(error){
+    if(error instanceof InvalidMediaRange)return new Response(null,{status:416,headers:{"content-range":`bytes */${error.size}`,"accept-ranges":"bytes"}});
+    return errorJson("Datei nicht verfügbar.",404);
+  }
 }

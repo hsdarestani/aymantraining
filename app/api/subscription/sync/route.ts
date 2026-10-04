@@ -4,7 +4,7 @@ import {errorJson,isSameOrigin,requireApiUser} from "../../../../lib/http";
 import {recomputeUserEntitlement,syncStorePurchase} from "../../../../lib/store-billing";
 
 export async function POST(request:Request){
-  if(!isSameOrigin(request)&&request.headers.get("x-bd-client")!=="mobile")return errorJson("Ungültige Anfrage.",403);
+  if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
   const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
   const rows=await prisma.subscription.findMany({
     where:{userId:user.id,provider:{in:["app_store","google_play"]}},

@@ -42,7 +42,7 @@ export async function GET(){
  return NextResponse.json({ok:true,items:items.map(x=>({...x,fuelGrade:grade(x.fuelScore)})),targets:t});
 }
 export async function POST(request:Request){
- if(!isSameOrigin(request)&&request.headers.get("x-bd-client")!=="mobile")return errorJson("Ungültige Anfrage.",403);
+ if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
  if(!await hasFeature(user.subscriptionTier,"nutrition_fuel"))return errorJson("BE FUEL ist PRO.",403);
  const p=schema.safeParse(await request.json().catch(()=>null));if(!p.success)return errorJson("Ungültige Ernährungsdaten.",422);
