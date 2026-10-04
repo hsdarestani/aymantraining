@@ -3,9 +3,10 @@ import {getMessaging} from "firebase-admin/messaging";
 import {prisma} from "./db";
 
 function credentials(){
-  if(process.env.FIREBASE_SERVICE_ACCOUNT_B64){
+  const unified=process.env.GOOGLE_SERVICE_ACCOUNT_B64||process.env.FIREBASE_SERVICE_ACCOUNT_B64;
+  if(unified){
     try{
-      const json=JSON.parse(Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_B64,"base64").toString("utf8"));
+      const json=JSON.parse(Buffer.from(unified,"base64").toString("utf8"));
       return {projectId:json.project_id,clientEmail:json.client_email,privateKey:json.private_key};
     }catch{return null}
   }
