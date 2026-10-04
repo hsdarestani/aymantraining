@@ -1,17 +1,24 @@
 name: Generate Lockfiles
-# dependency refresh
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
+      - "package.json"
+      - "mobile/package.json"
       - ".github/workflows/lockfiles.yml"
 
 permissions:
   contents: write
 
+concurrency:
+  group: bedifferent-lockfiles-v2
+  cancel-in-progress: true
+
 jobs:
   lock:
+    if: github.actor != 'bedifferent-ci'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,17 +32,13 @@ jobs:
           npm install --package-lock-only --ignore-scripts
           cd mobile
           npm install --package-lock-only --ignore-scripts
-      - name: Commit lockfiles
+      - name: Commit latest lockfiles
         run: |
           git config user.name "bedifferent-ci"
           git config user.email "ci@bedifferent.local"
           git add package-lock.json mobile/package-lock.json
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m "build: lock web and native dependencies"
+          git commit -m "build: lock direct store dependencies"
+          git fetch origin main
+          git rebase origin/main
           git push origin HEAD:main
-
-# dependency refresh 3
-
-# dependency refresh 4
-
-# direct-store-refresh
