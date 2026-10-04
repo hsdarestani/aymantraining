@@ -1,5 +1,7 @@
 import {useCallback,useState} from "react";
 import {ActivityIndicator,Pressable,RefreshControl,ScrollView,StyleSheet,Text,View} from "react-native";
+import Svg,{Circle} from "react-native-svg";
+import Animated,{FadeIn,FadeInDown,ZoomIn} from "react-native-reanimated";
 import {router,useFocusEffect} from "expo-router";
 import {Card,Eyebrow,SectionTitle} from "../../components/Card";
 import Brand from "../../components/Brand";
@@ -9,6 +11,20 @@ import {syncHealth} from "../../lib/health";
 import {C,radius} from "../../theme";
 
 function Bar({value,max}:{value:number;max:number}){const pct=Math.max(0,Math.min(100,max?value/max*100:0));return <View style={s.metricTrack}><View style={[s.metricFill,{width:`${pct}%`}]}/></View>}
+
+function ScoreSignature({score,level}:{score:number;level:string}){
+ const r=74,circ=2*Math.PI*r,pct=Math.max(0,Math.min(100,score)),complete=pct>=100;
+ return <View style={s.signature}>
+  <Svg width={188} height={188} viewBox="0 0 188 188" style={s.signatureSvg}>
+   <Circle cx="94" cy="94" r={r} stroke="#252928" strokeWidth="9" fill="none"/>
+   <Circle cx="94" cy="94" r={r} stroke={C.volt} strokeWidth="9" fill="none" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={circ*(1-pct/100)} transform="rotate(-90 94 94)"/>
+  </Svg>
+  <View style={s.signatureCenter}><Text style={s.signatureValue}>{pct}<Text style={s.signaturePercent}>%</Text></Text><Text style={s.signatureLevel}>{level}</Text></View>
+  {complete?<Animated.View entering={ZoomIn.duration(300)} style={s.explosion}>{Array.from({length:12},(_,i)=><View key={i} style={[s.spark,{transform:[{rotate:(i*30)+"deg"},{translateY:-98}]}]}/>)}</Animated.View>:null}
+  {complete?<Animated.Text entering={FadeInDown.duration(450)} style={s.truly}>TRULY DIFFERENT</Animated.Text>:null}
+ </View>
+}
+
 
 export default function Home(){
  const [d,setD]=useState<any>(null),[refreshing,setRefreshing]=useState(false),[syncing,setSyncing]=useState(false);
@@ -21,7 +37,7 @@ export default function Home(){
  return <ScrollView style={s.safe} contentContainerStyle={s.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
   <View style={s.top}><Brand compact/><Text style={s.plan}>{d.user.tier}</Text></View>
   <View style={s.hero}><Text style={s.eyebrow}>GUTEN MORGEN, {(d.user.name||"ATHLET").toUpperCase()}</Text><Text style={s.title}>BAUE DEINEN{"\\n"}ATHLETEN.</Text><Text style={s.copy}>Daten werden zu einer klaren Entscheidung für heute.</Text></View>
-  <Card style={s.scoreCard}><Eyebrow>BE DIFFERENT LEISTUNGSWERT</Eyebrow><Text style={s.score}>{score?.total??0}<Text style={s.percent}>%</Text></Text><Text style={s.level}>{score?.level||"NORMAL"}</Text><View style={s.track}><View style={[s.fill,{width:`${score?.total??0}%`}]}/></View><Text style={s.data}>DATEN {score?.completeness??0}% VOLLSTÄNDIG</Text></Card>
+  <Card style={s.scoreCard}><Eyebrow>BE DIFFERENT LEISTUNGSWERT</Eyebrow><ScoreSignature score={score?.total??0} level={score?.level||"NORMAL"}/><View style={s.track}><View style={[s.fill,{width:`${score?.total??0}%`}]}/></View><Text style={s.data}>DATEN {score?.completeness??0}% VOLLSTÄNDIG</Text></Card>
 
   <Card>
    <View style={s.cardHead}><View><Eyebrow>TRAINER RADAR</Eyebrow><SectionTitle>{d.recommendations?.[0]?.title||"Daten sammeln."}</SectionTitle></View><Text style={s.live}>{d.radarLocked?"◆ PRO":"● AKTIV"}</Text></View>
@@ -43,7 +59,7 @@ export default function Home(){
 }
 const s=StyleSheet.create({
  safe:{flex:1,backgroundColor:C.bg},content:{padding:16,paddingBottom:112,gap:12},center:{flex:1,backgroundColor:C.bg,alignItems:"center",justifyContent:"center"},top:{height:56,flexDirection:"row",justifyContent:"space-between",alignItems:"center"},plan:{color:C.volt,fontSize:8,fontWeight:"900",letterSpacing:1.8,borderWidth:1,borderColor:"#D7FF0040",borderRadius:20,paddingVertical:7,paddingHorizontal:10},
- hero:{paddingVertical:20},eyebrow:{color:C.volt,fontSize:9,fontWeight:"900",letterSpacing:2.2},title:{color:C.ink,fontSize:58,lineHeight:49,fontWeight:"900",letterSpacing:-3.6,marginTop:12},copy:{color:C.dim,fontSize:13,lineHeight:20,maxWidth:310,marginTop:16},scoreCard:{alignItems:"center",paddingVertical:28},score:{color:C.ink,fontSize:88,fontWeight:"900",letterSpacing:-6,marginTop:8},percent:{fontSize:34,color:C.volt},level:{color:C.volt,fontSize:10,fontWeight:"900",letterSpacing:2},track:{height:4,backgroundColor:"#252928",width:"100%",marginTop:22,overflow:"hidden"},fill:{height:"100%",backgroundColor:C.volt},data:{color:C.dim,fontSize:8,fontWeight:"800",letterSpacing:1.4,marginTop:9},
+ hero:{paddingVertical:20},eyebrow:{color:C.volt,fontSize:9,fontWeight:"900",letterSpacing:2.2},title:{color:C.ink,fontSize:58,lineHeight:49,fontWeight:"900",letterSpacing:-3.6,marginTop:12},copy:{color:C.dim,fontSize:13,lineHeight:20,maxWidth:310,marginTop:16},scoreCard:{alignItems:"center",paddingVertical:28},score:{color:C.ink,fontSize:88,fontWeight:"900",letterSpacing:-6,marginTop:8},percent:{fontSize:34,color:C.volt},level:{color:C.volt,fontSize:10,fontWeight:"900",letterSpacing:2},signature:{width:210,height:225,alignItems:"center",justifyContent:"center",marginTop:4},signatureSvg:{position:"absolute",top:7},signatureCenter:{position:"absolute",top:49,alignItems:"center"},signatureValue:{color:C.ink,fontSize:60,fontWeight:"900",letterSpacing:-5},signaturePercent:{fontSize:22,color:C.volt},signatureLevel:{color:C.volt,fontSize:9,fontWeight:"900",letterSpacing:1.8},explosion:{position:"absolute",top:101,left:104,width:2,height:2},spark:{position:"absolute",width:3,height:17,borderRadius:2,backgroundColor:C.volt},truly:{position:"absolute",bottom:2,color:C.volt,fontSize:10,fontWeight:"900",letterSpacing:2},track:{height:4,backgroundColor:"#252928",width:"100%",marginTop:22,overflow:"hidden"},fill:{height:"100%",backgroundColor:C.volt},data:{color:C.dim,fontSize:8,fontWeight:"800",letterSpacing:1.4,marginTop:9},
  cardHead:{flexDirection:"row",justifyContent:"space-between",gap:10},live:{color:C.green,fontSize:8,fontWeight:"900",letterSpacing:1.2},cardCopy:{color:C.dim,fontSize:13,lineHeight:20,marginTop:10},radarCta:{height:44,borderRadius:radius.md,borderWidth:1,borderColor:"#D7FF0055",alignItems:"center",justifyContent:"center",marginTop:14},radarCtaText:{color:C.volt,fontSize:8,fontWeight:"900",letterSpacing:1},
  workout:{minHeight:180,justifyContent:"flex-end",backgroundColor:"#10150C"},workoutTitle:{color:C.ink,fontSize:32,fontWeight:"900",letterSpacing:-1.5,marginTop:8},arrow:{color:C.volt,fontSize:10,fontWeight:"900",letterSpacing:1.5,marginTop:18},
  metric:{marginTop:15},metricHead:{flexDirection:"row",justifyContent:"space-between",alignItems:"center"},metricName:{color:C.dim,fontSize:8,fontWeight:"900",letterSpacing:1.1},metricValue:{color:C.ink,fontSize:9,fontWeight:"900"},metricTrack:{height:5,backgroundColor:C.panel2,borderRadius:4,overflow:"hidden",marginTop:7},metricFill:{height:"100%",backgroundColor:C.volt},calories:{color:C.dim,fontSize:8,fontWeight:"900",letterSpacing:1.1,marginTop:15},
