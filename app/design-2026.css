@@ -159,3 +159,5 @@ button,a,.tag,.primary,.secondary{transition:transform .2s ease,filter .2s ease,
   .app-mobile-top,.app-bottom-nav{display:none!important}
   .app-desktop-top{display:block}
 }
+
+.app-wordmark{display:flex;align-items:center}.app-wordmark img{display:block;width:138px;height:44px;object-fit:contain;object-position:left center}.app-mobile-top .app-wordmark img{width:122px;height:40px}.drawer-head .app-wordmark img{width:150px;height:48px}
