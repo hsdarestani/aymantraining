@@ -130,6 +130,7 @@ RUBY
   fi
 fi
 
+set +u
 xcodebuild \
   -workspace "$workspace" \
   -scheme "$scheme" \
@@ -140,6 +141,7 @@ xcodebuild \
   "${provisioningArgs[@]}" \
   "${extraAuth[@]}" \
   archive
+set -u
 
 if [ "$signingStyle" = "Manual" ]; then
   if [ -n "${IOS_BUNDLE_PROFILES_JSON:-}" ]; then
@@ -189,6 +191,7 @@ cat > "$PWD/build/ExportOptions.plist" <<PLIST
 PLIST
 fi
 
+set +u
 xcodebuild \
   -exportArchive \
   -archivePath "$archive" \
@@ -196,5 +199,6 @@ xcodebuild \
   -exportOptionsPlist "$PWD/build/ExportOptions.plist" \
   "${provisioningArgs[@]}" \
   "${extraAuth[@]}"
+set -u
 
 test -n "$(find "$exportDir" -name '*.ipa' -print -quit)"
