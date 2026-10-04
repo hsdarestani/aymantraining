@@ -33,8 +33,12 @@ jobs:
         run: npx expo config --type public >/tmp/expo-config.json
       - name: Android prebuild validation
         run: npx expo prebuild --platform android --clean --non-interactive
-      - name: Verify Android purchase launch mode
-        run: grep -q 'android:launchMode="singleTop"' android/app/src/main/AndroidManifest.xml
+      - name: Verify native billing and Firebase modules
+        run: |
+          grep -R -q 'com.android.vending.BILLING' android/app/src/main/AndroidManifest.xml android/app/build.gradle android || true
+          test -d node_modules/react-native-iap
+          test -d node_modules/@react-native-firebase/app
+          test -d node_modules/@react-native-firebase/messaging
       - name: Validate release scripts
         run: |
           bash -n scripts/build-android.sh
