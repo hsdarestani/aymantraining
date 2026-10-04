@@ -9,5 +9,5 @@
   ],
   "android_track": "internal",
   "auto_submit": true,
-  "release_notes": "BE DIFFERENT 1.0.0 build 3 retry after Apple profile API relationship fix"
+  "release_notes": "BE DIFFERENT 1.0.0 build 3 retry with macOS Bash provisioning fix"
 }
