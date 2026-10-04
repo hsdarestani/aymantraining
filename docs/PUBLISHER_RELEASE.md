@@ -1,26 +1,15 @@
-# BE DIFFERENT · Publisher Release Setup
+# BE DIFFERENT · Publisher Release
 
-## App record
+BE DIFFERENT is built through A+ Publisher from:
+`https://github.com/hsdarestani/aymantraining`
 
-Create the two store records manually first, then create one app in Publisher:
+Stable identifiers:
 
-- Name: `BE DIFFERENT`
-- Platform: `Android + iOS`
-- Framework: `React Native`
-- Repository: `https://github.com/hsdarestani/aymantraining`
-- Branch: `main`
 - Android package: `com.smarbiz.bedifferent`
 - iOS bundle ID: `com.smarbiz.bedifferent`
-- Privacy URL: `https://bedifferent.smarbiz.sbs/legal/privacy`
-- Support URL: `https://bedifferent.smarbiz.sbs/`
-- Marketing URL: `https://bedifferent.smarbiz.sbs/`
-- Requires login: enabled
+- Product IDs: `bd_pro_monthly`, `bd_pro_yearly`
 
-Publisher supplies `APP_VERSION_NAME` and `APP_BUILD_NUMBER` to each build. `mobile/app.config.ts` maps them into Android versionCode and iOS buildNumber.
-
-## Publisher build config
-
-Use this build config in the BE DIFFERENT app record:
+Publisher auto-bootstraps the BE DIFFERENT app record when the first authenticated release request arrives. The generated build configuration is:
 
 ```json
 {
@@ -28,65 +17,89 @@ Use this build config in the BE DIFFERENT app record:
   "android_artifact": "mobile/android/app/build/outputs/bundle/release/*.aab",
   "ios_command": "bash mobile/scripts/build-ios.sh",
   "ios_artifact": "mobile/ios/build/export/*.ipa",
-  "env": {
-    "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "SET_IN_PUBLISHER",
-    "EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY": "SET_IN_PUBLISHER",
-    "EXPO_PUBLIC_EAS_PROJECT_ID": "SET_IN_PUBLISHER"
-  }
+  "env": {}
 }
 ```
 
-The three `EXPO_PUBLIC_*` values are build-time SDK identifiers and are safe to embed in the app binary. Store private keys and signing passwords must not be placed in this JSON.
+## Android cloud builder
 
-## Android Publisher agent
+Publisher GitHub repository secrets:
 
-The Linux agent needs Node 22, JDK 17 and Android SDK.
+- `BEDIFFERENT_FIREBASE_ANDROID_GOOGLE_SERVICES_B64`
+- `BEDIFFERENT_ANDROID_KEYSTORE_B64`
+- `BEDIFFERENT_ANDROID_KEYSTORE_PASSWORD`
+- `BEDIFFERENT_ANDROID_KEY_ALIAS`
+- `BEDIFFERENT_ANDROID_KEY_PASSWORD`
 
-Create one upload keystore and store it only on the agent. The agent environment must contain:
+The Linux cloud agent reconstructs `google-services.json` and the upload keystore only for the build job. Neither file is committed.
 
-- `ANDROID_KEYSTORE_PATH`
-- `ANDROID_KEYSTORE_PASSWORD`
-- `ANDROID_KEY_ALIAS`
-- `ANDROID_KEY_PASSWORD`
+## iOS cloud builder
 
-The build script runs a clean Expo Android prebuild, injects release signing from those environment variables and produces a signed AAB.
+Publisher GitHub repository secrets:
 
-Google Play upload is handled by Publisher with a Google service-account JSON stored in the Publisher Store Account, not in the app repo or build config.
+- `BEDIFFERENT_FIREBASE_IOS_GOOGLE_SERVICE_INFO_B64`
+- `BEDIFFERENT_APPLE_TEAM_ID`
+- `BEDIFFERENT_ASC_KEY_ID`
+- `BEDIFFERENT_ASC_ISSUER_ID`
+- `BEDIFFERENT_ASC_PRIVATE_KEY_B64`
 
-## iOS Publisher agent
+The macOS cloud agent reconstructs `GoogleService-Info.plist` and the App Store Connect Team API key for the build. Xcode automatic signing is used.
 
-The macOS agent needs Node 22, CocoaPods and a current Xcode.
+## Store accounts inside Publisher
 
-Agent environment:
+Google Store Account:
+- store the full Google Play service-account JSON as the encrypted credential
+- give that service account access to the BE DIFFERENT app in Play Console
 
-- `APPLE_TEAM_ID`
-- `ASC_KEY_PATH`
-- `ASC_KEY_ID`
-- `ASC_ISSUER_ID`
+Apple Store Account:
+- Issuer ID
+- Key ID
+- Team ID
+- App Store Connect Team API private key
 
-`ASC_KEY_PATH` points to the App Store Connect Team API `.p8` file stored securely on the Mac. The same Team API key can also be stored in Publisher's Apple Store Account for upload, processing checks and metadata automation.
+These Store Accounts are used for upload, store status and later submission automation. Native build signing values remain GitHub Secrets on the Publisher repository.
 
-The iOS build script performs a clean Expo iOS prebuild, automatic signing, archive and App Store export. It verifies an IPA exists before the job succeeds.
+## Triggering a build
 
-## Store products
+The BE DIFFERENT repository has `release-request.json`. Keep `enabled=false` until credentials are complete.
 
-Create:
+When ready:
+1. set version and build number
+2. set `enabled=true`
+3. commit
 
-- `bd_pro_monthly`
-- `bd_pro_yearly`
+`.github/workflows/publisher-release.yml` calls:
+`POST /apps/automation/release/`
 
-Both grant RevenueCat entitlement `pro`.
+Required BE DIFFERENT repository secrets:
+- `PUBLISHER_URL=https://publisher.smarbiz.sbs`
+- `PUBLISHER_AUTOMATION_TOKEN`
 
-Configure the 7-day trial in App Store Connect and Google Play. Do not rely on the internal test-trial endpoint once RevenueCat production credentials are connected.
+The same automation token must exist in Publisher production.
 
-RevenueCat webhook:
+## Store billing
 
-`https://bedifferent.smarbiz.sbs/api/webhooks/revenuecat`
+There is no RevenueCat.
 
-Authorization:
+- iOS purchase: StoreKit through `react-native-iap`
+- Android purchase: Google Play Billing through `react-native-iap`
+- Backend verifies Apple with App Store Server API
+- Backend verifies Google with Android Publisher API
+- transaction is finished only after backend verification succeeds
 
-`Bearer <REVENUECAT_WEBHOOK_SECRET>`
+Store trial is configured in App Store Connect and Google Play, not as a production backend trial.
 
-## Review account
+## Push
 
-Before submission create a dedicated Athlete review account, complete onboarding and provide the credentials in App Review / Play review instructions. If reviewers need PRO-only flows, grant that review account PRO or use a store sandbox subscription.
+There is no Expo Push service.
+
+- Native app uses Firebase Messaging
+- Android: FCM
+- iOS: FCM token delivered through APNs
+- Backend sends directly with Firebase Admin
+
+## Media and email
+
+- private media is stored on the BE DIFFERENT VPS volume
+- database and media are backed up daily on the VPS with 14 day retention
+- email is sent through Strato SMTP
