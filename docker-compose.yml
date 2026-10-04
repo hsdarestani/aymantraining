@@ -71,6 +71,36 @@ services:
       - web
     networks: [internal]
 
+  backup:
+    image: postgres:17-alpine
+    container_name: bedifferent-backup
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: ${DB_PASSWORD}
+    volumes:
+      - bedifferent-data:/source:ro
+      - ${BACKUP_DIR:-/opt/bedifferent/backups}:/backups
+    command:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /backups
+        while true; do
+          stamp=$$(date -u +%Y%m%dT%H%M%SZ)
+          pg_dump -h db -U bedifferent -d bedifferent -Fc > "/backups/db-$$stamp.dump.tmp" &&
+            mv "/backups/db-$$stamp.dump.tmp" "/backups/db-$$stamp.dump"
+          if [ -d /source/uploads ]; then
+            tar -czf "/backups/media-$$stamp.tar.gz.tmp" -C /source uploads &&
+              mv "/backups/media-$$stamp.tar.gz.tmp" "/backups/media-$$stamp.tar.gz"
+          fi
+          find /backups -type f -mtime +14 -delete || true
+          sleep 86400
+        done
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [internal]
+
 networks:
   internal:
 
