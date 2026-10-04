@@ -13,7 +13,7 @@ export default async function Community(){
     improvementLeaderboard()
   ]);
   return <main className="sub-shell">
-    <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard">START</Link><Link href="/athlete">ATHLET</Link></nav></header>
+    <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard">BEGINN</Link><Link href="/athlete">ATHLET</Link></nav></header>
     <section className="page-hero compact-hero"><div><span className="eyebrow">GEMEINSCHAFT</span><h1>Gemeinsam weiter.</h1><p>Aufgaben belohnen Fortschritt und Beständigkeit. Die Rangliste zählt Verbesserung statt absoluter Leistung.</p></div><div className="hero-stat"><span>SERIE</span><strong>{gamification.streak}</strong><small>TAGE IN FOLGE</small></div></section>
     <CommunityClient challenges={challenges} entries={gamification.entries.map(e=>({challengeId:e.challengeId,progress:e.progress,completedAt:e.completedAt?.toISOString()||null}))} badges={gamification.badges.map(b=>({id:b.id,name:b.name}))} leaderboard={leaderboard}/>
   </main>;
