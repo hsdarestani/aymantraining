@@ -99,3 +99,6 @@ The platform and admin tools support the exercise schema, but real launch media 
 - exercise images
 - short coach videos
 - final legal company data/review
+
+
+Validation marker: direct Apple Google Firebase SMTP architecture with regenerated lockfiles.
