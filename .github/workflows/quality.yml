@@ -44,6 +44,8 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
       - name: Visible copy policy
         run: node scripts/check-visible-copy.mjs
+      - name: Navigation coverage
+        run: node scripts/check-navigation.mjs
       - name: Validate schema and TypeScript
         run: npm run check
       - name: Prepare database
