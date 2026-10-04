@@ -470,6 +470,7 @@ model Subscription {
   updatedAt   DateTime         @updatedAt
 
   @@index([userId, status])
+  @@unique([provider, externalId])
 }
 
 model Badge {
