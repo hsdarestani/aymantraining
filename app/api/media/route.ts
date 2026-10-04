@@ -14,6 +14,15 @@ const allowed={
   EXERCISE_VIDEO:{mime:/^video\/(mp4|quicktime|webm)$/,max:100*1024*1024}
 } as const;
 
+export async function GET(request:Request){
+  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
+  const url=new URL(request.url);const kind=url.searchParams.get("kind");
+  const allowedKinds=new Set(["PROGRESS_PHOTO","TECHNIQUE_VIDEO","TEST_VIDEO","VOICE_MESSAGE"]);
+  if(kind&&!allowedKinds.has(kind))return errorJson("Ungültiger Medientyp.",422);
+  const items=await prisma.mediaAsset.findMany({where:{relatedUserId:user.id,...(kind?{kind:kind as any}:{})},orderBy:{createdAt:"desc"},take:100});
+  return NextResponse.json({ok:true,items:items.map(x=>({id:x.id,kind:x.kind,originalName:x.originalName,mimeType:x.mimeType,sizeBytes:x.sizeBytes,createdAt:x.createdAt}))});
+}
+
 export async function POST(request:Request){
   if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
   const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
