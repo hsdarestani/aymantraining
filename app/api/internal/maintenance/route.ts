@@ -24,7 +24,7 @@ export async function POST(request:Request){
   await prisma.authThrottle.deleteMany({where:{updatedAt:{lt:new Date(Date.now()-86400000)}}});
   await prisma.passwordResetToken.deleteMany({where:{expiresAt:{lt:new Date(Date.now()-86400000)}}});
 
-  const expired=await prisma.subscription.findMany({where:{provider:{in:["internal_trial","internal_referral"]},status:"active",renewsAt:{lte:now}}});
+  const expired=await prisma.subscription.findMany({where:{provider:{in:["internal_trial","referral_reward"]},status:"active",renewsAt:{lte:now}}});
   for(const s of expired){
     await prisma.subscription.update({where:{id:s.id},data:{status:"expired"}}).catch(()=>undefined);
     const other=await prisma.subscription.findFirst({where:{userId:s.userId,status:"active",OR:[{renewsAt:null},{renewsAt:{gt:now}}]}});
@@ -58,21 +58,23 @@ export async function POST(request:Request){
     const last24h=new Date(now.getTime()-86400000);
     const last2h=new Date(now.getTime()-2*3600000);
 
-    const [score,recommendations,gamification,nextWorkout,todayCheck,todayNutrition,recentBadge]=await Promise.all([
+    const [score,recommendations,gamification,nextWorkout,todayCheck,todayNutrition,recentBadge,athleteContext]=await Promise.all([
       recomputeScoreForUser(user.id).catch(()=>null),
       evaluateRecommendations(user.id).catch(()=>[]),
       gamificationSnapshot(user.id).catch(()=>null),
       prisma.workout.findFirst({where:{userId:user.id,completedAt:null,scheduledAt:{gte:new Date(now.getTime()-15*60000)}},orderBy:{scheduledAt:"asc"}}),
       prisma.dailyCheck.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
       prisma.nutritionDaily.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
-      prisma.badge.findFirst({where:{userId:user.id,unlockedAt:{gte:last2h}},orderBy:{unlockedAt:"desc"}})
+      prisma.badge.findFirst({where:{userId:user.id,unlockedAt:{gte:last2h}},orderBy:{unlockedAt:"desc"}}),
+      prisma.athleteContext.findUnique({where:{userId:user.id}})
     ]);
 
-    if(local.hour>=7&&local.hour<=9&&!await alreadyQueued(user.id,"morning_brief",last24h)){
+    const morningHour=Math.max(4,Math.min(12,athleteContext?.preferredMorningHour??8));
+    if(local.hour===morningHour&&!await alreadyQueued(user.id,"morning_brief",last24h)){
       const recovery=score?.recovery;
-      const body=recovery!=null?`Recovery ${recovery} %. `:"";
-      const plan=nextWorkout&&sameLocalDate(nextWorkout.scheduledAt??now,now,tz)?`Heute: ${nextWorkout.title}.`:"Heute: Recovery und Consistency.";
-      if(await queueNotification({userId:user.id,category:"morning_brief",title:`Guten Morgen${user.name?", "+user.name:""}`,body:`${body}${plan} Be different.`,data:{route:"/dashboard"}}))queued++;
+      const body=recovery!=null?`Regeneration ${recovery} Prozent. `:"";
+      const plan=nextWorkout&&sameLocalDate(nextWorkout.scheduledAt??now,now,tz)?`Heute: ${nextWorkout.title}.`:"Heute: Regeneration und Beständigkeit.";
+      if(await queueNotification({userId:user.id,category:"morning_brief",title:`Guten Morgen${user.name?", "+user.name:""}`,body:`${body}${plan}`,data:{route:"/dashboard"}}))queued++;
     }
 
     if(nextWorkout?.scheduledAt){
@@ -92,18 +94,21 @@ export async function POST(request:Request){
       const checkSame=todayCheck&&sameLocalDate(todayCheck.date,now,tz);
       const nutritionSame=todayNutrition&&sameLocalDate(todayNutrition.date,now,tz);
       const water=nutritionSame?todayNutrition?.waterMl:checkSame?todayCheck?.waterMl:null;
-      if(water!=null&&water<1800){
-        const missing=Math.max(0,2500-water);
+      const waterTarget=athleteContext?.waterTargetMl??2500;
+      if(water!=null&&water<waterTarget*.72){
+        const missing=Math.max(0,waterTarget-water);
         if(await queueNotification({userId:user.id,category:"nutrition",title:"Wasser Ziel",body:`Du liegst ungefähr ${(missing/1000).toFixed(1).replace(".",",")} l unter deinem Tagesziel.`,data:{route:"/fuel"}}))queued++;
       }
     }
 
-    if(local.hour===21&&!await alreadyQueued(user.id,"sleep",last24h)){
+    const bedtimeHour=Number(String(athleteContext?.bedtimeTarget||"22:30").split(":")[0]||22);
+    const reminderHour=(bedtimeHour+23)%24;
+    if(local.hour===reminderHour&&!await alreadyQueued(user.id,"sleep",last24h)){
       const tomorrowStart=new Date(now.getTime()+3*3600000);
       const tomorrowEnd=new Date(now.getTime()+36*3600000);
       const tomorrowWorkout=await prisma.workout.findFirst({where:{userId:user.id,completedAt:null,scheduledAt:{gte:tomorrowStart,lte:tomorrowEnd}},orderBy:{scheduledAt:"asc"}});
       if(tomorrowWorkout){
-        if(await queueNotification({userId:user.id,category:"sleep",title:"BE RESTED",body:`Morgen steht ${tomorrowWorkout.title} an. Heute bewusst früher runterfahren.`,data:{route:"/lifestyle"}}))queued++;
+        if(await queueNotification({userId:user.id,category:"sleep",title:"Zeit für Regeneration",body:`Morgen steht ${tomorrowWorkout.title} an. Heute bewusst früher runterfahren.`,data:{route:"/lifestyle"}}))queued++;
       }
     }
 
@@ -115,7 +120,7 @@ export async function POST(request:Request){
     }
 
     if(recentBadge&&!await alreadyQueued(user.id,"achievement",last2h)){
-      if(await queueNotification({userId:user.id,category:"achievement",title:"YOU ARE DIFFERENT",body:`Neues Badge: ${recentBadge.name}.`,data:{route:"/community"}}))queued++;
+      if(await queueNotification({userId:user.id,category:"achievement",title:"Neuer Erfolg",body:`Neues Abzeichen: ${recentBadge.name}.`,data:{route:"/community"}}))queued++;
     }
 
     processed++;
