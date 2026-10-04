@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "916410703130",
+    "project_id": "bedifferent-723e6",
+    "storage_bucket": "bedifferent-723e6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916410703130:android:dae5967838db9f7f7ee0a3",
+        "android_client_info": {
+          "package_name": "com.smarbiz.bedifferent"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBR5R9i2DTUmNedgNx9mYAM_cBPdx0C3Z8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
