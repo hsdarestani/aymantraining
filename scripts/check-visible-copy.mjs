@@ -22,7 +22,7 @@ function walk(dir){
     const full=path.join(dir,entry.name).replaceAll("\\","/");
     if(ignored.some(x=>full===x||full.startsWith(x+"/")))continue;
     if(entry.isDirectory())walk(full);
-    else if(/\.(tsx|jsx)$/.test(entry.name))files.push(full);
+    else if(/\.(tsx|jsx|ts|js)$/.test(entry.name))files.push(full);
   }
 }
 for(const root of roots)walk(root);
