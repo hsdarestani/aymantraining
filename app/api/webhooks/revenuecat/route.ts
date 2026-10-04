@@ -10,9 +10,9 @@ function tierFrom(event:any){
   return id.includes("elite")?"ELITE":"PRO";
 }
 
-async function hasOtherActive(userId:string){
+async function hasOtherActiveNonRevenueCat(userId:string){
   const now=new Date();
-  return prisma.subscription.findFirst({where:{userId,status:"active",OR:[{renewsAt:null},{renewsAt:{gt:now}}]},orderBy:{updatedAt:"desc"}});
+  return prisma.subscription.findFirst({where:{userId,status:"active",provider:{not:"revenuecat"},OR:[{renewsAt:null},{renewsAt:{gt:now}}]},orderBy:{updatedAt:"desc"}});
 }
 
 async function grantReferralReward(referredUserId:string){
@@ -55,7 +55,8 @@ export async function POST(request:Request){
   }
 
   if(EXPIRE_EVENTS.has(type)){
-    const other=await hasOtherActive(userId);
+    await prisma.subscription.updateMany({where:{userId,provider:"revenuecat",status:"active"},data:{status:"expired",renewsAt:renewsAt??new Date()}});
+    const other=await hasOtherActiveNonRevenueCat(userId);
     if(!other)await prisma.user.update({where:{id:userId},data:{subscriptionTier:"FREE"}});
   }
 
