@@ -45,7 +45,7 @@ class BeDifferentWidgetProvider: AppWidgetProvider() {
   val workout=prefs.getString("workout","REGENERATION") ?: "REGENERATION"
   ids.forEach { id ->
    val view=RemoteViews(context.packageName,R.layout.be_different_widget)
-   view.setTextViewText(R.id.widgetScore,"\\${score}%")
+   view.setTextViewText(R.id.widgetScore,"\${score}%")
    view.setTextViewText(R.id.widgetLevel,level)
    view.setTextViewText(R.id.widgetWorkout,workout)
    manager.updateAppWidget(id,view)
