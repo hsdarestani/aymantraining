@@ -7,11 +7,15 @@ export function errorJson(message: string, status = 400, code?: string) {
 }
 
 export async function requireApiUser() {
-  const user = await getCurrentUser();
-  return user;
+  return getCurrentUser();
 }
 
 export function isSameOrigin(request: Request) {
+  const mobile =
+    request.headers.get("x-bd-client") === "mobile" &&
+    /^Bearer\s+\S+$/i.test(request.headers.get("authorization") || "");
+  if (mobile) return true;
+
   const origin = request.headers.get("origin");
   if (!origin) return true;
   const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
