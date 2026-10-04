@@ -1,5 +1,5 @@
 {
-  "enabled": false,
+  "enabled": true,
   "app_identifier": "com.smarbiz.bedifferent",
   "version_name": "1.0.0",
   "build_number": 2,
@@ -9,5 +9,5 @@
   ],
   "android_track": "internal",
   "auto_submit": false,
-  "release_notes": "BE DIFFERENT 1.0.0 build 2 native build retry"
+  "release_notes": "BE DIFFERENT 1.0.0 build 2 final Publisher retry after Expo Router dependency and dedicated iOS agent fix"
 }
