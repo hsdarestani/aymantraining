@@ -5,3 +5,8 @@ node_modules
 !.env.example
 data
 npm-debug.log*
+
+# Generated native credentials
+mobile/firebase/
+mobile/android/
+mobile/ios/
