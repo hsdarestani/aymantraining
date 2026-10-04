@@ -15,7 +15,13 @@
         "NSMicrophoneUsageDescription": "Das Mikrofon wird nur für Voice Messages an deinen Coach verwendet.",
         "NSCameraUsageDescription": "Die Kamera wird für freiwillige Fortschritts- und Technikvideos sowie den BE FUEL Barcode Scan verwendet."
       },
-      "icon": "./assets/favicon.png"
+      "icon": "./assets/favicon.png",
+      "appleTeamId": "884MVA2MD5",
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.smarbiz.bedifferent"
+        ]
+      }
     },
     "android": {
       "package": "com.smarbiz.bedifferent",
@@ -61,7 +67,8 @@
           "cameraPermission": "BE DIFFERENT benötigt deine Kamera für Technikvideos und Fortschrittsbilder.",
           "microphonePermission": "BE DIFFERENT benötigt dein Mikrofon für Technikvideos."
         }
-      ]
+      ],
+      "@bacons/apple-targets"
     ],
     "extra": {
       "apiUrl": "https://bedifferent.smarbiz.sbs"
