@@ -29,6 +29,7 @@
       "expo-router",
       "expo-secure-store",
       "expo-notifications",
+      "@kingstinct/react-native-healthkit",
       "react-native-health-connect",
       [
         "expo-build-properties",
