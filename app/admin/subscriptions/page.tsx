@@ -6,7 +6,7 @@ const pct=(n:number,d:number)=>d?Math.round(n/d*1000)/10:0;
 export default async function Subscriptions(){
  const now=new Date(),d7=new Date(Date.now()-7*86400000),d30=new Date(Date.now()-30*86400000),d60=new Date(Date.now()-60*86400000);
  const [users,subs,wearableUsers,waitlist,messages,settingsRow]=await Promise.all([
-   prisma.user.findMany({where:{role:"ATHLET"},select:{id:true,createdAt:true,onboardingCompleted:true,subscriptionTier:true,sessions:{select:{lastSeenAt:true}}}}),
+   prisma.user.findMany({where:{role:"ATHLETE"},select:{id:true,createdAt:true,onboardingCompleted:true,subscriptionTier:true,sessions:{select:{lastSeenAt:true}}}}),
    prisma.subscription.findMany({orderBy:{updatedAt:"desc"},take:500}),
    prisma.wearableDaily.groupBy({by:["userId"],_count:true}),
    prisma.waitlistEntry.count({where:{status:"WAITING"}}),
