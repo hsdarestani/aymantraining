@@ -30,35 +30,35 @@ export default async function Lifestyle(){
       ? String(checks[0].sleepHours)+" h"
       : "—";
   const line=(score?.recovery??100)<60
-    ? "Recovery is training too. Rest smart."
+    ? "Regeneration gehört zum Training. Erhole dich bewusst."
     : nextWorkout
-      ? "Plan für heute erfüllen. That's different."
-      : "Consistency schlägt Motivation.";
+      ? "Den Plan für heute erfüllen. Das macht den Unterschied."
+      : "Beständigkeit schlägt Motivation.";
   const ringBackground="conic-gradient(var(--volt) 0 "+stepPct+"%,rgba(255,255,255,.07) "+stepPct+"% 100%)";
 
   return <main className="sub-shell">
     <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link></header>
     <section className="page-hero compact-hero">
-      <div><span className="eyebrow">LIFESTYLE</span><h1>Recovery ist Teil der Leistung.</h1><p>Schlaf, Aktivität und Fokus ergänzen das Training, ohne daraus medizinische Diagnosen abzuleiten.</p></div>
-      <div className="hero-stat"><span>RECOVERY</span><strong>{score?.recovery??"—"}</strong><small>TRAINING SIGNAL</small></div>
+      <div><span className="eyebrow">REGENERATION</span><h1>Regeneration ist Teil der Leistung.</h1><p>Schlaf, Aktivität und Fokus ergänzen das Training, ohne daraus medizinische Diagnosen abzuleiten.</p></div>
+      <div className="hero-stat"><span>REGENERATION</span><strong>{score?.recovery??"—"}</strong><small>TRAININGSSIGNAL</small></div>
     </section>
     <section className="lifestyle-grid">
       <article className="panel rested-card">
-        <span className="eyebrow">BE RESTED</span><h2>Schlaf</h2>
+        <span className="eyebrow">SCHLAF</span><h2>Schlaf</h2>
         <div className="sleep-number"><strong>{sleepText}</strong><span>LETZTE NACHT</span></div>
         {advanced?<><div className="body-stats">
-          <div><span>SLEEP SCORE</span><strong>{sleepScore??"—"}</strong><small>0 bis 100</small></div>
+          <div><span>SCHLAFWERT</span><strong>{sleepScore??"—"}</strong><small>0 bis 100</small></div>
           <div><span>7 TAGE</span><strong>{s7?.toFixed(1)??"—"} h</strong><small>Durchschnitt</small></div>
           <div><span>30 TAGE</span><strong>{s30?.toFixed(1)??"—"} h</strong><small>persönlicher Trend</small></div>
-        </div><p className="muted">{s7!=null&&s7<7?"Schlaf liegt aktuell unter deinem Ziel. Heute Abend früher runterfahren und die nächste Belastung im Kontext deiner Recovery betrachten.":"Dein Schlaftrend ist stabil. Regelmäßigkeit beibehalten."}</p></>:<div className="locked-copy"><p className="muted">FREE zeigt die Schlafdauer. Qualität, Trend und persönliche Tipps sind PRO.</p><Link href="/pricing" className="secondary">PRO TESTEN</Link></div>}
+        </div><p className="muted">{s7!=null&&s7<7?"Schlaf liegt aktuell unter deinem Ziel. Heute Abend früher runterfahren und die nächste Belastung im Kontext deiner Regeneration betrachten.":"Dein Schlaftrend ist stabil. Regelmäßigkeit beibehalten."}</p></>:<div className="locked-copy"><p className="muted">KOSTENLOS zeigt die Schlafdauer. Qualität, Trend und persönliche Tipps sind PRO.</p><Link href="/pricing" className="secondary">PRO TESTEN</Link></div>}
       </article>
       <article className="panel active-card">
-        <span className="eyebrow">BE ACTIVE</span><h2>Heute bewegen.</h2>
+        <span className="eyebrow">AKTIVITÄT</span><h2>Heute bewegen.</h2>
         <div className="activity-ring" style={{background:ringBackground}}><div><strong>{steps.toLocaleString("de-DE")}</strong><small>SCHRITTE</small></div></div>
-        <div className="body-stats"><div><span>ACTIVE KCAL</span><strong>{Math.round(latest?.activeCalories??0)||"—"}</strong></div><div><span>VO2MAX</span><strong>{advanced?latest?.vo2max??"—":"PRO"}</strong></div></div>
+        <div className="body-stats"><div><span>AKTIVE KCAL</span><strong>{Math.round(latest?.activeCalories??0)||"—"}</strong></div><div><span>VO2MAX</span><strong>{advanced?latest?.vo2max??"—":"PRO"}</strong></div></div>
       </article>
       <LifestyleClient/>
-      <article className="panel different-line"><span className="eyebrow">DIFFERENT LINE</span><blockquote>“{line}”</blockquote><Link className="secondary" href="/settings">DAILY CHECK</Link></article>
+      <article className="panel different-line"><span className="eyebrow">TAGESIMPULS</span><blockquote>“{line}”</blockquote><Link className="secondary" href="/settings">TAGESCHECK</Link></article>
     </section>
   </main>;
 }
