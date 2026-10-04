@@ -33,3 +33,10 @@ jobs:
         run: npx expo config --type public >/tmp/expo-config.json
       - name: Android prebuild validation
         run: npx expo prebuild --platform android --clean --non-interactive
+      - name: Verify Android purchase launch mode
+        run: grep -q 'android:launchMode="singleTop"' android/app/src/main/AndroidManifest.xml
+      - name: Validate release scripts
+        run: |
+          bash -n scripts/build-android.sh
+          bash -n scripts/build-ios.sh
+          node --check scripts/configure-android-signing.mjs
