@@ -119,23 +119,6 @@ jobs:
             docker compose --env-file .env.production run --rm migrate
             docker compose --env-file .env.production up -d --remove-orphans web scheduler backup
 
-            ADMIN_PASSWORD="$(openssl rand -hex 16)"
-            docker compose --env-file .env.production run --rm -e ADMIN_PASSWORD="$ADMIN_PASSWORD" migrate node scripts/bootstrap-production-admin.mjs
-            cat >/tmp/bedifferent-admin-bootstrap.pub <<'PUBKEY'
-            -----BEGIN PUBLIC KEY-----
-            MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAizuJrfgipAEse3leZwio
-            tAUArvl+V9k5nv4s5oAHbvUqHuSndufJv1LVWGUK7QnPF3EH6lj2i4yJmgZG3aQ5
-            OgUy7jS+pxUFpXD/sFvLXBwmkYKPfBP5QTeaOKOyCxlgoVQcpDsQ1Y28He2U1rQb
-            nmbIgIaTbZRVOPGQD5YLww6pm9wGFu/n5gJXXSBHmgxMZfmo5jdPXMnf13lW59YF
-            5D3euH+SACPN5yWMIMsC/IkDw60PQEE7yOdhmksZEq+xSlulUtM8lFnoD+gMU0xz
-            i+jav3/4ZKt7W5KGJGzJMwI8sVZNxyG7CQbXaeFu9yjXkYwvlcEkAbg1G/0tPbAq
-            5QIDAQAB
-            -----END PUBLIC KEY-----
-            PUBKEY
-            ADMIN_PASSWORD_ENCRYPTED="$(printf '%s' "$ADMIN_PASSWORD" | openssl pkeyutl -encrypt -pubin -inkey /tmp/bedifferent-admin-bootstrap.pub | base64 -w0)"
-            echo "ADMIN_PASSWORD_ENCRYPTED=$ADMIN_PASSWORD_ENCRYPTED"
-            unset ADMIN_PASSWORD
-            rm -f /tmp/bedifferent-admin-bootstrap.pub
 
             mkdir -p /etc/nginx/ssl/bedifferent
             if [ -n "$CLOUDFLARE_ORIGIN_CERT_B64" ] && [ -n "$CLOUDFLARE_ORIGIN_KEY_B64" ]; then
