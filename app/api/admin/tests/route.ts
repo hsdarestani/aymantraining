@@ -5,7 +5,7 @@ import {requireRole} from "../../../../lib/auth";
 import {errorJson,isSameOrigin} from "../../../../lib/http";
 import {queueNotification} from "../../../../lib/notifications";
 
-const block=z.object({metric:z.string().min(1).max(80),label:z.string().min(1).max(100),unit:z.string().min(1).max(30),instructions:z.string().max(500).optional()});
+const block=z.object({metric:z.string().min(1).max(80),label:z.string().min(1).max(100),unit:z.string().min(1).max(30),instructions:z.string().max(500).optional(),instructionVideoUrl:z.string().max(500).optional()});
 const schema=z.object({userId:z.string(),name:z.string().min(2).max(100),scheduledAt:z.string().optional(),notes:z.string().max(1000).optional(),definition:z.array(block).min(1).max(20)});
 
 export async function POST(request:Request){
