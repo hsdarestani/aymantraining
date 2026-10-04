@@ -48,7 +48,7 @@ export default function AppNav(){
   return <>
     <header className="app-desktop-top">
       <div className="app-desktop-inner">
-        <Link href="/dashboard" className="app-wordmark">BE <b>DIFFERENT</b></Link>
+        <Link href="/dashboard" className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></Link>
         {workout&&<Link href="/training" className="desktop-back"><Icon name="back"/> ZURÜCK ZUM TRAINING</Link>}
         <nav aria-label="Hauptnavigation">
           {items.map(([href,label,icon])=>{
@@ -61,7 +61,7 @@ export default function AppNav(){
     </header>
 
     <div className="app-mobile-top">
-      {workout?<Link href="/training" className="mobile-back"><Icon name="back"/><span>TRAINING</span></Link>:<Link href="/dashboard" className="app-wordmark">BE <b>DIFFERENT</b></Link>}
+      {workout?<Link href="/training" className="mobile-back"><Icon name="back"/><span>TRAINING</span></Link>:<Link href="/dashboard" className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></Link>}
       <button aria-label="Menü öffnen" onClick={()=>setOpen(true)}><Icon name="menu"/></button>
     </div>
 
@@ -75,7 +75,7 @@ export default function AppNav(){
     <div className={open?"app-drawer open":"app-drawer"} aria-hidden={!open}>
       <button className="drawer-backdrop" aria-label="Menü schließen" onClick={()=>setOpen(false)}/>
       <aside>
-        <div className="drawer-head"><span className="app-wordmark">BE <b>DIFFERENT</b></span><button aria-label="Menü schließen" onClick={()=>setOpen(false)}><Icon name="close"/></button></div>
+        <div className="drawer-head"><span className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></span><button aria-label="Menü schließen" onClick={()=>setOpen(false)}><Icon name="close"/></button></div>
         <div className="drawer-identity"><span>DEINE ENTWICKLUNG</span><strong>DEIN ATHLET.</strong></div>
         <div className="drawer-primary">
           {items.map(([href,label,icon])=><Link href={href} onClick={()=>setOpen(false)} key={href}><Icon name={icon}/><span>{label}</span></Link>)}
