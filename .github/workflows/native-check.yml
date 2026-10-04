@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: bedifferent-native-check
+  group: bedifferent-native-check-v2
   cancel-in-progress: true
 
 jobs:
