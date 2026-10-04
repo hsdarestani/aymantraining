@@ -16,26 +16,26 @@ const exercises=[
 for(const item of exercises)await prisma.exercise.upsert({where:{id:item.id},update:item,create:item});
 
 const plans=[
-  {id:"starter-athlete-base",name:"ATHLETE BASE 01",description:"Kraft, Mobility und Core für einen sauberen Einstieg.",proOnly:false,items:[
-    ["BD-STR-001",0,0,4,"8-10",8,120],["BD-CORE-001",0,1,3,"45 Sek.",7,45],
+  {id:"starter-athlete-base",name:"ATHLETEN BASIS 01",description:"Kraft, Beweglichkeit und Rumpfstabilität für einen sauberen Einstieg.",proOnly:false,items:[
+    ["BD-STR-001",0,0,4,"8 bis 10",8,120],["BD-CORE-001",0,1,3,"45 Sek.",7,45],
     ["BD-LEG-012",2,0,3,"8/Seite",8,120],["BD-CORE-002",2,1,3,"10/Seite",7,45],
     ["BD-MOB-008",4,0,3,"45 Sek.",6,45],["BD-MOB-009",4,1,2,"60 Sek.",5,30]
   ]},
-  {id:"starter-bodyweight",name:"BODYWEIGHT BASE",description:"Einfacher Plan ohne Studio für Consistency und Grundlagen.",proOnly:false,items:[
-    ["BD-STR-002",0,0,4,"8-15",8,75],["BD-LEG-013",0,1,4,"12-20",8,75],["BD-CORE-001",0,2,3,"45 Sek.",7,45],
+  {id:"starter-bodyweight",name:"KÖRPERGEWICHT BASIS",description:"Einfacher Plan ohne Studio für konsequentes Training und Grundlagen.",proOnly:false,items:[
+    ["BD-STR-002",0,0,4,"8 bis 15",8,75],["BD-LEG-013",0,1,4,"12 bis 20",8,75],["BD-CORE-001",0,2,3,"45 Sek.",7,45],
     ["BD-MOB-009",2,0,3,"60 Sek.",5,30],["BD-CORE-002",2,1,3,"10/Seite",7,45],
     ["BD-STR-002",4,0,3,"max sauber",8,75],["BD-LEG-013",4,1,4,"15",8,75]
   ]},
-  {id:"starter-mobility",name:"MOBILITY RESET",description:"Kurze Mobility und Core Einheiten für aktive Recovery.",proOnly:false,items:[
+  {id:"starter-mobility",name:"BEWEGLICHKEIT NEUSTART",description:"Kurze Einheiten für Beweglichkeit und Rumpfstabilität an aktiven Erholungstagen.",proOnly:false,items:[
     ["BD-MOB-008",0,0,3,"60 Sek.",5,30],["BD-MOB-009",0,1,3,"60 Sek.",5,30],["BD-CORE-002",0,2,3,"8/Seite",6,30],
     ["BD-MOB-008",3,0,3,"60 Sek.",5,30],["BD-CORE-001",3,1,3,"30 Sek.",6,30]
   ]},
-  {id:"pro-explosive-base",name:"EXPLOSIVE ATHLETE",description:"Explosivität und Athletik für PRO mit Coach Anpassung.",proOnly:true,items:[
+  {id:"pro-explosive-base",name:"EXPLOSIVER ATHLET",description:"Explosivität und Athletik für PRO mit Anpassung durch den Trainer.",proOnly:true,items:[
     ["BD-ATH-014",0,0,5,"3",7,120],["BD-LEG-012",0,1,4,"6/Seite",8,120],["BD-CORE-001",0,2,3,"45 Sek.",7,45],
     ["BD-ATH-015",2,0,5,"12",7,90],["BD-MOB-009",2,1,3,"60 Sek.",5,30]
   ]},
-  {id:"pro-performance-mix",name:"PERFORMANCE MIX",description:"Kraft, Mobility und Explosivität in einem PRO Template.",proOnly:true,items:[
-    ["BD-STR-001",0,0,4,"6-8",8,150],["BD-ATH-014",0,1,4,"3",7,120],
+  {id:"pro-performance-mix",name:"LEISTUNGS MIX",description:"Kraft, Beweglichkeit und Explosivität in einer PRO Vorlage.",proOnly:true,items:[
+    ["BD-STR-001",0,0,4,"6 bis 8",8,150],["BD-ATH-014",0,1,4,"3",7,120],
     ["BD-LEG-012",2,0,4,"8/Seite",8,120],["BD-CORE-002",2,1,3,"10/Seite",7,45],
     ["BD-MOB-008",4,0,3,"60 Sek.",5,30],["BD-ATH-015",4,1,4,"12",7,90]
   ]}
@@ -46,13 +46,27 @@ for(const p of plans){
   for(const [exerciseId,dayIndex,orderIndex,targetSets,targetReps,targetRpe,restSeconds] of p.items)await prisma.trainingPlanItem.create({data:{planId:plan.id,exerciseId,dayIndex,orderIndex,targetSets,targetReps,targetRpe,restSeconds}});
 }
 
+const planNames=new Map(plans.map(p=>[p.id,p.name]));
+const existingPlanWorkouts=await prisma.workout.findMany({
+  where:{trainingPlanId:{in:plans.map(p=>p.id)}},
+  select:{id:true,trainingPlanId:true,title:true}
+});
+for(const workout of existingPlanWorkouts){
+  const planName=workout.trainingPlanId?planNames.get(workout.trainingPlanId):null;
+  if(!planName)continue;
+  const suffixRaw=workout.title.includes("·")?workout.title.split("·").slice(1).join("·").trim():"";
+  const suffix=suffixRaw.replace(/^SESSION\s+/i,"Einheit ").replace(/^WORKOUT\s+/i,"Einheit ");
+  const title=suffix?`${planName} · ${suffix}`:planName;
+  if(title!==workout.title)await prisma.workout.update({where:{id:workout.id},data:{title}});
+}
+
 const rules=[
   ["sleep_low_3_of_5","Schlaf kritisch",80,{sleepHours:{lt:6,count:3,window:5}},{severity:"warning",type:"moderate_training",title:"Schlaf unter deinem Ziel",action:"Training moderat halten und heute früher schlafen."}],
-  ["hrv_rhr_recovery","Recovery niedrig",30,{hrvVsBaseline:{lt:-12},restingHrVsBaseline:{gt:5}},{severity:"critical",type:"recovery_day",title:"Recovery Signale niedrig",action:"Recovery Tag prüfen. Coach entscheidet final über Planänderungen."}],
-  ["missed_workouts","Workouts verpasst",70,{missedWorkouts:{gte:2,windowDays:7}},{severity:"info",type:"coach_alert",title:"Zwei Einheiten verpasst",action:"Wochenplan realistisch neu abstimmen."}],
+  ["hrv_rhr_recovery","Erholung niedrig",30,{hrvVsBaseline:{lt:-12},restingHrVsBaseline:{gt:5}},{severity:"critical",type:"recovery_day",title:"Erholungssignale niedrig",action:"Erholungstag prüfen. Trainer entscheidet final über Planänderungen."}],
+  ["missed_workouts","Trainingseinheiten verpasst",70,{missedWorkouts:{gte:2,windowDays:7}},{severity:"info",type:"coach_alert",title:"Zwei Einheiten verpasst",action:"Wochenplan realistisch neu abstimmen."}],
   ["protein_low","Protein niedrig",100,{proteinGPerKg:{lt:1.6,count:4,window:7,goal:"Muskelaufbau"}},{severity:"info",type:"nutrition",title:"Protein Ziel mehrfach verfehlt",action:"Heute proteinreiche Mahlzeiten priorisieren."}],
   ["water_low","Wasser niedrig",110,{waterMl:{lt:2200,count:2,window:3}},{severity:"info",type:"hydration",title:"Trinkmenge niedrig",action:"Wasser über den Tag nachholen."}],
-  ["acute_chronic_load","Trainingslast erhöht",40,{acuteChronicRatio:{gt:1.5}},{severity:"warning",type:"deload",title:"Trainingslast deutlich erhöht",action:"Belastung als Signal prüfen und Recovery priorisieren."}],
+  ["acute_chronic_load","Trainingslast erhöht",40,{acuteChronicRatio:{gt:1.5}},{severity:"warning",type:"deload",title:"Trainingslast deutlich erhöht",action:"Belastung als Signal prüfen und Erholung priorisieren."}],
   ["personal_record","Neuer Rekord",10,{prDetected:{eq:true}},{severity:"good",type:"celebrate",title:"Neuer Rekord",action:"You are different."}]
 ];
 for(const [key,title,priority,conditions,action] of rules)await prisma.coachingRule.upsert({where:{key},update:{title,priority,conditions,action,enabled:true},create:{key,title,priority,conditions,action,enabled:true}});
