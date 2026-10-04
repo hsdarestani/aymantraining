@@ -5,9 +5,16 @@ cd "$(dirname "$0")/.."
 
 : "${APPLE_TEAM_ID:?APPLE_TEAM_ID is required on the Publisher macOS agent}"
 
+mkdir -p .publisher-secrets
+if [ -z "${ASC_KEY_PATH:-}" ] && [ -n "${ASC_PRIVATE_KEY_B64:-}" ] && [ -n "${ASC_KEY_ID:-}" ]; then
+  export ASC_KEY_PATH="$PWD/.publisher-secrets/AuthKey_${ASC_KEY_ID}.p8"
+  printf '%s' "$ASC_PRIVATE_KEY_B64" | base64 -d > "$ASC_KEY_PATH"
+  chmod 600 "$ASC_KEY_PATH"
+fi
+
 npm ci
 export APPLE_PUSH_ENV=production
-node ./scripts/prepare-native-config.mjs --require-firebase
+node ./scripts/prepare-native-config.mjs --require-ios
 npx expo prebuild --platform ios --clean --non-interactive
 
 cd ios
@@ -49,14 +56,12 @@ xcodebuild   -workspace "$workspace"   -scheme "$scheme"   -configuration Releas
 cat > "$PWD/build/ExportOptions.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>method</key><string>app-store-connect</string>
-  <key>teamID</key><string>$APPLE_TEAM_ID</string>
-  <key>signingStyle</key><string>automatic</string>
-  <key>uploadSymbols</key><true/>
-</dict>
-</plist>
+<plist version="1.0"><dict>
+<key>method</key><string>app-store-connect</string>
+<key>teamID</key><string>$APPLE_TEAM_ID</string>
+<key>signingStyle</key><string>automatic</string>
+<key>uploadSymbols</key><true/>
+</dict></plist>
 PLIST
 
 xcodebuild   -exportArchive   -archivePath "$archive"   -exportPath "$exportDir"   -exportOptionsPlist "$PWD/build/ExportOptions.plist"   -allowProvisioningUpdates   "${extraAuth[@]}"
