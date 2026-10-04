@@ -6,7 +6,7 @@ const pct=(n:number,d:number)=>d?Math.round(n/d*1000)/10:0;
 export default async function Subscriptions(){
  const now=new Date(),d7=new Date(Date.now()-7*86400000),d30=new Date(Date.now()-30*86400000),d60=new Date(Date.now()-60*86400000);
  const [users,subs,wearableUsers,waitlist,messages,settingsRow]=await Promise.all([
-   prisma.user.findMany({where:{role:"ATHLETE"},select:{id:true,createdAt:true,onboardingCompleted:true,subscriptionTier:true,sessions:{select:{lastSeenAt:true}}}}),
+   prisma.user.findMany({where:{role:"ATHLET"},select:{id:true,createdAt:true,onboardingCompleted:true,subscriptionTier:true,sessions:{select:{lastSeenAt:true}}}}),
    prisma.subscription.findMany({orderBy:{updatedAt:"desc"},take:500}),
    prisma.wearableDaily.groupBy({by:["userId"],_count:true}),
    prisma.waitlistEntry.count({where:{status:"WAITING"}}),
@@ -32,8 +32,8 @@ export default async function Subscriptions(){
  const estimatedMrr=Math.round(activePaid*Number(settings.proMonthly)*100)/100;
  const latest=subs.slice(0,50);
  return <main className="admin-content" style={{margin:"0 auto"}}>
-   <header className="admin-header"><div><span className="eyebrow">COACH PANEL</span><h1>Subscriptions & KPIs</h1></div><Link href="/admin" className="ghost">← Dashboard</Link></header>
-   <div className="kpis"><div><span>ATHLETES</span><strong>{total}</strong><small>gesamt</small></div><div><span>PRO</span><strong>{pro}</strong><small>{pct(pro,total)} %</small></div><div><span>WAITLIST</span><strong>{waitlist}</strong><small>Kapazität {settings.proCapacity}</small></div><div><span>EST. MRR</span><strong>{estimatedMrr.toLocaleString("de-DE")} €</strong><small>vor Store Gebühren</small></div></div>
+   <header className="admin-header"><div><span className="eyebrow">TRAINERBEREICH</span><h1>Subscriptions & KPIs</h1></div><Link href="/admin" className="ghost">← Dashboard</Link></header>
+   <div className="kpis"><div><span>ATHLETS</span><strong>{total}</strong><small>gesamt</small></div><div><span>PRO</span><strong>{pro}</strong><small>{pct(pro,total)} %</small></div><div><span>WAITLIST</span><strong>{waitlist}</strong><small>Kapazität {settings.proCapacity}</small></div><div><span>EST. MRR</span><strong>{estimatedMrr.toLocaleString("de-DE")} €</strong><small>vor Store Gebühren</small></div></div>
    <section className="kpi-target-grid">
      {[
        ["ONBOARDING",pct(onboarding,total),70],
@@ -43,10 +43,10 @@ export default async function Subscriptions(){
        ["FREE TO PRO",pct(pro,total),3],
        ["TRIAL TO PAID",pct(trialPaid,trialUsers.size),40],
        ["MONTHLY CHURN",pct(expired30,Math.max(1,activePaid+expired30)),8],
-       ["COACH ≤ 24H",under24,100]
+       ["TRAINER ≤ 24H",under24,100]
      ].map(([label,value,target])=><article className="panel kpi-target" key={String(label)}><span className="eyebrow">{label}</span><strong>{Number(value).toFixed(1)}%</strong><div className="kpi-track"><i style={{width:`${Math.min(100,Number(value))}%`}}/></div><small>Ziel {label==="MONTHLY CHURN"?"<":"≥"} {target}%</small></article>)}
    </section>
-   <article className="panel"><div className="panel-head"><div><span className="eyebrow">COACH SERVICE</span><h2>Antwortzeit</h2></div><span className="tag">{avgResponse==null?"NO DATA":`${avgResponse.toFixed(1)} H AVG`}</span></div><p className="muted">Gemessen von Athlete Nachricht bis zur nächsten Coach Antwort innerhalb der letzten 30 Tage.</p></article>
-   <article className="panel"><span className="eyebrow">BILLING EVENTS</span><h2>Provider Status</h2>{latest.length?latest.map(s=><div className="history-row" key={s.id}><strong>{s.provider} · {s.tier}</strong><span>{s.status} · {s.renewsAt?.toLocaleDateString("de-DE")||"—"}</span></div>):<p className="muted">Noch keine Store Subscription Events.</p>}</article>
+   <article className="panel"><div className="panel-head"><div><span className="eyebrow">TRAINERBETREUUNG</span><h2>Antwortzeit</h2></div><span className="tag">{avgResponse==null?"KEINE DATEN":`${avgResponse.toFixed(1)} H AVG`}</span></div><p className="muted">Gemessen von der Nachricht des Athleten bis zur nächsten Antwort des Trainers innerhalb der letzten 30 Tage.</p></article>
+   <article className="panel"><span className="eyebrow">BILLING EVENTS</span><h2>ANBIETERÜBERSICHT</h2>{latest.length?latest.map(s=><div className="history-row" key={s.id}><strong>{s.provider} · {s.tier}</strong><span>{s.status} · {s.renewsAt?.toLocaleDateString("de-DE")||"—"}</span></div>):<p className="muted">Noch keine Store Subscription Events.</p>}</article>
  </main>;
 }
