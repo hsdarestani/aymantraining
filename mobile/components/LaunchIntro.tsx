@@ -53,7 +53,7 @@ export default function LaunchIntro({onDone}:{onDone:()=>void}){
       <Text style={s.sub}>Training · Regeneration · Ernährung · Fortschritt</Text>
     </Animated.View>
 
-    <View style={s.footer}><Text style={s.footerText}>DEIN SYSTEM WIRD VORBEREITET</Text><View style={s.dots}><View/><View/><View/></View></View>
+    <View style={s.footer}><Text style={s.footerText}>DEIN SYSTEM WIRD VORBEREITET</Text><View style={s.dots}><View style={s.dot}/><View style={s.dot}/><View style={s.dot}/></View></View>
   </View>;
 }
 
@@ -75,5 +75,5 @@ const s=StyleSheet.create({
   sub:{color:C.dim,fontSize:10,fontWeight:"800",letterSpacing:.5,textAlign:"center"},
   footer:{position:"absolute",bottom:42,alignItems:"center",gap:10},
   footerText:{color:"#555C58",fontSize:8,fontWeight:"900",letterSpacing:1.7},
-  dots:{flexDirection:"row",gap:5}, 
+  dots:{flexDirection:"row",gap:5},dot:{width:5,height:5,borderRadius:3,backgroundColor:C.volt,opacity:.72}, 
 });
