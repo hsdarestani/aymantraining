@@ -7,7 +7,9 @@ data
 npm-debug.log*
 
 # Generated native credentials
-mobile/firebase/
+mobile/firebase/*
+!mobile/firebase/google-services.json
+!mobile/firebase/GoogleService-Info.plist
 mobile/android/
 mobile/ios/
 mobile/.publisher-secrets/
