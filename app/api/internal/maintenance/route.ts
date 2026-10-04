@@ -8,7 +8,8 @@ import {dispatchPendingPushes} from "../../../../lib/push";
 import {zonedParts} from "../../../../lib/timezone";
 import {hasFeature} from "../../../../lib/entitlements";
 import {gamificationSnapshot} from "../../../../lib/gamification";
-import {syncStorePurchase} from "../../../../lib/store-billing";\nimport {encryptPrivateObjectIfNeeded} from "../../../../lib/storage";
+import {syncStorePurchase} from "../../../../lib/store-billing";
+import {encryptPrivateObjectIfNeeded} from "../../../../lib/storage";
 
 async function alreadyQueued(userId:string,category:string,since:Date){
   return Boolean(await prisma.notification.findFirst({where:{userId,category,createdAt:{gte:since}},select:{id:true}}));
@@ -20,6 +21,32 @@ function sameLocalDate(a:Date,b:Date,timeZone:string){
 export async function POST(request:Request){
   if(!process.env.CRON_SECRET||request.headers.get("x-cron-secret")!==process.env.CRON_SECRET)return NextResponse.json({ok:false},{status:401});
   const now=new Date();
+
+  let encryptedLegacyMedia=0;
+  const migrationKey="private_media_encryption_v1";
+  const migration=await prisma.systemSetting.findUnique({where:{key:migrationKey}});
+  if(!migration){
+    const privateMedia=await prisma.mediaAsset.findMany({
+      where:{kind:{in:["PROGRESS_PHOTO","TECHNIQUE_VIDEO","TEST_VIDEO","VOICE_MESSAGE"]}},
+      select:{storageKey:true}
+    });
+    let migrationFailed=false;
+    for(const media of privateMedia){
+      try{
+        if(await encryptPrivateObjectIfNeeded(media.storageKey))encryptedLegacyMedia++;
+      }catch{
+        migrationFailed=true;
+      }
+    }
+    if(!migrationFailed){
+      await prisma.systemSetting.upsert({
+        where:{key:migrationKey},
+        update:{value:{completedAt:now.toISOString(),encrypted:encryptedLegacyMedia}},
+        create:{key:migrationKey,value:{completedAt:now.toISOString(),encrypted:encryptedLegacyMedia}}
+      });
+    }
+  }
+
   await purgeExpiredSessions();
   await prisma.authThrottle.deleteMany({where:{updatedAt:{lt:new Date(Date.now()-86400000)}}});
   await prisma.passwordResetToken.deleteMany({where:{expiresAt:{lt:new Date(Date.now()-86400000)}}});
