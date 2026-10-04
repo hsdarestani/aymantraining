@@ -3,18 +3,22 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-: "${ANDROID_KEYSTORE_PATH:?ANDROID_KEYSTORE_PATH is required on the Publisher Linux agent}"
-: "${ANDROID_KEYSTORE_PASSWORD:?ANDROID_KEYSTORE_PASSWORD is required on the Publisher Linux agent}"
-: "${ANDROID_KEY_ALIAS:?ANDROID_KEY_ALIAS is required on the Publisher Linux agent}"
-: "${ANDROID_KEY_PASSWORD:?ANDROID_KEY_PASSWORD is required on the Publisher Linux agent}"
-
-if [ ! -f "$ANDROID_KEYSTORE_PATH" ]; then
-  echo "Android keystore not found at $ANDROID_KEYSTORE_PATH" >&2
-  exit 2
+mkdir -p .publisher-secrets
+if [ -z "${ANDROID_KEYSTORE_PATH:-}" ] && [ -n "${ANDROID_KEYSTORE_B64:-}" ]; then
+  export ANDROID_KEYSTORE_PATH="$PWD/.publisher-secrets/bedifferent-upload.jks"
+  printf '%s' "$ANDROID_KEYSTORE_B64" | base64 -d > "$ANDROID_KEYSTORE_PATH"
+  chmod 600 "$ANDROID_KEYSTORE_PATH"
 fi
 
+: "${ANDROID_KEYSTORE_PATH:?ANDROID_KEYSTORE_PATH or ANDROID_KEYSTORE_B64 is required}"
+: "${ANDROID_KEYSTORE_PASSWORD:?ANDROID_KEYSTORE_PASSWORD is required}"
+: "${ANDROID_KEY_ALIAS:?ANDROID_KEY_ALIAS is required}"
+: "${ANDROID_KEY_PASSWORD:?ANDROID_KEY_PASSWORD is required}"
+
+test -f "$ANDROID_KEYSTORE_PATH"
+
 npm ci
-node ./scripts/prepare-native-config.mjs --require-firebase
+node ./scripts/prepare-native-config.mjs --require-android
 npx expo prebuild --platform android --clean --non-interactive
 node ./scripts/configure-android-signing.mjs
 
