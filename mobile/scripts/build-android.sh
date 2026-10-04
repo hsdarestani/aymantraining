@@ -14,6 +14,7 @@ if [ ! -f "$ANDROID_KEYSTORE_PATH" ]; then
 fi
 
 npm ci
+node ./scripts/prepare-native-config.mjs --require-firebase
 npx expo prebuild --platform android --clean --non-interactive
 node ./scripts/configure-android-signing.mjs
 
