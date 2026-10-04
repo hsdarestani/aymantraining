@@ -1,52 +1,48 @@
 import fs from "node:fs/promises";
+import {createReadStream} from "node:fs";
 import path from "node:path";
-import {DeleteObjectCommand,GetObjectCommand,PutObjectCommand,S3Client} from "@aws-sdk/client-s3";
-import {integrationStatus} from "./integrations";
+import {Readable} from "node:stream";
 
-let client:S3Client|undefined;
-function r2(){
-  if(!integrationStatus().r2) return null;
-  if(!client) client=new S3Client({
-    region:"auto",
-    endpoint:`https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    credentials:{accessKeyId:process.env.R2_ACCESS_KEY_ID!,secretAccessKey:process.env.R2_SECRET_ACCESS_KEY!}
-  });
-  return client;
+const root=()=>path.join(process.env.DATA_DIR||"/app/data","uploads");
+
+function safePath(key:string){
+  const normalized=path.normalize(key).replace(/^([.]{2}[\\/])+/, "");
+  const filePath=path.join(root(),normalized);
+  if(!filePath.startsWith(root()+path.sep)&&filePath!==root())throw new Error("Invalid storage key");
+  return filePath;
 }
-const bucket=()=>process.env.R2_BUCKET!;
 
-export async function putPrivateObject(key:string,data:Buffer,mimeType:string){
-  const c=r2();
-  if(c){
-    await c.send(new PutObjectCommand({Bucket:bucket(),Key:key,Body:data,ContentType:mimeType,CacheControl:"private, no-store"}));
-    return "r2" as const;
-  }
-  const dir=path.join(process.env.DATA_DIR||"/app/data","uploads");
-  const filePath=path.join(dir,key);
+export async function putPrivateObject(key:string,data:Buffer,_mimeType:string){
+  const filePath=safePath(key);
   await fs.mkdir(path.dirname(filePath),{recursive:true});
   await fs.writeFile(filePath,data);
   return "local" as const;
 }
 
 export async function deletePrivateObject(key:string){
-  const c=r2();
-  if(c){await c.send(new DeleteObjectCommand({Bucket:bucket(),Key:key})).catch(()=>undefined);return;}
-  await fs.unlink(path.join(process.env.DATA_DIR||"/app/data","uploads",key)).catch(()=>undefined);
+  await fs.unlink(safePath(key)).catch(()=>undefined);
 }
 
 export async function getPrivateObject(key:string,range?:string|null){
-  const c=r2();
-  if(c){
-    const result=await c.send(new GetObjectCommand({Bucket:bucket(),Key:key,Range:range||undefined}));
-    return {
-      body:result.Body?.transformToWebStream()||null,
-      size:result.ContentLength,
-      contentRange:result.ContentRange,
-      contentType:result.ContentType,
-      source:"r2" as const
-    };
+  const filePath=safePath(key);
+  const stat=await fs.stat(filePath);
+  let start=0,end=stat.size-1,contentRange:undefined|string;
+  if(range){
+    const m=/^bytes=(\d*)-(\d*)$/.exec(range.trim());
+    if(m){
+      if(m[1])start=Math.min(stat.size-1,Number(m[1]));
+      if(m[2])end=Math.min(stat.size-1,Number(m[2]));
+      if(!m[1]&&m[2])start=Math.max(0,stat.size-Number(m[2]));
+      if(end<start)end=start;
+      contentRange=`bytes ${start}-${end}/${stat.size}`;
+    }
   }
-  const filePath=path.join(process.env.DATA_DIR||"/app/data","uploads",key);
-  const data=await fs.readFile(filePath);
-  return {body:new Blob([data]).stream(),size:data.length,contentRange:undefined,contentType:undefined,source:"local" as const};
+  const stream=createReadStream(filePath,{start,end});
+  return {
+    body:Readable.toWeb(stream) as ReadableStream,
+    size:end-start+1,
+    contentRange,
+    contentType:undefined,
+    source:"local" as const
+  };
 }
