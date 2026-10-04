@@ -20,7 +20,7 @@ import ServiceWorker from "./ServiceWorker";
 
 export const metadata: Metadata = {
   title: "BE DIFFERENT",
-  description: "Build Your Athlete — coaching, performance and recovery in one system."
+  description: "Training, Leistung und Regeneration in einem persönlichen System."
 };
 
 export const viewport: Viewport = {
