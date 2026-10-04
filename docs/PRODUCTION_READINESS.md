@@ -1,160 +1,101 @@
 # BE DIFFERENT · Production Readiness
 
-This document contains names and setup requirements only. Never commit real secret values.
-
-Validation marker: final native lockfile state.
-
 ## Automated gates
 
-A release is acceptable only when all are green:
+A release is acceptable only when these are green:
 
-- Product Quality Gate
-  - locked dependency install
-  - production dependency audit at high severity
-  - Prisma validation
-  - TypeScript
-  - PostgreSQL integration database
-  - production Next.js build
-  - end to end product smoke test
-- Native App Check
-  - locked dependency install
-  - TypeScript
-  - Expo public config validation
-  - clean Android Expo prebuild
-- Production deploy
-  - database migration and seed
-  - Docker build
-  - origin health check
-  - Cloudflare public readiness check
+- Product Quality Gate: locked dependencies, high severity audit, Prisma, TypeScript, PostgreSQL, production build, E2E
+- Native App Check: native dependency install, TypeScript, Expo prebuild, Store Billing modules, Firebase modules, release script validation
+- Production deploy: DB migration/seed, Docker build, health/readiness, public Cloudflare check
+- Publisher validation: Django tests and production deployment
 
-## Existing GitHub deployment secrets
+## Production architecture
 
+- Backend: BE DIFFERENT VPS / PostgreSQL
+- Media: persistent local VPS volume
+- Backup: daily PostgreSQL dump + media archive, 14 day retention
+- Email: Strato SMTP
+- Android payment: Google Play Billing
+- iOS payment: Apple StoreKit
+- Subscription verification: Google Android Publisher API + Apple App Store Server API
+- Push: Firebase Admin -> FCM; iOS delivery uses APNs through Firebase
+- Build/upload: A+ Publisher cloud Linux and macOS agents
+
+No RevenueCat, Expo Push, R2 or Resend is required.
+
+## Existing app repository deployment secrets
+
+Already used:
 - `HOST`
 - `PASS`
 
-## Server integrations
+Needed for fully connected production:
 
-Required for a fully connected production launch:
-
-### RevenueCat
-
-- `REVENUECAT_WEBHOOK_SECRET`
-- `REVENUECAT_IOS_PUBLIC_API_KEY`
-- `REVENUECAT_ANDROID_PUBLIC_API_KEY`
-- `REVENUECAT_PRO_ENTITLEMENT` = `pro`
-- `REVENUECAT_ELITE_ENTITLEMENT` = `elite` only when ELITE is activated
-
-RevenueCat webhook URL:
-`https://bedifferent.smarbiz.sbs/api/webhooks/revenuecat`
-
-### Private media storage
-
-- `R2_ACCOUNT_ID`
-- `R2_ACCESS_KEY_ID`
-- `R2_SECRET_ACCESS_KEY`
-- `R2_BUCKET`
-
-The application has a local-storage fallback, but R2 is required for durable multi-instance production media.
-
-### Push
-
-Recommended Expo push path:
-
-- `EXPO_PUSH_ACCESS_TOKEN`
-
-Optional direct Firebase path:
-
+### Firebase server push
 - `FIREBASE_SERVICE_ACCOUNT_B64`
 
-### Email
+### Apple subscription verification
+Create an App Store Connect In-App Purchase API key:
+- `APPLE_IAP_ISSUER_ID`
+- `APPLE_IAP_KEY_ID`
+- `APPLE_IAP_PRIVATE_KEY_B64`
 
-- `RESEND_API_KEY`
+### Google subscription verification
+- `GOOGLE_PLAY_SERVICE_ACCOUNT_B64`
+- `GOOGLE_RTDN_WEBHOOK_SECRET`
+
+### Strato SMTP
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_SECURE`
+- `SMTP_USER`
+- `SMTP_PASSWORD`
 - `EMAIL_FROM`
 
-### Observability
-
-Recommended before public launch:
-
+Optional:
 - `SENTRY_DSN`
 - `POSTHOG_KEY`
+- Cloudflare Origin TLS secrets
 
-## Native build-time values
+## Publisher repository secrets
 
-These belong in the Publisher app build-config environment:
+Android:
+- `BEDIFFERENT_FIREBASE_ANDROID_GOOGLE_SERVICES_B64`
+- `BEDIFFERENT_ANDROID_KEYSTORE_B64`
+- `BEDIFFERENT_ANDROID_KEYSTORE_PASSWORD`
+- `BEDIFFERENT_ANDROID_KEY_ALIAS`
+- `BEDIFFERENT_ANDROID_KEY_PASSWORD`
 
-- `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY`
-- `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY`
-- `EXPO_PUBLIC_EAS_PROJECT_ID`
+iOS:
+- `BEDIFFERENT_FIREBASE_IOS_GOOGLE_SERVICE_INFO_B64`
+- `BEDIFFERENT_APPLE_TEAM_ID`
+- `BEDIFFERENT_ASC_KEY_ID`
+- `BEDIFFERENT_ASC_ISSUER_ID`
+- `BEDIFFERENT_ASC_PRIVATE_KEY_B64`
 
-They are SDK identifiers/keys embedded into the mobile binary, not backend secrets.
+Release trigger:
+- app repo: `PUBLISHER_URL`, `PUBLISHER_AUTOMATION_TOKEN`
+- Publisher production: same `PUBLISHER_AUTOMATION_TOKEN`
 
-## One-time external setup
+## Store configuration
 
-These cannot be completed from source code alone:
+iOS:
+- bundle ID `com.smarbiz.bedifferent`
+- products `bd_pro_monthly`, `bd_pro_yearly`
+- 7 day introductory trial
+- App Store Server Notifications V2 URL:
+  `https://bedifferent.smarbiz.sbs/api/webhooks/apple`
 
-- Apple Developer / App Store Connect app record
-- Google Play Console app record
-- store legal/tax/merchant agreements
-- App Store subscription products and trial
-- Play subscription products and trial
-- RevenueCat project, apps, products, offering and entitlement
-- Expo project for push project ID
-- Apple HealthKit capability
-- Apple Push Notifications capability
-- Android release upload keystore
-- iOS signing certificate/profile or automatic-signing setup on the macOS Publisher agent
-- legal review of Privacy Policy, Terms, Impressum and health-data DPIA/processor agreements
-- real BE DIFFERENT exercise images and short Ayman exercise videos
+Android:
+- package `com.smarbiz.bedifferent`
+- products `bd_pro_monthly`, `bd_pro_yearly`
+- 7 day offer
+- Real-time developer notifications through Google Pub/Sub push:
+  `https://bedifferent.smarbiz.sbs/api/webhooks/google-play?token=<GOOGLE_RTDN_WEBHOOK_SECRET>`
 
-## Store IDs
+## Content still supplied by the coach/owner
 
-- Android: `com.smarbiz.bedifferent`
-- iOS: `com.smarbiz.bedifferent`
-
-## Store products
-
-- `bd_pro_monthly`
-- `bd_pro_yearly`
-
-Both should grant RevenueCat entitlement `pro`. The 7 day trial must be configured in the stores.
-
-## Publisher
-
-See `docs/PUBLISHER_RELEASE.md` for the app record and build configuration.
-
-
-## Origin TLS / Cloudflare Full Strict
-
-Recommended before public release:
-
-- `CLOUDFLARE_ORIGIN_CERT_B64`
-- `CLOUDFLARE_ORIGIN_KEY_B64`
-
-Create a Cloudflare Origin Certificate for `bedifferent.smarbiz.sbs`, base64-encode the certificate and private key separately, save them as GitHub Secrets, deploy once, then set Cloudflare SSL/TLS mode to Full (strict).
-
-## Publisher build-agent signing secrets
-
-These do not belong in GitHub Secrets. Keep them on the corresponding build agent environment.
-
-Android Linux agent:
-
-- `ANDROID_KEYSTORE_PATH`
-- `ANDROID_KEYSTORE_PASSWORD`
-- `ANDROID_KEY_ALIAS`
-- `ANDROID_KEY_PASSWORD`
-
-iOS macOS agent:
-
-- `APPLE_TEAM_ID`
-- optional `IOS_SCHEME`
-- optional unattended provisioning: `ASC_KEY_PATH`, `ASC_KEY_ID`, `ASC_ISSUER_ID`
-
-
-## Remote Publisher build trigger
-
-After the BE DIFFERENT app record exists in Publisher, set these GitHub Secrets in this repository:
-
-- `PUBLISHER_URL` = the Publisher base URL, for example `https://publisher.smarbiz.sbs`
-- `PUBLISHER_AUTOMATION_TOKEN` = the same long random token configured as `PUBLISHER_AUTOMATION_TOKEN` in the Publisher server environment
-
-`release-request.json` is intentionally committed with `"enabled": false`. To queue a build, set a new version/build number and `"enabled": true`, then commit it. The GitHub workflow calls Publisher and queues Android and iOS build jobs for the exact commit.
+The platform and admin tools support the exercise schema, but real launch media must still be supplied:
+- exercise images
+- short coach videos
+- final legal company data/review
