@@ -9,9 +9,26 @@ export default () => {
   const hasAndroidFirebase=fs.existsSync(androidServices);
   const hasIosFirebase=fs.existsSync(iosServices);
   const pushEnvironment=process.env.APPLE_PUSH_ENV||"development";
-  const plugins=[...(base.expo.plugins||[])];
+  const plugins=(base.expo.plugins||[]).map((plugin:any)=>{
+    if(Array.isArray(plugin)&&plugin[0]==="expo-build-properties"){
+      return [
+        "expo-build-properties",
+        {
+          ...(plugin[1]||{}),
+          ios:{
+            ...((plugin[1]||{}).ios||{}),
+            useFrameworks:"static"
+          }
+        }
+      ];
+    }
+    return plugin;
+  });
   if(hasAndroidFirebase||hasIosFirebase){
-    plugins.push("@react-native-firebase/app","@react-native-firebase/messaging");
+    plugins.push(
+      ["@react-native-firebase/app",{ios:{disableSPM:true}}],
+      "@react-native-firebase/messaging"
+    );
   }
   return {
     ...base.expo,
