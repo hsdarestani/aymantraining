@@ -1,5 +1,5 @@
-import {useEffect,useState} from "react";
-import {ActivityIndicator,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View,Image} from "react-native";
+import {useEffect,useMemo,useState} from "react";
+import {ActivityIndicator,Dimensions,Image,Modal,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from "react-native";
 import {router,useLocalSearchParams} from "expo-router";
 import {useVideoPlayer,VideoView} from "expo-video";
 import Brand from "../../components/Brand";
@@ -10,13 +10,16 @@ import {C,radius} from "../../theme";
 
 function CoachVideo({uri}:{uri:string}){
   const player=useVideoPlayer(uri,p=>{p.loop=true;p.muted=true;p.play()});
-  return <View style={s.videoWrap}><VideoView style={s.videoView} player={player} nativeControls contentFit="cover"/><Text style={s.videoHint}>WIEDERHOLUNG · TON STANDARDMÄSSIG AUS</Text></View>;
+  return <View style={s.videoWrap}><VideoView style={s.videoView} player={player} nativeControls contentFit="cover"/><Text style={s.videoHint}>ENDLOSSCHLEIFE · TON ZUERST AUS</Text></View>;
 }
 
 export default function Exercise(){
   const {id}=useLocalSearchParams<{id:string}>();
   const [x,setX]=useState<any>(null);
   const [media,setMedia]=useState<Record<string,string>>({});
+  const [frame,setFrame]=useState(0);
+  const [lightbox,setLightbox]=useState<number|null>(null);
+
   useEffect(()=>{
     api<any>(`/api/exercises/${id}`).then(async j=>{
       setX(j.item);
@@ -26,29 +29,50 @@ export default function Exercise(){
     }).catch(()=>router.back());
   },[id]);
 
+  const imageUris=useMemo(()=>{
+    if(!x)return [];
+    return [x.imageStart,x.imageMiddle,x.imageEnd].filter(Boolean).map((u:string)=>media[u]||(u.startsWith("http")?u:API+u));
+  },[x,media]);
+
+  useEffect(()=>{
+    if(imageUris.length<2)return;
+    const timer=setInterval(()=>setFrame(v=>(v+1)%imageUris.length),950);
+    return()=>clearInterval(timer);
+  },[imageUris.length]);
+
   if(!x)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
   const images=[x.imageStart,x.imageMiddle,x.imageEnd];
   const mistakes=Array.isArray(x.commonMistakes)?x.commonMistakes:[];
   const video=x.videoUrl?media[x.videoUrl]||(x.videoUrl.startsWith("http")?x.videoUrl:API+x.videoUrl):null;
+  const labels=["START","MITTE","ENDE"];
+  const width=Dimensions.get("window").width;
 
   return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
     <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}>ZURÜCK</Text></Pressable></View>
     <Eyebrow>{String(x.id).replaceAll("-"," ")} · STUFE {x.level}</Eyebrow>
     <Text style={s.title}>{x.nameDe}</Text>
     <Text style={s.meta}>{x.category.toUpperCase()} · {x.equipment||"OHNE GERÄTE"}</Text>
-    <View style={s.images}>{images.map((uri:any,i:number)=>uri?<Image key={uri} source={{uri:media[uri]||(uri.startsWith("http")?uri:API+uri)}} style={s.image}/>:<View key={i} style={s.placeholder}><Text style={s.placeholderText}>{["START","MITTE","ENDE"][i]}</Text></View>)}</View>
+
+    {imageUris.length?<Pressable style={s.motion} onPress={()=>setLightbox(frame)}><Image source={{uri:imageUris[frame]}} style={s.motionImage}/><View style={s.motionLabel}><Text style={s.motionLabelText}>{labels[frame]} · BEWEGUNGSABLAUF</Text></View></Pressable>:null}
+    <View style={s.images}>{images.map((uri:any,i:number)=>uri?<Pressable key={uri} style={s.imageButton} onPress={()=>setLightbox(i)}><Image source={{uri:media[uri]||(uri.startsWith("http")?uri:API+uri)}} style={s.image}/><Text style={s.imageLabel}>{labels[i]}</Text></Pressable>:<View key={i} style={s.placeholder}><Text style={s.placeholderText}>{labels[i]}</Text></View>)}</View>
     {video&&<CoachVideo uri={video}/>}
     <Card><Eyebrow>ZIELMUSKELN</Eyebrow><SectionTitle>{x.primaryMuscles||"Keine Angabe"}</SectionTitle>{x.secondaryMuscles?<Text style={s.secondary}>{x.secondaryMuscles}</Text>:null}</Card>
     <Card><Eyebrow>TRAINERHINWEISE</Eyebrow><SectionTitle>Sauber ausführen.</SectionTitle>{[x.coachCue1,x.coachCue2,x.coachCue3].filter(Boolean).map((c:string,i:number)=><View style={s.cue} key={c}><Text style={s.cueNr}>{i+1}</Text><Text style={s.cueText}>{c}</Text></View>)}</Card>
     <Card><Eyebrow>HÄUFIGE FEHLER</Eyebrow>{mistakes.map((m:string)=><Text style={s.error} key={m}>× {m}</Text>)}</Card>
     {(x.easierExerciseId||x.harderExerciseId)&&<Card><Eyebrow>ALTERNATIVEN</Eyebrow><View style={s.alternatives}>{x.easierExerciseId&&<Pressable style={s.alt} onPress={()=>router.replace({pathname:"/exercise/[id]",params:{id:x.easierExerciseId}})}><Text style={s.altLabel}>LEICHTER</Text><Text style={s.altText}>{String(x.easierExerciseId).replaceAll("-"," ")}</Text></Pressable>}{x.harderExerciseId&&<Pressable style={s.alt} onPress={()=>router.replace({pathname:"/exercise/[id]",params:{id:x.harderExerciseId}})}><Text style={s.altLabel}>SCHWERER</Text><Text style={s.altText}>{String(x.harderExerciseId).replaceAll("-"," ")}</Text></Pressable>}</View></Card>}
+
+    <Modal visible={lightbox!=null} animationType="fade" transparent onRequestClose={()=>setLightbox(null)}>
+      <View style={s.modal}><Pressable style={s.close} onPress={()=>setLightbox(null)}><Text style={s.closeText}>SCHLIESSEN</Text></Pressable><ScrollView horizontal pagingEnabled contentOffset={{x:(lightbox||0)*width,y:0}} showsHorizontalScrollIndicator={false}>{imageUris.map((uri,i)=><View key={uri} style={[s.slide,{width}]}><Image source={{uri}} resizeMode="contain" style={s.fullImage}/><Text style={s.fullLabel}>{labels[i]}</Text></View>)}</ScrollView><Text style={s.swipe}>WISCHEN FÜR DEN NÄCHSTEN BILDSCHRITT</Text></View>
+    </Modal>
   </ScrollView></SafeAreaView>;
 }
 const s=StyleSheet.create({
  safe:{flex:1,backgroundColor:C.bg},center:{flex:1,backgroundColor:C.bg,alignItems:"center",justifyContent:"center"},content:{padding:18,paddingBottom:60,gap:12},
  top:{height:54,flexDirection:"row",justifyContent:"space-between",alignItems:"center"},back:{color:C.dim,fontSize:9,fontWeight:"900"},title:{color:C.ink,fontSize:42,lineHeight:39,fontWeight:"900",letterSpacing:-2.5,marginTop:7},meta:{color:C.dim,fontSize:9,fontWeight:"800"},
- images:{flexDirection:"row",gap:6},image:{flex:1,aspectRatio:.78,borderRadius:radius.md,backgroundColor:C.panel2},placeholder:{flex:1,aspectRatio:.78,borderRadius:radius.md,backgroundColor:C.panel2,alignItems:"center",justifyContent:"center"},placeholderText:{color:C.dim,fontSize:7,fontWeight:"900"},
+ motion:{borderRadius:radius.lg,overflow:"hidden",backgroundColor:C.panel2},motionImage:{width:"100%",aspectRatio:4/5,backgroundColor:C.panel2},motionLabel:{position:"absolute",left:10,bottom:10,paddingVertical:6,paddingHorizontal:9,borderRadius:20,backgroundColor:"#050606D9"},motionLabelText:{color:C.ink,fontSize:7,fontWeight:"900",letterSpacing:1},
+ images:{flexDirection:"row",gap:6},imageButton:{flex:1},image:{width:"100%",aspectRatio:.78,borderRadius:radius.md,backgroundColor:C.panel2},imageLabel:{color:C.dim,fontSize:7,fontWeight:"900",textAlign:"center",marginTop:4},placeholder:{flex:1,aspectRatio:.78,borderRadius:radius.md,backgroundColor:C.panel2,alignItems:"center",justifyContent:"center"},placeholderText:{color:C.dim,fontSize:7,fontWeight:"900"},
  videoWrap:{borderRadius:radius.lg,overflow:"hidden",backgroundColor:C.panel},videoView:{width:"100%",aspectRatio:9/16,maxHeight:520},videoHint:{position:"absolute",left:10,bottom:10,color:C.ink,backgroundColor:"#050606CC",paddingVertical:5,paddingHorizontal:8,borderRadius:20,fontSize:7,fontWeight:"900",letterSpacing:1},
  secondary:{color:C.dim,fontSize:12,marginTop:7},cue:{flexDirection:"row",gap:10,paddingVertical:10,borderBottomWidth:1,borderBottomColor:C.line},cueNr:{color:C.volt,fontWeight:"900"},cueText:{color:C.ink,flex:1,fontSize:12},error:{color:C.red,fontSize:12,paddingVertical:6},
- alternatives:{flexDirection:"row",gap:8,marginTop:12},alt:{flex:1,borderWidth:1,borderColor:C.line,borderRadius:radius.md,padding:13},altLabel:{color:C.volt,fontSize:7,fontWeight:"900",letterSpacing:1},altText:{color:C.ink,fontSize:11,fontWeight:"900",marginTop:4}
+ alternatives:{flexDirection:"row",gap:8,marginTop:12},alt:{flex:1,borderWidth:1,borderColor:C.line,borderRadius:radius.md,padding:13},altLabel:{color:C.volt,fontSize:7,fontWeight:"900",letterSpacing:1},altText:{color:C.ink,fontSize:11,fontWeight:"900",marginTop:4},
+ modal:{flex:1,backgroundColor:"#050606FA",justifyContent:"center"},close:{position:"absolute",top:58,right:20,zIndex:4,paddingVertical:10,paddingHorizontal:12,borderRadius:20,borderWidth:1,borderColor:C.line},closeText:{color:C.ink,fontSize:8,fontWeight:"900"},slide:{height:"100%",alignItems:"center",justifyContent:"center",paddingHorizontal:22},fullImage:{width:"100%",height:"70%"},fullLabel:{color:C.volt,fontSize:11,fontWeight:"900",letterSpacing:2,marginTop:12},swipe:{position:"absolute",bottom:52,alignSelf:"center",color:C.dim,fontSize:8,fontWeight:"900",letterSpacing:1}
 });
