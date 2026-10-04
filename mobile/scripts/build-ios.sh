@@ -2,6 +2,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+export NODE_ENV=production
 
 export APPLE_TEAM_ID="${APPLE_TEAM_ID:-${IOS_TEAM_ID:-}}"
 export ASC_KEY_PATH="${ASC_KEY_PATH:-${APPLE_API_KEY_PATH:-}}"
