@@ -51,3 +51,39 @@ jobs:
           bash -n scripts/build-android.sh
           bash -n scripts/build-ios.sh
           node --check scripts/configure-android-signing.mjs
+
+  wearos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+      - name: Build Wear OS debug
+        run: gradle -p mobile/wearos :app:assembleDebug --no-daemon
+
+  ios-companions:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Install native dependencies
+        run: npm ci
+      - name: Generate iOS project with Watch and widgets
+        run: CI=1 npx expo prebuild --platform ios --clean
+      - name: Verify companion targets
+        run: |
+          xcodebuild -project ios/*.xcodeproj -list | tee /tmp/xcode-targets.txt
+          grep -qi "watch" /tmp/xcode-targets.txt
+          grep -qi "widget" /tmp/xcode-targets.txt
