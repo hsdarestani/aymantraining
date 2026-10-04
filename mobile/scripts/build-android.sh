@@ -19,6 +19,7 @@ fi
 test -f "$ANDROID_KEYSTORE_PATH"
 
 npm ci --include=dev
+npm install --no-save --package-lock=false query-string@7.1.3
 npx expo install --check || echo "Expo dependency check reported a patch level advisory. Continuing with the validated native stack."
 node ./scripts/prepare-native-config.mjs --require-android
 npx expo prebuild --platform android --clean --non-interactive
