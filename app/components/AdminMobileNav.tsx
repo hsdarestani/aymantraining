@@ -19,6 +19,7 @@ const links=[
   ["/admin/events","Events und Video Calls"],
   ["/admin/briefs","Morgenübersicht"],
   ["/admin/ai","Different AI"],
+  ["/admin/kpi","KPI"],
   ["/admin/settings","App Einstellungen"]
 ];
 
