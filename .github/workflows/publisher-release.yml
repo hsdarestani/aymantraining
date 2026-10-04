@@ -37,5 +37,5 @@ jobs:
           oidc_token="$(printf '%s' "$token_response" | jq -r '.value')"
           test -n "$oidc_token"
           payload="$(jq --arg sha "$GITHUB_SHA" '.source_commit = $sha | del(.enabled)' release-request.json)"
-          curl -fsS             -X POST "${PUBLISHER_URL%/}/apps/automation/release/"             -H "X-GitHub-OIDC: $oidc_token"             -H "Content-Type: application/json"             --data "$payload" | tee /tmp/publisher-response.json
+          curl -fsS --retry 12 --retry-all-errors --retry-delay 10 --connect-timeout 10 --max-time 60             -X POST "${PUBLISHER_URL%/}/apps/automation/release/"             -H "X-GitHub-OIDC: $oidc_token"             -H "Content-Type: application/json"             --data "$payload" | tee /tmp/publisher-response.json
           jq -e '.ok == true' /tmp/publisher-response.json >/dev/null
