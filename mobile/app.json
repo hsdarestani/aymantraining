@@ -14,7 +14,8 @@
         "NSHealthUpdateUsageDescription": "BE DIFFERENT kann von dir gewählte Fitnessdaten in Apple Health speichern.",
         "NSMicrophoneUsageDescription": "Das Mikrofon wird nur für Voice Messages an deinen Coach verwendet.",
         "NSCameraUsageDescription": "Die Kamera wird für freiwillige Fortschritts- und Technikvideos sowie den BE FUEL Barcode Scan verwendet."
-      }
+      },
+      "icon": "./assets/favicon.png"
     },
     "android": {
       "package": "com.smarbiz.bedifferent",
@@ -23,7 +24,12 @@
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.RECORD_AUDIO",
         "android.permission.CAMERA"
-      ]
+      ],
+      "icon": "./assets/favicon.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/favicon.png",
+        "backgroundColor": "#D7FF00"
+      }
     },
     "plugins": [
       "expo-router",
@@ -46,6 +52,12 @@
     ],
     "extra": {
       "apiUrl": "https://bedifferent.smarbiz.sbs"
+    },
+    "icon": "./assets/favicon.png",
+    "splash": {
+      "image": "./assets/green-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#050606"
     }
   }
 }
