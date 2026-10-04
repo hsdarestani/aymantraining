@@ -18,11 +18,35 @@ if [ -z "${ASC_KEY_PATH:-}" ] && [ -n "${ASC_PRIVATE_KEY_B64:-}" ] && [ -n "${AS
 fi
 
 npm ci --include=dev
-npm install --include=dev --no-save --package-lock=false query-string@7.1.3
+npm install --include=dev --no-save --package-lock=false query-string@7.1.3 react-native-screens@4.11.1 react-native-safe-area-context@5.4.0
 npx expo install --check || echo "Expo dependency check reported a patch level advisory. Continuing with the validated native stack."
 export APPLE_PUSH_ENV=production
 node ./scripts/prepare-native-config.mjs --require-ios
 npx expo prebuild --platform ios --clean --non-interactive
+
+python3 - <<'PY'
+from pathlib import Path
+
+podfile = Path("ios/Podfile")
+text = podfile.read_text()
+
+if "$RNFirebaseDisableSPM = true" not in text:
+    target_index = text.find("target ")
+    if target_index < 0:
+        raise SystemExit("Could not locate iOS target in Podfile")
+    text = text[:target_index] + "$RNFirebaseDisableSPM = true\n\n" + text[target_index:]
+
+if "$RNFirebaseAsStaticFramework = true" not in text:
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        if line.lstrip().startswith("target "):
+            indent = line[: len(line) - len(line.lstrip())] + "  "
+            lines.insert(index + 1, indent + "$RNFirebaseAsStaticFramework = true")
+            break
+    text = "\n".join(lines) + "\n"
+
+podfile.write_text(text)
+PY
 
 cd ios
 if command -v pod >/dev/null 2>&1; then
