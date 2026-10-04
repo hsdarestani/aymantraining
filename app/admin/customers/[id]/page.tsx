@@ -25,13 +25,13 @@ export default async function Customer({ params }: { params: Promise<{ id: strin
 
   return <main className="admin-content" style={{ margin: "0 auto" }}>
     <header className="admin-header">
-      <div><span className="eyebrow">ATHLETE</span><h1>{u.name || u.email}</h1></div>
+      <div><span className="eyebrow">ATHLET</span><h1>{u.name || u.email}</h1></div>
       <Link href="/admin/customers" className="ghost">← Kunden</Link>
     </header>
     <div className="kpis">
       <div><span>PLAN</span><strong style={{ fontSize: 18 }}>{u.assignments[0]?.plan.name || "—"}</strong><small>aktiv</small></div>
-      <div><span>SCORE</span><strong>{u.scoreSnapshots[0]?.total ?? "—"}</strong><small>aktuell</small></div>
-      <div><span>RECOVERY</span><strong>{u.scoreSnapshots[0]?.recovery ?? "—"}</strong><small>aktuell</small></div>
+      <div><span>LEISTUNGSWERT</span><strong>{u.scoreSnapshots[0]?.total ?? "—"}</strong><small>aktuell</small></div>
+      <div><span>REGENERATION</span><strong>{u.scoreSnapshots[0]?.recovery ?? "—"}</strong><small>aktuell</small></div>
       <div><span>WORKOUTS</span><strong>{u.workouts.filter(w => w.completedAt).length}</strong><small>letzte 20</small></div>
     </div>
     <section className="admin-cols">
@@ -45,7 +45,7 @@ export default async function Customer({ params }: { params: Promise<{ id: strin
       <aside className="stack">
         <AssignPlan userId={u.id} plans={plans.map(p => ({ id: p.id, name: p.name }))} />
         <article className="panel">
-          <span className="eyebrow">CONSENT</span><h2>Health Data</h2>
+          <span className="eyebrow">CONSENT</span><h2>GESUNDHEITSDATEN</h2>
           <p className="muted">{u.consents.find(c => c.type === "health_data" && c.granted) ? "Einwilligung vorhanden" : "Noch keine Einwilligung"}</p>
         </article>
       </aside>
