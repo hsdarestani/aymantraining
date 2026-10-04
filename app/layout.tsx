@@ -20,7 +20,8 @@ import ServiceWorker from "./ServiceWorker";
 
 export const metadata: Metadata = {
   title: "BE DIFFERENT",
-  description: "Training, Leistung und Regeneration in einem persönlichen System."
+  description: "Training, Leistung und Regeneration in einem persönlichen System.",
+  icons: { icon: "/favicon.png", apple: "/favicon.png" }
 };
 
 export const viewport: Viewport = {
