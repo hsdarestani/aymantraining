@@ -1,0 +1,27 @@
+import {useEffect,useRef,useState} from "react";
+import {Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from "react-native";
+import {router} from "expo-router";
+import Brand from "../components/Brand";
+import {Card,Eyebrow,SectionTitle} from "../components/Card";
+import {api} from "../lib/api";
+import {C,radius} from "../theme";
+
+export default function Focus(){
+ const [d,setD]=useState<any>(null),[stress,setStress]=useState(5),[mood,setMood]=useState(7),[seconds,setSeconds]=useState(120),[running,setRunning]=useState(false),[status,setStatus]=useState("");
+ const timer=useRef<ReturnType<typeof setInterval>|null>(null);
+ useEffect(()=>{api<any>("/api/focus").then(x=>{setD(x);setStress(x.check?.stress??5);setMood(x.check?.mood??7)}).catch(()=>{})},[]);
+ useEffect(()=>()=>{if(timer.current)clearInterval(timer.current)},[]);
+ function breathe(){if(running){if(timer.current)clearInterval(timer.current);timer.current=null;setRunning(false);return}setRunning(true);timer.current=setInterval(()=>setSeconds(x=>{if(x<=1){if(timer.current)clearInterval(timer.current);timer.current=null;setRunning(false);return 0}return x-1}),1000)}
+ async function save(){try{await api("/api/daily-check",{method:"POST",body:JSON.stringify({stress,mood})});setStatus("GESPEICHERT")}catch(e:any){setStatus(e.message||"Fehler")}}
+ const phase=seconds%8>=4?"AUSATMEN":"EINATMEN";
+ return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
+  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}>ZURÜCK</Text></Pressable></View>
+  <Eyebrow>BE FOCUSED</Eyebrow><Text style={s.title}>KLARER KOPF.{"\n"}KLARE ENTSCHEIDUNG.</Text>
+  <Card style={s.lineCard}><Eyebrow>DEINE DIFFERENT LINE</Eyebrow><Text style={s.line}>{d?.line||"Heute zählt die nächste saubere Entscheidung."}</Text></Card>
+  <Card><Eyebrow>ZWEI MINUTEN</Eyebrow><SectionTitle>Atmung</SectionTitle><View style={[s.orb,running&&s.orbOn]}><Text style={s.phase}>{running?phase:"BEREIT"}</Text><Text style={s.timer}>{Math.floor(seconds/60)}:{String(seconds%60).padStart(2,"0")}</Text></View><Pressable style={s.primary} onPress={breathe}><Text style={s.primaryText}>{running?"PAUSIEREN":seconds===0?"NEU STARTEN":"ATMUNG STARTEN"}</Text></Pressable>{seconds===0?<Pressable style={s.secondary} onPress={()=>setSeconds(120)}><Text style={s.secondaryText}>ZURÜCKSETZEN</Text></Pressable>:null}</Card>
+  <Card><Eyebrow>TAGESCHECK</Eyebrow><SectionTitle>Wie fühlst du dich?</SectionTitle><Scale label="STRESS" value={stress} set={setStress}/><Scale label="STIMMUNG" value={mood} set={setMood}/><Pressable style={s.secondary} onPress={save}><Text style={s.secondaryText}>CHECK SPEICHERN</Text></Pressable></Card>
+  {status?<Text style={s.status}>{status}</Text>:null}
+ </ScrollView></SafeAreaView>;
+}
+function Scale({label,value,set}:{label:string;value:number;set:(n:number)=>void}){return <View style={s.scale}><Text style={s.scaleLabel}>{label} · {value}</Text><View style={s.choices}>{[1,2,3,4,5,6,7,8,9,10].map(n=><Pressable key={n} onPress={()=>set(n)} style={[s.choice,n===value&&s.choiceOn]}><Text style={[s.choiceText,n===value&&s.choiceTextOn]}>{n}</Text></Pressable>)}</View></View>}
+const s=StyleSheet.create({safe:{flex:1,backgroundColor:C.bg},content:{padding:18,paddingBottom:70,gap:12},top:{height:54,flexDirection:"row",justifyContent:"space-between",alignItems:"center"},back:{color:C.dim,fontSize:9,fontWeight:"900"},title:{color:C.ink,fontSize:44,lineHeight:39,fontWeight:"900",letterSpacing:-3,marginVertical:12},lineCard:{paddingVertical:28},line:{color:C.ink,fontSize:24,lineHeight:31,fontWeight:"900",marginTop:14},orb:{width:180,height:180,borderRadius:90,borderWidth:2,borderColor:C.line,alignSelf:"center",alignItems:"center",justifyContent:"center",marginVertical:18},orbOn:{borderColor:C.volt,backgroundColor:"#D4FF0008"},phase:{color:C.volt,fontSize:10,fontWeight:"900",letterSpacing:1.5},timer:{color:C.ink,fontSize:38,fontWeight:"900",fontVariant:["tabular-nums"],marginTop:5},primary:{height:50,borderRadius:radius.md,backgroundColor:C.volt,alignItems:"center",justifyContent:"center"},primaryText:{color:C.bg,fontSize:9,fontWeight:"900"},secondary:{height:46,borderRadius:radius.md,borderWidth:1,borderColor:C.line,alignItems:"center",justifyContent:"center",marginTop:8},secondaryText:{color:C.ink,fontSize:8,fontWeight:"900"},scale:{marginTop:16},scaleLabel:{color:C.dim,fontSize:8,fontWeight:"900"},choices:{flexDirection:"row",flexWrap:"wrap",gap:5,marginTop:7},choice:{width:30,height:30,borderRadius:9,borderWidth:1,borderColor:C.line,alignItems:"center",justifyContent:"center"},choiceOn:{backgroundColor:C.volt,borderColor:C.volt},choiceText:{color:C.ink,fontSize:8,fontWeight:"900"},choiceTextOn:{color:C.bg},status:{color:C.green,textAlign:"center",fontSize:10}});
