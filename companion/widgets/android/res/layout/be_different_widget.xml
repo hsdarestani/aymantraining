@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:padding="16dp" android:background="#0A0A0B">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="BE DIFFERENT" android:textStyle="bold" android:textColor="#D4FF00" android:textSize="10sp"/>
+    <TextView android:id="@+id/widgetScore" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0%" android:textStyle="bold" android:textColor="#FFFFFF" android:textSize="38sp"/>
+    <TextView android:id="@+id/widgetLevel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="NORMAL" android:textStyle="bold" android:textColor="#D4FF00" android:textSize="10sp"/>
+    <Space android:layout_width="1dp" android:layout_height="0dp" android:layout_weight="1"/>
+    <TextView android:id="@+id/widgetWorkout" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="2" android:text="REGENERATION" android:textStyle="bold" android:textColor="#FFFFFF" android:textSize="11sp"/>
+</LinearLayout>
