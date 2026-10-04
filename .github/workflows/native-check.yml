@@ -26,6 +26,6 @@ jobs:
           cache: npm
           cache-dependency-path: mobile/package.json
       - name: Install native dependencies
-        run: npm install
+        run: npm ci
       - name: TypeScript check
         run: npm run typecheck
