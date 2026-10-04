@@ -719,3 +719,15 @@ model AiMessage {
 
   @@index([userId, createdAt])
 }
+
+
+model CompanionPairCode {
+  id        String   @id @default(cuid())
+  userId    String
+  codeHash  String   @unique
+  expiresAt DateTime
+  claimedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, expiresAt])
+}
