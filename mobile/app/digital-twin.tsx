@@ -12,7 +12,6 @@ function points(values:Record<string,number>,radius:number,cx=150,cy=150){return
 function Radar({current,target}:{current:Record<string,number>;target:Record<string,number>}){
  return <Svg width="100%" height={330} viewBox="0 0 300 330">
   {[25,50,75,100].map(p=><Circle key={p} cx="150" cy="150" r={1.12*p} fill="none" stroke="#2A2D2C" strokeWidth="1"/>)}
-  {labels.map(([_,label],i)=>{const a=-Math.PI/2+i*2*Math.PI/labels.length;const x=150+Math.cos(a)*112,y=150+Math.sin(a)*112;const tx=150+Math.cos(a)*142,ty=150+Math.sin(a)*142;return <View key={label} />})}
   {labels.map(([_,label],i)=>{const a=-Math.PI/2+i*2*Math.PI/labels.length;const x=150+Math.cos(a)*112,y=150+Math.sin(a)*112;const tx=150+Math.cos(a)*145,ty=150+Math.sin(a)*145;return <Line key={"l"+i} x1="150" y1="150" x2={x} y2={y} stroke="#2A2D2C" strokeWidth="1"/>})}
   <Polygon points={points(target,112)} fill="#D4FF0010" stroke="#D4FF0066" strokeWidth="2" strokeDasharray="5 5"/>
   <Polygon points={points(current,112)} fill="#D4FF0025" stroke="#D4FF00" strokeWidth="3"/>
