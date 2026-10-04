@@ -17,11 +17,7 @@
       },
       "icon": "./assets/favicon.png",
       "appleTeamId": "884MVA2MD5",
-      "entitlements": {
-        "com.apple.security.application-groups": [
-          "group.com.smarbiz.bedifferent"
-        ]
-      },
+      "entitlements": {},
       "buildNumber": "2"
     },
     "android": {
