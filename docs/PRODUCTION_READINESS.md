@@ -120,3 +120,30 @@ Both should grant RevenueCat entitlement `pro`. The 7 day trial must be configur
 ## Publisher
 
 See `docs/PUBLISHER_RELEASE.md` for the app record and build configuration.
+
+
+## Origin TLS / Cloudflare Full Strict
+
+Recommended before public release:
+
+- `CLOUDFLARE_ORIGIN_CERT_B64`
+- `CLOUDFLARE_ORIGIN_KEY_B64`
+
+Create a Cloudflare Origin Certificate for `bedifferent.smarbiz.sbs`, base64-encode the certificate and private key separately, save them as GitHub Secrets, deploy once, then set Cloudflare SSL/TLS mode to Full (strict).
+
+## Publisher build-agent signing secrets
+
+These do not belong in GitHub Secrets. Keep them on the corresponding build agent environment.
+
+Android Linux agent:
+
+- `ANDROID_KEYSTORE_PATH`
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+
+iOS macOS agent:
+
+- `APPLE_TEAM_ID`
+- optional `IOS_SCHEME`
+- optional unattended provisioning: `ASC_KEY_PATH`, `ASC_KEY_ID`, `ASC_ISSUER_ID`
