@@ -43,7 +43,7 @@ export default function Membership(){
   return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
     <Brand/>
     <Text style={s.kicker}>MITGLIEDSCHAFT</Text>
-    <Text style={s.title}>KOSTENLOS ZEIGT DIR DEN START.{"\n"}PRO MACHT ES{"\n"}PERSÖNLICH.</Text>
+    <Text style={s.title}>KOSTENLOS ZEIGT DIR DEN EINSTIEG.{"\n"}PRO MACHT ES{"\n"}PERSÖNLICH.</Text>
     <Text style={s.copy}>Trainer Radar · direkter Trainer Chat · Sprachnachrichten · Technikvideo · vollständige Berichte · vollständiger Verlauf</Text>
 
     {loading?<ActivityIndicator color={C.volt}/>:
