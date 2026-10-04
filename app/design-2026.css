@@ -136,3 +136,26 @@ button,a,.tag,.primary,.secondary{transition:transform .2s ease,filter .2s ease,
   .app-drawer{display:block}
   .shell,.sub-shell{padding-top:18px}
 }
+
+/* Einheitliche Seitenbewegung */
+.member-stage{min-height:100%;animation:bdStageIn .46s cubic-bezier(.16,.8,.2,1) both}
+.member-stage main>*{animation:bdRise .62s cubic-bezier(.16,.8,.2,1) both}
+.member-stage main>*:nth-child(2){animation-delay:.04s}
+.member-stage main>*:nth-child(3){animation-delay:.08s}
+.member-stage main>*:nth-child(4){animation-delay:.12s}
+.member-stage input,.member-stage select,.member-stage textarea{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+.member-stage input:focus,.member-stage select:focus,.member-stage textarea:focus{transform:translateY(-1px)}
+.exercise-card img,.workout-media-mini img,.before-after img{transition:transform .55s cubic-bezier(.16,.8,.2,1),filter .35s ease}
+.exercise-card:hover img,.workout-media-mini:hover img{transform:scale(1.035);filter:contrast(1.03)}
+@keyframes bdStageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+@media(max-width:1200px){
+  .app-desktop-top{display:none}
+  .app-mobile-top{display:flex!important}
+  .app-bottom-nav{display:grid!important}
+  .shell,.sub-shell{padding-top:84px!important;padding-bottom:calc(116px + env(safe-area-inset-bottom,0px))!important}
+}
+@media(min-width:1201px){
+  .app-mobile-top,.app-bottom-nav{display:none!important}
+  .app-desktop-top{display:block}
+}
