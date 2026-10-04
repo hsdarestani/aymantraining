@@ -83,7 +83,7 @@ const flags={
   workout_tracking:[true,true,true],exercise_library_full:[false,true,true],unlimited_history:[false,true,true],wearable_advanced:[false,true,true],
   progress_photos_unlimited:[false,true,true],score_details:[false,true,true],coach_radar_full:[false,true,true],recovery_warnings:[false,true,true],
   sleep_advanced:[false,true,true],nutrition_fuel:[false,true,true],performance_tests_unlimited:[false,true,true],coach_chat:[false,true,true],
-  video_feedback:[false,true,true],weekly_checkin:[false,true,true],weekly_report_full:[false,true,true],performance_timeline:[false,true,true],
+  video_feedback:[false,true,true],weekly_checkin:[false,true,true],weekly_report_full:[false,true,true],performance_timeline:[false,true,true],different_ai:[false,true,true],elite_video_calls:[false,false,true],
   digital_twin:[false,true,true],pro_challenges:[false,true,true]
 };
 for(const [key,[free,pro,elite]] of Object.entries(flags))await prisma.featureFlag.upsert({where:{key},update:{free,pro,elite},create:{key,free,pro,elite}});
