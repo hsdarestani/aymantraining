@@ -9,5 +9,5 @@
   ],
   "android_track": "internal",
   "auto_submit": false,
-  "release_notes": "BE DIFFERENT 1.0.0 build 2 Publisher retry with preserved Expo dev plugins"
+  "release_notes": "BE DIFFERENT 1.0.0 build 2 final Publisher retry with iOS CocoaPods Firebase linking fix"
 }
