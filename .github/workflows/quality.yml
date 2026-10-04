@@ -29,7 +29,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://bedifferent:bedifferent_test@127.0.0.1:5432/bedifferent_test?schema=public
       NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
-      REVENUECAT_WEBHOOK_SECRET: test-revenuecat-secret
+      ENABLE_INTERNAL_TRIAL: "true"
       CRON_SECRET: test-cron-secret
       DATA_DIR: /tmp/bedifferent-e2e
       NODE_ENV: test
