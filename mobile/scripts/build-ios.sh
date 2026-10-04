@@ -94,11 +94,37 @@ fi
 
 if [ "$signingStyle" = "Manual" ]; then
   : "${IOS_CODE_SIGN_IDENTITY:?IOS_CODE_SIGN_IDENTITY is required for manual signing}"
-  : "${IOS_PROVISIONING_PROFILE_SPECIFIER:?IOS_PROVISIONING_PROFILE_SPECIFIER is required for manual signing}"
-  archiveSigning+=(
-    CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY"
-    PROVISIONING_PROFILE_SPECIFIER="$IOS_PROVISIONING_PROFILE_SPECIFIER"
-  )
+  archiveSigning+=(CODE_SIGN_IDENTITY="$IOS_CODE_SIGN_IDENTITY")
+
+  if [ -n "${IOS_TARGET_PROFILES_JSON:-}" ]; then
+    project="$(find . -maxdepth 2 -name '*.xcodeproj' -print -quit)"
+    if [ -z "$project" ]; then
+      echo "No Xcode project found for target profile assignment" >&2
+      exit 2
+    fi
+    IOS_PROJECT_PATH="$project" ruby -rjson -rxcodeproj <<'RUBY'
+project_path = ENV.fetch("IOS_PROJECT_PATH")
+profiles = JSON.parse(ENV.fetch("IOS_TARGET_PROFILES_JSON"))
+team_id = ENV.fetch("APPLE_TEAM_ID")
+identity = ENV.fetch("IOS_CODE_SIGN_IDENTITY")
+project = Xcodeproj::Project.open(project_path)
+project.targets.each do |target|
+  profile = profiles[target.name]
+  next unless profile
+  target.build_configurations.each do |config|
+    config.build_settings["DEVELOPMENT_TEAM"] = team_id
+    config.build_settings["CODE_SIGN_STYLE"] = "Manual"
+    config.build_settings["CODE_SIGN_IDENTITY"] = identity
+    config.build_settings["PROVISIONING_PROFILE_SPECIFIER"] = profile
+  end
+end
+project.save
+RUBY
+  else
+    : "${IOS_PROVISIONING_PROFILE_SPECIFIER:?IOS_PROVISIONING_PROFILE_SPECIFIER is required for manual signing}"
+    archiveSigning+=(PROVISIONING_PROFILE_SPECIFIER="$IOS_PROVISIONING_PROFILE_SPECIFIER")
+  fi
+
   if [ -n "${IOS_SIGNING_KEYCHAIN:-}" ]; then
     archiveSigning+=(OTHER_CODE_SIGN_FLAGS="--keychain $IOS_SIGNING_KEYCHAIN")
   fi
@@ -116,6 +142,25 @@ xcodebuild \
   archive
 
 if [ "$signingStyle" = "Manual" ]; then
+  if [ -n "${IOS_BUNDLE_PROFILES_JSON:-}" ]; then
+    IOS_EXPORT_PATH="$PWD/build/ExportOptions.plist" python3 - <<'PY'
+import json
+import os
+import plistlib
+
+profiles = json.loads(os.environ["IOS_BUNDLE_PROFILES_JSON"])
+payload = {
+    "method": "app-store-connect",
+    "teamID": os.environ["APPLE_TEAM_ID"],
+    "signingStyle": "manual",
+    "signingCertificate": os.environ["IOS_CODE_SIGN_IDENTITY"],
+    "provisioningProfiles": profiles,
+    "uploadSymbols": True,
+}
+with open(os.environ["IOS_EXPORT_PATH"], "wb") as handle:
+    plistlib.dump(payload, handle)
+PY
+  else
 cat > "$PWD/build/ExportOptions.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -130,6 +175,7 @@ cat > "$PWD/build/ExportOptions.plist" <<PLIST
 <key>uploadSymbols</key><true/>
 </dict></plist>
 PLIST
+  fi
 else
 cat > "$PWD/build/ExportOptions.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
