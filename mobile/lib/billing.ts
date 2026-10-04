@@ -1,6 +1,6 @@
 import {Platform} from "react-native";
 import {useCallback,useEffect,useRef,useState} from "react";
-import {ErrorCode,useIAP,type Purchase,type SubscriptionProduct} from "react-native-iap";
+import {ErrorCode,useIAP,type Purchase,type ProductSubscription} from "react-native-iap";
 import {api} from "./api";
 
 export const STORE_PRODUCT_IDS=["bd_pro_monthly","bd_pro_yearly"];
@@ -38,7 +38,7 @@ export function useStoreBilling(){
   const iap=useIAP({
     onPurchaseSuccess:async purchase=>{await verifyPurchase(purchase).catch(()=>undefined)},
     onPurchaseError:error=>{
-      if(error.code===ErrorCode.E_USER_CANCELLED){setStatus("Kauf abgebrochen.");return}
+      if(error.code===ErrorCode.UserCancelled){setStatus("Kauf abgebrochen.");return}
       setStatus(error.message||"Kauf konnte nicht abgeschlossen werden.");
     }
   });
@@ -61,7 +61,7 @@ export function useStoreBilling(){
     })();
   },[iap.availablePurchases,verifyPurchase]);
 
-  async function buy(product:SubscriptionProduct){
+  async function buy(product:ProductSubscription){
     setStatus("Store wird geöffnet…");
     const p:any=product;
     const androidOffers=(p.subscriptionOfferDetailsAndroid||[]).map((offer:any)=>({sku:product.id,offerToken:offer.offerToken}));
