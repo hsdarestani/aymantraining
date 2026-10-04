@@ -72,8 +72,9 @@ export async function verifyAppleSubscription(transactionId:string):Promise<Stor
 }
 
 function googleCredentials(){
-  if(!process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_B64)return null;
-  try{return JSON.parse(Buffer.from(process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_B64,"base64").toString("utf8"))}catch{return null}
+  const value=process.env.GOOGLE_SERVICE_ACCOUNT_B64||process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_B64;
+  if(!value)return null;
+  try{return JSON.parse(Buffer.from(value,"base64").toString("utf8"))}catch{return null}
 }
 
 export async function verifyGoogleSubscription(purchaseToken:string):Promise<StoreVerification>{
