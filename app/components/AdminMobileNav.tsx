@@ -24,12 +24,12 @@ export default function AdminMobileNav(){
   return <>
     <div className="admin-mobile-top">
       <Link href="/admin" className="app-wordmark">BE <b>DIFFERENT</b></Link>
-      <span>COACH</span>
-      <button onClick={()=>setOpen(!open)} aria-label="Coach Menü">{open?"×":"☰"}</button>
+      <span>TRAINER</span>
+      <button onClick={()=>setOpen(!open)} aria-label="Trainer Menü">{open?"×":"☰"}</button>
     </div>
     <div className={open?"admin-mobile-sheet open":"admin-mobile-sheet"}>
       {links.map(([href,label])=><Link key={href} href={href} onClick={()=>setOpen(false)} className={path===href?"active":""}>{label}<b>↗</b></Link>)}
-      <Link href="/dashboard" onClick={()=>setOpen(false)}>Athlete View<b>↗</b></Link>
+      <Link href="/dashboard" onClick={()=>setOpen(false)}>Athletenansicht<b>↗</b></Link>
     </div>
   </>;
 }
