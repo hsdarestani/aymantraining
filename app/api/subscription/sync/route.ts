@@ -1,6 +1,9 @@
 import {NextResponse} from "next/server";
+import {z} from "zod";
 import {prisma} from "../../../../lib/db";
 import {errorJson,isSameOrigin,requireApiUser} from "../../../../lib/http";
+
+const schema=z.object({platform:z.enum(["ios","android"])});
 
 function active(expiration?:string|null){
   if(!expiration)return true;
@@ -9,15 +12,25 @@ function active(expiration?:string|null){
 }
 
 export async function POST(request:Request){
-  if(!isSameOrigin(request)&&request.headers.get("x-bd-client")!=="mobile")return errorJson("Ungültige Anfrage.",403);
+  if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
   const user=await requireApiUser();
   if(!user)return errorJson("Nicht angemeldet.",401);
 
-  const key=process.env.REVENUECAT_SECRET_API_KEY;
+  const parsed=schema.safeParse(await request.json().catch(()=>null));
+  if(!parsed.success)return errorJson("Plattform fehlt.",422);
+
+  const key=parsed.data.platform==="ios"
+    ?process.env.REVENUECAT_IOS_PUBLIC_API_KEY
+    :process.env.REVENUECAT_ANDROID_PUBLIC_API_KEY;
+
   if(!key)return NextResponse.json({ok:true,configured:false,tier:user.subscriptionTier});
 
   const response=await fetch(`https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(user.id)}`,{
-    headers:{"Authorization":`Bearer ${key}`,"X-Platform":"server"}
+    headers:{
+      "Authorization":`Bearer ${key}`,
+      "X-Platform":parsed.data.platform
+    },
+    cache:"no-store"
   });
   if(!response.ok)return errorJson("Subscription Sync fehlgeschlagen.",502);
 
