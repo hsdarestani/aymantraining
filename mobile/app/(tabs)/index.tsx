@@ -20,14 +20,13 @@ export default function Home(){
  const score=d.score,a=d.activity||{};
  return <ScrollView style={s.safe} contentContainerStyle={s.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
   <View style={s.top}><Brand compact/><Text style={s.plan}>{d.user.tier}</Text></View>
-  <View style={s.hero}><Text style={s.eyebrow}>GUTEN MORGEN, {(d.user.name||"ATHLET").toUpperCase()}</Text><Text style={s.title}>BAUE DEINEN{"
-"}ATHLETEN.</Text><Text style={s.copy}>Daten werden zu einer klaren Entscheidung für heute.</Text></View>
-  <Card style={s.scoreCard}><Eyebrow>BE DIFFERENT SCORE</Eyebrow><Text style={s.score}>{score?.total??0}<Text style={s.percent}>%</Text></Text><Text style={s.level}>{score?.level||"NORMAL"}</Text><View style={s.track}><View style={[s.fill,{width:`${score?.total??0}%`}]}/></View><Text style={s.data}>DATEN {score?.completeness??0}% VOLLSTÄNDIG</Text></Card>
+  <View style={s.hero}><Text style={s.eyebrow}>GUTEN MORGEN, {(d.user.name||"ATHLET").toUpperCase()}</Text><Text style={s.title}>BAUE DEINEN{"\\n"}ATHLETEN.</Text><Text style={s.copy}>Daten werden zu einer klaren Entscheidung für heute.</Text></View>
+  <Card style={s.scoreCard}><Eyebrow>BE DIFFERENT LEISTUNGSWERT</Eyebrow><Text style={s.score}>{score?.total??0}<Text style={s.percent}>%</Text></Text><Text style={s.level}>{score?.level||"NORMAL"}</Text><View style={s.track}><View style={[s.fill,{width:`${score?.total??0}%`}]}/></View><Text style={s.data}>DATEN {score?.completeness??0}% VOLLSTÄNDIG</Text></Card>
 
   <Card>
-   <View style={s.cardHead}><View><Eyebrow>COACH RADAR</Eyebrow><SectionTitle>{d.recommendations?.[0]?.title||"Daten sammeln."}</SectionTitle></View><Text style={s.live}>{d.radarLocked?"◆ PRO":"● AKTIV"}</Text></View>
+   <View style={s.cardHead}><View><Eyebrow>TRAINER RADAR</Eyebrow><SectionTitle>{d.recommendations?.[0]?.title||"Daten sammeln."}</SectionTitle></View><Text style={s.live}>{d.radarLocked?"◆ PRO":"● AKTIV"}</Text></View>
    <Text style={s.cardCopy}>{d.recommendations?.[0]?.action||"Verbinde Gesundheitsdaten oder mach deinen Tagescheck."}</Text>
-   {d.radarLocked?<Pressable style={s.radarCta} onPress={()=>router.push("/membership")}><Text style={s.radarCtaText}>COACH RADAR FREISCHALTEN →</Text></Pressable>:null}
+   {d.radarLocked?<Pressable style={s.radarCta} onPress={()=>router.push("/membership")}><Text style={s.radarCtaText}>TRAINER RADAR FREISCHALTEN →</Text></Pressable>:null}
   </Card>
 
   <Pressable onPress={()=>d.nextWorkout&&router.push(`/workout/${d.nextWorkout.id}`)}><Card style={s.workout}><Eyebrow>HEUTIGES TRAINING</Eyebrow><Text style={s.workoutTitle}>{d.nextWorkout?.title||"REGENERATIONSTAG"}</Text><Text style={s.cardCopy}>{d.nextWorkout?.scheduledAt?new Date(d.nextWorkout.scheduledAt).toLocaleString("de-DE"):"Regeneration gehört zum Training."}</Text><Text style={s.arrow}>{d.nextWorkout?"STARTEN →":"BEWUSST ERHOLEN."}</Text></Card></Pressable>
