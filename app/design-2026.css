@@ -102,3 +102,37 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;o
 }
 @keyframes navPop{0%{transform:scale(.75)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+
+/* Globale Mitgliedernavigation */
+.app-desktop-top{position:sticky;top:0;z-index:80;background:rgba(5,6,6,.88);border-bottom:1px solid var(--bd-line);backdrop-filter:blur(24px);animation:bdNavIn .55s cubic-bezier(.2,.8,.2,1) both}
+.app-desktop-inner{max-width:1480px;height:74px;margin:auto;padding:0 42px;display:grid;grid-template-columns:auto auto 1fr auto;align-items:center;gap:22px}
+.app-desktop-top .app-wordmark{font-size:18px;color:#fff;text-decoration:none;white-space:nowrap}.app-desktop-top .app-wordmark b{color:var(--bd-volt)}
+.app-desktop-top nav{display:flex;justify-content:center;gap:6px}.app-desktop-top nav a{height:46px;padding:0 13px;display:flex;align-items:center;gap:8px;color:#7f8581;border-radius:14px;text-decoration:none;font-size:9px;font-weight:950;letter-spacing:.08em;transition:transform .22s ease,background .22s ease,color .22s ease}
+.app-desktop-top nav a:hover{color:#fff;background:rgba(255,255,255,.05);transform:translateY(-2px)}.app-desktop-top nav a.active{color:#050606;background:var(--bd-volt);box-shadow:0 12px 34px rgba(215,255,0,.13)}
+.desktop-menu,.desktop-back{height:42px;border:1px solid var(--bd-line);border-radius:13px;background:rgba(255,255,255,.035);color:#fff;display:flex;align-items:center;gap:8px;padding:0 12px;font-size:8px;font-weight:950;letter-spacing:.1em;text-decoration:none;transition:.22s ease}.desktop-menu:hover,.desktop-back:hover{border-color:rgba(215,255,0,.5);transform:translateY(-2px)}
+.mobile-back{display:flex;align-items:center;gap:7px;color:#fff;text-decoration:none;font-size:9px;font-weight:950;letter-spacing:.1em}
+.drawer-primary{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:18px 0}.drawer-primary a{display:flex;align-items:center;gap:9px;padding:12px;border:1px solid var(--bd-line);border-radius:14px;color:#fff;text-decoration:none;font-size:9px;font-weight:900;letter-spacing:.06em;background:rgba(255,255,255,.025);transition:.2s ease}.drawer-primary a:hover{transform:translateY(-2px);border-color:rgba(215,255,0,.35)}
+.drawer-links{display:grid;gap:2px;overflow:auto}.drawer-links a{display:flex;align-items:center;justify-content:space-between;padding:11px 0;color:#a5aaa7;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px;transition:.2s ease}.drawer-links a:hover{color:#fff;padding-left:4px}.drawer-links b{color:var(--bd-volt)}
+.sub-top{display:none!important}
+
+/* Bewegungsstil für die gesamte App */
+.page-hero,.panel,.exercise-card,.template-card,.day-card,.exercise-row,.history-row,.test-card,.kpis>div,.setting-row,.challenge-grid>*,.progress-cards>*{animation:bdRise .65s cubic-bezier(.16,.8,.2,1) both;transform-origin:center bottom}
+.panel:nth-child(2),.exercise-card:nth-child(2),.template-card:nth-child(2),.day-card:nth-child(2){animation-delay:.05s}
+.panel:nth-child(3),.exercise-card:nth-child(3),.template-card:nth-child(3),.day-card:nth-child(3){animation-delay:.10s}
+.panel:nth-child(4),.exercise-card:nth-child(4),.template-card:nth-child(4),.day-card:nth-child(4){animation-delay:.15s}
+.panel,.exercise-card,.template-card,.day-card{transition:transform .28s cubic-bezier(.2,.8,.2,1),border-color .28s ease,box-shadow .28s ease}
+.panel:hover,.exercise-card:hover,.template-card:hover,.day-card:hover{transform:translateY(-4px);border-color:rgba(215,255,0,.22);box-shadow:0 18px 55px rgba(0,0,0,.22)}
+button,a,.tag,.primary,.secondary{transition:transform .2s ease,filter .2s ease,background .2s ease,border-color .2s ease}button:active,a:active,.primary:active,.secondary:active{transform:scale(.985)}
+@keyframes bdRise{from{opacity:0;transform:translateY(18px) scale(.985);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+@keyframes bdNavIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.page-hero,.panel,.exercise-card,.template-card,.day-card,.exercise-row,.history-row,.test-card,.kpis>div,.setting-row,.challenge-grid>*,.progress-cards>*,.app-desktop-top{animation:none!important}.panel,.exercise-card,.template-card,.day-card,button,a{transition:none!important}}
+
+@media(max-width:980px){
+  .app-desktop-top{display:none}
+}
+@media(min-width:981px){
+  .app-mobile-top,.app-bottom-nav{display:none!important}
+  .app-drawer{display:block}
+  .shell,.sub-shell{padding-top:18px}
+}
