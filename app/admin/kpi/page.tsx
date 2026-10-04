@@ -20,9 +20,9 @@ export default async function Kpi(){
   <header className="admin-header"><div><span className="eyebrow">ERFOLGSKENNZAHLEN</span><h1>Produkt KPI</h1></div><Link className="ghost" href="/admin">← ÜBERSICHT</Link></header>
   <div className="kpis">
    {metric("ONBOARDING",pct(onboard,total)+"%","Ziel über 70 %",pct(onboard,total)>70)}
-   {metric("WEARABLE VERBUNDEN",pct(wear,total)+"%","Ziel über 50 %",pct(wear,total)>50)}
-   {metric("TAG 7 RETENTION",pct(ret7,eligible7.length)+"%","Ziel über 35 %",pct(ret7,eligible7.length)>35)}
-   {metric("TAG 30 RETENTION",pct(ret30,eligible30.length)+"%","Ziel über 20 %",pct(ret30,eligible30.length)>20)}
+   {metric("GERÄT VERBUNDEN",pct(wear,total)+"%","Ziel über 50 %",pct(wear,total)>50)}
+   {metric("BINDUNG NACH 7 TAGEN",pct(ret7,eligible7.length)+"%","Ziel über 35 %",pct(ret7,eligible7.length)>35)}
+   {metric("BINDUNG NACH 30 TAGEN",pct(ret30,eligible30.length)+"%","Ziel über 20 %",pct(ret30,eligible30.length)>20)}
   </div>
   <div className="kpis">
    {metric("KOSTENLOS ZU PRO",pct(pro,total)+"%","Ziel 3 bis 8 %",pct(pro,total)>=3&&pct(pro,total)<=8)}
@@ -30,6 +30,6 @@ export default async function Kpi(){
    {metric("ATHLETEN",String(total),"Aktive Produktbasis",total>0)}
    {metric("PRO UND ELITE",String(pro),"Kapazität beobachten",true)}
   </div>
-  <section className="admin-cols"><article className="panel"><span className="eyebrow">ZAHLUNGSMETRIKEN</span><h2>Bewusst ausgenommen</h2><p className="muted">Testphase zu Bezahlabo und Kündigungsrate werden erst aktiviert, wenn die Store Zahlung final angeschlossen ist. Alle anderen KPI werden aus echten Produktdaten berechnet.</p></article><article className="panel"><span className="eyebrow">MESSUNG</span><h2>Keine erfundenen Zahlen</h2><p className="muted">Retention basiert auf realer Sitzungaktivität. Wearable Quote basiert auf aktiven Verbindungen. Trainer Antwortzeit basiert auf echten Nachrichtenpaaren.</p></article></section>
+  <section className="admin-cols"><article className="panel"><span className="eyebrow">ZAHLUNGSMETRIKEN</span><h2>Bewusst ausgenommen</h2><p className="muted">Testphase zu Bezahlabo und Kündigungsrate werden erst aktiviert, wenn die Store Zahlung final angeschlossen ist. Alle anderen KPI werden aus echten Produktdaten berechnet.</p></article><article className="panel"><span className="eyebrow">MESSUNG</span><h2>Keine erfundenen Zahlen</h2><p className="muted">Bindung basiert auf realer Sitzungsaktivität. Die Quote verbundener Geräte basiert auf aktiven Verbindungen. Die Antwortzeit des Trainers basiert auf echten Nachrichtenpaaren.</p></article></section>
  </main>;
 }
