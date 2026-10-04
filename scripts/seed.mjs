@@ -38,6 +38,11 @@ const plans=[
     ["BD-STR-001",0,0,4,"6 bis 8",8,150],["BD-ATH-014",0,1,4,"3",7,120],
     ["BD-LEG-012",2,0,4,"8/Seite",8,120],["BD-CORE-002",2,1,3,"10/Seite",7,45],
     ["BD-MOB-008",4,0,3,"60 Sek.",5,30],["BD-ATH-015",4,1,4,"12",7,90]
+  ]},
+  {id:"pro-travel-hotel",name:"REISE UND HOTEL",description:"Kurze Einheiten ohne Geräte für Reisen und Hotelzimmer.",proOnly:true,items:[
+    ["BD-STR-002",0,0,4,"10 bis 20",7,60],["BD-LEG-013",0,1,4,"15 bis 25",7,60],["BD-CORE-001",0,2,3,"45 Sek.",7,35],
+    ["BD-MOB-008",2,0,3,"60 Sek.",5,30],["BD-MOB-009",2,1,3,"60 Sek.",5,30],["BD-CORE-002",2,2,3,"10 je Seite",6,30],
+    ["BD-STR-002",4,0,5,"8 bis 15",8,60],["BD-LEG-013",4,1,5,"12 bis 20",8,60],["BD-CORE-001",4,2,3,"60 Sek.",7,35]
   ]}
 ];
 for(const p of plans){
@@ -75,7 +80,14 @@ const settings={
   score_weights:{strength:20,endurance:15,athleticism:15,mobility:10,recovery:15,fuel:10,consistency:15},
   score_formula:{sleepTargetHours:8,proteinTargetGPerKg:1.6,waterTargetMl:2500,checkinsPerWeek:5,performanceChangeMultiplier:125},
   radar_thresholds:{green:80,amber:60},
-  notification_limits:{dailyMax:3}
+  notification_limits:{dailyMax:3},
+  different_lines:[
+    "Heute zählt die nächste saubere Entscheidung.",
+    "Regeneration ist Teil deiner Entwicklung.",
+    "Beständigkeit schlägt einen perfekten einzelnen Tag.",
+    "Trainiere klar. Erhole dich bewusst.",
+    "Baue den Athleten Schritt für Schritt."
+  ]
 };
 for(const [key,value] of Object.entries(settings))await prisma.systemSetting.upsert({where:{key},update:{value},create:{key,value}});
 
