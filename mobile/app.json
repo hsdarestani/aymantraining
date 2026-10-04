@@ -41,7 +41,8 @@
             "minSdkVersion": 26
           }
         }
-      ]
+      ],
+      "./plugins/withRevenueCatAndroid"
     ],
     "extra": {
       "apiUrl": "https://bedifferent.smarbiz.sbs"
