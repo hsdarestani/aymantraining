@@ -3,7 +3,7 @@
     "name": "BE DIFFERENT",
     "slug": "be-different",
     "scheme": "bedifferent",
-    "version": "0.2.0",
+    "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
@@ -21,7 +21,8 @@
         "com.apple.security.application-groups": [
           "group.com.smarbiz.bedifferent"
         ]
-      }
+      },
+      "buildNumber": "1"
     },
     "android": {
       "package": "com.smarbiz.bedifferent",
@@ -35,7 +36,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/favicon.png",
         "backgroundColor": "#D7FF00"
-      }
+      },
+      "versionCode": 1
     },
     "plugins": [
       "expo-router",
