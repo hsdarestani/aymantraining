@@ -41,7 +41,14 @@
       "expo-router",
       "expo-secure-store",
       "expo-camera",
-      "@kingstinct/react-native-healthkit",
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "BE DIFFERENT nutzt freigegebene Health Daten für Score, Recovery und persönliche Trainingsempfehlungen.",
+          "NSHealthUpdateUsageDescription": "BE DIFFERENT kann von dir gewählte Fitnessdaten in Apple Health speichern.",
+          "background": true
+        }
+      ],
       "react-native-health-connect",
       [
         "expo-build-properties",
