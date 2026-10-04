@@ -87,6 +87,10 @@ archiveSigning=(
   DEVELOPMENT_TEAM="$APPLE_TEAM_ID"
   CODE_SIGN_STYLE="$signingStyle"
 )
+provisioningArgs=()
+if [ "$signingStyle" != "Manual" ]; then
+  provisioningArgs+=(-allowProvisioningUpdates)
+fi
 
 if [ "$signingStyle" = "Manual" ]; then
   : "${IOS_CODE_SIGN_IDENTITY:?IOS_CODE_SIGN_IDENTITY is required for manual signing}"
@@ -107,6 +111,7 @@ xcodebuild \
   -destination "generic/platform=iOS" \
   -archivePath "$archive" \
   "${archiveSigning[@]}" \
+  "${provisioningArgs[@]}" \
   "${extraAuth[@]}" \
   archive
 
@@ -143,6 +148,7 @@ xcodebuild \
   -archivePath "$archive" \
   -exportPath "$exportDir" \
   -exportOptionsPlist "$PWD/build/ExportOptions.plist" \
+  "${provisioningArgs[@]}" \
   "${extraAuth[@]}"
 
 test -n "$(find "$exportDir" -name '*.ipa' -print -quit)"
