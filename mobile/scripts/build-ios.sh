@@ -6,6 +6,8 @@ cd "$(dirname "$0")/.."
 : "${APPLE_TEAM_ID:?APPLE_TEAM_ID is required on the Publisher macOS agent}"
 
 npm ci
+export APPLE_PUSH_ENV=production
+node ./scripts/prepare-native-config.mjs --require-firebase
 npx expo prebuild --platform ios --clean --non-interactive
 
 cd ios
