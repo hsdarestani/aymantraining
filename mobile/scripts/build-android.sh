@@ -18,6 +18,7 @@ fi
 test -f "$ANDROID_KEYSTORE_PATH"
 
 npm ci
+npx expo install --check
 node ./scripts/prepare-native-config.mjs --require-android
 npx expo prebuild --platform android --clean --non-interactive
 node ./scripts/configure-android-signing.mjs
