@@ -1,13 +1,14 @@
 import WidgetKit
 import SwiftUI
+func bd(_ de:String,_ en:String)->String{(UserDefaults(suiteName:"group.com.smarbiz.bedifferent")?.string(forKey:"locale") ?? Locale.current.languageCode ?? "de")=="en" ? en : de}
 
 struct BeDifferentEntry:TimelineEntry{let date:Date;let score:Int;let level:String;let workout:String}
 struct BeDifferentProvider:TimelineProvider{
- func placeholder(in context:Context)->BeDifferentEntry{.init(date:.now,score:81,level:"BE DIFFERENT",workout:"HEUTIGES TRAINING")}
+ func placeholder(in context:Context)->BeDifferentEntry{.init(date:.now,score:81,level:"BE DIFFERENT",workout:bd("HEUTIGES TRAINING","TODAY’S WORKOUT"))}
  func getSnapshot(in context:Context,completion:@escaping(BeDifferentEntry)->Void){completion(placeholder(in:context))}
  func getTimeline(in context:Context,completion:@escaping(Timeline<BeDifferentEntry>)->Void){
   let d=UserDefaults(suiteName:"group.com.smarbiz.bedifferent")
-  let e=BeDifferentEntry(date:.now,score:d?.integer(forKey:"score") ?? 0,level:d?.string(forKey:"level") ?? "NORMAL",workout:d?.string(forKey:"workout") ?? "REGENERATION")
+  let e=BeDifferentEntry(date:.now,score:d?.integer(forKey:"score") ?? 0,level:d?.string(forKey:"level") ?? "NORMAL",workout:d?.string(forKey:"workout") ?? bd("REGENERATION","RECOVERY"))
   completion(Timeline(entries:[e],policy:.after(Date().addingTimeInterval(1800))))
  }
 }
@@ -20,5 +21,5 @@ struct BeDifferentWidgetView:View{
 }
 @main
 struct BeDifferentWidget:Widget{
- var body:some WidgetConfiguration{StaticConfiguration(kind:"BeDifferentWidget",provider:BeDifferentProvider()){BeDifferentWidgetView(entry:$0)}.configurationDisplayName("BE DIFFERENT").description("Leistungswert und heutiges Training").supportedFamilies([.systemSmall,.systemMedium])}
+ var body:some WidgetConfiguration{StaticConfiguration(kind:"BeDifferentWidget",provider:BeDifferentProvider()){BeDifferentWidgetView(entry:$0)}.configurationDisplayName("BE DIFFERENT").description(bd("Leistungswert und heutiges Training","Performance score and today’s workout")).supportedFamilies([.systemSmall,.systemMedium])}
 }

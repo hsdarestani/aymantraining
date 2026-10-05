@@ -1,5 +1,6 @@
 import WidgetKit
 import SwiftUI
+func bd(_ de:String,_ en:String)->String{(UserDefaults(suiteName:"group.com.smarbiz.bedifferent.watch")?.string(forKey:"locale") ?? Locale.current.languageCode ?? "de")=="en" ? en : de}
 
 struct WatchEntry:TimelineEntry{let date:Date;let score:Int;let level:String}
 struct WatchProvider:TimelineProvider{
@@ -24,5 +25,5 @@ struct WatchComplicationView:View{
 }
 @main
 struct BeDifferentWatchWidget:Widget{
- var body:some WidgetConfiguration{StaticConfiguration(kind:"BeDifferentWatchWidget",provider:WatchProvider()){WatchComplicationView(entry:$0)}.configurationDisplayName("BE DIFFERENT").description("Dein aktueller Leistungswert").supportedFamilies([.accessoryCircular,.accessoryRectangular,.accessoryInline])}
+ var body:some WidgetConfiguration{StaticConfiguration(kind:"BeDifferentWatchWidget",provider:WatchProvider()){WatchComplicationView(entry:$0)}.configurationDisplayName("BE DIFFERENT").description(bd("Dein aktueller Leistungswert","Your current performance score")).supportedFamilies([.accessoryCircular,.accessoryRectangular,.accessoryInline])}
 }

@@ -16,11 +16,11 @@ export async function GET(){
   prisma.workout.findFirst({where:{userId:user.id,completedAt:null,scheduledAt:{gte:new Date(Date.now()-12*3600000)}},include:{exercises:{include:{exercise:true},orderBy:{orderIndex:"asc"}},sets:{orderBy:[{exerciseId:"asc"},{setNumber:"asc"}]}},orderBy:{scheduledAt:"asc"}})
  ]);
  return NextResponse.json({
-  ok:true,
+  ok:true,locale:user.locale,
   score:score?{total:score.total,level:levelForScore(score.total),recovery:score.recovery,completeness:score.completeness}:null,
   workout:workout?{
     id:workout.id,title:workout.title,scheduledAt:workout.scheduledAt,
-    exercises:workout.exercises.map(x=>({id:x.exerciseId,name:x.exercise.nameDe,sets:x.targetSets,reps:x.targetReps,rpe:x.targetRpe,restSeconds:x.restSeconds,completed:workout.sets.filter(s=>s.exerciseId===x.exerciseId).length}))
+    exercises:workout.exercises.map(x=>({id:x.exerciseId,name:user.locale==="en"?(x.exercise.nameEn||x.exercise.nameDe):x.exercise.nameDe,sets:x.targetSets,reps:x.targetReps,rpe:x.targetRpe,restSeconds:x.restSeconds,completed:workout.sets.filter(s=>s.exerciseId===x.exerciseId).length}))
   }:null,
   updatedAt:new Date().toISOString()
  });
