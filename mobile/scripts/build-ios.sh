@@ -67,6 +67,8 @@ if command -v pod >/dev/null 2>&1; then
   pod install --repo-update
 fi
 
+python3 ../scripts/patch-fmt-apple-clang.py "$PWD/Pods"
+
 workspace="$(find . -maxdepth 1 -name '*.xcworkspace' -print -quit)"
 if [ -z "$workspace" ]; then
   echo "No Xcode workspace found" >&2
