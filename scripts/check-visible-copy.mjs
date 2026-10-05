@@ -33,7 +33,7 @@ function checkText(file,text,pos){
   const value=String(text).replace(/\s+/g," ").trim();
   if(!value)return;
   // Public business contact addresses are not prose or punctuation violations.
-  if(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value))return;
+  if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))return;
   if(/[-\u2010-\u2015]/.test(value))errors.push(`${file}:${pos} enthält einen Strich im sichtbaren Text: ${JSON.stringify(value)}`);
   const lower=value.toLowerCase();
   for(const word of forbidden){
