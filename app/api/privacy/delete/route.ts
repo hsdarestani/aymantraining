@@ -17,6 +17,7 @@ export async function DELETE(request:Request){
     prisma.challengeEntry.deleteMany({where:{userId:id}}),
     prisma.referral.deleteMany({where:{OR:[{referrerUserId:id},{referredUserId:id}]}}),
     prisma.weeklyCheckIn.deleteMany({where:{userId:id}}),
+    prisma.companionPairCode.deleteMany({where:{userId:id}}),
     prisma.passwordResetToken.deleteMany({where:{userId:id}}),
     prisma.recommendation.deleteMany({where:{userId:id}}),
     prisma.nutritionDaily.deleteMany({where:{userId:id}}),
