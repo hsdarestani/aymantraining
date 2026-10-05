@@ -90,3 +90,12 @@ jobs:
           xcodebuild -project ios/*.xcodeproj -list | tee /tmp/xcode-targets.txt
           grep -qi "watch" /tmp/xcode-targets.txt
           grep -qi "widget" /tmp/xcode-targets.txt
+      - name: Compile iOS simulator app and embedded companions
+        run: |
+          cd ios
+          workspace="$(find . -maxdepth 2 -name '*.xcworkspace' -print -quit)"
+          test -n "$workspace"
+          scheme="$(xcodebuild -list -json -workspace "$workspace" | python3 -c 'import json,sys; print(json.load(sys.stdin)["workspace"]["schemes"][0])')"
+          set -o pipefail
+          xcodebuild -workspace "$workspace" -scheme "$scheme" -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/bd-ios-derived CODE_SIGNING_ALLOWED=NO build > /tmp/bd-ios-build.log 2>&1 || { tail -n 160 /tmp/bd-ios-build.log; exit 1; }
+          tail -n 20 /tmp/bd-ios-build.log
