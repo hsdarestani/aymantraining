@@ -63,15 +63,15 @@ export default function Membership(){
 
 const s=StyleSheet.create({
   safe:{flex:1,backgroundColor:C.bg},content:{padding:22,paddingBottom:50},
-  kicker:{color:C.volt,fontSize:9,fontWeight:"900",letterSpacing:2,marginTop:44},
-  title:{color:C.ink,fontSize:47,lineHeight:41,fontWeight:"900",letterSpacing:-3,marginTop:12,marginBottom:24},
-  copy:{color:C.dim,fontSize:13,lineHeight:21,marginBottom:18},
+  kicker:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:2,marginTop:44},
+  title:{color:C.ink,fontFamily:"Archivo",fontSize:36,lineHeight:40,letterSpacing:-.8,marginTop:12,marginBottom:24},
+  copy:{color:C.dim,fontFamily:"Manrope",fontSize:13,lineHeight:21,marginBottom:18},
   primary:{minHeight:54,borderRadius:radius.md,backgroundColor:C.volt,alignItems:"center",justifyContent:"center",paddingHorizontal:12,marginTop:8},
-  primaryText:{color:C.bg,fontSize:9,fontWeight:"900",letterSpacing:1,textAlign:"center"},
+  primaryText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1,textAlign:"center"},
   restore:{minHeight:48,borderRadius:radius.md,borderWidth:1,borderColor:C.line,alignItems:"center",justifyContent:"center",marginTop:9},
-  restoreText:{color:C.ink,fontSize:9,fontWeight:"900",letterSpacing:1},
-  unavailable:{color:C.dim,borderWidth:1,borderColor:C.line,borderRadius:radius.md,padding:14,fontSize:11,lineHeight:18},
-  note:{color:C.dim,fontSize:9,lineHeight:14,marginTop:14},
-  status:{color:C.green,fontSize:11,marginTop:10},
-  back:{color:C.dim,fontSize:9,fontWeight:"900",letterSpacing:1.1,textAlign:"center",marginTop:24}
+  restoreText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1},
+  unavailable:{color:C.dim,borderWidth:1,borderColor:C.line,borderRadius:radius.md,padding:14,fontFamily:"Manrope",fontSize:11,lineHeight:18},
+  note:{color:C.dim,fontFamily:"Manrope",fontSize:11,lineHeight:14,marginTop:14},
+  status:{color:C.green,fontFamily:"Manrope",fontSize:11,marginTop:10},
+  back:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.1,textAlign:"center",marginTop:24}
 });

@@ -4,7 +4,8 @@ import {Copy,LocalizedTextInput,LocalizedValue} from "../../components/Locale";
 
 
 import {useCallback,useEffect,useMemo,useState} from "react";
-import {Alert,Pressable,StyleSheet,Text,TextInput,View} from "react-native";
+import {Alert,Pressable,StyleSheet,Text,View} from "react-native";
+import {BrandInput as TextInput} from "../../components/BrandInput";
 import {useFocusEffect,router} from "expo-router";
 import {AudioModule,RecordingPresets,useAudioPlayer,useAudioRecorder} from "expo-audio";
 import * as ImagePicker from "expo-image-picker";
@@ -116,9 +117,9 @@ export default function Coach(){
   </Screen>;
 }
 const s=StyleSheet.create({
-  hero:{paddingVertical:18},big:{color:C.ink,fontSize:54,lineHeight:46,fontWeight:"900",letterSpacing:-3,marginTop:10},online:{color:C.green,fontSize:9,fontWeight:"900",letterSpacing:1.5,marginTop:12},copy:{color:C.dim,fontSize:13,lineHeight:20,marginVertical:14},
-  chat:{minHeight:560},messages:{gap:8,flex:1},bubble:{maxWidth:"88%",paddingHorizontal:14,paddingVertical:11,borderRadius:16},mine:{alignSelf:"flex-end",backgroundColor:C.volt},theirs:{alignSelf:"flex-start",backgroundColor:C.panel2},bubbleText:{color:C.ink,fontSize:13,lineHeight:19},mineText:{color:C.bg},time:{color:C.dim,fontSize:7,marginTop:6},
-  composer:{flexDirection:"row",gap:8,alignItems:"flex-end",marginTop:10},input:{flex:1,minHeight:50,maxHeight:110,backgroundColor:C.panel2,borderWidth:1,borderColor:C.line,borderRadius:radius.md,paddingHorizontal:14,paddingVertical:13,color:C.ink},send:{width:50,height:50,borderRadius:25,backgroundColor:C.volt,alignItems:"center",justifyContent:"center"},sendText:{color:C.bg,fontSize:23,fontWeight:"900"},
-  mediaActions:{flexDirection:"row",gap:8,marginTop:14},mediaAction:{flex:1,minHeight:44,borderRadius:radius.md,borderWidth:1,borderColor:C.line,alignItems:"center",justifyContent:"center",paddingHorizontal:8},recording:{borderColor:C.red},mediaActionText:{color:C.ink,fontSize:8,fontWeight:"900",textAlign:"center"},mediaButton:{marginTop:8,paddingVertical:10,paddingHorizontal:12,borderRadius:12,backgroundColor:"#0A0A0B33"},mediaButtonText:{color:C.ink,fontSize:8,fontWeight:"900"},video:{width:240,aspectRatio:9/16,maxHeight:340,borderRadius:12,marginTop:8},status:{color:C.volt,fontSize:9,fontWeight:"900",marginTop:8,textAlign:"center"},
-  primary:{height:52,backgroundColor:C.volt,borderRadius:radius.md,alignItems:"center",justifyContent:"center"},primaryText:{color:C.bg,fontSize:10,fontWeight:"900",letterSpacing:1.3}
+  hero:{paddingVertical:18},big:{color:C.ink,fontFamily:"Archivo",fontSize:36,lineHeight:40,letterSpacing:-.8,marginTop:10},online:{color:C.green,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.5,marginTop:12},copy:{color:C.dim,fontFamily:"Manrope",fontSize:13,lineHeight:20,marginVertical:14},
+  chat:{minHeight:560},messages:{gap:8,flex:1},bubble:{maxWidth:"88%",paddingHorizontal:14,paddingVertical:11,borderRadius:16},mine:{alignSelf:"flex-end",backgroundColor:C.volt},theirs:{alignSelf:"flex-start",backgroundColor:C.panel2},bubbleText:{color:C.ink,fontFamily:"Manrope",fontSize:13,lineHeight:19},mineText:{color:C.bg},time:{color:C.dim,fontFamily:"Manrope",fontSize:11,marginTop:6},
+  composer:{flexDirection:"row",gap:8,alignItems:"flex-end",marginTop:10},input:{flex:1,minHeight:50,maxHeight:110,backgroundColor:C.panel2,borderWidth:1,borderColor:C.line,borderRadius:radius.md,paddingHorizontal:14,paddingVertical:13,color:C.ink},send:{width:50,height:50,borderRadius:25,backgroundColor:C.volt,alignItems:"center",justifyContent:"center"},sendText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:23,},
+  mediaActions:{flexDirection:"row",gap:8,marginTop:14},mediaAction:{flex:1,minHeight:44,borderRadius:radius.md,borderWidth:1,borderColor:C.line,alignItems:"center",justifyContent:"center",paddingHorizontal:8},recording:{borderColor:C.red},mediaActionText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:11,textAlign:"center"},mediaButton:{marginTop:8,paddingVertical:10,paddingHorizontal:12,borderRadius:12,backgroundColor:"#0A0A0B33"},mediaButtonText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:11,},video:{width:240,aspectRatio:9/16,maxHeight:340,borderRadius:12,marginTop:8},status:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:11,marginTop:8,textAlign:"center"},
+  primary:{height:52,backgroundColor:C.volt,borderRadius:radius.md,alignItems:"center",justifyContent:"center"},primaryText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.3}
 });

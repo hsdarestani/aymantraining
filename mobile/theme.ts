@@ -1,2 +1,2 @@
-export const C={bg:"#050606",panel:"#0D0F0F",panel2:"#141717",ink:"#F5F6F2",dim:"#8C928E",volt:"#D7FF00",line:"rgba(255,255,255,0.10)",green:"#2EE59D",amber:"#FFB020",red:"#FF566A"};
-export const radius={sm:12,md:18,lg:26,xl:34};
+export const C={bg:"#0A0C0D",panel:"#14181B",panel2:"#1D2327",ink:"#F4F5EF",dim:"#A5ADB3",volt:"#D4FF00",line:"#2B3338",green:"#2EE59D",amber:"#FFB020",red:"#FF566A"};
+export const radius={sm:8,md:12,lg:18,xl:24};

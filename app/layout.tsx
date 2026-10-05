@@ -16,6 +16,7 @@ import "./admin-settings.css";
 import "./onboarding-ux.css";
 import "./mobile-viewport-fix.css";
 import "./completion.css";
+import "./brand-system.css";
 import {cookies} from "next/headers";
 import {LocaleProvider} from "./components/Locale";
 import {getCurrentUser} from "../lib/auth";
@@ -31,8 +32,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: "cover",
   themeColor: "#050606"
 };
