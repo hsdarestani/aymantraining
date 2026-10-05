@@ -7,7 +7,7 @@ import {prisma} from "../../../lib/db";
 export const dynamic="force-dynamic";
 
 function pct(n:number,d:number){return d?Math.round(n/d*1000)/10:0}
-function metric(label:string,value:string,target:string,ok:boolean){return <div className="kpi-card"><span>{label}</span><strong>{value}</strong><small>{target}</small><i className={ok?"risk good":"risk warning"}/></div>}
+function metric(label:string,value:string,target:string,ok:boolean){return <div className="kpi-card"><span><Copy text={label}/></span><strong>{value}</strong><small>{target}</small><i className={ok?"risk good":"risk warning"}/></div>}
 
 export default async function Kpi(){
  const now=new Date(),d7=new Date(Date.now()-7*86400000),d30=new Date(Date.now()-30*86400000);

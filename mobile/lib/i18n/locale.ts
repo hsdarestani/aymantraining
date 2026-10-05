@@ -7,6 +7,8 @@ export function currentLocale(){return locale}
 export function translate(text:string){if(locale==='de')return text;const trimmed=text.trim(),value=(english as Record<string,string>)[trimmed];if(value!==undefined)return text.replace(trimmed,value);
 
  const patterns:[RegExp,(...parts:string[])=>string][]=[
+  [/^(.*) · Tag (\d+)$/,(_,a,b)=>`${a} · Day ${b}`],
+  [/^(\d+) Übungen importiert(?: · (\d+) Hinweise)?\.$/,(_,a,b)=>`${a} exercises imported${b?` · ${b} notices`:""}.`],
   [/^Training (\d+) von (\d+)$/,(_,a,b)=>`Workouts ${a} of ${b}`],
   [/^Training (\d+)\/(\d+)$/,(_,a,b)=>`Workouts ${a}/${b}`],
   [/^Leistungswert ([+-]?\d+) Prozent$/,(_,a)=>`Performance score ${a} percent`],
@@ -16,7 +18,7 @@ export function translate(text:string){if(locale==='de')return text;const trimme
   [/^Schlaf im Schnitt (\d+(?:[.,]\d+)? Stunden|Keine Angabe)$/,(_,a)=>`Average sleep ${a==='Keine Angabe'?'Not available':a.replace(' Stunden',' hours')}`],
   [/^Schlaf Ø (\d+(?:[.,]\d+)?|Keine Angabe) h$/,(_,a)=>`Average sleep ${a==='Keine Angabe'?'Not available':a+' h'}`]
  ];
- for(const [pattern,format] of patterns){const match=trimmed.match(pattern);if(match)return text.replace(trimmed,format(...match))}
+ for(const [pattern,format] of patterns){const match=trimmed.match(pattern);if(match)return text.replace(trimmed,()=>format(...match))}
 return text}
 
 export function useLocale(){return useSyncExternalStore(cb=>{listeners.add(cb);return ()=>listeners.delete(cb)},()=>locale,()=>locale)}

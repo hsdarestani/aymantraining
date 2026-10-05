@@ -1,5 +1,5 @@
 
-import {Copy} from "../components/Locale";
+import {Copy,LocalizedTextInput} from "../components/Locale";
 import {useEffect,useState} from "react";
 import {Pressable,SafeAreaView,ScrollView,StyleSheet,Text,TextInput,View} from "react-native";
 import {router,useLocalSearchParams} from "expo-router";
@@ -26,7 +26,7 @@ export default function Fuel(){
   <Card><Eyebrow><Copy text={"TAGESZIELE"}/></Eyebrow><View style={s.targets}><Text style={s.target}><Copy text={"KALORIEN"}/>{targets.calories}</Text><Text style={s.target}>PROTEIN {Math.round(targets.proteinG)} g</Text><Text style={s.target}><Copy text={"WASSER"}/>{targets.waterMl} ml</Text></View></Card>
   <Pressable style={s.scan} onPress={()=>router.push("/barcode")}><Text style={s.scanText}><Copy text={"STRICHCODE ERFASSEN →"}/></Text></Pressable>
   <Card><Eyebrow><Copy text={"WASSER"}/></Eyebrow><SectionTitle>{Number(form.waterMl)||today?.waterMl||0} ml</SectionTitle><View style={s.waterRow}>{[250,500,750].map(n=><Pressable key={n} style={s.water} onPress={()=>water(n)}><Text style={s.waterText}>+ {n} ml</Text></Pressable>)}</View></Card>
-  <Card><Eyebrow><Copy text={"TAGESWERTE"}/></Eyebrow><View style={s.grid}>{inputs.map(([k,label])=><TextInput key={k} style={s.input} value={(form as any)[k]} onChangeText={x=>setForm({...form,[k]:x})} keyboardType="decimal-pad" placeholder={label} placeholderTextColor="#626864"/>)}</View><Pressable style={s.primary} onPress={()=>save()}><Text style={s.primaryText}><Copy text={"SPEICHERN →"}/></Text></Pressable></Card>
+  <Card><Eyebrow><Copy text={"TAGESWERTE"}/></Eyebrow><View style={s.grid}>{inputs.map(([k,label])=><LocalizedTextInput key={k} style={s.input} value={(form as any)[k]} onChangeText={x=>setForm({...form,[k]:x})} keyboardType="decimal-pad" placeholder={label} placeholderTextColor="#626864"/>)}</View><Pressable style={s.primary} onPress={()=>save()}><Text style={s.primaryText}><Copy text={"SPEICHERN →"}/></Text></Pressable></Card>
   <Card><Eyebrow><Copy text={"BEWERTUNG"}/></Eyebrow><Text style={s.copy}><Copy text={"Die Ernährungsbewertung berücksichtigt Zielkalorien, Protein, Wasser, Obst und Gemüse, Zucker und den Anteil stark verarbeiteter Lebensmittel. Sie ist eine eigene Tagesbewertung und keine offizielle Produktbewertung."}/></Text></Card>
   {status?<Text style={s.status}><Copy text={status}/></Text>:null}
  </ScrollView></SafeAreaView>;

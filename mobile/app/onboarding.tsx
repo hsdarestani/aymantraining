@@ -86,7 +86,7 @@ export default function Onboarding(){
 
     {step===2&&<><Text style={s.kicker}><Copy text={"02 · AUSGANGSLAGE"}/></Text><Text style={s.title}><Copy text={"DEINE"}/>{"\n"}<Copy text={"BASIS."}/></Text>
       <TextInput style={s.input} value={birth} onChangeText={setBirth} placeholder="TT.MM.JJJJ" placeholderTextColor="#555"/>
-      <Text style={s.label}><Copy text={"GESCHLECHT FÜR REFERENZWERTE"}/></Text><View style={s.choiceRow}>{sexOptions.map(([value,label])=><Pressable key={value} style={[s.choice,sex===value&&s.choiceOn]} onPress={()=>setSex(value)}><Text style={[s.choiceText,sex===value&&s.choiceTextOn]}>{label}</Text></Pressable>)}</View>
+      <Text style={s.label}><Copy text={"GESCHLECHT FÜR REFERENZWERTE"}/></Text><View style={s.choiceRow}>{sexOptions.map(([value,label])=><Pressable key={value} style={[s.choice,sex===value&&s.choiceOn]} onPress={()=>setSex(value)}><Text style={[s.choiceText,sex===value&&s.choiceTextOn]}><Copy text={label}/></Text></Pressable>)}</View>
       <LocalizedTextInput style={s.input} value={height} onChangeText={setHeight} keyboardType="number-pad" placeholder="Größe cm" placeholderTextColor="#555"/>
       <LocalizedTextInput style={s.input} value={weight} onChangeText={setWeight} keyboardType="decimal-pad" placeholder="Gewicht kg" placeholderTextColor="#555"/>
       <Text style={s.label}><Copy text={"TRAININGSERFAHRUNG"}/></Text>

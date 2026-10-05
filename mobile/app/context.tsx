@@ -24,7 +24,7 @@ export default function Context(){
   setStatus("SPEICHERE");
   try{await api("/api/athlete-context",{method:"POST",body:JSON.stringify({nextMatchAt,travelModeUntil,cycleTrackingEnabled:v.cycleTrackingEnabled,cycleStartDate,cycleLengthDays:Number(v.cycleLengthDays),targetScore:v.targetScore===""?null:Number(v.targetScore),targetDate,bedtimeTarget:v.bedtimeTarget,stepTarget:Number(v.stepTarget),waterTargetMl:Number(v.waterTargetMl),proteinTargetG:Number(v.proteinTargetG),preferredMorningHour:Number(v.preferredMorningHour)})});setStatus("GESPEICHERT")}catch(e:any){setStatus(e.message||"Fehler")}
  }
- const field=(key:string,label:string,keyboardType:"default"|"number-pad"|"decimal-pad"="default")=><View style={s.field}><Text style={s.label}>{label}</Text><TextInput style={s.input} value={String(v[key]??"")} onChangeText={x=>setV({...v,[key]:x})} keyboardType={keyboardType} placeholderTextColor="#666"/></View>;
+ const field=(key:string,label:string,keyboardType:"default"|"number-pad"|"decimal-pad"="default")=><View style={s.field}><Text style={s.label}><Copy text={label}/></Text><TextInput style={s.input} value={String(v[key]??"")} onChangeText={x=>setV({...v,[key]:x})} keyboardType={keyboardType} placeholderTextColor="#666"/></View>;
  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
   <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text={"ZURÜCK"}/></Text></Pressable></View>
   <Eyebrow><Copy text={"DEIN KONTEXT"}/></Eyebrow><Text style={s.title}><Copy text={"TRAINING PASST"}/>{"\n"}<Copy text={"ZU DEINEM LEBEN."}/></Text>

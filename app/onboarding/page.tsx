@@ -20,7 +20,7 @@ function ageFromBirth(value:string){
 function Stepper({label,value,onChange,min,max,step=1,unit}:{label:string;value:number;onChange:(v:number)=>void;min:number;max:number;step?:number;unit?:string}){
   const clamp=(v:number)=>Math.min(max,Math.max(min,Math.round(v/step)*step));
   return <div className="stepper-field">
-    <span>{label}</span>
+    <span><Copy text={label}/></span>
     <div className="stepper-control">
       <button type="button" onClick={()=>onChange(clamp(value-step))} aria-label={label+" verringern"}>−</button>
       <strong>{Number.isInteger(value)?value:value.toFixed(1)}{unit?<small>{unit}</small>:null}</strong>

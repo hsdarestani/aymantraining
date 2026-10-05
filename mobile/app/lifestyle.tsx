@@ -9,7 +9,7 @@ import {api} from "../lib/api";
 import {C,radius} from "../theme";
 
 function Value({label,value,unit=""}:{label:string;value:any;unit?:string}){
- return <View style={s.value}><Text style={s.valueLabel}>{label}</Text><Text style={s.valueNumber}>{value??"Keine Angabe"}{value!=null&&unit?" "+unit:""}</Text></View>
+ return <View style={s.value}><Text style={s.valueLabel}><Copy text={label}/></Text><Text style={s.valueNumber}>{value??"Keine Angabe"}{value!=null&&unit?" "+unit:""}</Text></View>
 }
 
 export default function Lifestyle(){
