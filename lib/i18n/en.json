@@ -1517,5 +1517,9 @@
   "Speichere…": "Saving…",
   "Trainerzeit beginnt": "Coach hours start",
   "Trainerzeit endet": "Coach hours end",
-  "Nachrichten pro Tag": "Messages per day"
+  "Nachrichten pro Tag": "Messages per day",
+  "▼ Kritisch": "▼ Critical",
+  "● Achtung": "● Attention",
+  "▲ Stabil": "▲ Stable",
+  "Diese Aufgabe ist nicht aktiv.": "This challenge is not active."
 }

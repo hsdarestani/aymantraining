@@ -84,6 +84,26 @@
       "image": "./assets/green-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#050606"
+    },
+    "locales": {
+      "de": {
+        "ios": {
+          "NSHealthShareUsageDescription": "BE DIFFERENT nutzt freigegebene Health-Daten für Score, Recovery und persönliche Trainingsempfehlungen.",
+          "NSHealthUpdateUsageDescription": "BE DIFFERENT kann von dir gewählte Fitnessdaten in Apple Health speichern.",
+          "NSMicrophoneUsageDescription": "Das Mikrofon wird nur für Voice Messages an deinen Coach verwendet.",
+          "NSCameraUsageDescription": "Die Kamera wird für freiwillige Fortschritts- und Technikvideos sowie den BE FUEL Barcode Scan verwendet.",
+          "NSPhotoLibraryUsageDescription": "BE DIFFERENT benötigt Zugriff auf deine Mediathek für Technikvideos und Fortschrittsbilder."
+        }
+      },
+      "en": {
+        "ios": {
+          "NSHealthShareUsageDescription": "BE DIFFERENT uses health data you approve for your performance score, recovery and personal training recommendations.",
+          "NSHealthUpdateUsageDescription": "BE DIFFERENT can save fitness data you choose in Apple Health.",
+          "NSMicrophoneUsageDescription": "BE DIFFERENT uses your microphone for voice messages to your coach and optional technique videos.",
+          "NSCameraUsageDescription": "BE DIFFERENT uses your camera for optional progress photos, technique videos and food barcode scanning.",
+          "NSPhotoLibraryUsageDescription": "BE DIFFERENT uses your photo library for technique videos and progress photos."
+        }
+      }
     }
   }
 }

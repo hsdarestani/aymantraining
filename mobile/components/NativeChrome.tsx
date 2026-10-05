@@ -1,3 +1,4 @@
+import {translate} from "../lib/i18n/locale";
 
 import {Copy} from "./Locale";
 import {useState} from "react";
@@ -38,10 +39,10 @@ export default function NativeChrome(){
 
   return <>
     <Animated.View entering={FadeInUp.duration(420)} pointerEvents="box-none" style={s.chrome}>
-      <Pressable accessibilityLabel="Zurück" onPress={back} style={s.quick}><ArrowLeft color={C.ink} size={18}/><Text style={s.quickText}><Copy text={"ZURÜCK"}/></Text></Pressable>
-      <Pressable accessibilityLabel="Start öffnen" onPress={()=>go("/(tabs)")} style={s.iconQuick}><House color={C.ink} size={18}/></Pressable>
-      <Pressable accessibilityLabel="Training öffnen" onPress={()=>go("/(tabs)/training")} style={s.iconQuick}><Dumbbell color={C.ink} size={18}/></Pressable>
-      <Pressable accessibilityLabel="Menü öffnen" onPress={()=>setOpen(true)} style={s.menuPill}><Menu color={C.bg} size={18}/><Text style={s.menuText}><Copy text={"MENÜ"}/></Text></Pressable>
+      <Pressable accessibilityLabel={translate("Zurück")} onPress={back} style={s.quick}><ArrowLeft color={C.ink} size={18}/><Text style={s.quickText}><Copy text={"ZURÜCK"}/></Text></Pressable>
+      <Pressable accessibilityLabel={translate("Start öffnen")} onPress={()=>go("/(tabs)")} style={s.iconQuick}><House color={C.ink} size={18}/></Pressable>
+      <Pressable accessibilityLabel={translate("Training öffnen")} onPress={()=>go("/(tabs)/training")} style={s.iconQuick}><Dumbbell color={C.ink} size={18}/></Pressable>
+      <Pressable accessibilityLabel={translate("Menü öffnen")} onPress={()=>setOpen(true)} style={s.menuPill}><Menu color={C.bg} size={18}/><Text style={s.menuText}><Copy text={"MENÜ"}/></Text></Pressable>
     </Animated.View>
 
     <Modal visible={open} transparent animationType="fade" onRequestClose={()=>setOpen(false)}>

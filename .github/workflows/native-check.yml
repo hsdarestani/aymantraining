@@ -93,7 +93,7 @@ jobs:
       - name: Compile iOS simulator app and embedded companions
         run: |
           cd ios
-          workspace="$(find . -maxdepth 2 -name '*.xcworkspace' -print -quit)"
+          workspace="$(find . -maxdepth 1 -name '*.xcworkspace' -print -quit)"
           test -n "$workspace"
           scheme="$(xcodebuild -list -json -workspace "$workspace" | python3 -c 'import json,sys; print(json.load(sys.stdin)["workspace"]["schemes"][0])')"
           set -o pipefail

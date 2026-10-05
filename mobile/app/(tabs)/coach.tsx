@@ -1,3 +1,4 @@
+import {translate} from "../../lib/i18n/locale";
 
 import {Copy,LocalizedTextInput,LocalizedValue} from "../../components/Locale";
 
@@ -69,7 +70,7 @@ export default function Coach(){
       return;
     }
     const permission=await AudioModule.requestRecordingPermissionsAsync();
-    if(!permission.granted){Alert.alert("Mikrofon","Bitte erlaube den Mikrofonzugriff für Sprachnachrichten.");return}
+    if(!permission.granted){Alert.alert(translate("Mikrofon"),translate("Bitte erlaube den Mikrofonzugriff für Sprachnachrichten."));return}
     await recorder.prepareToRecordAsync();
     recorder.record();
     setRecordStarted(Date.now());
@@ -79,7 +80,7 @@ export default function Coach(){
 
   async function sendTechniqueVideo(){
     const permission=await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if(!permission.granted){Alert.alert("Mediathek","Bitte erlaube den Zugriff auf deine Mediathek.");return}
+    if(!permission.granted){Alert.alert(translate("Mediathek"),translate("Bitte erlaube den Zugriff auf deine Mediathek."));return}
     const result=await ImagePicker.launchImageLibraryAsync({mediaTypes:["videos"],quality:0.8,videoMaxDuration:120});
     if(result.canceled)return;
     const a=result.assets[0];
