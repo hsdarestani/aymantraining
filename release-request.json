@@ -2,12 +2,12 @@
   "enabled": true,
   "app_identifier": "com.smarbiz.bedifferent",
   "version_name": "1.0.0",
-  "build_number": 5,
+  "build_number": 7,
   "platforms": [
     "android",
     "ios"
   ],
   "android_track": "internal",
   "auto_submit": true,
-  "release_notes": "QA fixes including wearable unit conversion and sleep interval normalization"
+  "release_notes": "English language, wearable lifecycle, AI coach handoff and validated platform operations"
 }
