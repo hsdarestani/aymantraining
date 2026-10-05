@@ -45,12 +45,12 @@ export default function Home(){
   <Card style={s.scoreCard}><Eyebrow><Copy text={"BE DIFFERENT LEISTUNGSWERT"}/></Eyebrow><ScoreSignature score={score?.total??0} level={score?.level||"NORMAL"}/><View style={s.track}><View style={[s.fill,{width:`${score?.total??0}%`}]}/></View><Text style={s.data}><Copy text={"DATEN"}/>{score?.completeness??0}<Copy text={"% VOLLSTÄNDIG"}/></Text></Card>
 
   <Card>
-   <View style={s.cardHead}><View><Eyebrow><Copy text={"TRAINER RADAR"}/></Eyebrow><SectionTitle>{d.recommendations?.[0]?.title||"Daten sammeln."}</SectionTitle></View><Text style={s.live}><Copy text={d.radarLocked?"◆ PRO":"● AKTIV"}/></Text></View>
+   <View style={s.cardHead}><View><Eyebrow><Copy text={"TRAINER RADAR"}/></Eyebrow><SectionTitle><Copy text={d.recommendations?.[0]?.title||"Daten sammeln."}/></SectionTitle></View><Text style={s.live}><Copy text={d.radarLocked?"◆ PRO":"● AKTIV"}/></Text></View>
    <Text style={s.cardCopy}>{d.recommendations?.[0]?.action||"Verbinde Gesundheitsdaten oder mach deinen Tagescheck."}</Text>
    {d.radarLocked?<Pressable style={s.radarCta} onPress={()=>router.push("/membership")}><Text style={s.radarCtaText}><Copy text={"TRAINER RADAR FREISCHALTEN →"}/></Text></Pressable>:null}
   </Card>
 
-  <Pressable onPress={()=>d.nextWorkout&&router.push(`/workout/${d.nextWorkout.id}`)}><Card style={s.workout}><Eyebrow><Copy text={"HEUTIGES TRAINING"}/></Eyebrow><Text style={s.workoutTitle}>{d.nextWorkout?.title||"REGENERATIONSTAG"}</Text><Text style={s.cardCopy}><Copy text={d.nextWorkout?.scheduledAt?new Date(d.nextWorkout.scheduledAt).toLocaleString("de-DE"):"Regeneration gehört zum Training."}/></Text><Text style={s.arrow}><Copy text={d.nextWorkout?"STARTEN →":"BEWUSST ERHOLEN."}/></Text></Card></Pressable>
+  <Pressable onPress={()=>d.nextWorkout&&router.push(`/workout/${d.nextWorkout.id}`)}><Card style={s.workout}><Eyebrow><Copy text={"HEUTIGES TRAINING"}/></Eyebrow><Text style={s.workoutTitle}><Copy text={d.nextWorkout?.title||"REGENERATIONSTAG"}/></Text><Text style={s.cardCopy}>{d.nextWorkout?.scheduledAt?<LocalizedValue value={new Date(d.nextWorkout.scheduledAt)}/>:<Copy text="Regeneration gehört zum Training."/>}</Text><Text style={s.arrow}><Copy text={d.nextWorkout?"STARTEN →":"BEWUSST ERHOLEN."}/></Text></Card></Pressable>
 
   <Card><Eyebrow><Copy text={"HEUTE"}/></Eyebrow><SectionTitle><Copy text={"Aktivität und Versorgung"}/></SectionTitle>
    <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}><Copy text={"SCHRITTE"}/></Text><Text style={s.metricValue}><LocalizedValue value={Number(a.steps||0)} format="toLocaleString"/> / <LocalizedValue value={Number(a.stepTarget||10000)} format="toLocaleString"/></Text></View><Bar value={a.steps||0} max={a.stepTarget||10000}/></View>

@@ -1,3 +1,4 @@
+import {translate,language} from "../../../lib/i18n/translate";
 import {NextResponse} from "next/server";
 import {z} from "zod";
 import {prisma} from "../../../lib/db";
@@ -19,7 +20,7 @@ export async function GET(){
   ok:true,locale:user.locale,
   score:score?{total:score.total,level:levelForScore(score.total),recovery:score.recovery,completeness:score.completeness}:null,
   workout:workout?{
-    id:workout.id,title:workout.title,scheduledAt:workout.scheduledAt,
+    id:workout.id,title:translate(workout.title,language(user.locale)),scheduledAt:workout.scheduledAt,
     exercises:workout.exercises.map(x=>({id:x.exerciseId,name:user.locale==="en"?(x.exercise.nameEn||x.exercise.nameDe):x.exercise.nameDe,sets:x.targetSets,reps:x.targetReps,rpe:x.targetRpe,restSeconds:x.restSeconds,completed:workout.sets.filter(s=>s.exerciseId===x.exerciseId).length}))
   }:null,
   updatedAt:new Date().toISOString()
