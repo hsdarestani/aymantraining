@@ -32,6 +32,8 @@ function line(sf,node){return sf.getLineAndCharacterOfPosition(node.getStart(sf)
 function checkText(file,text,pos){
   const value=String(text).replace(/\s+/g," ").trim();
   if(!value)return;
+  // Public business contact addresses are not prose or punctuation violations.
+  if(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value))return;
   if(/[-\u2010-\u2015]/.test(value))errors.push(`${file}:${pos} enthält einen Strich im sichtbaren Text: ${JSON.stringify(value)}`);
   const lower=value.toLowerCase();
   for(const word of forbidden){
@@ -70,6 +72,8 @@ for(const file of files){
   const sf=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
 
   function visit(node){
+    // Phase 3 allows English surfaces explicitly marked with their language.
+    if(ts.isJsxElement(node)&&node.openingElement.attributes.properties.some(attr=>ts.isJsxAttribute(attr)&&attr.name.getText(sf)==="lang"&&attr.initializer&&ts.isStringLiteral(attr.initializer)&&attr.initializer.text==="en"))return;
     if(ts.isJsxText(node))checkText(file,node.getText(sf),line(sf,node));
 
     if(ts.isJsxAttribute(node)){
