@@ -50,7 +50,7 @@ export default async function Lifestyle(){
           <div><span>SCHLAFWERT</span><strong>{sleepScore??"—"}</strong><small>0 bis 100</small></div>
           <div><span>7 TAGE</span><strong>{s7?.toFixed(1)??"—"} h</strong><small>Durchschnitt</small></div>
           <div><span>30 TAGE</span><strong>{s30?.toFixed(1)??"—"} h</strong><small>persönlicher Trend</small></div>
-        </div><p className="muted">{s7!=null&&s7<7?"Schlaf liegt aktuell unter deinem Ziel. Heute Abend früher runterfahren und die nächste Belastung im Kontext deiner Regeneration betrachten.":"Dein Schlaftrend ist stabil. Regelmäßigkeit beibehalten."}</p></>:<div className="locked-copy"><p className="muted">KOSTENLOS zeigt die Schlafdauer. Qualität, Trend und persönliche Tipps sind PRO.</p><Link href="/pricing" className="secondary">PRO TESTEN</Link></div>}
+        </div><p className="muted">{s7==null?"Für einen Schlaftrend fehlen noch Schlafdaten.":s7<7?"Schlaf liegt aktuell unter deinem Ziel. Heute Abend früher runterfahren und die nächste Belastung im Kontext deiner Regeneration betrachten.":"Dein Schlaftrend ist stabil. Regelmäßigkeit beibehalten."}</p></>:<div className="locked-copy"><p className="muted">KOSTENLOS zeigt die Schlafdauer. Qualität, Trend und persönliche Tipps sind PRO.</p><Link href="/pricing" className="secondary">PRO TESTEN</Link></div>}
       </article>
       <article className="panel active-card">
         <span className="eyebrow">AKTIVITÄT</span><h2>Heute bewegen.</h2>

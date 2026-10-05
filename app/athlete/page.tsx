@@ -24,6 +24,7 @@ export default async function AthletePage(){
   const values=rows.map(([,v])=>v??0);
   const days=oldest&&score?Math.max(1,(score.date.getTime()-oldest.date.getTime())/86400000):0;
   const daily=days?((score?.total??0)-(oldest?.total??0))/days:0;
+  const hasTrend=Boolean(oldest&&score&&oldest.date.getTime()<score.date.getTime());
   const projection=Math.max(0,Math.min(100,Math.round((score?.total??0)+daily*84)));
 
   return <main className="sub-shell">
@@ -41,7 +42,7 @@ export default async function AthletePage(){
           {!digital&&<div className="radar-lock">PRO</div>}
         </div>
         <h2>DIGITALES ATHLETENABBILD</h2>
-        <p className="muted">{digital?`Wenn dein aktueller Trend stabil bleibt, liegt die 12 Wochen Projektion bei ca. ${projection} %. Das ist eine Trendanzeige, keine Garantie.`:"Radar, Verlauf, Zielprofil und Trend Projektion sind PRO."}</p>
+        <p className="muted">{digital?(hasTrend?`Wenn dein aktueller Trend stabil bleibt, liegt die 12 Wochen Projektion bei ca. ${projection} %. Das ist eine Trendanzeige, keine Garantie.`:"Für eine Trend Projektion fehlen noch Messpunkte an unterschiedlichen Tagen."):"Radar, Verlauf, Zielprofil und Trend Projektion sind PRO."}</p>
         {!digital&&<Link href="/pricing" className="secondary">PRO TESTEN</Link>}
       </article>
 
