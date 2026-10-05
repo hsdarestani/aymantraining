@@ -3,6 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 export NODE_ENV=production
+export RCT_NEW_ARCH_ENABLED=1
 
 export APPLE_TEAM_ID="${APPLE_TEAM_ID:-${IOS_TEAM_ID:-}}"
 export ASC_KEY_PATH="${ASC_KEY_PATH:-${APPLE_API_KEY_PATH:-}}"
@@ -23,6 +24,19 @@ npx expo install --check || echo "Expo dependency check reported a patch level a
 export APPLE_PUSH_ENV=production
 node ./scripts/prepare-native-config.mjs --require-ios
 npx expo prebuild --platform ios --clean --non-interactive
+
+python3 - <<'PY'
+from pathlib import Path
+p = Path("ios/Podfile.properties.json")
+if p.exists():
+    import json
+    data = json.loads(p.read_text())
+    data["newArchEnabled"] = "true"
+    p.write_text(json.dumps(data, indent=2) + "\n")
+else:
+    raise SystemExit("ios/Podfile.properties.json missing after prebuild")
+PY
+echo "New Architecture is required by React Native Firebase and is forced on for iOS."
 
 python3 - <<'PY'
 from pathlib import Path
