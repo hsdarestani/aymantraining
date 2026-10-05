@@ -1,3 +1,4 @@
+import {execFile} from 'node:child_process';import {promisify} from 'node:util';
 import assert from 'node:assert/strict';import crypto from 'node:crypto';import {PrismaClient} from '@prisma/client';import bcrypt from 'bcryptjs';
 const db=new PrismaClient(),base=process.env.TEST_BASE_URL||'http://127.0.0.1:3000',secret=process.env.WEARABLE_AGGREGATOR_SECRET;
 if(!base.startsWith('http://127.0.0.1:')||!process.env.DATABASE_URL?.includes('bedifferent_test'))throw Error('Feature acceptance must run against the isolated CI database');
@@ -83,6 +84,12 @@ try{
  const logout=await fetch(base+'/api/auth/logout',{method:'POST',headers:{authorization:'Bearer '+watch,'x-bd-client':'watch',origin:base}});assert.equal(logout.status,200);checks++;await watchCall(undefined,401);
  for(const endpoint of ['focus','lifestyle','gamification','challenges','performance-timeline','digital-twin','weekly-report','events','notifications','mobile/dashboard']){const result=await call(athlete,'/api/'+endpoint);assert.equal(result.ok,true);checks++}
  await call(free,'/api/digital-twin',undefined,403);await call(free,'/api/performance-timeline',undefined,403);
+
+
+ // A subsequent deployment must preserve changes made in admin.
+ const template=(await call(admin,'/api/admin/plans/starter-bodyweight')).plan;await call(admin,'/api/admin/plans/'+template.id,{name:'Owner configured template',items:template.items.map(x=>({...x,targetSets:6}))},200,'PATCH');
+ await promisify(execFile)(process.execPath,['scripts/seed.mjs'],{env:process.env});
+ const preserved=(await call(admin,'/api/admin/plans/'+template.id)).plan;assert.equal(preserved.name,'Owner configured template');assert.equal(preserved.items.length,template.items.length);assert(preserved.items.every(x=>x.targetSets===6));assert.equal((await db.systemSetting.findUnique({where:{key:'score_formula'}})).value.waterTargetMl,2800);if(rule)assert.equal((await db.coachingRule.findUnique({where:{id:rule.id}})).enabled,false);checks+=5;
 
  const exported=await call(athlete,'/api/privacy/export');assert(exported.aiMessages.length>0&&exported.aiHandoffs.length>0&&exported.wearableConnections.length===7);checks++;
  console.log(`FEATURE_ACCEPTANCE_OK ${checks}`);

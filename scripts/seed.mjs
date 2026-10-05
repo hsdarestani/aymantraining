@@ -13,7 +13,7 @@ const exercises=[
   {id:"BD-ATH-014",nameDe:"Kastensprung",nameEn:"Box Jump",category:"Explosivität",equipment:"Kasten",primaryMuscles:"Beine",secondaryMuscles:"Rumpf",level:2,coachCue1:"Explosiv abspringen",coachCue2:"Leise landen",coachCue3:"Knie stabil halten",commonMistakes:["Zu hohe Box","Instabile Landung"],trackingType:"REPS",freeAccess:false},
   {id:"BD-ATH-015",nameDe:"Sprunggelenksprünge",nameEn:"Pogo Jumps",category:"Explosivität",equipment:"Keine",primaryMuscles:"Wade, Fuß",secondaryMuscles:"Beine",level:2,coachCue1:"Kurz am Boden",coachCue2:"Sprunggelenk aktiv",coachCue3:"Körper bleibt aufrecht",commonMistakes:["Zu tief landen","Lange Bodenkontaktzeit"],trackingType:"REPS",freeAccess:false}
 ];
-for(const item of exercises)await prisma.exercise.upsert({where:{id:item.id},update:item,create:item});
+for(const item of exercises)await prisma.exercise.upsert({where:{id:item.id},update:{},create:item});
 
 const plans=[
   {id:"starter-athlete-base",name:"ATHLETEN BASIS 01",description:"Kraft, Beweglichkeit und Rumpfstabilität für einen sauberen Einstieg.",proOnly:false,items:[
@@ -46,23 +46,10 @@ const plans=[
   ]}
 ];
 for(const p of plans){
-  const plan=await prisma.trainingPlan.upsert({where:{id:p.id},update:{name:p.name,description:p.description,isTemplate:true,active:true,proOnly:p.proOnly},create:{id:p.id,name:p.name,description:p.description,isTemplate:true,active:true,proOnly:p.proOnly}});
-  await prisma.trainingPlanItem.deleteMany({where:{planId:plan.id}});
+  const existing=await prisma.trainingPlan.findUnique({where:{id:p.id}});
+  const plan=await prisma.trainingPlan.upsert({where:{id:p.id},update:{},create:{id:p.id,name:p.name,description:p.description,isTemplate:true,active:true,proOnly:p.proOnly}});
+  if(existing)continue;
   for(const [exerciseId,dayIndex,orderIndex,targetSets,targetReps,targetRpe,restSeconds] of p.items)await prisma.trainingPlanItem.create({data:{planId:plan.id,exerciseId,dayIndex,orderIndex,targetSets,targetReps,targetRpe,restSeconds}});
-}
-
-const planNames=new Map(plans.map(p=>[p.id,p.name]));
-const existingPlanWorkouts=await prisma.workout.findMany({
-  where:{trainingPlanId:{in:plans.map(p=>p.id)}},
-  select:{id:true,trainingPlanId:true,title:true}
-});
-for(const workout of existingPlanWorkouts){
-  const planName=workout.trainingPlanId?planNames.get(workout.trainingPlanId):null;
-  if(!planName)continue;
-  const suffixRaw=workout.title.includes("·")?workout.title.split("·").slice(1).join("·").trim():"";
-  const suffix=suffixRaw.replace(/^SESSION\s+/i,"Einheit ").replace(/^WORKOUT\s+/i,"Einheit ");
-  const title=suffix?`${planName} · ${suffix}`:planName;
-  if(title!==workout.title)await prisma.workout.update({where:{id:workout.id},data:{title}});
 }
 
 const rules=[
@@ -74,7 +61,7 @@ const rules=[
   ["acute_chronic_load","Trainingslast erhöht",40,{acuteChronicRatio:{gt:1.5}},{severity:"warning",type:"deload",title:"Trainingslast deutlich erhöht",action:"Belastung als Signal prüfen und Erholung priorisieren."}],
   ["personal_record","Neuer Rekord",10,{prDetected:{eq:true}},{severity:"good",type:"celebrate",title:"Neuer Rekord",action:"Du bist anders."}]
 ];
-for(const [key,title,priority,conditions,action] of rules)await prisma.coachingRule.upsert({where:{key},update:{title,priority,conditions,action,enabled:true},create:{key,title,priority,conditions,action,enabled:true}});
+for(const [key,title,priority,conditions,action] of rules)await prisma.coachingRule.upsert({where:{key},update:{},create:{key,title,priority,conditions,action,enabled:true}});
 
 const settings={
   score_weights:{strength:20,endurance:15,athleticism:15,mobility:10,recovery:15,fuel:10,consistency:15},
@@ -89,7 +76,7 @@ const settings={
     "Baue den Athleten Schritt für Schritt."
   ]
 };
-for(const [key,value] of Object.entries(settings))await prisma.systemSetting.upsert({where:{key},update:{value},create:{key,value}});
+for(const [key,value] of Object.entries(settings))await prisma.systemSetting.upsert({where:{key},update:{},create:{key,value}});
 
 const flags={
   workout_tracking:[true,true,true],exercise_library_full:[false,true,true],unlimited_history:[false,true,true],wearable_advanced:[false,true,true],
@@ -98,14 +85,14 @@ const flags={
   video_feedback:[false,true,true],weekly_checkin:[false,true,true],weekly_report_full:[false,true,true],performance_timeline:[false,true,true],different_ai:[false,true,true],elite_video_calls:[false,false,true],
   digital_twin:[false,true,true],pro_challenges:[false,true,true]
 };
-for(const [key,[free,pro,elite]] of Object.entries(flags))await prisma.featureFlag.upsert({where:{key},update:{free,pro,elite},create:{key,free,pro,elite}});
+for(const [key,[free,pro,elite]] of Object.entries(flags))await prisma.featureFlag.upsert({where:{key},update:{},create:{key,free,pro,elite}});
 
 const now=new Date(),end=new Date(Date.now()+30*86400000);
 for(const c of [
   {id:"challenge-30-different",title:"30 Tage anders",description:"Erfülle deinen Tagesplan. Training oder Erholung zählt.",proOnly:false},
   {id:"challenge-pushups",title:"100 Liegestütze",description:"Baue kontrolliert Volumen auf und erfasse deinen Fortschritt.",proOnly:false},
   {id:"challenge-recovery-pro",title:"Erholungsmeister",description:"PRO Herausforderung für sieben starke Erholungstage.",proOnly:true}
-])await prisma.challenge.upsert({where:{id:c.id},update:{...c,startsAt:now,endsAt:end},create:{...c,startsAt:now,endsAt:end}});
+])await prisma.challenge.upsert({where:{id:c.id},update:{},create:{...c,startsAt:now,endsAt:end}});
 
 console.log("BE DIFFERENT seed complete");
 await prisma.$disconnect();
