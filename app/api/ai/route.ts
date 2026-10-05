@@ -10,8 +10,8 @@ async function policy(){const setting=await prisma.systemSetting.findUnique({whe
 export async function GET(){
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
  if(!await hasFeature(user.subscriptionTier,"different_ai"))return errorJson("Different AI ist PRO.",403);
- const [items,handoff,p]=await Promise.all([prisma.aiMessage.findMany({where:{userId:user.id},orderBy:{createdAt:"asc"},take:100}),prisma.aiHandoff.findFirst({where:{userId:user.id,status:{in:["OPEN","CLAIMED"]}},orderBy:{createdAt:"desc"}}),policy()]);
- return NextResponse.json({ok:true,items,handoff,provider:Boolean(process.env.OPENAI_API_KEY),coachAvailable:coachAvailable(p),enabled:p.enabled});
+ const [items,handoff,p]=await Promise.all([prisma.aiMessage.findMany({where:{userId:user.id},orderBy:{createdAt:"desc"},take:100}),prisma.aiHandoff.findFirst({where:{userId:user.id,status:{in:["OPEN","CLAIMED"]}},orderBy:{createdAt:"desc"}}),policy()]);
+ return NextResponse.json({ok:true,items:items.reverse(),handoff,provider:Boolean(process.env.OPENAI_API_KEY),coachAvailable:coachAvailable(p),enabled:p.enabled});
 }
 export async function POST(request:Request){
  if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
@@ -21,13 +21,17 @@ export async function POST(request:Request){
  const config=await policy(),english=user.locale==="en",now=new Date();
  const count=await prisma.aiMessage.count({where:{userId:user.id,role:"user",createdAt:{gte:new Date(now.getTime()-86400000)}}});
  if(count>=config.dailyLimit)return errorJson(english?"Daily message limit reached.":"Tägliches Nachrichtenlimit erreicht.",429);
- const [score,recs,workout,goal,history,existing]=await Promise.all([
+ const [score,recs,workout,goal,history,existing,scoreHistory,checks,coachExamples,consent]=await Promise.all([
   prisma.scoreSnapshot.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
   prisma.recommendation.findMany({where:{userId:user.id,date:dateOnly()},orderBy:{createdAt:"desc"},take:3}),
   prisma.workout.findFirst({where:{userId:user.id,completedAt:null},orderBy:{scheduledAt:"asc"}}),
   prisma.goal.findFirst({where:{userId:user.id,active:true}}),
   prisma.aiMessage.findMany({where:{userId:user.id},orderBy:{createdAt:"desc"},take:12}),
-  prisma.aiHandoff.findFirst({where:{userId:user.id,status:{in:["OPEN","CLAIMED"]}},orderBy:{createdAt:"desc"}})
+  prisma.aiHandoff.findFirst({where:{userId:user.id,status:{in:["OPEN","CLAIMED"]}},orderBy:{createdAt:"desc"}}),
+  prisma.scoreSnapshot.findMany({where:{userId:user.id},orderBy:{date:"desc"},take:7,select:{date:true,total:true,recovery:true,completeness:true}}),
+  prisma.dailyCheck.findMany({where:{userId:user.id},orderBy:{date:"desc"},take:7,select:{date:true,energy:true,soreness:true,mood:true,stress:true,sleepHours:true}}),
+  prisma.message.findMany({where:{athleteId:user.id,senderId:{not:user.id},kind:"TEXT"},orderBy:{createdAt:"desc"},take:5,select:{text:true}}),
+  prisma.consentRecord.findFirst({where:{userId:user.id,type:"health_data"},orderBy:{grantedAt:"desc"}})
  ]);
  const reserved=await prisma.$transaction(async tx=>{await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;const used=await tx.aiMessage.count({where:{userId:user.id,role:"user",createdAt:{gte:new Date(now.getTime()-86400000)}}});if(used>=config.dailyLimit)return false;await tx.aiMessage.create({data:{userId:user.id,role:"user",content:p.data.message}});return true;});
  if(!reserved)return errorJson(english?"Daily message limit reached.":"Tägliches Nachrichtenlimit erreicht.",429);
@@ -39,7 +43,8 @@ export async function POST(request:Request){
   handoff=await openAiHandoff(user.id,reason,p.data.message);source="handoff";
   answer=english?(reason==="HEALTH_CONCERN"?"I cannot assess medical symptoms. Please seek professional medical assessment. Your coach has been notified; your plan has not been changed.":"Your request has been handed to your coach. Your plan remains unchanged until your coach reviews it."):(reason==="HEALTH_CONCERN"?"Ich kann medizinische Beschwerden nicht beurteilen. Bitte suche professionelle medizinische Abklärung. Dein Trainer wurde informiert; dein Plan wurde nicht geändert.":"Deine Anfrage wurde an deinen Trainer übergeben. Dein Plan bleibt unverändert, bis dein Trainer ihn prüft.");
  }else if(process.env.OPENAI_API_KEY){
-  const context={goal:goal?.type??null,score:score?{total:score.total,recovery:score.recovery,completeness:score.completeness}:null,recommendations:recs.map(r=>({action:r.action,severity:r.severity})),nextWorkout:workout?{title:workout.title,scheduledAt:workout.scheduledAt}:null};
+  const health=consent?.granted?await prisma.wearableDaily.findMany({where:{userId:user.id},orderBy:{date:"desc"},take:7,select:{date:true,source:true,steps:true,sleepMinutes:true,hrv:true,restingHr:true,completeness:true}}):[];
+  const context={scoreHistory,checks,health,coachStyleExamples:coachExamples.map(x=>x.text?.slice(0,600)),goal:goal?.type??null,score:score?{total:score.total,recovery:score.recovery,completeness:score.completeness}:null,recommendations:recs.map(r=>({action:r.action,severity:r.severity})),nextWorkout:workout?{title:workout.title,scheduledAt:workout.scheduledAt}:null};
   try{
    const endpoint=process.env.OPENAI_RESPONSES_URL||"https://api.openai.com/v1/responses";
    const url=new URL(endpoint);if(url.origin!=="https://api.openai.com"&&!['localhost','127.0.0.1'].includes(url.hostname))throw Error("Invalid AI endpoint");

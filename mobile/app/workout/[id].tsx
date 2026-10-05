@@ -1,7 +1,7 @@
 
-import {ExerciseName} from "../../components/Locale";
+import {Copy,ExerciseName,LocalizedTextInput} from "../../components/Locale";
 
-import {Copy,LocalizedTextInput} from "../../components/Locale";
+
 import {useEffect,useState} from "react";
 import {ActivityIndicator,AppState,Image,Modal,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,TextInput,View,Vibration} from "react-native";
 import {router,useLocalSearchParams} from "expo-router";

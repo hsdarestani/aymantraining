@@ -22,8 +22,7 @@ export async function POST(request:Request){
  if(action==="disconnect"){
   if(!conn)return errorJson("Verbindung nicht gefunden.",404);
   // Disable imports before contacting the provider. A failed remote revoke is retryable.
-  await prisma.wearableConnection.update({where:{id:conn.id},data:{status:"DISCONNECTED"}});
-  await prisma.wearableAuthAttempt.updateMany({where:{userId:user.id,provider,usedAt:null},data:{usedAt:new Date()}});
+  await prisma.$transaction(async tx=>{await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;await tx.wearableConnection.update({where:{id:conn.id},data:{status:"DISCONNECTED"}});await tx.wearableAuthAttempt.updateMany({where:{userId:user.id,provider,usedAt:null},data:{usedAt:new Date()}});});
   try{await gatewayRequest("disconnect",{provider,externalUserId:conn.externalUserId});await prisma.wearableConnection.update({where:{id:conn.id},data:{metadata:{revokePending:false},externalUserId:null}});return NextResponse.json({ok:true,revokePending:false});}
   catch{await prisma.wearableConnection.update({where:{id:conn.id},data:{metadata:{revokePending:true}}});return NextResponse.json({ok:true,revokePending:true});}
  }
@@ -45,8 +44,7 @@ export async function POST(request:Request){
  try{
   if(!wearableGateway())return errorJson("Anbieter ist noch nicht aktiviert.",503);
   const token=crypto.randomBytes(32).toString("base64url"),tokenHash=crypto.createHash("sha256").update(token).digest("hex");
-  await prisma.wearableAuthAttempt.updateMany({where:{userId:user.id,provider,usedAt:null},data:{usedAt:new Date()}});
-  const attempt=await prisma.wearableAuthAttempt.create({data:{tokenHash,userId:user.id,provider,expiresAt:new Date(Date.now()+15*60000)}});
+  const attempt=await prisma.$transaction(async tx=>{await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;await tx.wearableAuthAttempt.updateMany({where:{userId:user.id,provider,usedAt:null},data:{usedAt:new Date()}});return tx.wearableAuthAttempt.create({data:{tokenHash,userId:user.id,provider,expiresAt:new Date(Date.now()+15*60000)}})});
   try{
    const result=await gatewayRequest("connect",{provider,state:token,locale:user.locale,callbackUrl:(process.env.APP_URL||"https://bedifferent.smarbiz.sbs")+"/api/wearables/callback"});
    return NextResponse.json({ok:true,connectUrl:result.connectUrl});

@@ -1,7 +1,7 @@
 
-import {LocalizedValue} from "../components/Locale";
+import {Copy,LocalizedValue} from "../components/Locale";
 
-import {Copy} from "../components/Locale";
+
 import {useState} from "react";
 import {Pressable,SafeAreaView,StyleSheet,Text,View} from "react-native";
 import {router} from "expo-router";

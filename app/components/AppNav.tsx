@@ -2,6 +2,8 @@
 import {Copy,LocalizedElement} from "./Locale";
 
 
+
+
 import Link from "next/link";
 import {usePathname} from "next/navigation";
 import {useState} from "react";
@@ -54,12 +56,12 @@ export default function AppNav(){
       <div className="app-desktop-inner">
         <Link href="/dashboard" className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></Link>
         {workout&&<Link href="/training" className="desktop-back"><Icon name="back"/><Copy text={"ZURÜCK ZUM TRAINING"}/></Link>}
-        <nav aria-label="Hauptnavigation">
+        <LocalizedElement as="nav" aria-label="Hauptnavigation">
           {items.map(([href,label,icon])=>{
             const active=path===href||(href!=="/dashboard"&&path.startsWith(href+"/"));
             return <Link href={href} className={active?"active":""} key={href}><Icon name={icon}/><span><Copy text={label}/></span></Link>;
           })}
-        </nav>
+        </LocalizedElement>
         <LocalizedElement as="button" className="desktop-menu" aria-label="Menü öffnen" onClick={()=>setOpen(true)}><Icon name="menu"/><span><Copy text={"MENÜ"}/></span></LocalizedElement>
       </div>
     </header>
@@ -69,12 +71,12 @@ export default function AppNav(){
       <LocalizedElement as="button" aria-label="Menü öffnen" onClick={()=>setOpen(true)}><Icon name="menu"/></LocalizedElement>
     </div>
 
-    <nav className="app-bottom-nav" aria-label="Hauptnavigation">
+    <LocalizedElement as="nav" className="app-bottom-nav" aria-label="Hauptnavigation">
       {items.map(([href,label,icon])=>{
         const active=path===href||(href!=="/dashboard"&&path.startsWith(href+"/"));
         return <Link href={href} className={active?"active":""} key={href}><span className="nav-icon"><Icon name={icon}/></span><small><Copy text={label}/></small></Link>;
       })}
-    </nav>
+    </LocalizedElement>
 
     <div className={open?"app-drawer open":"app-drawer"} aria-hidden={!open}>
       <LocalizedElement as="button" className="drawer-backdrop" aria-label="Menü schließen" onClick={()=>setOpen(false)}/>

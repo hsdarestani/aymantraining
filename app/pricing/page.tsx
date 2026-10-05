@@ -1,7 +1,7 @@
 
-import {LocalizedValue} from "../components/Locale";
+import {Copy,LocalizedValue} from "../components/Locale";
 
-import {Copy} from "../components/Locale";
+
 import Link from "next/link";
 import {getCurrentUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";

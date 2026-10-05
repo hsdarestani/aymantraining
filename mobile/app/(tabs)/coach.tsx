@@ -1,7 +1,7 @@
 
-import {LocalizedValue} from "../../components/Locale";
+import {Copy,LocalizedTextInput,LocalizedValue} from "../../components/Locale";
 
-import {Copy,LocalizedTextInput} from "../../components/Locale";
+
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {Alert,Pressable,StyleSheet,Text,TextInput,View} from "react-native";
 import {useFocusEffect,router} from "expo-router";

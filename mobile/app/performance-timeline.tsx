@@ -1,7 +1,7 @@
 
-import {LocalizedValue} from "../components/Locale";
+import {Copy,LocalizedValue} from "../components/Locale";
 
-import {Copy} from "../components/Locale";
+
 import {useEffect,useMemo,useState} from "react";
 import {Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from "react-native";
 import Svg,{Circle,Line,Path,Text as SvgText} from "react-native-svg";

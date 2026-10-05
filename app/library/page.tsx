@@ -1,7 +1,7 @@
 
-import {ExerciseName} from "../components/Locale";
+import {Copy,ExerciseName,LocalizedElement} from "../components/Locale";
 
-import {Copy,LocalizedElement} from "../components/Locale";
+
 import Link from "next/link";
 import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";

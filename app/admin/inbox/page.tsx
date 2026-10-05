@@ -1,7 +1,9 @@
 
-import {LocalizedValue} from "../../components/Locale";
+import {Copy,LocalizedValue} from "../../components/Locale";
 
-import {Copy} from "../../components/Locale";
+
+
+
 import Link from "next/link";
 import {requireRole} from "../../../lib/auth";
 import {coachAthleteFilter} from "../../../lib/coach-access";
@@ -31,7 +33,7 @@ export default async function Inbox(){
  return <main className="admin-content" style={{margin:"0 auto"}}>
   <header className="admin-header"><div><span className="eyebrow"><Copy text={"TRAINERBEREICH"}/></span><h1><Copy text={"Nachrichten"}/></h1></div><Link href="/admin" className="ghost"><Copy text={"← ÜBERSICHT"}/></Link></header>
   <article className="panel"><div className="panel-head"><div><span className="eyebrow"><Copy text={"PRIORISIERT"}/></span><h2><Copy text={"Trainer Postfach"}/></h2></div><span className="tag">{threads.length}</span></div>
-   <div className="athlete-table">{threads.map(t=><div className="athlete-row" key={t.id}><i className={"risk "+(t.severity==="critical"?"critical":t.severity==="warning"?"warning":"good")}/><strong>{t.name}</strong><span>{t.unread?t.unread+" NEU":"GELESEN"}</span><span><LocalizedValue value={t.latest?.createdAt} format="toLocaleString"/></span><small>{t.latest?.text||t.latest?.kind||"Keine Nachricht"}</small><Link href={`/admin/inbox/${t.id}`} className="secondary"><Copy text={"ÖFFNEN"}/></Link></div>)}</div>
+   <div className="athlete-table">{threads.map(t=><div className="athlete-row" key={t.id}><i className={"risk "+(t.severity==="critical"?"critical":t.severity==="warning"?"warning":"good")}/><strong>{t.name}</strong><span><Copy text={t.unread?t.unread+" NEU":"GELESEN"}/></span><span><LocalizedValue value={t.latest?.createdAt} format="toLocaleString"/></span><small>{t.latest?.text||t.latest?.kind||"Keine Nachricht"}</small><Link href={`/admin/inbox/${t.id}`} className="secondary"><Copy text={"ÖFFNEN"}/></Link></div>)}</div>
   </article>
  </main>;
 }

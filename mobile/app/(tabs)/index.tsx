@@ -1,7 +1,7 @@
 
-import {LocalizedValue} from "../../components/Locale";
+import {Copy,LocalizedValue} from "../../components/Locale";
 
-import {Copy} from "../../components/Locale";
+
 import {useCallback,useState} from "react";
 import {ActivityIndicator,Pressable,RefreshControl,ScrollView,StyleSheet,Text,View} from "react-native";
 import Svg,{Circle} from "react-native-svg";

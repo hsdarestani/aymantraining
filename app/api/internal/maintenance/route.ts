@@ -1,3 +1,4 @@
+import {handOffNightConversations} from "../../../../lib/ai-shift";
 import {NextResponse} from "next/server";
 import {prisma} from "../../../../lib/db";
 import {purgeExpiredSessions} from "../../../../lib/auth";
@@ -153,6 +154,7 @@ export async function POST(request:Request){
     processed++;
   }
 
+  const aiHandoffs=await handOffNightConversations(now);
   const push=await dispatchPendingPushes();
-  return NextResponse.json({ok:true,processed,queued,encryptedLegacyMedia,expiredSubscriptions:expired.length,storeSync,push,at:now.toISOString()});
+  return NextResponse.json({ok:true,processed,queued,aiHandoffs,encryptedLegacyMedia,expiredSubscriptions:expired.length,storeSync,push,at:now.toISOString()});
 }

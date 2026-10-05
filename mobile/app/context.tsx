@@ -1,5 +1,7 @@
 
 import {Copy} from "../components/Locale";
+
+
 import {useEffect,useState} from "react";
 import {Pressable,SafeAreaView,ScrollView,StyleSheet,Switch,Text,TextInput,View} from "react-native";
 import {router} from "expo-router";
@@ -28,7 +30,7 @@ export default function Context(){
   <Eyebrow><Copy text={"DEIN KONTEXT"}/></Eyebrow><Text style={s.title}><Copy text={"TRAINING PASST"}/>{"\n"}<Copy text={"ZU DEINEM LEBEN."}/></Text>
   <Card><Eyebrow><Copy text={"ZIEL"}/></Eyebrow><SectionTitle><Copy text={"Dein nächster Entwicklungspunkt"}/></SectionTitle>{field("targetScore","Zielwert in Prozent","number-pad")}{field("targetDate","Zieldatum · TT.MM.JJJJ")}</Card>
   <Card><Eyebrow><Copy text={"SPIELTAG"}/></Eyebrow><SectionTitle><Copy text={"Belastung rund um dein Spiel"}/></SectionTitle>{field("nextMatchAt","Nächster Spieltag · TT.MM.JJJJ")}<Text style={s.copy}><Copy text={"Vor einem eingetragenen Spiel wird Belastung reduziert. Danach wird Regeneration priorisiert."}/></Text></Card>
-  <Card><Eyebrow><Copy text={"REISEMODUS"}/></Eyebrow><SectionTitle><Copy text={"Training ohne Geräte"}/></SectionTitle><View style={s.choices}>{[0,3,7,14].map(n=><Pressable key={n} style={[s.choice,Number(v.travelDays)===n&&s.choiceOn]} onPress={()=>setV({...v,travelDays:n})}><Text style={[s.choiceText,Number(v.travelDays)===n&&s.choiceTextOn]}>{n===0?"AUS":n+" TAGE"}</Text></Pressable>)}</View></Card>
+  <Card><Eyebrow><Copy text={"REISEMODUS"}/></Eyebrow><SectionTitle><Copy text={"Training ohne Geräte"}/></SectionTitle><View style={s.choices}>{[0,3,7,14].map(n=><Pressable key={n} style={[s.choice,Number(v.travelDays)===n&&s.choiceOn]} onPress={()=>setV({...v,travelDays:n})}><Text style={[s.choiceText,Number(v.travelDays)===n&&s.choiceTextOn]}><Copy text={n===0?"AUS":n+" TAGE"}/></Text></Pressable>)}</View></Card>
   <Card><Eyebrow><Copy text={"ZYKLUS KONTEXT"}/></Eyebrow><View style={s.switchRow}><View style={{flex:1}}><SectionTitle><Copy text={"Optional berücksichtigen"}/></SectionTitle><Text style={s.copy}><Copy text={"Nur wenn du diese Funktion aktivierst. Sie liefert Trainingskontext und keine medizinische Bewertung."}/></Text></View><Switch value={v.cycleTrackingEnabled} onValueChange={x=>setV({...v,cycleTrackingEnabled:x})} trackColor={{true:C.volt}}/></View>{v.cycleTrackingEnabled?<>{field("cycleStartDate","Letzter Zyklusbeginn · TT.MM.JJJJ")}{field("cycleLengthDays","Zykluslänge in Tagen","number-pad")}</>:null}</Card>
   <Card><Eyebrow><Copy text={"TAGESZIELE"}/></Eyebrow>{field("stepTarget","Schritte","number-pad")}{field("waterTargetMl","Wasser ml","number-pad")}{field("proteinTargetG","Protein g","decimal-pad")}{field("bedtimeTarget","Ziel Schlafenszeit · HH:MM")}{field("preferredMorningHour","Morgenübersicht ab Stunde","number-pad")}</Card>
   <Pressable style={s.primary} onPress={save}><Text style={s.primaryText}><Copy text={"KONTEXT SPEICHERN"}/></Text></Pressable>{status?<Text style={s.status}><Copy text={status}/></Text>:null}

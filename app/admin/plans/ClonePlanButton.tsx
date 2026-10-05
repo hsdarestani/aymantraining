@@ -1,4 +1,6 @@
 "use client";
+import {Copy} from "../../components/Locale";
+
 import {useState} from "react";
 export default function ClonePlanButton({id,name,proOnly}:{id:string;name:string;proOnly:boolean}){
  const [busy,setBusy]=useState(false);
@@ -8,5 +10,5 @@ export default function ClonePlanButton({id,name,proOnly}:{id:string;name:string
   const j=await r.json().catch(()=>({}));
   if(r.ok)location.href=`/admin/plans/${j.item.id}`;else{setBusy(false);alert(j.error||"Kopieren fehlgeschlagen.")}
  }
- return <button className="secondary" onClick={clone} disabled={busy}>{busy?"KOPIERE…":"KOPIEREN"}</button>
+ return <button className="secondary" onClick={clone} disabled={busy}><Copy text={busy?"KOPIERE…":"KOPIEREN"}/></button>
 }

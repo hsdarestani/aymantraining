@@ -1,7 +1,7 @@
 
-import {LocalizedValue} from "../../components/Locale";
+import {Copy,LocalizedValue} from "../../components/Locale";
 
-import {Copy} from "../../components/Locale";
+
 import Link from "next/link";
 import {prisma} from "../../../lib/db";
 export const dynamic="force-dynamic";

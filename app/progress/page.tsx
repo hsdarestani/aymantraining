@@ -1,7 +1,9 @@
 
-import {LocalizedValue} from "../components/Locale";
+import {Copy,LocalizedValue} from "../components/Locale";
 
-import {Copy} from "../components/Locale";
+
+
+
 import Link from "next/link";
 import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";
@@ -31,7 +33,7 @@ export default async function ProgressPage(){
         <div className="panel-head"><div><span className="eyebrow"><Copy text={"VERLAUF"}/></span><h2><Copy text={details?"Letzte Messpunkte":"PRO Verlauf"}/></h2></div></div>
         {details?<div className="fake-chart">{scores.slice().reverse().map(s=><i key={s.id} style={{height:`${Math.max(4,s.total)}%`}}/>)}</div>:<div className="locked-copy"><p className="muted"><Copy text={"KOSTENLOS zeigt den aktuellen Gesamtwert. Verlauf und Erklärungen sind PRO."}/></p><Link href="/pricing" className="secondary"><Copy text={"PRO TESTEN"}/></Link></div>}
       </article>
-      <article className="panel"><span className="eyebrow"><Copy text={"KÖRPER"}/></span><h2><Copy text={"Aktuell"}/></h2><div className="body-stats"><div><span><Copy text={"GEWICHT"}/></span><strong>{metrics[0]?.weightKg??"Keine Angabe"} kg</strong><small>{metrics[0]?.date.toLocaleDateString("de-DE")??"keine Daten"}</small></div><div><span><Copy text={"TAILLE"}/></span><strong>{metrics[0]?.waistCm??"Keine Angabe"} cm</strong><small><Copy text={"letzter Wert"}/></small></div><div><span><Copy text={"FOTOS"}/></span><strong>{photos.length}</strong><small>{user.subscriptionTier==="FREE"?"max. 3":"privat"}</small></div></div></article>
+      <article className="panel"><span className="eyebrow"><Copy text={"KÖRPER"}/></span><h2><Copy text={"Aktuell"}/></h2><div className="body-stats"><div><span><Copy text={"GEWICHT"}/></span><strong>{metrics[0]?.weightKg??"Keine Angabe"} kg</strong><small>{metrics[0]?.date.toLocaleDateString("de-DE")??"keine Daten"}</small></div><div><span><Copy text={"TAILLE"}/></span><strong>{metrics[0]?.waistCm??"Keine Angabe"} cm</strong><small><Copy text={"letzter Wert"}/></small></div><div><span><Copy text={"FOTOS"}/></span><strong>{photos.length}</strong><small><Copy text={user.subscriptionTier==="FREE"?"max. 3":"privat"}/></small></div></div></article>
     </section>
 
     <article className="panel timeline-panel">

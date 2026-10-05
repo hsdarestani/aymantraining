@@ -1,3 +1,4 @@
+import {handOffNightConversations} from "../../../../lib/ai-shift";
 import {NextResponse} from "next/server";
 import {z} from "zod";
 import {prisma} from "../../../../lib/db";
@@ -14,6 +15,7 @@ const schema=z.discriminatedUnion("action",[
 ]);
 export async function GET(){
  const coach=await requireRole(["COACH","ADMIN"]),filter=await coachAthleteFilter(coach);
+ await handOffNightConversations();
  const [items,handoffs,setting]=await Promise.all([prisma.aiMessage.findMany({where:{...filter,role:"assistant"},include:{user:{select:{id:true,name:true,email:true}}},orderBy:{createdAt:"desc"},take:100}),prisma.aiHandoff.findMany({where:{...filter},include:{user:{select:{id:true,name:true,email:true}}},orderBy:{createdAt:"desc"},take:100}),prisma.systemSetting.findUnique({where:{key:"ai_policy"}})]);
  return NextResponse.json({ok:true,items,handoffs,settings:aiPolicySchema.safeParse(setting?.value??{}).data??defaultAiPolicy,canConfigure:coach.role==="ADMIN"});
 }

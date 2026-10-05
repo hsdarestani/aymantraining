@@ -1,7 +1,7 @@
 "use client";
-import {ExerciseName} from "../../components/Locale";
+import {Copy,ExerciseName} from "../../components/Locale";
 
-import {Copy} from "../../components/Locale";
+
 
 import Link from "next/link";
 import {useEffect,useMemo,useState} from "react";

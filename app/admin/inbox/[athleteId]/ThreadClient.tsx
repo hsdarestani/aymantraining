@@ -1,7 +1,7 @@
 "use client";
-import {LocalizedValue} from "../../../components/Locale";
+import {Copy,LocalizedElement,LocalizedValue} from "../../../components/Locale";
 
-import {Copy,LocalizedElement} from "../../../components/Locale";
+
 
 import {useRef,useState} from "react";
 

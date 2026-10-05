@@ -4,7 +4,7 @@ export async function completeWearableAuthorization(provider:string,externalUser
  const tokenHash=crypto.createHash('sha256').update(state).digest('hex');
  return prisma.$transaction(async tx=>{
   // Serialise competing ownership claims for the same remote account.
-  await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${provider+':'+externalUserId}, 0))`;
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${provider+':'+externalUserId}, 0))`;
   const attempt=await tx.wearableAuthAttempt.findUnique({where:{tokenHash}});
   if(!attempt||attempt.provider!==provider||attempt.expiresAt<=new Date())throw Error('expired_state');
   if(attempt.usedAt){const existing=await tx.wearableConnection.findUnique({where:{userId_provider:{userId:attempt.userId,provider}}});if(existing?.status==='CONNECTED'&&existing.externalUserId===externalUserId)return {duplicate:true};throw Error('replayed_state')}

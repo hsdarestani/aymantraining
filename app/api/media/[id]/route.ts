@@ -1,3 +1,4 @@
+import {canCoachAccess} from "../../../../lib/coach-access";
 import {prisma} from "../../../../lib/db";
 import {errorJson,requireApiUser} from "../../../../lib/http";
 import {getPrivateObject,InvalidMediaRange} from "../../../../lib/storage";
@@ -10,7 +11,7 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
   const publicExercise=["EXERCISE_IMAGE","EXERCISE_VIDEO"].includes(asset.kind);
   if(!publicExercise){
     const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
-    let allowed=asset.ownerId===user.id||asset.relatedUserId===user.id||["COACH","ADMIN"].includes(user.role);
+    let allowed=asset.ownerId===user.id||asset.relatedUserId===user.id||user.role==="ADMIN"||(user.role==="COACH"&&await canCoachAccess(user,asset.relatedUserId||asset.ownerId));
     if(!allowed&&asset.kind==="VOICE_MESSAGE"){
       const brief=await prisma.coachBrief.findFirst({where:{mediaId:asset.id,publishAt:{lte:new Date()},OR:[{expiresAt:null},{expiresAt:{gt:new Date()}}]},orderBy:{publishAt:"desc"}});
       const rank:Record<string,number>={FREE:0,PRO:1,ELITE:2};
