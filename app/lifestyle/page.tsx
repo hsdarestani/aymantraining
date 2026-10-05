@@ -1,3 +1,7 @@
+
+import {LocalizedValue} from "../components/Locale";
+
+import {Copy} from "../components/Locale";
 import Link from "next/link";
 import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";
@@ -39,26 +43,26 @@ export default async function Lifestyle(){
   return <main className="sub-shell">
     <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link></header>
     <section className="page-hero compact-hero">
-      <div><span className="eyebrow">REGENERATION</span><h1>Regeneration ist Teil der Leistung.</h1><p>Schlaf, Aktivität und Fokus ergänzen das Training, ohne daraus medizinische Diagnosen abzuleiten.</p></div>
-      <div className="hero-stat"><span>REGENERATION</span><strong>{score?.recovery??"—"}</strong><small>TRAININGSSIGNAL</small></div>
+      <div><span className="eyebrow"><Copy text={"REGENERATION"}/></span><h1><Copy text={"Regeneration ist Teil der Leistung."}/></h1><p><Copy text={"Schlaf, Aktivität und Fokus ergänzen das Training, ohne daraus medizinische Diagnosen abzuleiten."}/></p></div>
+      <div className="hero-stat"><span><Copy text={"REGENERATION"}/></span><strong>{score?.recovery??"—"}</strong><small><Copy text={"TRAININGSSIGNAL"}/></small></div>
     </section>
     <section className="lifestyle-grid">
       <article className="panel rested-card">
-        <span className="eyebrow">SCHLAF</span><h2>Schlaf</h2>
-        <div className="sleep-number"><strong>{sleepText}</strong><span>LETZTE NACHT</span></div>
+        <span className="eyebrow"><Copy text={"SCHLAF"}/></span><h2><Copy text={"Schlaf"}/></h2>
+        <div className="sleep-number"><strong>{sleepText}</strong><span><Copy text={"LETZTE NACHT"}/></span></div>
         {advanced?<><div className="body-stats">
-          <div><span>SCHLAFWERT</span><strong>{sleepScore??"—"}</strong><small>0 bis 100</small></div>
-          <div><span>7 TAGE</span><strong>{s7?.toFixed(1)??"—"} h</strong><small>Durchschnitt</small></div>
-          <div><span>30 TAGE</span><strong>{s30?.toFixed(1)??"—"} h</strong><small>persönlicher Trend</small></div>
-        </div><p className="muted">{s7==null?"Für einen Schlaftrend fehlen noch Schlafdaten.":s7<7?"Schlaf liegt aktuell unter deinem Ziel. Heute Abend früher runterfahren und die nächste Belastung im Kontext deiner Regeneration betrachten.":"Dein Schlaftrend ist stabil. Regelmäßigkeit beibehalten."}</p></>:<div className="locked-copy"><p className="muted">KOSTENLOS zeigt die Schlafdauer. Qualität, Trend und persönliche Tipps sind PRO.</p><Link href="/pricing" className="secondary">PRO TESTEN</Link></div>}
+          <div><span><Copy text={"SCHLAFWERT"}/></span><strong>{sleepScore??"—"}</strong><small><Copy text={"0 bis 100"}/></small></div>
+          <div><span><Copy text={"7 TAGE"}/></span><strong>{s7?.toFixed(1)??"—"} h</strong><small><Copy text={"Durchschnitt"}/></small></div>
+          <div><span><Copy text={"30 TAGE"}/></span><strong>{s30?.toFixed(1)??"—"} h</strong><small><Copy text={"persönlicher Trend"}/></small></div>
+        </div><p className="muted"><Copy text={s7==null?"Für einen Schlaftrend fehlen noch Schlafdaten.":s7<7?"Schlaf liegt aktuell unter deinem Ziel. Heute Abend früher runterfahren und die nächste Belastung im Kontext deiner Regeneration betrachten.":"Dein Schlaftrend ist stabil. Regelmäßigkeit beibehalten."}/></p></>:<div className="locked-copy"><p className="muted"><Copy text={"KOSTENLOS zeigt die Schlafdauer. Qualität, Trend und persönliche Tipps sind PRO."}/></p><Link href="/pricing" className="secondary"><Copy text={"PRO TESTEN"}/></Link></div>}
       </article>
       <article className="panel active-card">
-        <span className="eyebrow">AKTIVITÄT</span><h2>Heute bewegen.</h2>
-        <div className="activity-ring" style={{background:ringBackground}}><div><strong>{steps.toLocaleString("de-DE")}</strong><small>SCHRITTE</small></div></div>
-        <div className="body-stats"><div><span>AKTIVE KCAL</span><strong>{Math.round(latest?.activeCalories??0)||"—"}</strong></div><div><span>VO2MAX</span><strong>{advanced?latest?.vo2max??"—":"PRO"}</strong></div></div>
+        <span className="eyebrow"><Copy text={"AKTIVITÄT"}/></span><h2><Copy text={"Heute bewegen."}/></h2>
+        <div className="activity-ring" style={{background:ringBackground}}><div><strong><LocalizedValue value={steps} format="toLocaleString"/></strong><small><Copy text={"SCHRITTE"}/></small></div></div>
+        <div className="body-stats"><div><span><Copy text={"AKTIVE KCAL"}/></span><strong>{Math.round(latest?.activeCalories??0)||"—"}</strong></div><div><span>VO2MAX</span><strong>{advanced?latest?.vo2max??"—":"PRO"}</strong></div></div>
       </article>
       <LifestyleClient/>
-      <article className="panel different-line"><span className="eyebrow">TAGESIMPULS</span><blockquote>“{line}”</blockquote><Link className="secondary" href="/settings">TAGESCHECK</Link></article>
+      <article className="panel different-line"><span className="eyebrow"><Copy text={"TAGESIMPULS"}/></span><blockquote>“{line}”</blockquote><Link className="secondary" href="/settings"><Copy text={"TAGESCHECK"}/></Link></article>
     </section>
   </main>;
 }

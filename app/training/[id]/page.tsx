@@ -1,3 +1,5 @@
+
+import {Copy} from "../../components/Locale";
 import Link from "next/link";
 import {notFound} from "next/navigation";
 import {requireUser} from "../../../lib/auth";
@@ -12,5 +14,5 @@ export default async function WorkoutPage({params}:{params:Promise<{id:string}>}
   const exerciseIds=workout.exercises.map(x=>x.exerciseId);
   const prior=await prisma.setLog.findMany({where:{exerciseId:{in:exerciseIds},workout:{userId:user.id,id:{not:id},completedAt:{not:null}}},orderBy:{completedAt:"desc"},take:500});
   const seen=new Set<string>();const previous=prior.filter(s=>{const key=`${s.exerciseId}:${s.setNumber}`;if(seen.has(key))return false;seen.add(key);return true;});
-  return <main className="sub-shell workout-page"><header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/training">← TRAINING</Link></nav></header><section className="page-hero compact-hero"><div><span className="eyebrow">TRAININGSMODUS</span><h1>{workout.title}</h1><p>Letzte Werte werden vorausgefüllt. Satzdaten bleiben bei Netzverlust lokal in der lokalen Warteschlange und werden bei der nächsten Internetverbindung synchronisiert.</p></div><div className="hero-stat"><span>ÜBUNGEN</span><strong>{workout.exercises.length}</strong><small>{workout.startedAt?"LÄUFT":"BEREIT"}</small></div></section><WorkoutSession workoutId={workout.id} exercises={workout.exercises} existing={workout.sets} previous={previous}/></main>;
+  return <main className="sub-shell workout-page"><header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/training"><Copy text={"← TRAINING"}/></Link></nav></header><section className="page-hero compact-hero"><div><span className="eyebrow"><Copy text={"TRAININGSMODUS"}/></span><h1>{workout.title}</h1><p><Copy text={"Letzte Werte werden vorausgefüllt. Satzdaten bleiben bei Netzverlust lokal in der lokalen Warteschlange und werden bei der nächsten Internetverbindung synchronisiert."}/></p></div><div className="hero-stat"><span><Copy text={"ÜBUNGEN"}/></span><strong>{workout.exercises.length}</strong><small><Copy text={workout.startedAt?"LÄUFT":"BEREIT"}/></small></div></section><WorkoutSession workoutId={workout.id} exercises={workout.exercises} existing={workout.sets} previous={previous}/></main>;
 }

@@ -1,3 +1,7 @@
+
+import {LocalizedValue} from "../../components/Locale";
+
+import {Copy,LocalizedTextInput} from "../../components/Locale";
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {Alert,Pressable,StyleSheet,Text,TextInput,View} from "react-native";
 import {useFocusEffect,router} from "expo-router";
@@ -13,7 +17,7 @@ import {C,radius} from "../../theme";
 function VoiceBubble({mediaId,token}:{mediaId:string;token:string}){
   const source=useMemo(()=>({uri:API+"/api/media/"+mediaId,headers:{Authorization:"Bearer "+token}}),[mediaId,token]);
   const player=useAudioPlayer(source);
-  return <Pressable style={s.mediaButton} onPress={()=>player.play()}><Text style={s.mediaButtonText}>SPRACHNACHRICHT ABSPIELEN</Text></Pressable>;
+  return <Pressable style={s.mediaButton} onPress={()=>player.play()}><Text style={s.mediaButtonText}><Copy text={"SPRACHNACHRICHT ABSPIELEN"}/></Text></Pressable>;
 }
 
 function VideoBubble({mediaId,token}:{mediaId:string;token:string}){
@@ -87,10 +91,10 @@ export default function Coach(){
     }catch(e:any){setStatus(e.message||"Upload fehlgeschlagen")}
   }
 
-  if(locked)return <Screen><View style={s.hero}><Eyebrow>DEIN TRAINER</Eyebrow><Text style={s.big}>DIREKT.{"\n"}PERSÖNLICH.{"\n"}PRO.</Text></View><Card><SectionTitle>Trainer Chat ist PRO.</SectionTitle><Text style={s.copy}>Text, Sprachnachrichten, Technikvideo und persönliche Antworten.</Text><Pressable style={s.primary} onPress={()=>router.push("/membership")}><Text style={s.primaryText}>PRO FREISCHALTEN →</Text></Pressable></Card></Screen>;
+  if(locked)return <Screen><View style={s.hero}><Eyebrow><Copy text={"DEIN TRAINER"}/></Eyebrow><Text style={s.big}><Copy text={"DIREKT."}/>{"\n"}<Copy text={"PERSÖNLICH."}/>{"\n"}PRO.</Text></View><Card><SectionTitle><Copy text={"Trainer Chat ist PRO."}/></SectionTitle><Text style={s.copy}><Copy text={"Text, Sprachnachrichten, Technikvideo und persönliche Antworten."}/></Text><Pressable style={s.primary} onPress={()=>router.push("/membership")}><Text style={s.primaryText}><Copy text={"PRO FREISCHALTEN →"}/></Text></Pressable></Card></Screen>;
 
   return <Screen>
-    <View style={s.hero}><Eyebrow>DEIN TRAINER</Eyebrow><Text style={s.big}>AYMAN.</Text><Text style={s.online}>● AKTIVE BETREUUNG</Text></View>
+    <View style={s.hero}><Eyebrow><Copy text={"DEIN TRAINER"}/></Eyebrow><Text style={s.big}>AYMAN.</Text><Text style={s.online}><Copy text={"● AKTIVE BETREUUNG"}/></Text></View>
     <Card style={s.chat}>
       <View style={s.messages}>{messages.map(m=>{
         const mine=m.senderId===m.athleteId;
@@ -98,15 +102,15 @@ export default function Coach(){
           {m.text?<Text style={[s.bubbleText,mine&&s.mineText]}>{m.text}</Text>:null}
           {m.kind==="VOICE"&&m.mediaId&&token?<VoiceBubble mediaId={m.mediaId} token={token}/>:null}
           {m.kind==="VIDEO"&&m.mediaId&&token?<VideoBubble mediaId={m.mediaId} token={token}/>:null}
-          <Text style={[s.time,mine&&s.mineText]}>{new Date(m.createdAt).toLocaleString("de-DE")}</Text>
+          <Text style={[s.time,mine&&s.mineText]}><LocalizedValue value={new Date(m.createdAt)} format="toLocaleString"/></Text>
         </View>
       })}</View>
       <View style={s.mediaActions}>
-        <Pressable style={[s.mediaAction,recording&&s.recording]} onPress={toggleVoice}><Text style={s.mediaActionText}>{recording?"AUFNAHME BEENDEN":"SPRACHE AUFNEHMEN"}</Text></Pressable>
-        <Pressable style={s.mediaAction} onPress={sendTechniqueVideo}><Text style={s.mediaActionText}>TECHNIKVIDEO SENDEN</Text></Pressable>
+        <Pressable style={[s.mediaAction,recording&&s.recording]} onPress={toggleVoice}><Text style={s.mediaActionText}><Copy text={recording?"AUFNAHME BEENDEN":"SPRACHE AUFNEHMEN"}/></Text></Pressable>
+        <Pressable style={s.mediaAction} onPress={sendTechniqueVideo}><Text style={s.mediaActionText}><Copy text={"TECHNIKVIDEO SENDEN"}/></Text></Pressable>
       </View>
-      <View style={s.composer}><TextInput value={text} onChangeText={setText} placeholder="Nachricht an Ayman…" placeholderTextColor="#666D69" style={s.input} multiline/><Pressable style={s.send} onPress={send}><Text style={s.sendText}>↑</Text></Pressable></View>
-      {status?<Text style={s.status}>{status}</Text>:null}
+      <View style={s.composer}><LocalizedTextInput value={text} onChangeText={setText} placeholder="Nachricht an Ayman…" placeholderTextColor="#666D69" style={s.input} multiline/><Pressable style={s.send} onPress={send}><Text style={s.sendText}>↑</Text></Pressable></View>
+      {status?<Text style={s.status}><Copy text={status}/></Text>:null}
     </Card>
   </Screen>;
 }

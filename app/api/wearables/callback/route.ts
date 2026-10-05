@@ -1,14 +1,15 @@
-import crypto from "node:crypto";
+import {completeWearableAuthorization} from "../../../../lib/wearable-authorization";
 import {NextResponse} from "next/server";
-import {prisma} from "../../../../lib/db";
-function sign(value:string){return crypto.createHmac("sha256",process.env.CRON_SECRET||"local").update(value).digest("hex")}
+import {providerSchema,verifySignature} from "../../../../lib/wearable-contract";
+import {wearableGateway} from "../../../../lib/wearable-gateway";
 export async function GET(request:Request){
- const u=new URL(request.url),provider=(u.searchParams.get("provider")||"").toLowerCase(),externalUserId=u.searchParams.get("externalUserId")||"",encoded=u.searchParams.get("state")||"";
+ const u=new URL(request.url),provider=u.searchParams.get("provider")||"",externalUserId=u.searchParams.get("externalUserId")||"",state=u.searchParams.get("state")||"";
+ const base=process.env.APP_URL||"https://bedifferent.smarbiz.sbs";
  try{
-  const decoded=Buffer.from(encoded,"base64url").toString("utf8"),dot=decoded.lastIndexOf("."),raw=decoded.slice(0,dot),sig=decoded.slice(dot+1),[userId,exp]=raw.split(":");
-  if(!userId||!exp||Number(exp)<Date.now()||!crypto.timingSafeEqual(Buffer.from(sig),Buffer.from(sign(raw))))throw new Error("state");
-  if(!provider||!externalUserId)throw new Error("provider");
-  await prisma.wearableConnection.upsert({where:{userId_provider:{userId,provider}},update:{externalUserId,status:"CONNECTED",lastSyncAt:new Date()},create:{userId,provider,externalUserId,status:"CONNECTED"}});
-  return NextResponse.redirect(new URL("/wearables?connected=1",process.env.APP_URL||"https://bedifferent.smarbiz.sbs"));
- }catch{return NextResponse.redirect(new URL("/wearables?error=1",process.env.APP_URL||"https://bedifferent.smarbiz.sbs"))}
+  const config=wearableGateway();
+  const payload=JSON.stringify({provider,externalUserId,state});
+  if(!config||!providerSchema.safeParse(provider).success||externalUserId.length<1||externalUserId.length>200||state.length>100||!verifySignature(payload,config.secret,u.searchParams.get("timestamp"),u.searchParams.get("signature")))throw Error("invalid_callback");
+  const result=await completeWearableAuthorization(provider,externalUserId,state);if(result.duplicate)throw Error("replayed_state");
+  return NextResponse.redirect(new URL("/wearables?connected=1",base));
+ }catch{return NextResponse.redirect(new URL("/wearables?error=1",base))}
 }

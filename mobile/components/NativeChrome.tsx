@@ -1,3 +1,5 @@
+
+import {Copy} from "./Locale";
 import {useState} from "react";
 import {Modal,Pressable,SafeAreaView,StyleSheet,Text,View} from "react-native";
 import {router,useSegments} from "expo-router";
@@ -7,6 +9,8 @@ import Animated,{FadeInDown,FadeInUp} from "react-native-reanimated";
 import {C,radius} from "../theme";
 
 const links=[
+  {label:"Different AI",path:"/different-ai",icon:MessageCircle},
+  {label:"Wearables",path:"/wearables",icon:HeartPulse},
   {label:"START",path:"/(tabs)",icon:House},
   {label:"TRAINING",path:"/(tabs)/training",icon:Dumbbell},
   {label:"FORTSCHRITT",path:"/(tabs)/progress",icon:TrendingUp},
@@ -34,10 +38,10 @@ export default function NativeChrome(){
 
   return <>
     <Animated.View entering={FadeInUp.duration(420)} pointerEvents="box-none" style={s.chrome}>
-      <Pressable accessibilityLabel="Zurück" onPress={back} style={s.quick}><ArrowLeft color={C.ink} size={18}/><Text style={s.quickText}>ZURÜCK</Text></Pressable>
+      <Pressable accessibilityLabel="Zurück" onPress={back} style={s.quick}><ArrowLeft color={C.ink} size={18}/><Text style={s.quickText}><Copy text={"ZURÜCK"}/></Text></Pressable>
       <Pressable accessibilityLabel="Start öffnen" onPress={()=>go("/(tabs)")} style={s.iconQuick}><House color={C.ink} size={18}/></Pressable>
       <Pressable accessibilityLabel="Training öffnen" onPress={()=>go("/(tabs)/training")} style={s.iconQuick}><Dumbbell color={C.ink} size={18}/></Pressable>
-      <Pressable accessibilityLabel="Menü öffnen" onPress={()=>setOpen(true)} style={s.menuPill}><Menu color={C.bg} size={18}/><Text style={s.menuText}>MENÜ</Text></Pressable>
+      <Pressable accessibilityLabel="Menü öffnen" onPress={()=>setOpen(true)} style={s.menuPill}><Menu color={C.bg} size={18}/><Text style={s.menuText}><Copy text={"MENÜ"}/></Text></Pressable>
     </Animated.View>
 
     <Modal visible={open} transparent animationType="fade" onRequestClose={()=>setOpen(false)}>
@@ -45,9 +49,9 @@ export default function NativeChrome(){
         <Pressable style={StyleSheet.absoluteFill} onPress={()=>setOpen(false)}/>
         <Animated.View entering={FadeInDown.duration(340)} style={s.sheetWrap}>
           <SafeAreaView style={s.sheet}>
-            <View style={s.head}><View><Text style={s.brand}>BE <Text style={s.volt}>DIFFERENT</Text></Text><Text style={s.caption}>DEIN BEREICH</Text></View><Pressable onPress={()=>setOpen(false)} style={s.close}><X color={C.ink} size={20}/></Pressable></View>
-            <View style={s.grid}>{links.map(item=>{const Icon=item.icon;return <Pressable key={item.path} onPress={()=>go(item.path)} style={({pressed})=>[s.item,pressed&&s.pressed]}><Icon color={C.volt} size={20}/><Text style={s.itemText}>{item.label}</Text></Pressable>})}</View>
-            <Text style={s.note}>Alles an einem Ort. Jeder Schritt zählt.</Text>
+            <View style={s.head}><View><Text style={s.brand}>BE <Text style={s.volt}>DIFFERENT</Text></Text><Text style={s.caption}><Copy text={"DEIN BEREICH"}/></Text></View><Pressable onPress={()=>setOpen(false)} style={s.close}><X color={C.ink} size={20}/></Pressable></View>
+            <View style={s.grid}>{links.map(item=>{const Icon=item.icon;return <Pressable key={item.path} onPress={()=>go(item.path)} style={({pressed})=>[s.item,pressed&&s.pressed]}><Icon color={C.volt} size={20}/><Text style={s.itemText}><Copy text={item.label}/></Text></Pressable>})}</View>
+            <Text style={s.note}><Copy text={"Alles an einem Ort. Jeder Schritt zählt."}/></Text>
           </SafeAreaView>
         </Animated.View>
       </View>

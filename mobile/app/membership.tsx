@@ -1,3 +1,5 @@
+
+import {Copy} from "../components/Locale";
 import {useEffect,useState} from "react";
 import {ActivityIndicator,Pressable,SafeAreaView,ScrollView,StyleSheet,Text} from "react-native";
 import {router} from "expo-router";
@@ -42,20 +44,20 @@ export default function Membership(){
 
   return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
     <Brand/>
-    <Text style={s.kicker}>MITGLIEDSCHAFT</Text>
-    <Text style={s.title}>KOSTENLOS ZEIGT DIR DEN EINSTIEG.{"\n"}PRO MACHT ES{"\n"}PERSÖNLICH.</Text>
-    <Text style={s.copy}>Trainer Radar · direkter Trainer Chat · Sprachnachrichten · Technikvideo · vollständige Berichte · vollständiger Verlauf</Text>
+    <Text style={s.kicker}><Copy text={"MITGLIEDSCHAFT"}/></Text>
+    <Text style={s.title}><Copy text={"KOSTENLOS ZEIGT DIR DEN EINSTIEG."}/>{"\n"}<Copy text={"PRO MACHT ES"}/>{"\n"}<Copy text={"PERSÖNLICH."}/></Text>
+    <Text style={s.copy}><Copy text={"Trainer Radar · direkter Trainer Chat · Sprachnachrichten · Technikvideo · vollständige Berichte · vollständiger Verlauf"}/></Text>
 
     {loading?<ActivityIndicator color={C.volt}/>:
-      full?<Pressable style={s.primary} onPress={joinWaitlist}><Text style={s.primaryText}>PRO WARTELISTE →</Text></Pressable>:
+      full?<Pressable style={s.primary} onPress={joinWaitlist}><Text style={s.primaryText}><Copy text={"PRO WARTELISTE →"}/></Text></Pressable>:
       billing.products.length?billing.products.map((p:any)=><Pressable style={s.primary} key={p.id} onPress={()=>buy(p)}><Text style={s.primaryText}>{p.title||p.id} · {p.displayPrice||""}</Text></Pressable>):
-      <Text style={s.unavailable}>Die Produkte im App Store und Play Store sind noch nicht verfügbar. Prüfe die Produktkennungen und die Freigabe.</Text>}
+      <Text style={s.unavailable}><Copy text={"Die Produkte im App Store und Play Store sind noch nicht verfügbar. Prüfe die Produktkennungen und die Freigabe."}/></Text>}
 
-    {billing.connected&&<Pressable style={s.restore} onPress={restore}><Text style={s.restoreText}>KÄUFE WIEDERHERSTELLEN</Text></Pressable>}
-    <Text style={s.note}>{billing.connected?"APPLE UND GOOGLE VERBUNDEN":"VERBINDUNG ZU APPLE UND GOOGLE WIRD HERGESTELLT…"}</Text>
-    {availability&&<Text style={s.note}>PRO Plätze: {availability.active} / {availability.capacity||"∞"}</Text>}
+    {billing.connected&&<Pressable style={s.restore} onPress={restore}><Text style={s.restoreText}><Copy text={"KÄUFE WIEDERHERSTELLEN"}/></Text></Pressable>}
+    <Text style={s.note}><Copy text={billing.connected?"APPLE UND GOOGLE VERBUNDEN":"VERBINDUNG ZU APPLE UND GOOGLE WIRD HERGESTELLT…"}/></Text>
+    {availability&&<Text style={s.note}><Copy text={"PRO Plätze:"}/>{availability.active} / {availability.capacity||"∞"}</Text>}
     {billing.status?<Text style={s.status}>{billing.status}</Text>:null}
-    <Pressable onPress={()=>router.back()}><Text style={s.back}>← ZURÜCK</Text></Pressable>
+    <Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text={"← ZURÜCK"}/></Text></Pressable>
   </ScrollView></SafeAreaView>
 }
 

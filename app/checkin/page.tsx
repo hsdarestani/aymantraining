@@ -1,1 +1,3 @@
-import Link from "next/link";import CheckInClient from "./CheckInClient";export default function CheckIn(){return <main className="sub-shell"><header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard">BEGINN</Link><Link href="/coach">TRAINER</Link></nav></header><section className="checkin-wrap"><CheckInClient/></section></main>;}
+
+import {Copy} from "../components/Locale";
+import Link from "next/link";import CheckInClient from "./CheckInClient";export default function CheckIn(){return <main className="sub-shell"><header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard"><Copy text={"BEGINN"}/></Link><Link href="/coach"><Copy text={"TRAINER"}/></Link></nav></header><section className="checkin-wrap"><CheckInClient/></section></main>;}

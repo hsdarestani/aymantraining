@@ -1,3 +1,4 @@
+import {language,translate} from "./i18n/translate";
 import {prisma} from "./db";
 import {localMinutes} from "./timezone";
 
@@ -17,7 +18,7 @@ export async function queueNotification(input:{
 }){
   const [pref,user]=await Promise.all([
     prisma.pushPreference.findUnique({where:{userId_category:{userId:input.userId,category:input.category}}}),
-    prisma.user.findUnique({where:{id:input.userId},select:{timezone:true}})
+    prisma.user.findUnique({where:{id:input.userId},select:{timezone:true,locale:true}})
   ]);
   if(pref&&!pref.enabled)return null;
   const now=new Date();
@@ -32,6 +33,6 @@ export async function queueNotification(input:{
   if(!input.urgent&&count>=dailyMax)return null;
 
   return prisma.notification.create({data:{
-    userId:input.userId,category:input.category,title:input.title,body:input.body,data:input.data,sendAt:target
+    userId:input.userId,category:input.category,title:translate(input.title,language(user?.locale)),body:translate(input.body,language(user?.locale)),data:input.data,sendAt:target
   }});
 }

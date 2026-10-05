@@ -1,4 +1,6 @@
 "use client";
+import {Copy} from "../components/Locale";
+
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
@@ -60,18 +62,18 @@ export default function RegisterPage() {
   return <main className="auth-shell">
     <Link className="brand" href="/">BE <span>DIFFERENT</span></Link>
     <form className="auth-card" onSubmit={submit}>
-      <span className="eyebrow">ANDERS STARTEN</span>
-      <h1>Dein Athlet beginnt hier.</h1>
-      <p>Du startest im kostenlosen Tarif. PRO kann später freigeschaltet werden.</p>
+      <span className="eyebrow"><Copy text={"ANDERS STARTEN"}/></span>
+      <h1><Copy text={"Dein Athlet beginnt hier."}/></h1>
+      <p><Copy text={"Du startest im kostenlosen Tarif. PRO kann später freigeschaltet werden."}/></p>
 
       <label>Name<input name="name" autoComplete="name" minLength={2} required /></label>
-      <label>E Mail<input name="email" type="email" autoComplete="email" required /></label>
-      <label>Passwort<input name="password" type="password" autoComplete="new-password" minLength={10} required /><small>Mindestens 10 Zeichen</small></label>
-      <label>Ziel<select name="goal" defaultValue="Athletik"><option>Muskelaufbau</option><option>Fettabbau</option><option>Athletik</option><option>Fußball</option><option>Calisthenics</option><option>Gesundheit</option></select></label>
+      <label><Copy text={"E Mail"}/><input name="email" type="email" autoComplete="email" required /></label>
+      <label><Copy text={"Passwort"}/><input name="password" type="password" autoComplete="new-password" minLength={10} required /><small><Copy text={"Mindestens 10 Zeichen"}/></small></label>
+      <label><Copy text={"Ziel"}/><select name="goal" defaultValue="Athletik"><option><Copy text={"Muskelaufbau"}/></option><option><Copy text={"Fettabbau"}/></option><option><Copy text={"Athletik"}/></option><option><Copy text={"Fußball"}/></option><option>Calisthenics</option><option><Copy text={"Gesundheit"}/></option></select></label>
 
-      {error && <div className="form-error">{error}</div>}
-      <button className="primary" disabled={busy}>{busy ? "BITTE WARTEN…" : "KONTO ERSTELLEN →"}</button>
-      <small>Schon dabei? <Link href="/login">Anmelden</Link></small>
+      {error && <div className="form-error"><Copy text={error}/></div>}
+      <button className="primary" disabled={busy}><Copy text={busy ? "BITTE WARTEN…" : "KONTO ERSTELLEN →"}/></button>
+      <small><Copy text={"Schon dabei?"}/><Link href="/login"><Copy text={"Anmelden"}/></Link></small>
     </form>
   </main>;
 }

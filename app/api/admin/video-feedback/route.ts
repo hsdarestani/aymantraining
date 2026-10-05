@@ -1,3 +1,4 @@
+import {canCoachAccess} from "../../../../lib/coach-access";
 import {NextResponse} from "next/server";
 import {z} from "zod";
 import {prisma} from "../../../../lib/db";
@@ -19,7 +20,7 @@ export async function POST(request:Request){
  if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
  const p=schema.safeParse(await request.json().catch(()=>null));
  if(!p.success)return errorJson("Ungültiges Feedback.",422);
- const asset=await prisma.mediaAsset.findFirst({where:{id:p.data.mediaId,relatedUserId:p.data.athleteId,kind:"TECHNIQUE_VIDEO"}});
+if(!await canCoachAccess(coach,p.data.athleteId))return errorJson("Keine Berechtigung.",403); const asset=await prisma.mediaAsset.findFirst({where:{id:p.data.mediaId,relatedUserId:p.data.athleteId,kind:"TECHNIQUE_VIDEO"}});
  if(!asset)return errorJson("Technikvideo nicht gefunden.",404);
  const annotations={items:[{timestampSec:p.data.timestampSec,note:p.data.note.trim(),strokes:p.data.strokes}]};
  const item=await prisma.videoFeedback.create({data:{athleteId:p.data.athleteId,coachId:coach.id,mediaId:p.data.mediaId,annotations,status:"REVIEWED",reviewedAt:new Date()}});

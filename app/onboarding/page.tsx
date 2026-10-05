@@ -1,4 +1,6 @@
 "use client";
+import {Copy} from "../components/Locale";
+
 
 import {useMemo,useState} from "react";
 
@@ -95,30 +97,30 @@ export default function Onboarding(){
     <div className="onboard-brand">BE <span>DIFFERENT</span></div>
     <section className="onboard-card">
       <div className="steps">{[1,2,3,4,5,6].map(n=><i key={n} className={n<step?"done":n===step?"active":""}/>)}</div>
-      <span className="eyebrow">SCHRITT {String(step).padStart(2,"0")} / 06</span>
+      <span className="eyebrow"><Copy text={"SCHRITT"}/>{String(step).padStart(2,"0")} / 06</span>
 
       {step===1&&<>
-        <h1>Normal ist langweilig.</h1>
-        <p>BE DIFFERENT verbindet Training, Regeneration und persönliche Trainerbetreuung. Empfehlungen sind Training und Lifestyle, keine medizinische Diagnose.</p>
-        <label className="consent-line"><input type="checkbox" checked={privacy} onChange={e=>{setPrivacy(e.target.checked);setError("")}}/> Datenschutzinformationen gelesen und akzeptiert</label>
-        <label className="consent-line"><input type="checkbox" checked={terms} onChange={e=>{setTerms(e.target.checked);setError("")}}/> Nutzungsbedingungen akzeptiert</label>
+        <h1><Copy text={"Normal ist langweilig."}/></h1>
+        <p><Copy text={"BE DIFFERENT verbindet Training, Regeneration und persönliche Trainerbetreuung. Empfehlungen sind Training und Lifestyle, keine medizinische Diagnose."}/></p>
+        <label className="consent-line"><input type="checkbox" checked={privacy} onChange={e=>{setPrivacy(e.target.checked);setError("")}}/><Copy text={"Datenschutzinformationen gelesen und akzeptiert"}/></label>
+        <label className="consent-line"><input type="checkbox" checked={terms} onChange={e=>{setTerms(e.target.checked);setError("")}}/><Copy text={"Nutzungsbedingungen akzeptiert"}/></label>
       </>}
 
       {step===2&&<>
-        <h1>Was willst du verändern?</h1>
+        <h1><Copy text={"Was willst du verändern?"}/></h1>
         <div className="goals">{goals.map(x=><button type="button" key={x} className={goal===x?"selected":""} onClick={()=>setGoal(x)}><span>{x}</span><b>{goal===x?"✓":"→"}</b></button>)}</div>
       </>}
 
       {step===3&&<>
-        <h1>Deine Basis.</h1>
-        <p>Einmal auswählen statt tippen. Wir nutzen diese Daten für deine persönliche Baseline.</p>
+        <h1><Copy text={"Deine Basis."}/></h1>
+        <p><Copy text={"Einmal auswählen statt tippen. Wir nutzen diese Daten für deine persönliche Baseline."}/></p>
         <div className="mobile-field">
-          <label>Geburtsdatum</label>
+          <label><Copy text={"Geburtsdatum"}/></label>
           <input className={age!=null&&age<16?"invalid":""} type="date" value={birthDate} onChange={e=>{setBirthDate(e.target.value);setError("")}}/>
-          {age!=null&&<small className={age<16?"field-error":"field-ok"}>{age<16?"Mindestens 16 Jahre erforderlich":age+" Jahre"}</small>}
+          {age!=null&&<small className={age<16?"field-error":"field-ok"}><Copy text={age<16?"Mindestens 16 Jahre erforderlich":age+" Jahre"}/></small>}
         </div>
         <div className="segmented-field">
-          <label>Geschlecht</label>
+          <label><Copy text={"Geschlecht"}/></label>
           <div>{[["male","Männlich"],["female","Weiblich"],["diverse","Divers"],["prefer_not_to_say","Keine Angabe"]].map(([value,label])=><button type="button" key={value} className={sex===value?"selected":""} onClick={()=>setSex(value)}>{label}</button>)}</div>
         </div>
         <div className="stepper-grid">
@@ -128,40 +130,40 @@ export default function Onboarding(){
       </>}
 
       {step===4&&<>
-        <h1>Gesundheitsdaten verbinden.</h1>
-        <p>Gesundheitsdaten werden nur nach ausdrücklicher Einwilligung verarbeitet und nicht für Werbung verwendet.</p>
+        <h1><Copy text={"Gesundheitsdaten verbinden."}/></h1>
+        <p><Copy text={"Gesundheitsdaten werden nur nach ausdrücklicher Einwilligung verarbeitet und nicht für Werbung verwendet."}/></p>
         <button type="button" className={health?"health-choice selected":"health-choice"} onClick={()=>setHealth(!health)}>
-          <span><b>{health?"✓":"+"}</b><strong>Gesundheitsdaten verwenden</strong></span>
-          <small>Schlaf · HRV · Ruhepuls · Schritte · VO2max · Workouts · Gewicht</small>
+          <span><b>{health?"✓":"+"}</b><strong><Copy text={"Gesundheitsdaten verwenden"}/></strong></span>
+          <small><Copy text={"Schlaf · HRV · Ruhepuls · Schritte · VO2max · Workouts · Gewicht"}/></small>
         </button>
-        <p className="optional-note">Optional. Du kannst das später jederzeit in Einstellungen verbinden.</p>
+        <p className="optional-note"><Copy text={"Optional. Du kannst das später jederzeit in Einstellungen verbinden."}/></p>
       </>}
 
       {step===5&&<>
-        <h1>Kurzer Starttest.</h1>
-        <p>Kein Tippen nötig. Passe die Werte einfach mit + und − an.</p>
+        <h1><Copy text={"Kurzer Starttest."}/></h1>
+        <p><Copy text={"Kein Tippen nötig. Passe die Werte einfach mit + und − an."}/></p>
         <div className="stepper-stack">
           <Stepper label="Liegestütze" value={pushups} onChange={setPushups} min={0} max={300}/>
           <Stepper label="Unterarmstütz" value={plank} onChange={setUnterarmstütz} min={0} max={1800} step={5} unit=" Sek."/>
           <div className="optional-stepper">
-            <div className="optional-head"><span>5 km Lauf</span><button type="button" onClick={()=>setRun(run==null?30:null)}>{run==null?"HINZUFÜGEN":"+ ENTFERNEN"}</button></div>
+            <div className="optional-head"><span><Copy text={"5 km Lauf"}/></span><button type="button" onClick={()=>setRun(run==null?30:null)}><Copy text={run==null?"HINZUFÜGEN":"+ ENTFERNEN"}/></button></div>
             {run!=null&&<Stepper label="Zeit" value={run} onChange={setRun} min={10} max={120} step={0.5} unit=" Min."/>}
-            {run==null&&<small>Optional. Nur hinzufügen, wenn du einen aktuellen Wert kennst.</small>}
+            {run==null&&<small><Copy text={"Optional. Nur hinzufügen, wenn du einen aktuellen Wert kennst."}/></small>}
           </div>
         </div>
       </>}
 
       {step===6&&<>
-        <div className="first-score"><span className="eyebrow">BEREIT</span><strong>100%</strong><b>EINRICHTUNG</b></div>
-        <h1>Jetzt beginnt die Entwicklung.</h1>
-        <p>Der erste echte Leistungswert wird aus deinen gespeicherten Daten berechnet. Fehlende Werte werden nicht erfunden.</p>
+        <div className="first-score"><span className="eyebrow"><Copy text={"BEREIT"}/></span><strong>100%</strong><b><Copy text={"EINRICHTUNG"}/></b></div>
+        <h1><Copy text={"Jetzt beginnt die Entwicklung."}/></h1>
+        <p><Copy text={"Der erste echte Leistungswert wird aus deinen gespeicherten Daten berechnet. Fehlende Werte werden nicht erfunden."}/></p>
       </>}
 
-      {error&&<div className="form-error onboard-error">{error}</div>}
+      {error&&<div className="form-error onboard-error"><Copy text={error}/></div>}
 
       <div className="onboard-actions sticky-actions">
-        {step>1?<button type="button" className="back-button" onClick={back}>ZURÜCK</button>:<span/>}
-        {step<6?<button type="button" className="primary" onClick={next}>WEITER →</button>:<button type="button" className="primary" onClick={finish} disabled={busy}>{busy?"SPEICHERN…":"EINRICHTUNG ABSCHLIESSEN →"}</button>}
+        {step>1?<button type="button" className="back-button" onClick={back}><Copy text={"ZURÜCK"}/></button>:<span/>}
+        {step<6?<button type="button" className="primary" onClick={next}><Copy text={"WEITER →"}/></button>:<button type="button" className="primary" onClick={finish} disabled={busy}><Copy text={busy?"SPEICHERN…":"EINRICHTUNG ABSCHLIESSEN →"}/></button>}
       </div>
     </section>
   </main>;

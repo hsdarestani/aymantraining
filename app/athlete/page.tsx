@@ -1,3 +1,5 @@
+
+import {Copy,LocalizedElement} from "../components/Locale";
 import Link from "next/link";
 import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";
@@ -28,30 +30,30 @@ export default async function AthletePage(){
   const projection=Math.max(0,Math.min(100,Math.round((score?.total??0)+daily*84)));
 
   return <main className="sub-shell">
-    <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard">BEGINN</Link><Link href="/training">TRAINING</Link><Link href="/progress">FORTSCHRITT</Link><Link href="/coach">TRAINER</Link><Link className="active" href="/athlete">ATHLET</Link></nav></header>
-    <section className="page-hero"><div><span className="eyebrow">ATHLETENPROFIL</span><h1>Von Training zu Identität.</h1><p>Deine Entwicklung über alle Säulen. Prognosen werden als Trend und nie als Garantie dargestellt.</p></div><div className="hero-stat"><span>STUFE</span><strong>{score?.total??0}%</strong><small>{levelForScore(score?.total??0)}</small></div></section>
+    <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard"><Copy text={"BEGINN"}/></Link><Link href="/training">TRAINING</Link><Link href="/progress"><Copy text={"FORTSCHRITT"}/></Link><Link href="/coach"><Copy text={"TRAINER"}/></Link><Link className="active" href="/athlete"><Copy text={"ATHLET"}/></Link></nav></header>
+    <section className="page-hero"><div><span className="eyebrow"><Copy text={"ATHLETENPROFIL"}/></span><h1><Copy text={"Von Training zu Identität."}/></h1><p><Copy text={"Deine Entwicklung über alle Säulen. Prognosen werden als Trend und nie als Garantie dargestellt."}/></p></div><div className="hero-stat"><span><Copy text={"STUFE"}/></span><strong>{score?.total??0}%</strong><small>{levelForScore(score?.total??0)}</small></div></section>
 
     <section className="athlete-grid">
       <article className={digital?"panel twin-panel":"panel twin-panel twin-preview"}>
-        <span className="tag">{digital?"DIGITALES ABBILD":"PRO VORSCHAU"}</span>
+        <span className="tag"><Copy text={digital?"DIGITALES ABBILD":"PRO VORSCHAU"}/></span>
         <div className="digital-radar">
-          <svg viewBox="0 0 300 300" role="img" aria-label="Radar des digitalen Athletenabbilds">
+          <LocalizedElement as="svg" viewBox="0 0 300 300" role="img" aria-label="Radar des digitalen Athletenabbilds">
             {[.25,.5,.75,1].map(s=><polygon key={s} points={gridPoints(s)} className="radar-grid"/> )}
             {digital&&<polygon points={radarPoints(values)} className="radar-shape"/>}
-          </svg>
+          </LocalizedElement>
           {!digital&&<div className="radar-lock">PRO</div>}
         </div>
-        <h2>DIGITALES ATHLETENABBILD</h2>
-        <p className="muted">{digital?(hasTrend?`Wenn dein aktueller Trend stabil bleibt, liegt die 12 Wochen Projektion bei ca. ${projection} %. Das ist eine Trendanzeige, keine Garantie.`:"Für eine Trend Projektion fehlen noch Messpunkte an unterschiedlichen Tagen."):"Radar, Verlauf, Zielprofil und Trend Projektion sind PRO."}</p>
-        {!digital&&<Link href="/pricing" className="secondary">PRO TESTEN</Link>}
+        <h2><Copy text={"DIGITALES ATHLETENABBILD"}/></h2>
+        <p className="muted"><Copy text={digital?(hasTrend?`Wenn dein aktueller Trend stabil bleibt, liegt die 12 Wochen Projektion bei ca. ${projection} %. Das ist eine Trendanzeige, keine Garantie.`:"Für eine Trend Projektion fehlen noch Messpunkte an unterschiedlichen Tagen."):"Radar, Verlauf, Zielprofil und Trend Projektion sind PRO."}/></p>
+        {!digital&&<Link href="/pricing" className="secondary"><Copy text={"PRO TESTEN"}/></Link>}
       </article>
 
-      <article className="panel"><span className="eyebrow">DEINE LEISTUNGSBEREICHE</span><h2>Leistungsprofil</h2>
-        {details?<div className="athlete-bars">{rows.map(([name,val])=><div key={name}><span>{name}</span><div className="weight-track"><i style={{width:`${val??0}%`}}/></div><strong>{val??"Keine Angabe"}</strong></div>)}</div>:<div className="locked-copy"><p className="muted">KOSTENLOS zeigt deinen Gesamtwert. Teilwerte und Erklärungen werden mit PRO freigeschaltet.</p><Link href="/pricing" className="secondary">DETAILS FREISCHALTEN</Link></div>}
+      <article className="panel"><span className="eyebrow"><Copy text={"DEINE LEISTUNGSBEREICHE"}/></span><h2><Copy text={"Leistungsprofil"}/></h2>
+        {details?<div className="athlete-bars">{rows.map(([name,val])=><div key={name}><span>{name}</span><div className="weight-track"><i style={{width:`${val??0}%`}}/></div><strong>{val??"Keine Angabe"}</strong></div>)}</div>:<div className="locked-copy"><p className="muted"><Copy text={"KOSTENLOS zeigt deinen Gesamtwert. Teilwerte und Erklärungen werden mit PRO freigeschaltet."}/></p><Link href="/pricing" className="secondary"><Copy text={"DETAILS FREISCHALTEN"}/></Link></div>}
       </article>
     </section>
 
-    <section className="panel badge-panel"><div><span className="eyebrow">ABZEICHEN</span><h2>Deine Meilensteine</h2></div><div className="badge-strip">{badges.length?badges.map(b=><span key={b.id}><b>◆</b>{b.name}</span>):<span className="muted">Dein erstes Abzeichen wartet auf dich.</span>}</div></section>
-    <section className="share-card panel"><div><span className="eyebrow">GEMEINSCHAFT UND TEILEN</span><h2>Aufgaben, Fortschrittsbild und Einladung</h2></div><div className="share-actions"><Link className="secondary" href="/api/story" target="_blank">FORTSCHRITTSBILD</Link><Link className="primary compact" href="/community">ÖFFNEN</Link></div></section>
+    <section className="panel badge-panel"><div><span className="eyebrow"><Copy text={"ABZEICHEN"}/></span><h2><Copy text={"Deine Meilensteine"}/></h2></div><div className="badge-strip">{badges.length?badges.map(b=><span key={b.id}><b>◆</b>{b.name}</span>):<span className="muted"><Copy text={"Dein erstes Abzeichen wartet auf dich."}/></span>}</div></section>
+    <section className="share-card panel"><div><span className="eyebrow"><Copy text={"GEMEINSCHAFT UND TEILEN"}/></span><h2><Copy text={"Aufgaben, Fortschrittsbild und Einladung"}/></h2></div><div className="share-actions"><Link className="secondary" href="/api/story" target="_blank"><Copy text={"FORTSCHRITTSBILD"}/></Link><Link className="primary compact" href="/community"><Copy text={"ÖFFNEN"}/></Link></div></section>
   </main>;
 }

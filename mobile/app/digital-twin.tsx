@@ -1,3 +1,7 @@
+
+import {LocalizedValue} from "../components/Locale";
+
+import {Copy} from "../components/Locale";
 import {useEffect,useMemo,useState} from "react";
 import {Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from "react-native";
 import Svg,{Circle,Line,Polygon,Text as SvgText} from "react-native-svg";
@@ -22,15 +26,15 @@ export default function DigitalTwin(){
  const [d,setD]=useState<any>(null),[error,setError]=useState("");
  useEffect(()=>{api("/api/digital-twin").then(setD).catch(e=>setError(e.message||"Nicht verfügbar"))},[]);
  const trend=useMemo(()=>{if(!d?.history?.length)return 0;return d.history.at(-1).total-d.history[0].total},[d]);
- if(error)return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}><Brand compact/><Card><SectionTitle>Der digitale Athlet ist PRO.</SectionTitle><Text style={s.copy}>{error}</Text><Pressable style={s.primary} onPress={()=>router.push("/membership")}><Text style={s.primaryText}>PRO FREISCHALTEN</Text></Pressable></Card></ScrollView></SafeAreaView>;
+ if(error)return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}><Brand compact/><Card><SectionTitle><Copy text={"Der digitale Athlet ist PRO."}/></SectionTitle><Text style={s.copy}><Copy text={error}/></Text><Pressable style={s.primary} onPress={()=>router.push("/membership")}><Text style={s.primaryText}><Copy text={"PRO FREISCHALTEN"}/></Text></Pressable></Card></ScrollView></SafeAreaView>;
  if(!d?.current)return <SafeAreaView style={s.safe}/>;
  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
-  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}>ZURÜCK</Text></Pressable></View>
-  <Eyebrow>DIGITALER ATHLET</Eyebrow><Text style={s.title}>DEIN PROFIL.{"\n"}DEIN ZIEL.</Text>
-  <Card><View style={s.scoreRow}><View><Text style={s.score}>{d.current.total}%</Text><Text style={s.level}>{d.current.level}</Text></View><View style={s.target}><Text style={s.targetLabel}>ZIEL</Text><Text style={s.targetValue}>{d.target.score}%</Text><Text style={s.date}>{new Date(d.target.date).toLocaleDateString("de-DE")}</Text></View></View><Radar current={d.current.pillars} target={d.target.pillars}/></Card>
-  <View style={s.grid}><Card style={s.half}><Eyebrow>90 TAGE</Eyebrow><Text style={trend>=0?s.good:s.bad}>{trend>=0?"+":""}{trend}</Text><Text style={s.small}>PUNKTE ENTWICKLUNG</Text></Card><Card style={s.half}><Eyebrow>PROGNOSE</Eyebrow><Text style={s.projected}>{d.target.projected}%</Text><Text style={s.small}>BEI GLEICHEM TREND</Text></Card></View>
-  <Card><Eyebrow>KÖRPERPROFIL</Eyebrow><SectionTitle>Messbare Entwicklung</SectionTitle><View style={s.body}><View style={s.head}/><View style={s.torso}/><View style={s.arms}/><View style={s.legs}/></View><Text style={s.copy}>Gewicht {d.body?.weightKg??"Keine Angabe"} kg · Taille {d.body?.waistCm??"Keine Angabe"} cm · Körperfett {d.body?.bodyFat??"Keine Angabe"}</Text></Card>
-  <Pressable style={s.secondary} onPress={()=>router.push("/context")}><Text style={s.secondaryText}>ZIEL UND KONTEXT ANPASSEN →</Text></Pressable>
+  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text={"ZURÜCK"}/></Text></Pressable></View>
+  <Eyebrow><Copy text={"DIGITALER ATHLET"}/></Eyebrow><Text style={s.title}><Copy text={"DEIN PROFIL."}/>{"\n"}<Copy text={"DEIN ZIEL."}/></Text>
+  <Card><View style={s.scoreRow}><View><Text style={s.score}>{d.current.total}%</Text><Text style={s.level}>{d.current.level}</Text></View><View style={s.target}><Text style={s.targetLabel}><Copy text={"ZIEL"}/></Text><Text style={s.targetValue}>{d.target.score}%</Text><Text style={s.date}><LocalizedValue value={new Date(d.target.date)} format="toLocaleDateString"/></Text></View></View><Radar current={d.current.pillars} target={d.target.pillars}/></Card>
+  <View style={s.grid}><Card style={s.half}><Eyebrow><Copy text={"90 TAGE"}/></Eyebrow><Text style={trend>=0?s.good:s.bad}>{trend>=0?"+":""}{trend}</Text><Text style={s.small}><Copy text={"PUNKTE ENTWICKLUNG"}/></Text></Card><Card style={s.half}><Eyebrow><Copy text={"PROGNOSE"}/></Eyebrow><Text style={s.projected}>{d.target.projected}%</Text><Text style={s.small}><Copy text={"BEI GLEICHEM TREND"}/></Text></Card></View>
+  <Card><Eyebrow><Copy text={"KÖRPERPROFIL"}/></Eyebrow><SectionTitle><Copy text={"Messbare Entwicklung"}/></SectionTitle><View style={s.body}><View style={s.head}/><View style={s.torso}/><View style={s.arms}/><View style={s.legs}/></View><Text style={s.copy}><Copy text={"Gewicht"}/>{d.body?.weightKg??"Keine Angabe"}<Copy text={"kg · Taille"}/>{d.body?.waistCm??"Keine Angabe"}<Copy text={"cm · Körperfett"}/>{d.body?.bodyFat??"Keine Angabe"}</Text></Card>
+  <Pressable style={s.secondary} onPress={()=>router.push("/context")}><Text style={s.secondaryText}><Copy text={"ZIEL UND KONTEXT ANPASSEN →"}/></Text></Pressable>
   <Text style={s.disclaimer}>{d.disclaimer}</Text>
  </ScrollView></SafeAreaView>;
 }

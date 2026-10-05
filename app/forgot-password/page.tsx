@@ -1,4 +1,6 @@
 "use client";
+import {Copy} from "../components/Locale";
+
 import Link from "next/link";
 import {FormEvent,useState} from "react";
 export default function Forgot(){
@@ -12,12 +14,12 @@ export default function Forgot(){
   return <main className="auth-shell">
     <Link className="brand" href="/login">BE <span>DIFFERENT</span></Link>
     <form className="auth-card" onSubmit={submit}>
-      <span className="eyebrow">KONTO WIEDERHERSTELLEN</span><h1>Passwort vergessen?</h1>
-      <p>Wir senden einen einmaligen Link, sobald E Mail Versand konfiguriert ist.</p>
-      <label>E Mail<input name="email" type="email" required/></label>
-      <button className="primary">LINK SENDEN →</button>
-      {status&&<small>{status}</small>}
-      <small><Link href="/login">Zurück zur Anmeldung</Link></small>
+      <span className="eyebrow"><Copy text={"KONTO WIEDERHERSTELLEN"}/></span><h1><Copy text={"Passwort vergessen?"}/></h1>
+      <p><Copy text={"Wir senden einen einmaligen Link, sobald E Mail Versand konfiguriert ist."}/></p>
+      <label><Copy text={"E Mail"}/><input name="email" type="email" required/></label>
+      <button className="primary"><Copy text={"LINK SENDEN →"}/></button>
+      {status&&<small><Copy text={status}/></small>}
+      <small><Link href="/login"><Copy text={"Zurück zur Anmeldung"}/></Link></small>
     </form>
   </main>;
 }

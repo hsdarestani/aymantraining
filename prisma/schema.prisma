@@ -66,6 +66,8 @@ model User {
   wearableConnections WearableConnection[]
   eventRegistrations  EventRegistration[]
   aiMessages           AiMessage[]
+  aiHandoffs           AiHandoff[]
+  wearableAuthAttempts WearableAuthAttempt[]
   coachBriefs          CoachBrief[] @relation("CoachBriefAuthor")
 }
 
@@ -730,4 +732,31 @@ model CompanionPairCode {
   createdAt DateTime @default(now())
 
   @@index([userId, expiresAt])
+}
+
+model WearableAuthAttempt {
+  id String @id @default(cuid())
+  tokenHash String @unique
+  userId String
+  provider String
+  expiresAt DateTime
+  usedAt DateTime?
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, provider])
+}
+
+model AiHandoff {
+  id String @id @default(cuid())
+  userId String
+  coachId String?
+  reason String
+  summary String
+  status String @default("OPEN")
+  resolution String?
+  createdAt DateTime @default(now())
+  resolvedAt DateTime?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, status])
+  @@index([coachId, status])
 }

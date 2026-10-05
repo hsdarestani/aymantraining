@@ -1,3 +1,5 @@
+
+import {Copy} from "./Locale";
 import {useEffect} from "react";
 import {Image,StyleSheet,Text,View} from "react-native";
 import {LinearGradient} from "expo-linear-gradient";
@@ -66,7 +68,7 @@ export default function LaunchIntro({onDone}:{onDone:()=>void}){
       <View style={s.ringInner}>
         <Animated.View style={scoreStyle}>
           <Text style={s.score}>100</Text>
-          <Text style={s.scoreLabel}>LEISTUNGSWERT</Text>
+          <Text style={s.scoreLabel}><Copy text={"LEISTUNGSWERT"}/></Text>
         </Animated.View>
       </View>
       <View style={[s.tick,{transform:[{rotate:"24deg"},{translateY:-128}]}]}/>
@@ -79,13 +81,13 @@ export default function LaunchIntro({onDone}:{onDone:()=>void}){
       <Animated.View style={[s.logoPlate,titleStyle]}>
         <Image source={require("../assets/black-logo.png")} resizeMode="contain" style={s.logoImage}/>
       </Animated.View>
-      <Text style={s.title}>BAUE DEINEN ATHLETEN.</Text>
+      <Text style={s.title}><Copy text={"BAUE DEINEN ATHLETEN."}/></Text>
       <Animated.View style={[s.line,lineStyle]}/>
-      <Text style={s.sub}>Training · Regeneration · Ernährung · Fortschritt</Text>
+      <Text style={s.sub}><Copy text={"Training · Regeneration · Ernährung · Fortschritt"}/></Text>
     </Animated.View>
 
     <View style={s.footer}>
-      <Text style={s.footerText}>DEIN SYSTEM WIRD VORBEREITET</Text>
+      <Text style={s.footerText}><Copy text={"DEIN SYSTEM WIRD VORBEREITET"}/></Text>
       <View style={s.meter}><Animated.View style={[s.meterFill,meterStyle]}/></View>
     </View>
   </View>;

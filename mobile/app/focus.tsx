@@ -1,3 +1,5 @@
+
+import {Copy,LocalizedTextInput} from "../components/Locale";
 import {useEffect,useRef,useState} from "react";
 import {Pressable,SafeAreaView,ScrollView,StyleSheet,Text,TextInput,View} from "react-native";
 import {router} from "expo-router";
@@ -15,12 +17,12 @@ export default function Focus(){
  async function save(){try{await api("/api/daily-check",{method:"POST",body:JSON.stringify({stress,mood,energy,soreness,sleepHours:Number(sleepHours)||undefined})});setStatus("GESPEICHERT")}catch(e:any){setStatus(e.message||"Fehler")}}
  const phase=seconds%8>=4?"AUSATMEN":"EINATMEN";
  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
-  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}>ZURÜCK</Text></Pressable></View>
-  <Eyebrow>BE FOCUSED</Eyebrow><Text style={s.title}>KLARER KOPF.{"\n"}KLARE ENTSCHEIDUNG.</Text>
-  <Card style={s.lineCard}><Eyebrow>DEINE DIFFERENT LINE</Eyebrow><Text style={s.line}>{d?.line||"Heute zählt die nächste saubere Entscheidung."}</Text></Card>
-  <Card><Eyebrow>ZWEI MINUTEN</Eyebrow><SectionTitle>Atmung</SectionTitle><View style={[s.orb,running&&s.orbOn]}><Text style={s.phase}>{running?phase:"BEREIT"}</Text><Text style={s.timer}>{Math.floor(seconds/60)}:{String(seconds%60).padStart(2,"0")}</Text></View><Pressable style={s.primary} onPress={breathe}><Text style={s.primaryText}>{running?"PAUSIEREN":seconds===0?"NEU STARTEN":"ATMUNG STARTEN"}</Text></Pressable>{seconds===0?<Pressable style={s.secondary} onPress={()=>setSeconds(120)}><Text style={s.secondaryText}>ZURÜCKSETZEN</Text></Pressable>:null}</Card>
-  <Card><Eyebrow>TAGESCHECK</Eyebrow><SectionTitle>Wie fühlst du dich?</SectionTitle><Scale label="ENERGIE" value={energy} set={setEnergy}/><Scale label="MUSKELKATER" value={soreness} set={setSoreness}/><Scale label="STIMMUNG" value={mood} set={setMood}/><Scale label="STRESS" value={stress} set={setStress}/><TextInput style={s.sleepInput} value={sleepHours} onChangeText={setSleepHours} keyboardType="decimal-pad" placeholder="Schlafstunden optional" placeholderTextColor="#666"/><Pressable style={s.secondary} onPress={save}><Text style={s.secondaryText}>CHECK SPEICHERN</Text></Pressable></Card>
-  {status?<Text style={s.status}>{status}</Text>:null}
+  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text={"ZURÜCK"}/></Text></Pressable></View>
+  <Eyebrow>BE FOCUSED</Eyebrow><Text style={s.title}><Copy text={"KLARER KOPF."}/>{"\n"}<Copy text={"KLARE ENTSCHEIDUNG."}/></Text>
+  <Card style={s.lineCard}><Eyebrow><Copy text={"DEINE DIFFERENT LINE"}/></Eyebrow><Text style={s.line}>{d?.line||"Heute zählt die nächste saubere Entscheidung."}</Text></Card>
+  <Card><Eyebrow><Copy text={"ZWEI MINUTEN"}/></Eyebrow><SectionTitle><Copy text={"Atmung"}/></SectionTitle><View style={[s.orb,running&&s.orbOn]}><Text style={s.phase}><Copy text={running?phase:"BEREIT"}/></Text><Text style={s.timer}>{Math.floor(seconds/60)}:{String(seconds%60).padStart(2,"0")}</Text></View><Pressable style={s.primary} onPress={breathe}><Text style={s.primaryText}><Copy text={running?"PAUSIEREN":seconds===0?"NEU STARTEN":"ATMUNG STARTEN"}/></Text></Pressable>{seconds===0?<Pressable style={s.secondary} onPress={()=>setSeconds(120)}><Text style={s.secondaryText}><Copy text={"ZURÜCKSETZEN"}/></Text></Pressable>:null}</Card>
+  <Card><Eyebrow><Copy text={"TAGESCHECK"}/></Eyebrow><SectionTitle><Copy text={"Wie fühlst du dich?"}/></SectionTitle><Scale label="ENERGIE" value={energy} set={setEnergy}/><Scale label="MUSKELKATER" value={soreness} set={setSoreness}/><Scale label="STIMMUNG" value={mood} set={setMood}/><Scale label="STRESS" value={stress} set={setStress}/><LocalizedTextInput style={s.sleepInput} value={sleepHours} onChangeText={setSleepHours} keyboardType="decimal-pad" placeholder="Schlafstunden optional" placeholderTextColor="#666"/><Pressable style={s.secondary} onPress={save}><Text style={s.secondaryText}><Copy text={"CHECK SPEICHERN"}/></Text></Pressable></Card>
+  {status?<Text style={s.status}><Copy text={status}/></Text>:null}
  </ScrollView></SafeAreaView>;
 }
 function Scale({label,value,set}:{label:string;value:number;set:(n:number)=>void}){return <View style={s.scale}><Text style={s.scaleLabel}>{label} · {value}</Text><View style={s.choices}>{[1,2,3,4,5,6,7,8,9,10].map(n=><Pressable key={n} onPress={()=>set(n)} style={[s.choice,n===value&&s.choiceOn]}><Text style={[s.choiceText,n===value&&s.choiceTextOn]}>{n}</Text></Pressable>)}</View></View>}

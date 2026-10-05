@@ -1,4 +1,6 @@
 "use client";
+import {Copy,LocalizedElement} from "../components/Locale";
+
 import {FormEvent,useState} from "react";
 export default function ProgressClient(){
   const [status,setStatus]=useState("");
@@ -17,8 +19,8 @@ export default function ProgressClient(){
     setStatus(r.ok?"Foto privat gespeichert.":j.error||"Hochladen fehlgeschlagen.");if(r.ok)setTimeout(()=>location.reload(),350);
   }
   return <div className="progress-actions">
-    <form className="panel mini-form" onSubmit={metric}><span className="eyebrow">KÖRPERWERTE</span><h2>Maße eintragen</h2><input name="weightKg" type="number" step=".1" placeholder="Gewicht kg"/><input name="waistCm" type="number" step=".1" placeholder="Taille cm"/><input name="chestCm" type="number" step=".1" placeholder="Brust cm"/><button className="secondary">SPEICHERN</button></form>
-    <form className="panel mini-form" onSubmit={photo}><span className="eyebrow">PRIVATES FOTO</span><h2>Fortschrittsbild</h2><input name="file" type="file" accept="image/jpeg,image/png,image/webp" required/><label className="consent-line"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/> Ich stimme der privaten Verarbeitung dieses Fortschrittsbildes für Betreuung und Fortschrittsvergleich zu.</label><button className="secondary">HOCHLADEN</button></form>
-    {status&&<div className="save-toast">{status}</div>}
+    <form className="panel mini-form" onSubmit={metric}><span className="eyebrow"><Copy text={"KÖRPERWERTE"}/></span><h2><Copy text={"Maße eintragen"}/></h2><LocalizedElement as="input" name="weightKg" type="number" step=".1" placeholder="Gewicht kg"/><LocalizedElement as="input" name="waistCm" type="number" step=".1" placeholder="Taille cm"/><LocalizedElement as="input" name="chestCm" type="number" step=".1" placeholder="Brust cm"/><button className="secondary"><Copy text={"SPEICHERN"}/></button></form>
+    <form className="panel mini-form" onSubmit={photo}><span className="eyebrow"><Copy text={"PRIVATES FOTO"}/></span><h2><Copy text={"Fortschrittsbild"}/></h2><input name="file" type="file" accept="image/jpeg,image/png,image/webp" required/><label className="consent-line"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/><Copy text={"Ich stimme der privaten Verarbeitung dieses Fortschrittsbildes für Betreuung und Fortschrittsvergleich zu."}/></label><button className="secondary"><Copy text={"HOCHLADEN"}/></button></form>
+    {status&&<div className="save-toast"><Copy text={status}/></div>}
   </div>
 }

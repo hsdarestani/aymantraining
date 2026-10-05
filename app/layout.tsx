@@ -16,6 +16,10 @@ import "./admin-settings.css";
 import "./onboarding-ux.css";
 import "./mobile-viewport-fix.css";
 import "./completion.css";
+import {cookies} from "next/headers";
+import {LocaleProvider} from "./components/Locale";
+import {getCurrentUser} from "../lib/auth";
+import {language} from "../lib/i18n/translate";
 import ServiceWorker from "./ServiceWorker";
 
 export const metadata: Metadata = {
@@ -33,6 +37,8 @@ export const viewport: Viewport = {
   themeColor: "#050606"
 };
 
-export default function RootLayout({children}:{children:React.ReactNode}) {
-  return <html lang="de"><body><ServiceWorker/>{children}</body></html>;
+export default async function RootLayout({children}:{children:React.ReactNode}) {
+  const preferred=(await cookies()).get("bd_locale")?.value;
+  const locale=language(preferred??(await getCurrentUser())?.locale);
+  return <html lang={locale}><body><LocaleProvider initialLocale={locale}><ServiceWorker/>{children}</LocaleProvider></body></html>;
 }

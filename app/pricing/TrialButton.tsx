@@ -1,4 +1,6 @@
 "use client";
+import {Copy} from "../components/Locale";
+
 import {useState} from "react";
 
 export default function TrialButton(){
@@ -8,7 +10,7 @@ export default function TrialButton(){
     window.location.href="bedifferent://membership";
   }
   return <div>
-    <button className="primary" onClick={openApp}>7 TAGE PRO IN DER APP TESTEN →</button>
-    {status&&<small className="muted" style={{display:"block",marginTop:10}}>{status}</small>}
+    <button className="primary" onClick={openApp}><Copy text={"7 TAGE PRO IN DER APP TESTEN →"}/></button>
+    {status&&<small className="muted" style={{display:"block",marginTop:10}}><Copy text={status}/></small>}
   </div>;
 }

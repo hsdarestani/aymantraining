@@ -1,3 +1,4 @@
+import {coachAthleteFilter} from "../../../../lib/coach-access";
 import bcrypt from "bcryptjs";
 import {NextResponse} from "next/server";
 import {z} from "zod";
@@ -11,11 +12,11 @@ const schema=z.discriminatedUnion("action",[
  z.object({action:z.literal("unassign"),athleteId:z.string(),coachId:z.string()})
 ]);
 export async function GET(){
- await requireRole(["COACH","ADMIN"]);
+ const actor=await requireRole(["COACH","ADMIN"]),filter=await coachAthleteFilter(actor);
  const [coaches,athletes,assignments]=await Promise.all([
   prisma.user.findMany({where:{role:{in:["COACH","ADMIN"]}},select:{id:true,name:true,email:true,role:true},orderBy:{createdAt:"asc"}}),
-  prisma.user.findMany({where:{role:"ATHLETE"},select:{id:true,name:true,email:true,subscriptionTier:true},orderBy:{name:"asc"}}),
-  prisma.coachAssignment.findMany({where:{active:true}})
+  prisma.user.findMany({where:{role:"ATHLETE",...(filter.userId?{id:filter.userId}:{})},select:{id:true,name:true,email:true,subscriptionTier:true},orderBy:{name:"asc"}}),
+  prisma.coachAssignment.findMany({where:{active:true,...(actor.role==="COACH"?{coachId:actor.id}:{})}})
  ]);
  return NextResponse.json({ok:true,coaches,athletes,assignments});
 }

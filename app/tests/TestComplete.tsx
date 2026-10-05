@@ -1,4 +1,6 @@
 "use client";
+import {Copy} from "../components/Locale";
+
 import {useEffect,useMemo,useState} from "react";
 type Block={metric:string;label:string;unit:string;instructions?:string};
 export default function TestComplete({id,name,definition}:{id:string;name:string;definition:Block[]}){
@@ -25,9 +27,9 @@ export default function TestComplete({id,name,definition}:{id:string;name:string
    const r=await fetch(`/api/performance-tests/${id}/complete`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
    const j=await r.json().catch(()=>({}));setStatus(r.ok?"Test gespeichert. Leistungswert wurde aktualisiert.":j.error||"Speichern fehlgeschlagen.");if(r.ok)setTimeout(()=>location.reload(),600);
  }
- return <article className="panel guided-test"><div className="panel-head"><div><span className="eyebrow">GEFÜHRTER TEST</span><h2>{name}</h2></div><span className="tag">{blocks.length} BLÖCKE</span></div>
-   <div className="guided-blocks">{blocks.map((b,i)=><section key={b.metric}><div><span>{String(i+1).padStart(2,"0")}</span><strong>{b.label}</strong><small>{b.instructions||"Sauber ausführen und Ergebnis eintragen."}</small></div><div className="test-value"><input type="number" step=".01" value={values[b.metric]||""} onChange={e=>setValues(v=>({...v,[b.metric]:e.target.value}))} placeholder="Ergebnis"/><b>{b.unit}</b></div>{["seconds","minutes"].includes(b.unit)&&<button className="secondary" type="button" onClick={()=>running&&activeMetric===b.metric?stopTimer(b):timerFor(b)}>{running&&activeMetric===b.metric?`STOPP ${timer.toFixed(1)}`:"TIMER"}</button>}</section>)}</div>
-   <label className="field-label">Optionales Testvideo<input type="file" accept="video/mp4,video/quicktime,video/webm" onChange={e=>setVideo(e.target.files?.[0]||null)}/><small>Privat. Nur für dich und berechtigte Trainer.</small></label>
-   <button className="primary compact" onClick={save}>TEST ABSCHLIESSEN →</button>{status&&<small className="muted">{status}</small>}
+ return <article className="panel guided-test"><div className="panel-head"><div><span className="eyebrow"><Copy text={"GEFÜHRTER TEST"}/></span><h2>{name}</h2></div><span className="tag">{blocks.length}<Copy text={"BLÖCKE"}/></span></div>
+   <div className="guided-blocks">{blocks.map((b,i)=><section key={b.metric}><div><span>{String(i+1).padStart(2,"0")}</span><strong><Copy text={b.label}/></strong><small>{b.instructions||"Sauber ausführen und Ergebnis eintragen."}</small></div><div className="test-value"><input type="number" step=".01" value={values[b.metric]||""} onChange={e=>setValues(v=>({...v,[b.metric]:e.target.value}))} placeholder="Ergebnis"/><b>{b.unit}</b></div>{["seconds","minutes"].includes(b.unit)&&<button className="secondary" type="button" onClick={()=>running&&activeMetric===b.metric?stopTimer(b):timerFor(b)}>{running&&activeMetric===b.metric?`STOPP ${timer.toFixed(1)}`:"TIMER"}</button>}</section>)}</div>
+   <label className="field-label"><Copy text={"Optionales Testvideo"}/><input type="file" accept="video/mp4,video/quicktime,video/webm" onChange={e=>setVideo(e.target.files?.[0]||null)}/><small><Copy text={"Privat. Nur für dich und berechtigte Trainer."}/></small></label>
+   <button className="primary compact" onClick={save}><Copy text={"TEST ABSCHLIESSEN →"}/></button>{status&&<small className="muted"><Copy text={status}/></small>}
  </article>;
 }

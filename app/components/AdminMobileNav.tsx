@@ -1,4 +1,6 @@
 "use client";
+import {Copy,LocalizedElement} from "./Locale";
+
 
 import Link from "next/link";
 import {usePathname} from "next/navigation";
@@ -29,12 +31,12 @@ export default function AdminMobileNav(){
   return <>
     <div className="admin-mobile-top">
       <Link href="/admin" className="app-wordmark">BE <b>DIFFERENT</b></Link>
-      <span>TRAINER</span>
-      <button onClick={()=>setOpen(!open)} aria-label="Trainer Menü">{open?"×":"☰"}</button>
+      <span><Copy text={"TRAINER"}/></span>
+      <LocalizedElement as="button" onClick={()=>setOpen(!open)} aria-label="Trainer Menü">{open?"×":"☰"}</LocalizedElement>
     </div>
     <div className={open?"admin-mobile-sheet open":"admin-mobile-sheet"}>
       {links.map(([href,label])=><Link key={href} href={href} onClick={()=>setOpen(false)} className={path===href?"active":""}>{label}<b>↗</b></Link>)}
-      <Link href="/dashboard" onClick={()=>setOpen(false)}>Athletenansicht<b>↗</b></Link>
+      <Link href="/dashboard" onClick={()=>setOpen(false)}><Copy text={"Athletenansicht"}/><b>↗</b></Link>
     </div>
   </>;
 }

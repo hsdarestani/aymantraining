@@ -1,3 +1,7 @@
+
+import {Copy,LocalizedTextInput} from "../components/Locale";
+
+
 import {useState} from "react";
 import {Pressable,SafeAreaView,ScrollView,StyleSheet,Switch,Text,TextInput,View} from "react-native";
 import {router} from "expo-router";
@@ -78,29 +82,29 @@ export default function Onboarding(){
     <Brand/>
     <View style={s.progress}>{[1,2,3,4,5].map(x=><View key={x} style={[s.bar,x<=step&&s.barOn]}/>)}</View>
 
-    {step===1&&<><Text style={s.kicker}>01 · ZIEL</Text><Text style={s.title}>WAS WILLST{"\n"}DU ERREICHEN?</Text><View style={s.goals}>{goals.map(g=><Pressable key={g} onPress={()=>setGoal(g)} style={[s.goal,goal===g&&s.goalOn]}><Text style={[s.goalText,goal===g&&s.goalTextOn]}>{g}</Text><Text style={[s.arrow,goal===g&&s.goalTextOn]}>{goal===g?"✓":"→"}</Text></Pressable>)}</View></>}
+    {step===1&&<><Text style={s.kicker}><Copy text={"01 · ZIEL"}/></Text><Text style={s.title}><Copy text={"WAS WILLST"}/>{"\n"}<Copy text={"DU ERREICHEN?"}/></Text><View style={s.goals}>{goals.map(g=><Pressable key={g} onPress={()=>setGoal(g)} style={[s.goal,goal===g&&s.goalOn]}><Text style={[s.goalText,goal===g&&s.goalTextOn]}>{g}</Text><Text style={[s.arrow,goal===g&&s.goalTextOn]}>{goal===g?"✓":"→"}</Text></Pressable>)}</View></>}
 
-    {step===2&&<><Text style={s.kicker}>02 · AUSGANGSLAGE</Text><Text style={s.title}>DEINE{"\n"}BASIS.</Text>
+    {step===2&&<><Text style={s.kicker}><Copy text={"02 · AUSGANGSLAGE"}/></Text><Text style={s.title}><Copy text={"DEINE"}/>{"\n"}<Copy text={"BASIS."}/></Text>
       <TextInput style={s.input} value={birth} onChangeText={setBirth} placeholder="TT.MM.JJJJ" placeholderTextColor="#555"/>
-      <Text style={s.label}>GESCHLECHT FÜR REFERENZWERTE</Text><View style={s.choiceRow}>{sexOptions.map(([value,label])=><Pressable key={value} style={[s.choice,sex===value&&s.choiceOn]} onPress={()=>setSex(value)}><Text style={[s.choiceText,sex===value&&s.choiceTextOn]}>{label}</Text></Pressable>)}</View>
-      <TextInput style={s.input} value={height} onChangeText={setHeight} keyboardType="number-pad" placeholder="Größe cm" placeholderTextColor="#555"/>
-      <TextInput style={s.input} value={weight} onChangeText={setWeight} keyboardType="decimal-pad" placeholder="Gewicht kg" placeholderTextColor="#555"/>
-      <Text style={s.label}>TRAININGSERFAHRUNG</Text>
-      <View style={s.choiceRow}>{experienceOptions.map(x=><Pressable key={x.value} style={[s.choice,experience===x.value&&s.choiceOn]} onPress={()=>setExperience(x.value)}><Text style={[s.choiceText,experience===x.value&&s.choiceTextOn]}>{x.label}</Text></Pressable>)}</View>
-      <Text style={s.label}>TRAININGSTAGE PRO WOCHE · {availability}</Text>
+      <Text style={s.label}><Copy text={"GESCHLECHT FÜR REFERENZWERTE"}/></Text><View style={s.choiceRow}>{sexOptions.map(([value,label])=><Pressable key={value} style={[s.choice,sex===value&&s.choiceOn]} onPress={()=>setSex(value)}><Text style={[s.choiceText,sex===value&&s.choiceTextOn]}>{label}</Text></Pressable>)}</View>
+      <LocalizedTextInput style={s.input} value={height} onChangeText={setHeight} keyboardType="number-pad" placeholder="Größe cm" placeholderTextColor="#555"/>
+      <LocalizedTextInput style={s.input} value={weight} onChangeText={setWeight} keyboardType="decimal-pad" placeholder="Gewicht kg" placeholderTextColor="#555"/>
+      <Text style={s.label}><Copy text={"TRAININGSERFAHRUNG"}/></Text>
+      <View style={s.choiceRow}>{experienceOptions.map(x=><Pressable key={x.value} style={[s.choice,experience===x.value&&s.choiceOn]} onPress={()=>setExperience(x.value)}><Text style={[s.choiceText,experience===x.value&&s.choiceTextOn]}><Copy text={x.label}/></Text></Pressable>)}</View>
+      <Text style={s.label}><Copy text={"TRAININGSTAGE PRO WOCHE ·"}/>{availability}</Text>
       <View style={s.choiceRow}>{[2,3,4,5,6].map(x=><Pressable key={x} style={[s.choice,availability===x&&s.choiceOn]} onPress={()=>setAvailability(x)}><Text style={[s.choiceText,availability===x&&s.choiceTextOn]}>{x}</Text></Pressable>)}</View>
-      <Text style={s.legal}>Trainings und Lifestyle Empfehlungen ersetzen keine medizinische Diagnose. Gesundheitsdaten werden nur nach deiner ausdrücklichen Einwilligung verarbeitet.</Text>
-      {error?<Text style={s.error}>{error}</Text>:null}
+      <Text style={s.legal}><Copy text={"Trainings und Lifestyle Empfehlungen ersetzen keine medizinische Diagnose. Gesundheitsdaten werden nur nach deiner ausdrücklichen Einwilligung verarbeitet."}/></Text>
+      {error?<Text style={s.error}><Copy text={error}/></Text>:null}
     </>}
 
-    {step===3&&<><Text style={s.kicker}>03 · DATEN</Text><Text style={s.title}>GESUNDHEIT{"\n"}VERBINDEN.</Text><Text style={s.copy}>Schlaf, HRV, Ruhepuls, Schritte, Kalorien, VO2max und Gewicht werden nur nach deiner Einwilligung genutzt. Fehlende Werte bleiben sichtbar unvollständig.</Text><View style={s.switch}><Text style={s.switchText}>GESUNDHEITSDATEN ERLAUBEN</Text><Switch value={health} onValueChange={setHealth} trackColor={{true:C.volt}} thumbColor={health?C.bg:"#eee"}/></View></>}
+    {step===3&&<><Text style={s.kicker}><Copy text={"03 · DATEN"}/></Text><Text style={s.title}><Copy text={"GESUNDHEIT"}/>{"\n"}<Copy text={"VERBINDEN."}/></Text><Text style={s.copy}><Copy text={"Schlaf, HRV, Ruhepuls, Schritte, Kalorien, VO2max und Gewicht werden nur nach deiner Einwilligung genutzt. Fehlende Werte bleiben sichtbar unvollständig."}/></Text><View style={s.switch}><Text style={s.switchText}><Copy text={"GESUNDHEITSDATEN ERLAUBEN"}/></Text><Switch value={health} onValueChange={setHealth} trackColor={{true:C.volt}} thumbColor={health?C.bg:"#eee"}/></View></>}
 
-    {step===4&&<><Text style={s.kicker}>04 · STARTTEST</Text><Text style={s.title}>DEIN ERSTER{"\n"}MESSPUNKT.</Text><Text style={s.copy}>Führe zwei einfache Tests sauber aus. Der 5 km Lauf ist optional.</Text><TextInput style={s.input} value={pushups} onChangeText={setPushups} keyboardType="number-pad" placeholder="Liegestütze Wiederholungen" placeholderTextColor="#555"/><TextInput style={s.input} value={plank} onChangeText={setPlank} keyboardType="number-pad" placeholder="Unterarmstütz Sekunden" placeholderTextColor="#555"/><TextInput style={s.input} value={run5k} onChangeText={setRun5k} keyboardType="decimal-pad" placeholder="5 km Lauf Minuten optional" placeholderTextColor="#555"/>{error?<Text style={s.error}>{error}</Text>:null}</>}
+    {step===4&&<><Text style={s.kicker}><Copy text={"04 · STARTTEST"}/></Text><Text style={s.title}><Copy text={"DEIN ERSTER"}/>{"\n"}<Copy text={"MESSPUNKT."}/></Text><Text style={s.copy}><Copy text={"Führe zwei einfache Tests sauber aus. Der 5 km Lauf ist optional."}/></Text><LocalizedTextInput style={s.input} value={pushups} onChangeText={setPushups} keyboardType="number-pad" placeholder="Liegestütze Wiederholungen" placeholderTextColor="#555"/><LocalizedTextInput style={s.input} value={plank} onChangeText={setPlank} keyboardType="number-pad" placeholder="Unterarmstütz Sekunden" placeholderTextColor="#555"/><LocalizedTextInput style={s.input} value={run5k} onChangeText={setRun5k} keyboardType="decimal-pad" placeholder="5 km Lauf Minuten optional" placeholderTextColor="#555"/>{error?<Text style={s.error}><Copy text={error}/></Text>:null}</>}
 
-    {step===5&&<><Text style={s.kicker}>05 · DEIN ERGEBNIS</Text><Text style={s.result}>{score?.total??0}<Text style={s.resultPercent}>%</Text></Text><Text style={s.resultTitle}>DU BIST {score?.level||"NORMAL"}.</Text><Text style={s.copy}>Das ist dein erster messbarer Ausgangspunkt. Jetzt entwickeln wir ihn Schritt für Schritt weiter.</Text><View style={s.resultCard}><Text style={s.resultCardLabel}>DATENVOLLSTÄNDIGKEIT</Text><Text style={s.resultCardValue}>{score?.completeness??0}%</Text></View><Text style={s.trial}>Als Nächstes kannst du PRO sieben Tage kostenlos testen.</Text></>}
+    {step===5&&<><Text style={s.kicker}><Copy text={"05 · DEIN ERGEBNIS"}/></Text><Text style={s.result}>{score?.total??0}<Text style={s.resultPercent}>%</Text></Text><Text style={s.resultTitle}><Copy text={"DU BIST"}/>{score?.level||"NORMAL"}.</Text><Text style={s.copy}><Copy text={"Das ist dein erster messbarer Ausgangspunkt. Jetzt entwickeln wir ihn Schritt für Schritt weiter."}/></Text><View style={s.resultCard}><Text style={s.resultCardLabel}><Copy text={"DATENVOLLSTÄNDIGKEIT"}/></Text><Text style={s.resultCardValue}>{score?.completeness??0}%</Text></View><Text style={s.trial}><Copy text={"Als Nächstes kannst du PRO sieben Tage kostenlos testen."}/></Text></>}
 
-    <Pressable style={[s.next,busy&&{opacity:.55}]} disabled={busy} onPress={next}><Text style={s.nextText}>{busy?"WIRD BERECHNET":step===4?"LEISTUNGSWERT BERECHNEN →":step===5?"PRO TESTEN →":"WEITER →"}</Text></Pressable>
-    {step>1&&step<5&&<Pressable onPress={()=>setStep(step-1)}><Text style={s.back}>← ZURÜCK</Text></Pressable>}
+    <Pressable style={[s.next,busy&&{opacity:.55}]} disabled={busy} onPress={next}><Text style={s.nextText}><Copy text={busy?"WIRD BERECHNET":step===4?"LEISTUNGSWERT BERECHNEN →":step===5?"PRO TESTEN →":"WEITER →"}/></Text></Pressable>
+    {step>1&&step<5&&<Pressable onPress={()=>setStep(step-1)}><Text style={s.back}><Copy text={"← ZURÜCK"}/></Text></Pressable>}
   </ScrollView></SafeAreaView>;
 }
 

@@ -1,4 +1,6 @@
 "use client";
+import {Copy} from "../../components/Locale";
+
 import {useState} from "react";
 
 const blocks=[
@@ -35,17 +37,17 @@ export default function TestForm({users}:{users:{id:string;name:string}[]}){
  }
 
  return <article className="panel mini-form">
-  <span className="eyebrow">TEST BUILDER</span><h2>Test zuweisen</h2>
+  <span className="eyebrow">TEST BUILDER</span><h2><Copy text={"Test zuweisen"}/></h2>
   <select value={userId} onChange={e=>setUserId(e.target.value)}>{users.map(u=><option key={u.id} value={u.id}>{u.name}</option>)}</select>
   <input value={name} onChange={e=>setName(e.target.value)}/>
   <div className="test-block-grid">{blocks.map(([metric,label,unit])=><button type="button" key={metric} className={selected.includes(metric)?"selected":""} onClick={()=>setSelected(x=>x.includes(metric)?x.filter(v=>v!==metric):[...x,metric])}><strong>{label}</strong><small>{unit}</small></button>)}</div>
   {blocks.filter(x=>selected.includes(x[0])).map(([metric,label])=><details key={metric} className="rule-editor">
-    <summary><strong>{label}</strong><span>ANLEITUNG</span></summary>
+    <summary><strong>{label}</strong><span><Copy text={"ANLEITUNG"}/></span></summary>
     <div className="rule-editor-body">
-      <label>Anweisung<textarea value={detail(metric).instructions} onChange={e=>patch(metric,{instructions:e.target.value})}/></label>
-      <label>Anleitungsvideo URL<input value={detail(metric).instructionVideoUrl} onChange={e=>patch(metric,{instructionVideoUrl:e.target.value})} placeholder="Optional"/></label>
+      <label><Copy text={"Anweisung"}/><textarea value={detail(metric).instructions} onChange={e=>patch(metric,{instructions:e.target.value})}/></label>
+      <label><Copy text={"Anleitungsvideo URL"}/><input value={detail(metric).instructionVideoUrl} onChange={e=>patch(metric,{instructionVideoUrl:e.target.value})} placeholder="Optional"/></label>
     </div>
   </details>)}
-  <button className="primary compact" onClick={create}>TEST PLANEN</button>{status&&<small>{status}</small>}
+  <button className="primary compact" onClick={create}><Copy text={"TEST PLANEN"}/></button>{status&&<small><Copy text={status}/></small>}
  </article>;
 }

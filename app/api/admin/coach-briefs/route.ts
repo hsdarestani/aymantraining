@@ -1,3 +1,4 @@
+import {coachAthleteFilter} from "../../../../lib/coach-access";
 import {NextResponse} from "next/server";
 import {z} from "zod";
 import {prisma} from "../../../../lib/db";
@@ -12,7 +13,8 @@ export async function POST(request:Request){
  const p=schema.safeParse(await request.json().catch(()=>null));if(!p.success)return errorJson("Ungültige Morgenübersicht.",422);
  if(p.data.mediaId){const media=await prisma.mediaAsset.findFirst({where:{id:p.data.mediaId,ownerId:coach.id,kind:"VOICE_MESSAGE"}});if(!media)return errorJson("Audiodatei nicht gefunden.",404)}
  const item=await prisma.coachBrief.create({data:{coachId:coach.id,title:p.data.title,body:p.data.body,mediaId:p.data.mediaId||null,audienceTier:p.data.audienceTier,publishAt:p.data.publishAt?new Date(p.data.publishAt):new Date(),expiresAt:p.data.expiresAt?new Date(p.data.expiresAt):null}});
- const users=await prisma.user.findMany({where:{role:"ATHLETE"},select:{id:true,subscriptionTier:true}});
+ const filter=await coachAthleteFilter(coach);
+ const users=await prisma.user.findMany({where:{role:"ATHLETE",...(filter.userId?{id:filter.userId}:{})},select:{id:true,subscriptionTier:true}});
  await Promise.all(users.filter(x=>(rank[x.subscriptionTier]??0)>=(rank[p.data.audienceTier]??0)).map(x=>queueNotification({userId:x.id,category:"morning_brief",title:p.data.title,body:p.data.body||"Neue persönliche Morgenübersicht von deinem Trainer.",data:{route:"/coach-brief"},urgent:false})));
  return NextResponse.json({ok:true,item});
 }

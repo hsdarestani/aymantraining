@@ -1,4 +1,6 @@
 "use client";
+import {Copy} from "../components/Locale";
+
 import {FormEvent,useState} from "react";
 type Pref={category:string;enabled:boolean;quietFrom:string|null;quietTo:string|null};
 const categories=[
@@ -27,25 +29,25 @@ export default function SettingsClient({initialPrefs}:{initialPrefs:Pref[]}){
 
  return <div className="settings-stack">
   <form className="panel mini-form wide" onSubmit={checkin}>
-   <span className="eyebrow">10 SEKUNDEN TAGESCHECK</span><h2>Wie fühlst du dich heute?</h2>
+   <span className="eyebrow"><Copy text={"10 SEKUNDEN TAGESCHECK"}/></span><h2><Copy text={"Wie fühlst du dich heute?"}/></h2>
    <div className="input-grid compact-inputs">
-    <label>Energie 1 bis 10<input name="energy" type="number" min="1" max="10"/></label>
-    <label>Muskelkater 1 bis 10<input name="soreness" type="number" min="1" max="10"/></label>
-    <label>Stimmung 1 bis 10<input name="mood" type="number" min="1" max="10"/></label>
-    <label>Stress 1 bis 10<input name="stress" type="number" min="1" max="10"/></label>
-    <label>Schlaf Stunden<input name="sleepHours" type="number" step=".1" min="0" max="24"/></label>
-    <label>Schritte<input name="steps" type="number" min="0"/></label>
-    <label>Wasser ml<input name="waterMl" type="number" min="0"/></label>
+    <label><Copy text={"Energie 1 bis 10"}/><input name="energy" type="number" min="1" max="10"/></label>
+    <label><Copy text={"Muskelkater 1 bis 10"}/><input name="soreness" type="number" min="1" max="10"/></label>
+    <label><Copy text={"Stimmung 1 bis 10"}/><input name="mood" type="number" min="1" max="10"/></label>
+    <label><Copy text={"Stress 1 bis 10"}/><input name="stress" type="number" min="1" max="10"/></label>
+    <label><Copy text={"Schlaf Stunden"}/><input name="sleepHours" type="number" step=".1" min="0" max="24"/></label>
+    <label><Copy text={"Schritte"}/><input name="steps" type="number" min="0"/></label>
+    <label><Copy text={"Wasser ml"}/><input name="waterMl" type="number" min="0"/></label>
     <label>Protein g<input name="proteinG" type="number" min="0"/></label>
-   </div><button className="primary">TAGESCHECK SPEICHERN →</button>
+   </div><button className="primary"><Copy text={"TAGESCHECK SPEICHERN →"}/></button>
   </form>
-  <article className="panel"><span className="eyebrow">MITTEILUNGEN</span><h2>Begleitung ohne Spam</h2><p className="muted">Maximal drei nicht dringende Mitteilungen in 24 Stunden. Deine Ruhezeit gilt für jede Kategorie.</p>
+  <article className="panel"><span className="eyebrow"><Copy text={"MITTEILUNGEN"}/></span><h2><Copy text={"Begleitung ohne Spam"}/></h2><p className="muted"><Copy text={"Maximal drei nicht dringende Mitteilungen in 24 Stunden. Deine Ruhezeit gilt für jede Kategorie."}/></p>
    {prefs.map((p,i)=>{const label=categories.find(x=>x[0]===p.category)?.[1]||p.category;return <div className="setting-row push-setting-row" key={p.category}>
-    <div><strong>{label.toUpperCase()}</strong><div className="quiet-editor"><label>VON<input type="time" value={p.quietFrom||"22:00"} onChange={e=>setPrefs(current=>current.map((x,j)=>j===i?{...x,quietFrom:e.target.value}:x))} onBlur={()=>persist(i,prefs[i])}/></label><label>BIS<input type="time" value={p.quietTo||"07:00"} onChange={e=>setPrefs(current=>current.map((x,j)=>j===i?{...x,quietTo:e.target.value}:x))} onBlur={()=>persist(i,prefs[i])}/></label></div></div>
+    <div><strong>{label.toUpperCase()}</strong><div className="quiet-editor"><label><Copy text={"VON"}/><input type="time" value={p.quietFrom||"22:00"} onChange={e=>setPrefs(current=>current.map((x,j)=>j===i?{...x,quietFrom:e.target.value}:x))} onBlur={()=>persist(i,prefs[i])}/></label><label><Copy text={"BIS"}/><input type="time" value={p.quietTo||"07:00"} onChange={e=>setPrefs(current=>current.map((x,j)=>j===i?{...x,quietTo:e.target.value}:x))} onBlur={()=>persist(i,prefs[i])}/></label></div></div>
     <button type="button" className={p.enabled?"toggle on":"toggle"} onClick={()=>toggle(i)}>{p.enabled?"ON":"OFF"}</button>
    </div>})}
   </article>
-  <article className="panel privacy-box"><span className="eyebrow">DATENSCHUTZ</span><h2>Deine Daten</h2><p className="muted">Du kannst deine gespeicherten Daten als JSON exportieren oder dein Konto endgültig löschen.</p><div className="privacy-actions"><a className="secondary" href="/api/privacy/export">DATEN EXPORTIEREN</a><button className="danger-button" onClick={deleteAccount}>KONTO LÖSCHEN</button><button className="secondary" onClick={logout}>ABMELDEN</button></div></article>
-  {status&&<div className="save-toast">{status}</div>}
+  <article className="panel privacy-box"><span className="eyebrow"><Copy text={"DATENSCHUTZ"}/></span><h2><Copy text={"Deine Daten"}/></h2><p className="muted"><Copy text={"Du kannst deine gespeicherten Daten als JSON exportieren oder dein Konto endgültig löschen."}/></p><div className="privacy-actions"><a className="secondary" href="/api/privacy/export"><Copy text={"DATEN EXPORTIEREN"}/></a><button className="danger-button" onClick={deleteAccount}><Copy text={"KONTO LÖSCHEN"}/></button><button className="secondary" onClick={logout}><Copy text={"ABMELDEN"}/></button></div></article>
+  {status&&<div className="save-toast"><Copy text={status}/></div>}
  </div>;
 }

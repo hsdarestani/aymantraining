@@ -1,3 +1,7 @@
+
+import {Copy} from "../../components/Locale";
+
+
 import Link from "next/link";
 import {prisma} from "../../../lib/db";
 export const dynamic="force-dynamic";
@@ -17,7 +21,7 @@ export default async function Kpi(){
  for(const m of athleteSent){const r=messages.find(x=>x.athleteId===m.athleteId&&x.senderId!==x.athleteId&&x.createdAt>m.createdAt);if(r)responseHours.push((r.createdAt.getTime()-m.createdAt.getTime())/3600000)}
  const avgResponse=responseHours.length?responseHours.reduce((a,b)=>a+b,0)/responseHours.length:null;
  return <main className="admin-content" style={{margin:"0 auto"}}>
-  <header className="admin-header"><div><span className="eyebrow">ERFOLGSKENNZAHLEN</span><h1>Produkt KPI</h1></div><Link className="ghost" href="/admin">← ÜBERSICHT</Link></header>
+  <header className="admin-header"><div><span className="eyebrow"><Copy text={"ERFOLGSKENNZAHLEN"}/></span><h1><Copy text={"Produkt KPI"}/></h1></div><Link className="ghost" href="/admin"><Copy text={"← ÜBERSICHT"}/></Link></header>
   <div className="kpis">
    {metric("ONBOARDING",pct(onboard,total)+"%","Ziel über 70 %",pct(onboard,total)>70)}
    {metric("GERÄT VERBUNDEN",pct(wear,total)+"%","Ziel über 50 %",pct(wear,total)>50)}
@@ -30,6 +34,6 @@ export default async function Kpi(){
    {metric("ATHLETEN",String(total),"Aktive Produktbasis",total>0)}
    {metric("PRO UND ELITE",String(pro),"Kapazität beobachten",true)}
   </div>
-  <section className="admin-cols"><article className="panel"><span className="eyebrow">ZAHLUNGSMETRIKEN</span><h2>Bewusst ausgenommen</h2><p className="muted">Testphase zu Bezahlabo und Kündigungsrate werden erst aktiviert, wenn die Store Zahlung final angeschlossen ist. Alle anderen KPI werden aus echten Produktdaten berechnet.</p></article><article className="panel"><span className="eyebrow">MESSUNG</span><h2>Keine erfundenen Zahlen</h2><p className="muted">Bindung basiert auf realer Sitzungsaktivität. Die Quote verbundener Geräte basiert auf aktiven Verbindungen. Die Antwortzeit des Trainers basiert auf echten Nachrichtenpaaren.</p></article></section>
+  <section className="admin-cols"><article className="panel"><span className="eyebrow"><Copy text={"ZAHLUNGSMETRIKEN"}/></span><h2><Copy text={"Bewusst ausgenommen"}/></h2><p className="muted"><Copy text={"Testphase zu Bezahlabo und Kündigungsrate werden erst aktiviert, wenn die Store Zahlung final angeschlossen ist. Alle anderen KPI werden aus echten Produktdaten berechnet."}/></p></article><article className="panel"><span className="eyebrow"><Copy text={"MESSUNG"}/></span><h2><Copy text={"Keine erfundenen Zahlen"}/></h2><p className="muted"><Copy text={"Bindung basiert auf realer Sitzungsaktivität. Die Quote verbundener Geräte basiert auf aktiven Verbindungen. Die Antwortzeit des Trainers basiert auf echten Nachrichtenpaaren."}/></p></article></section>
  </main>;
 }

@@ -1,3 +1,7 @@
+
+import {LocalizedValue} from "../components/Locale";
+
+import {Copy} from "../components/Locale";
 import {useEffect,useMemo,useRef,useState} from "react";
 import {Pressable,SafeAreaView,ScrollView,StyleSheet,Text,TextInput,View} from "react-native";
 import {router} from "expo-router";
@@ -63,32 +67,32 @@ export default function Tests(){
   }catch(e:any){setStatus(e.message||"Fehler")}
  }
 
- if(!due)return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}><View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}>ZURÜCK</Text></Pressable></View><Eyebrow>BE DIFFERENT TEST</Eyebrow><Text style={s.title}>DEIN NÄCHSTER{"\n"}TEST KOMMT.</Text><Card><SectionTitle>Kein Test fällig.</SectionTitle><Text style={s.note}>Der nächste Test wird von deinem Trainer geplant.</Text></Card><History items={items}/></ScrollView></SafeAreaView>;
+ if(!due)return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}><View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text={"ZURÜCK"}/></Text></Pressable></View><Eyebrow>BE DIFFERENT TEST</Eyebrow><Text style={s.title}><Copy text={"DEIN NÄCHSTER"}/>{"\n"}<Copy text={"TEST KOMMT."}/></Text><Card><SectionTitle><Copy text={"Kein Test fällig."}/></SectionTitle><Text style={s.note}><Copy text={"Der nächste Test wird von deinem Trainer geplant."}/></Text></Card><History items={items}/></ScrollView></SafeAreaView>;
 
  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
-  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}>ZURÜCK</Text></Pressable></View>
-  <Eyebrow>BE DIFFERENT TEST</Eyebrow><Text style={s.title}>TESTEN.{"\n"}VERGLEICHEN.{"\n"}ENTWICKELN.</Text>
-  <Text style={s.progress}>BAUSTEIN {index+1} VON {blocks.length}</Text>
+  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text={"ZURÜCK"}/></Text></Pressable></View>
+  <Eyebrow>BE DIFFERENT TEST</Eyebrow><Text style={s.title}><Copy text={"TESTEN."}/>{"\n"}<Copy text={"VERGLEICHEN."}/>{"\n"}<Copy text={"ENTWICKELN."}/></Text>
+  <Text style={s.progress}><Copy text={"BAUSTEIN"}/>{index+1}<Copy text={"VON"}/>{blocks.length}</Text>
   <Card>
-   <Eyebrow>GEFÜHRTER TEST</Eyebrow><SectionTitle>{block.label}</SectionTitle>
-   {block.instructions?<Text style={s.note}>{block.instructions}</Text>:<Text style={s.note}>Sauber ausführen und Ergebnis eintragen.</Text>}
+   <Eyebrow><Copy text={"GEFÜHRTER TEST"}/></Eyebrow><SectionTitle><Copy text={block.label}/></SectionTitle>
+   {block.instructions?<Text style={s.note}>{block.instructions}</Text>:<Text style={s.note}><Copy text={"Sauber ausführen und Ergebnis eintragen."}/></Text>}
    {block.instructionVideoUrl?<InstructionVideo uri={block.instructionVideoUrl}/>:null}
-   <View style={s.timer}><Text style={s.timerValue}>{Math.floor(timer/60)}:{String(timer%60).padStart(2,"0")}</Text><View style={s.timerActions}><Pressable style={s.secondary} onPress={toggleTimer}><Text style={s.secondaryText}>{running?"STOPP":"TIMER STARTEN"}</Text></Pressable><Pressable style={s.secondary} onPress={resetTimer}><Text style={s.secondaryText}>NULLSTELLEN</Text></Pressable></View></View>
+   <View style={s.timer}><Text style={s.timerValue}>{Math.floor(timer/60)}:{String(timer%60).padStart(2,"0")}</Text><View style={s.timerActions}><Pressable style={s.secondary} onPress={toggleTimer}><Text style={s.secondaryText}><Copy text={running?"STOPP":"TIMER STARTEN"}/></Text></Pressable><Pressable style={s.secondary} onPress={resetTimer}><Text style={s.secondaryText}><Copy text={"NULLSTELLEN"}/></Text></Pressable></View></View>
    <View style={s.value}><TextInput style={s.input} keyboardType="decimal-pad" value={values[block.metric]||""} onChangeText={v=>setValues({...values,[block.metric]:v})} placeholder="0" placeholderTextColor="#626864"/><Text style={s.unit}>{block.unit}</Text></View>
-   <Pressable style={s.proof} onPress={proof}><Text style={s.proofText}>{proofs[block.metric]?"BELEGVIDEO GESPEICHERT":"OPTIONALES BELEGVIDEO"}</Text></Pressable>
-   <View style={s.nav}>{index>0?<Pressable style={s.secondary} onPress={()=>{setIndex(index-1);resetTimer()}}><Text style={s.secondaryText}>ZURÜCK</Text></Pressable>:<View/>}{index<blocks.length-1?<Pressable style={s.primarySmall} onPress={()=>{if(!Number.isFinite(Number(values[block.metric]))||values[block.metric]===""){setStatus("Bitte zuerst den Wert eintragen.");return}setIndex(index+1);resetTimer();setStatus("")}}><Text style={s.primaryText}>WEITER →</Text></Pressable>:<Pressable style={s.primarySmall} onPress={finish}><Text style={s.primaryText}>TEST ABSCHLIESSEN →</Text></Pressable>}</View>
+   <Pressable style={s.proof} onPress={proof}><Text style={s.proofText}><Copy text={proofs[block.metric]?"BELEGVIDEO GESPEICHERT":"OPTIONALES BELEGVIDEO"}/></Text></Pressable>
+   <View style={s.nav}>{index>0?<Pressable style={s.secondary} onPress={()=>{setIndex(index-1);resetTimer()}}><Text style={s.secondaryText}><Copy text={"ZURÜCK"}/></Text></Pressable>:<View/>}{index<blocks.length-1?<Pressable style={s.primarySmall} onPress={()=>{if(!Number.isFinite(Number(values[block.metric]))||values[block.metric]===""){setStatus("Bitte zuerst den Wert eintragen.");return}setIndex(index+1);resetTimer();setStatus("")}}><Text style={s.primaryText}><Copy text={"WEITER →"}/></Text></Pressable>:<Pressable style={s.primarySmall} onPress={finish}><Text style={s.primaryText}><Copy text={"TEST ABSCHLIESSEN →"}/></Text></Pressable>}</View>
   </Card>
   <History items={items}/>
-  {status?<Text style={s.status}>{status}</Text>:null}
+  {status?<Text style={s.status}><Copy text={status}/></Text>:null}
  </ScrollView></SafeAreaView>;
 }
 
 function History({items}:{items:any[]}){
- return <Card><Eyebrow>LEISTUNGSVERLAUF</Eyebrow>{items.filter(x=>x.completedAt).slice(0,20).map((x:any,i:number)=>{
+ return <Card><Eyebrow><Copy text={"LEISTUNGSVERLAUF"}/></Eyebrow>{items.filter(x=>x.completedAt).slice(0,20).map((x:any,i:number)=>{
   const prev=items.filter(y=>y.completedAt).slice(0,20)[i+1];
   const current=x.results?.[0]?.value,old=prev?.results?.find((r:any)=>r.metric===x.results?.[0]?.metric)?.value;
   const diff=current!=null&&old!=null?current-old:null;
-  return <View style={s.history} key={x.id}><View><Text style={s.label}>{x.name}</Text><Text style={s.note}>{new Date(x.completedAt).toLocaleDateString("de-DE")}</Text></View><View style={{alignItems:"flex-end"}}><Text style={s.histVal}>{current??"Keine Angabe"} {x.results?.[0]?.unit??""}</Text>{diff!=null?<Text style={diff>=0?s.up:s.down}>{diff>=0?"+":""}{Math.round(diff*10)/10}</Text>:null}</View></View>
+  return <View style={s.history} key={x.id}><View><Text style={s.label}>{x.name}</Text><Text style={s.note}><LocalizedValue value={new Date(x.completedAt)} format="toLocaleDateString"/></Text></View><View style={{alignItems:"flex-end"}}><Text style={s.histVal}>{current??"Keine Angabe"} {x.results?.[0]?.unit??""}</Text>{diff!=null?<Text style={diff>=0?s.up:s.down}>{diff>=0?"+":""}{Math.round(diff*10)/10}</Text>:null}</View></View>
  })}</Card>;
 }
 

@@ -1,3 +1,7 @@
+
+import {LocalizedValue} from "../../components/Locale";
+
+import {Copy} from "../../components/Locale";
 import Link from "next/link";
 import {prisma} from "../../../lib/db";
 export const dynamic="force-dynamic";
@@ -33,8 +37,8 @@ export default async function Subscriptions(){
  const estimatedMrr=Math.round(activePaid*Number(settings.proMonthly)*100)/100;
  const latest=subs.slice(0,50);
  return <main className="admin-content" style={{margin:"0 auto"}}>
-   <header className="admin-header"><div><span className="eyebrow">TRAINERBEREICH</span><h1>Subscriptions & KPIs</h1></div><Link href="/admin" className="ghost">← Dashboard</Link></header>
-   <div className="kpis"><div><span>ATHLETS</span><strong>{total}</strong><small>gesamt</small></div><div><span>PRO</span><strong>{pro}</strong><small>{pct(pro,total)} %</small></div><div><span>WAITLIST</span><strong>{waitlist}</strong><small>Kapazität {settings.proCapacity}</small></div><div><span>EST. MRR</span><strong>{estimatedMrr.toLocaleString("de-DE")} €</strong><small>vor Store Gebühren</small></div></div>
+   <header className="admin-header"><div><span className="eyebrow"><Copy text={"TRAINERBEREICH"}/></span><h1>Subscriptions & KPIs</h1></div><Link href="/admin" className="ghost">← Dashboard</Link></header>
+   <div className="kpis"><div><span>ATHLETS</span><strong>{total}</strong><small><Copy text={"gesamt"}/></small></div><div><span>PRO</span><strong>{pro}</strong><small>{pct(pro,total)} %</small></div><div><span>WAITLIST</span><strong>{waitlist}</strong><small><Copy text={"Kapazität"}/>{settings.proCapacity}</small></div><div><span>EST. MRR</span><strong><LocalizedValue value={estimatedMrr} format="toLocaleString"/> €</strong><small><Copy text={"vor Store Gebühren"}/></small></div></div>
    <section className="kpi-target-grid">
      {[
        ["ONBOARDING",pct(onboarding,total),70],
@@ -45,9 +49,9 @@ export default async function Subscriptions(){
        ["TRIAL TO PAID",pct(trialPaid,trialUsers.size),40],
        ["MONTHLY CHURN",pct(expired30,Math.max(1,activePaid+expired30)),8],
        ["TRAINER ≤ 24H",under24,100]
-     ].map(([label,value,target])=><article className="panel kpi-target" key={String(label)}><span className="eyebrow">{label}</span><strong>{Number(value).toFixed(1)}%</strong><div className="kpi-track"><i style={{width:`${Math.min(100,Number(value))}%`}}/></div><small>Ziel {label==="MONTHLY CHURN"?"<":"≥"} {target}%</small></article>)}
+     ].map(([label,value,target])=><article className="panel kpi-target" key={String(label)}><span className="eyebrow">{label}</span><strong>{Number(value).toFixed(1)}%</strong><div className="kpi-track"><i style={{width:`${Math.min(100,Number(value))}%`}}/></div><small><Copy text={"Ziel"}/>{label==="MONTHLY CHURN"?"<":"≥"} {target}%</small></article>)}
    </section>
-   <article className="panel"><div className="panel-head"><div><span className="eyebrow">TRAINERBETREUUNG</span><h2>Antwortzeit</h2></div><span className="tag">{avgResponse==null?"KEINE DATEN":`${avgResponse.toFixed(1)} H AVG`}</span></div><p className="muted">Gemessen von der Nachricht des Athleten bis zur nächsten Antwort des Trainers innerhalb der letzten 30 Tage.</p></article>
-   <article className="panel"><span className="eyebrow">BILLING EVENTS</span><h2>ANBIETERÜBERSICHT</h2>{latest.length?latest.map(s=><div className="history-row" key={s.id}><strong>{s.provider} · {s.tier}</strong><span>{s.status} · {s.renewsAt?.toLocaleDateString("de-DE")||"—"}</span></div>):<p className="muted">Noch keine Store Subscription Events.</p>}</article>
+   <article className="panel"><div className="panel-head"><div><span className="eyebrow"><Copy text={"TRAINERBETREUUNG"}/></span><h2><Copy text={"Antwortzeit"}/></h2></div><span className="tag"><Copy text={avgResponse==null?"KEINE DATEN":`${avgResponse.toFixed(1)} H AVG`}/></span></div><p className="muted"><Copy text={"Gemessen von der Nachricht des Athleten bis zur nächsten Antwort des Trainers innerhalb der letzten 30 Tage."}/></p></article>
+   <article className="panel"><span className="eyebrow">BILLING EVENTS</span><h2><Copy text={"ANBIETERÜBERSICHT"}/></h2>{latest.length?latest.map(s=><div className="history-row" key={s.id}><strong>{s.provider} · {s.tier}</strong><span>{s.status} · {s.renewsAt?.toLocaleDateString("de-DE")||"—"}</span></div>):<p className="muted"><Copy text={"Noch keine Store Subscription Events."}/></p>}</article>
  </main>;
 }

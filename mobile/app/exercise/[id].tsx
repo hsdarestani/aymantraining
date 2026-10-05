@@ -1,3 +1,7 @@
+
+import {ExerciseName} from "../../components/Locale";
+
+import {Copy} from "../../components/Locale";
 import {useEffect,useMemo,useState} from "react";
 import {ActivityIndicator,Dimensions,Image,Modal,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from "react-native";
 import {router,useLocalSearchParams} from "expo-router";
@@ -10,7 +14,7 @@ import {C,radius} from "../../theme";
 
 function CoachVideo({uri}:{uri:string}){
   const player=useVideoPlayer(uri,p=>{p.loop=true;p.muted=true;p.play()});
-  return <View style={s.videoWrap}><VideoView style={s.videoView} player={player} nativeControls contentFit="cover"/><Text style={s.videoHint}>ENDLOSSCHLEIFE · TON ZUERST AUS</Text></View>;
+  return <View style={s.videoWrap}><VideoView style={s.videoView} player={player} nativeControls contentFit="cover"/><Text style={s.videoHint}><Copy text={"ENDLOSSCHLEIFE · TON ZUERST AUS"}/></Text></View>;
 }
 
 export default function Exercise(){
@@ -48,21 +52,21 @@ export default function Exercise(){
   const width=Dimensions.get("window").width;
 
   return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
-    <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}>ZURÜCK</Text></Pressable></View>
-    <Eyebrow>{String(x.id).replaceAll("-"," ")} · STUFE {x.level}</Eyebrow>
-    <Text style={s.title}>{x.nameDe}</Text>
+    <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text={"ZURÜCK"}/></Text></Pressable></View>
+    <Eyebrow>{String(x.id).replaceAll("-"," ")}<Copy text={"· STUFE"}/>{x.level}</Eyebrow>
+    <Text style={s.title}><ExerciseName exercise={x}/></Text>
     <Text style={s.meta}>{x.category.toUpperCase()} · {x.equipment||"OHNE GERÄTE"}</Text>
 
-    {imageUris.length?<Pressable style={s.motion} onPress={()=>setLightbox(frame)}><Image source={{uri:imageUris[frame]}} style={s.motionImage}/><View style={s.motionLabel}><Text style={s.motionLabelText}>{labels[frame]} · BEWEGUNGSABLAUF</Text></View></Pressable>:null}
+    {imageUris.length?<Pressable style={s.motion} onPress={()=>setLightbox(frame)}><Image source={{uri:imageUris[frame]}} style={s.motionImage}/><View style={s.motionLabel}><Text style={s.motionLabelText}>{labels[frame]}<Copy text={"· BEWEGUNGSABLAUF"}/></Text></View></Pressable>:null}
     <View style={s.images}>{images.map((uri:any,i:number)=>uri?<Pressable key={uri} style={s.imageButton} onPress={()=>setLightbox(i)}><Image source={{uri:media[uri]||(uri.startsWith("http")?uri:API+uri)}} style={s.image}/><Text style={s.imageLabel}>{labels[i]}</Text></Pressable>:<View key={i} style={s.placeholder}><Text style={s.placeholderText}>{labels[i]}</Text></View>)}</View>
     {video&&<CoachVideo uri={video}/>}
-    <Card><Eyebrow>ZIELMUSKELN</Eyebrow><SectionTitle>{x.primaryMuscles||"Keine Angabe"}</SectionTitle>{x.secondaryMuscles?<Text style={s.secondary}>{x.secondaryMuscles}</Text>:null}</Card>
-    <Card><Eyebrow>TRAINERHINWEISE</Eyebrow><SectionTitle>Sauber ausführen.</SectionTitle>{[x.coachCue1,x.coachCue2,x.coachCue3].filter(Boolean).map((c:string,i:number)=><View style={s.cue} key={c}><Text style={s.cueNr}>{i+1}</Text><Text style={s.cueText}>{c}</Text></View>)}</Card>
-    <Card><Eyebrow>HÄUFIGE FEHLER</Eyebrow>{mistakes.map((m:string)=><Text style={s.error} key={m}>× {m}</Text>)}</Card>
-    {(x.easierExerciseId||x.harderExerciseId)&&<Card><Eyebrow>ALTERNATIVEN</Eyebrow><View style={s.alternatives}>{x.easierExerciseId&&<Pressable style={s.alt} onPress={()=>router.replace({pathname:"/exercise/[id]",params:{id:x.easierExerciseId}})}><Text style={s.altLabel}>LEICHTER</Text><Text style={s.altText}>{String(x.easierExerciseId).replaceAll("-"," ")}</Text></Pressable>}{x.harderExerciseId&&<Pressable style={s.alt} onPress={()=>router.replace({pathname:"/exercise/[id]",params:{id:x.harderExerciseId}})}><Text style={s.altLabel}>SCHWERER</Text><Text style={s.altText}>{String(x.harderExerciseId).replaceAll("-"," ")}</Text></Pressable>}</View></Card>}
+    <Card><Eyebrow><Copy text={"ZIELMUSKELN"}/></Eyebrow><SectionTitle>{x.primaryMuscles||"Keine Angabe"}</SectionTitle>{x.secondaryMuscles?<Text style={s.secondary}>{x.secondaryMuscles}</Text>:null}</Card>
+    <Card><Eyebrow><Copy text={"TRAINERHINWEISE"}/></Eyebrow><SectionTitle><Copy text={"Sauber ausführen."}/></SectionTitle>{[x.coachCue1,x.coachCue2,x.coachCue3].filter(Boolean).map((c:string,i:number)=><View style={s.cue} key={c}><Text style={s.cueNr}>{i+1}</Text><Text style={s.cueText}>{c}</Text></View>)}</Card>
+    <Card><Eyebrow><Copy text={"HÄUFIGE FEHLER"}/></Eyebrow>{mistakes.map((m:string)=><Text style={s.error} key={m}>× {m}</Text>)}</Card>
+    {(x.easierExerciseId||x.harderExerciseId)&&<Card><Eyebrow><Copy text={"ALTERNATIVEN"}/></Eyebrow><View style={s.alternatives}>{x.easierExerciseId&&<Pressable style={s.alt} onPress={()=>router.replace({pathname:"/exercise/[id]",params:{id:x.easierExerciseId}})}><Text style={s.altLabel}><Copy text={"LEICHTER"}/></Text><Text style={s.altText}>{String(x.easierExerciseId).replaceAll("-"," ")}</Text></Pressable>}{x.harderExerciseId&&<Pressable style={s.alt} onPress={()=>router.replace({pathname:"/exercise/[id]",params:{id:x.harderExerciseId}})}><Text style={s.altLabel}><Copy text={"SCHWERER"}/></Text><Text style={s.altText}>{String(x.harderExerciseId).replaceAll("-"," ")}</Text></Pressable>}</View></Card>}
 
     <Modal visible={lightbox!=null} animationType="fade" transparent onRequestClose={()=>setLightbox(null)}>
-      <View style={s.modal}><Pressable style={s.close} onPress={()=>setLightbox(null)}><Text style={s.closeText}>SCHLIESSEN</Text></Pressable><ScrollView horizontal pagingEnabled contentOffset={{x:(lightbox||0)*width,y:0}} showsHorizontalScrollIndicator={false}>{imageUris.map((uri,i)=><View key={uri} style={[s.slide,{width}]}><Image source={{uri}} resizeMode="contain" style={s.fullImage}/><Text style={s.fullLabel}>{labels[i]}</Text></View>)}</ScrollView><Text style={s.swipe}>WISCHEN FÜR DEN NÄCHSTEN BILDSCHRITT</Text></View>
+      <View style={s.modal}><Pressable style={s.close} onPress={()=>setLightbox(null)}><Text style={s.closeText}><Copy text={"SCHLIESSEN"}/></Text></Pressable><ScrollView horizontal pagingEnabled contentOffset={{x:(lightbox||0)*width,y:0}} showsHorizontalScrollIndicator={false}>{imageUris.map((uri,i)=><View key={uri} style={[s.slide,{width}]}><Image source={{uri}} resizeMode="contain" style={s.fullImage}/><Text style={s.fullLabel}>{labels[i]}</Text></View>)}</ScrollView><Text style={s.swipe}><Copy text={"WISCHEN FÜR DEN NÄCHSTEN BILDSCHRITT"}/></Text></View>
     </Modal>
   </ScrollView></SafeAreaView>;
 }

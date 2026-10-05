@@ -1,3 +1,7 @@
+
+import {LocalizedValue} from "../../components/Locale";
+
+import {Copy} from "../../components/Locale";
 import {useCallback,useState} from "react";
 import {ActivityIndicator,Pressable,RefreshControl,ScrollView,StyleSheet,Text,View} from "react-native";
 import Svg,{Circle} from "react-native-svg";
@@ -37,25 +41,25 @@ export default function Home(){
  const score=d.score,a=d.activity||{};
  return <ScrollView style={s.safe} contentContainerStyle={s.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
   <View style={s.top}><Brand compact/><Text style={s.plan}>{d.user.tier}</Text></View>
-  <View style={s.hero}><Text style={s.eyebrow}>GUTEN MORGEN, {(d.user.name||"ATHLET").toUpperCase()}</Text><Text style={s.title}>BAUE DEINEN{"\n"}ATHLETEN.</Text><Text style={s.copy}>Daten werden zu einer klaren Entscheidung für heute.</Text></View>
-  <Card style={s.scoreCard}><Eyebrow>BE DIFFERENT LEISTUNGSWERT</Eyebrow><ScoreSignature score={score?.total??0} level={score?.level||"NORMAL"}/><View style={s.track}><View style={[s.fill,{width:`${score?.total??0}%`}]}/></View><Text style={s.data}>DATEN {score?.completeness??0}% VOLLSTÄNDIG</Text></Card>
+  <View style={s.hero}><Text style={s.eyebrow}><Copy text={"GUTEN MORGEN,"}/>{(d.user.name||"ATHLET").toUpperCase()}</Text><Text style={s.title}><Copy text={"BAUE DEINEN"}/>{"\n"}<Copy text={"ATHLETEN."}/></Text><Text style={s.copy}><Copy text={"Daten werden zu einer klaren Entscheidung für heute."}/></Text></View>
+  <Card style={s.scoreCard}><Eyebrow><Copy text={"BE DIFFERENT LEISTUNGSWERT"}/></Eyebrow><ScoreSignature score={score?.total??0} level={score?.level||"NORMAL"}/><View style={s.track}><View style={[s.fill,{width:`${score?.total??0}%`}]}/></View><Text style={s.data}><Copy text={"DATEN"}/>{score?.completeness??0}<Copy text={"% VOLLSTÄNDIG"}/></Text></Card>
 
   <Card>
-   <View style={s.cardHead}><View><Eyebrow>TRAINER RADAR</Eyebrow><SectionTitle>{d.recommendations?.[0]?.title||"Daten sammeln."}</SectionTitle></View><Text style={s.live}>{d.radarLocked?"◆ PRO":"● AKTIV"}</Text></View>
+   <View style={s.cardHead}><View><Eyebrow><Copy text={"TRAINER RADAR"}/></Eyebrow><SectionTitle>{d.recommendations?.[0]?.title||"Daten sammeln."}</SectionTitle></View><Text style={s.live}><Copy text={d.radarLocked?"◆ PRO":"● AKTIV"}/></Text></View>
    <Text style={s.cardCopy}>{d.recommendations?.[0]?.action||"Verbinde Gesundheitsdaten oder mach deinen Tagescheck."}</Text>
-   {d.radarLocked?<Pressable style={s.radarCta} onPress={()=>router.push("/membership")}><Text style={s.radarCtaText}>TRAINER RADAR FREISCHALTEN →</Text></Pressable>:null}
+   {d.radarLocked?<Pressable style={s.radarCta} onPress={()=>router.push("/membership")}><Text style={s.radarCtaText}><Copy text={"TRAINER RADAR FREISCHALTEN →"}/></Text></Pressable>:null}
   </Card>
 
-  <Pressable onPress={()=>d.nextWorkout&&router.push(`/workout/${d.nextWorkout.id}`)}><Card style={s.workout}><Eyebrow>HEUTIGES TRAINING</Eyebrow><Text style={s.workoutTitle}>{d.nextWorkout?.title||"REGENERATIONSTAG"}</Text><Text style={s.cardCopy}>{d.nextWorkout?.scheduledAt?new Date(d.nextWorkout.scheduledAt).toLocaleString("de-DE"):"Regeneration gehört zum Training."}</Text><Text style={s.arrow}>{d.nextWorkout?"STARTEN →":"BEWUSST ERHOLEN."}</Text></Card></Pressable>
+  <Pressable onPress={()=>d.nextWorkout&&router.push(`/workout/${d.nextWorkout.id}`)}><Card style={s.workout}><Eyebrow><Copy text={"HEUTIGES TRAINING"}/></Eyebrow><Text style={s.workoutTitle}>{d.nextWorkout?.title||"REGENERATIONSTAG"}</Text><Text style={s.cardCopy}><Copy text={d.nextWorkout?.scheduledAt?new Date(d.nextWorkout.scheduledAt).toLocaleString("de-DE"):"Regeneration gehört zum Training."}/></Text><Text style={s.arrow}><Copy text={d.nextWorkout?"STARTEN →":"BEWUSST ERHOLEN."}/></Text></Card></Pressable>
 
-  <Card><Eyebrow>HEUTE</Eyebrow><SectionTitle>Aktivität und Versorgung</SectionTitle>
-   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}>SCHRITTE</Text><Text style={s.metricValue}>{Number(a.steps||0).toLocaleString("de-DE")} / {Number(a.stepTarget||10000).toLocaleString("de-DE")}</Text></View><Bar value={a.steps||0} max={a.stepTarget||10000}/></View>
-   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}>WASSER</Text><Text style={s.metricValue}>{a.waterMl||0} / {a.waterTargetMl||2500} ml</Text></View><Bar value={a.waterMl||0} max={a.waterTargetMl||2500}/></View>
+  <Card><Eyebrow><Copy text={"HEUTE"}/></Eyebrow><SectionTitle><Copy text={"Aktivität und Versorgung"}/></SectionTitle>
+   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}><Copy text={"SCHRITTE"}/></Text><Text style={s.metricValue}><LocalizedValue value={Number(a.steps||0)} format="toLocaleString"/> / <LocalizedValue value={Number(a.stepTarget||10000)} format="toLocaleString"/></Text></View><Bar value={a.steps||0} max={a.stepTarget||10000}/></View>
+   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}><Copy text={"WASSER"}/></Text><Text style={s.metricValue}>{a.waterMl||0} / {a.waterTargetMl||2500} ml</Text></View><Bar value={a.waterMl||0} max={a.waterTargetMl||2500}/></View>
    <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}>PROTEIN</Text><Text style={s.metricValue}>{Math.round(a.proteinG||0)} / {a.proteinTargetG||130} g</Text></View><Bar value={a.proteinG||0} max={a.proteinTargetG||130}/></View>
-   <Text style={s.calories}>AKTIVE KALORIEN {Math.round(a.activeCalories||0)}</Text>
+   <Text style={s.calories}><Copy text={"AKTIVE KALORIEN"}/>{Math.round(a.activeCalories||0)}</Text>
   </Card>
 
-  <Pressable style={({pressed})=>[s.sync,pressed&&{opacity:.75}]} onPress={health}><Text style={s.syncText}>{syncing?"GESUNDHEITSDATEN WERDEN SYNCHRONISIERT…":"GESUNDHEITSDATEN SYNCHRONISIEREN"}</Text></Pressable>
+  <Pressable style={({pressed})=>[s.sync,pressed&&{opacity:.75}]} onPress={health}><Text style={s.syncText}><Copy text={syncing?"GESUNDHEITSDATEN WERDEN SYNCHRONISIERT…":"GESUNDHEITSDATEN SYNCHRONISIEREN"}/></Text></Pressable>
  </ScrollView>;
 }
 const s=StyleSheet.create({

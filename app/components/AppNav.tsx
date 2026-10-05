@@ -1,4 +1,6 @@
 "use client";
+import {Copy,LocalizedElement} from "./Locale";
+
 
 import Link from "next/link";
 import {usePathname} from "next/navigation";
@@ -26,6 +28,8 @@ const items=[
 ] as const;
 
 const more=[
+  ["/ai","Different AI"],
+  ["/wearables","Wearables"],
   ["/report","Wochenbericht"],
   ["/plans","Trainingspläne"],
   ["/library","Übungsbibliothek"],
@@ -49,39 +53,39 @@ export default function AppNav(){
     <header className="app-desktop-top">
       <div className="app-desktop-inner">
         <Link href="/dashboard" className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></Link>
-        {workout&&<Link href="/training" className="desktop-back"><Icon name="back"/> ZURÜCK ZUM TRAINING</Link>}
+        {workout&&<Link href="/training" className="desktop-back"><Icon name="back"/><Copy text={"ZURÜCK ZUM TRAINING"}/></Link>}
         <nav aria-label="Hauptnavigation">
           {items.map(([href,label,icon])=>{
             const active=path===href||(href!=="/dashboard"&&path.startsWith(href+"/"));
-            return <Link href={href} className={active?"active":""} key={href}><Icon name={icon}/><span>{label}</span></Link>;
+            return <Link href={href} className={active?"active":""} key={href}><Icon name={icon}/><span><Copy text={label}/></span></Link>;
           })}
         </nav>
-        <button className="desktop-menu" aria-label="Menü öffnen" onClick={()=>setOpen(true)}><Icon name="menu"/><span>MENÜ</span></button>
+        <LocalizedElement as="button" className="desktop-menu" aria-label="Menü öffnen" onClick={()=>setOpen(true)}><Icon name="menu"/><span><Copy text={"MENÜ"}/></span></LocalizedElement>
       </div>
     </header>
 
     <div className="app-mobile-top">
       {workout?<Link href="/training" className="mobile-back"><Icon name="back"/><span>TRAINING</span></Link>:<Link href="/dashboard" className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></Link>}
-      <button aria-label="Menü öffnen" onClick={()=>setOpen(true)}><Icon name="menu"/></button>
+      <LocalizedElement as="button" aria-label="Menü öffnen" onClick={()=>setOpen(true)}><Icon name="menu"/></LocalizedElement>
     </div>
 
     <nav className="app-bottom-nav" aria-label="Hauptnavigation">
       {items.map(([href,label,icon])=>{
         const active=path===href||(href!=="/dashboard"&&path.startsWith(href+"/"));
-        return <Link href={href} className={active?"active":""} key={href}><span className="nav-icon"><Icon name={icon}/></span><small>{label}</small></Link>;
+        return <Link href={href} className={active?"active":""} key={href}><span className="nav-icon"><Icon name={icon}/></span><small><Copy text={label}/></small></Link>;
       })}
     </nav>
 
     <div className={open?"app-drawer open":"app-drawer"} aria-hidden={!open}>
-      <button className="drawer-backdrop" aria-label="Menü schließen" onClick={()=>setOpen(false)}/>
+      <LocalizedElement as="button" className="drawer-backdrop" aria-label="Menü schließen" onClick={()=>setOpen(false)}/>
       <aside>
-        <div className="drawer-head"><span className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></span><button aria-label="Menü schließen" onClick={()=>setOpen(false)}><Icon name="close"/></button></div>
-        <div className="drawer-identity"><span>DEINE ENTWICKLUNG</span><strong>DEIN ATHLET.</strong></div>
+        <div className="drawer-head"><span className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></span><LocalizedElement as="button" aria-label="Menü schließen" onClick={()=>setOpen(false)}><Icon name="close"/></LocalizedElement></div>
+        <div className="drawer-identity"><span><Copy text={"DEINE ENTWICKLUNG"}/></span><strong><Copy text={"DEIN ATHLET."}/></strong></div>
         <div className="drawer-primary">
-          {items.map(([href,label,icon])=><Link href={href} onClick={()=>setOpen(false)} key={href}><Icon name={icon}/><span>{label}</span></Link>)}
+          {items.map(([href,label,icon])=><Link href={href} onClick={()=>setOpen(false)} key={href}><Icon name={icon}/><span><Copy text={label}/></span></Link>)}
         </div>
-        <div className="drawer-links">{more.map(([href,label])=><Link href={href} onClick={()=>setOpen(false)} key={href}>{label}<b>→</b></Link>)}</div>
-        <p>Normal ist langweilig.</p>
+        <div className="drawer-links">{more.map(([href,label])=><Link href={href} onClick={()=>setOpen(false)} key={href}><Copy text={label}/><b>→</b></Link>)}</div>
+        <p><Copy text={"Normal ist langweilig."}/></p>
       </aside>
     </div>
   </>;
