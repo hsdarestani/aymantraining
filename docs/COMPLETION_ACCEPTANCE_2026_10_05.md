@@ -11,13 +11,26 @@ Scope: platform features in German and English, web/admin/native, wearable lifec
 - Scoped coach athlete lists, inbox/detail reads and athlete operations. Media message ownership validation. Capacity-safe and idempotent event registration. Plan-item validation before replacement.
 - Privacy export includes AI messages/handoffs and wearable connection status.
 
-## Verification state
+## Verified technical acceptance — 5 October 2026
 
-Local schema/TypeScript checks for web and native pass. A production web build passed before the final adapter/formatting changes; it must be repeated on the exact final tree. Contract tests cover provider validation, dates/units, FREE/PRO filtering, signatures, coach hours and timezones, medical/plan-change escalation, AI output guards, and Terra payload normalization. Language tests verify identical nonempty catalogs and actual locale translation/preservation.
+- [Product Quality Gate](https://github.com/hsdarestani/aymantraining/actions/runs/37284746534) passed on `376dee21ef8c289a18929047bf93b08ab73197c2`: 303 persisted API operation assertions, three browser acceptance tests, contract regressions, schema/type checks, dependency audit and production build.
+- Browser tests exercise language persistence and preservation of entered text; bilingual exercise creation; saved plan sets, real pointer reorder, cross-day movement and progression persistence; and athlete AI handoff followed by admin claim, reply and resolution.
+- [Native App Check](https://github.com/hsdarestani/aymantraining/actions/runs/37283519617) passed: actual Android debug build, WearOS debug build, native TypeScript and actual iOS simulator app plus embedded Watch/widget compilation. The mobile tree is identical between that run's commit `fda84911c498e299153e11b0674719691c6d1aff` and the final web commit: `86b9659dd027ce89650addc653a138c75a830a33`.
+- The identical web/native English catalogs contain 1,524 entries. Catalog regression checks cover known system copy, dynamic reports and preservation of user text.
 
-The PostgreSQL acceptance suite is designed for the isolated GitHub Actions service database. It asserts stored results and authorization for roster assignment, exercise creation, plan create/edit/clone/assignment, assigned test completion, reference norm creation/deletion, event joining/capacity/idempotency, push preference persistence, campaign roster isolation, profile locale persistence, AI successful provider/error/unsafe-output fallback, handoff claim/resolve/idempotency, all seven gateway provider cycles, consent/replay/signature/deduplication/disconnect behavior and privacy export.
+| Feature area | Acceptance evidence |
+|---|---|
+| Admin exercises and plans | Create/edit/clone/assign, English names, stored sets, progression, pointer reorder and day movement |
+| Coach access | Assigned roster isolation for athletes, inbox, media and plans |
+| Athlete operations | Profile locale, assigned tests, events, challenge eligibility, push preferences and companion session |
+| Concurrent operations | Event capacity, AI daily limits and one-use companion pairing |
+| AI behavior | Coach availability/timezone, context, medical and plan-change escalation, output guards, provider errors and explicit fallback |
+| Human control | Persisted handoff, scoped queue, claim/reply/resolve, notifications and no autonomous plan assignment |
+| Wearable lifecycle | All seven gateway provider connect/sync/disconnect cycles, consent, entitlement, signed callbacks, replay prevention, deduplication and revocation retries |
+| Terra integration | Adapter request contracts, signed auth/data callbacks and payload normalization using isolated provider simulation |
+| Privacy and deployment | Export/delete relations, pairing purge and seed preservation of administrator edits |
 
-**Until the exact final commit's CI results are recorded, this document is not a claim of full acceptance.** Live wearable authorization requires configured Terra keys and enabled provider integrations; simulator success does not certify a third-party production account. No physical-device or store release acceptance is claimed.
+These results establish technical acceptance for the tested platform workflows. Live third-party wearable authorization still requires configured Terra/gateway keys and enabled provider accounts; simulated provider acceptance does not certify those external production accounts. Physical-device and store-release acceptance remain outside this scope. Production rollout is tracked separately by the deployment workflow.
 
 ## Required runtime integration settings
 
