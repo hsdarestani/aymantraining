@@ -7,6 +7,7 @@ export function currentLocale(){return locale}
 export function translate(text:string){if(locale==='de')return text;const trimmed=text.trim(),value=(english as Record<string,string>)[trimmed];if(value!==undefined)return text.replace(trimmed,value);
 
  const patterns:[RegExp,(...parts:string[])=>string][]=[
+  [/^REGENERATION (\d+|Keine Angabe)$/,(_,a)=>`RECOVERY ${a==='Keine Angabe'?'No data':a}`],
   [/^(.*) · Tag (\d+)$/,(_,a,b)=>`${a} · Day ${b}`],
   [/^(\d+) Übungen importiert(?: · (\d+) Hinweise)?\.$/,(_,a,b)=>`${a} exercises imported${b?` · ${b} notices`:""}.`],
   [/^Training (\d+) von (\d+)$/,(_,a,b)=>`Workouts ${a} of ${b}`],

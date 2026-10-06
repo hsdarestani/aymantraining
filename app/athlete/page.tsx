@@ -49,7 +49,7 @@ export default async function AthletePage(){
       </article>
 
       <article className="panel"><span className="eyebrow"><Copy text={"DEINE LEISTUNGSBEREICHE"}/></span><h2><Copy text={"Leistungsprofil"}/></h2>
-        {details?<div className="athlete-bars">{rows.map(([name,val])=><div key={name}><span>{name}</span><div className="weight-track"><i style={{width:`${val??0}%`}}/></div><strong>{val??"Keine Angabe"}</strong></div>)}</div>:<div className="locked-copy"><p className="muted"><Copy text={"KOSTENLOS zeigt deinen Gesamtwert. Teilwerte und Erklärungen werden mit PRO freigeschaltet."}/></p><Link href="/pricing" className="secondary"><Copy text={"DETAILS FREISCHALTEN"}/></Link></div>}
+        {details?<div className="athlete-bars">{rows.map(([name,val])=><div key={name}><span>{name}</span><div className="weight-track"><i style={{width:`${val??0}%`}}/></div><strong><Copy text={val??"Keine Angabe"}/></strong></div>)}</div>:<div className="locked-copy"><p className="muted"><Copy text={"KOSTENLOS zeigt deinen Gesamtwert. Teilwerte und Erklärungen werden mit PRO freigeschaltet."}/></p><Link href="/pricing" className="secondary"><Copy text={"DETAILS FREISCHALTEN"}/></Link></div>}
       </article>
     </section>
 

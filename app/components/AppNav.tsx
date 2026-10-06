@@ -1,5 +1,5 @@
 "use client";
-import {Copy,LocalizedElement} from "./Locale";
+import {Copy,LocalizedElement,useLocale} from "./Locale";
 
 
 
@@ -48,6 +48,7 @@ const more=[
 
 export default function AppNav(){
   const path=usePathname();
+  const locale=useLocale();
   const [open,setOpen]=useState(false);
   const drawer=useRef<HTMLElement>(null);
   useEffect(()=>{
@@ -77,7 +78,7 @@ export default function AppNav(){
         <LocalizedElement as="nav" aria-label="Hauptnavigation">
           {items.map(([href,label,icon])=>{
             const active=path===href||(href!=="/dashboard"&&path.startsWith(href+"/"));
-            return <Link href={href} className={active?"active":""} aria-current={active?"page":undefined} key={href}><Icon name={icon}/><span><Copy text={label}/></span></Link>;
+            return <Link href={href} className={active?"active":""} aria-current={active?"page":undefined} key={href}><Icon name={icon}/><span><Copy text={label==="START"&&locale==="en"?"HOME":label}/></span></Link>;
           })}
         </LocalizedElement>
         <LocalizedElement as="button" className="desktop-menu" aria-label="Menü öffnen" aria-expanded={open} onClick={()=>setOpen(true)}><Icon name="menu"/><span><Copy text={"MENÜ"}/></span></LocalizedElement>
@@ -92,7 +93,7 @@ export default function AppNav(){
     <LocalizedElement as="nav" className="app-bottom-nav" aria-label="Hauptnavigation">
       {items.map(([href,label,icon])=>{
         const active=path===href||(href!=="/dashboard"&&path.startsWith(href+"/"));
-        return <Link href={href} className={active?"active":""} aria-current={active?"page":undefined} key={href}><span className="nav-icon"><Icon name={icon}/></span><small><Copy text={label}/></small></Link>;
+        return <Link href={href} className={active?"active":""} aria-current={active?"page":undefined} key={href}><span className="nav-icon"><Icon name={icon}/></span><small><Copy text={label==="START"&&locale==="en"?"HOME":label}/></small></Link>;
       })}
     </LocalizedElement>
 
@@ -102,7 +103,7 @@ export default function AppNav(){
         <div className="drawer-head"><span className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></span><LocalizedElement as="button" aria-label="Menü schließen" onClick={()=>setOpen(false)}><Icon name="close"/></LocalizedElement></div>
         <div className="drawer-identity"><span><Copy text={"DEINE ENTWICKLUNG"}/></span><strong><Copy text={"DEIN ATHLET."}/></strong></div>
         <div className="drawer-primary">
-          {items.map(([href,label,icon])=><Link href={href} onClick={()=>setOpen(false)} key={href}><Icon name={icon}/><span><Copy text={label}/></span></Link>)}
+          {items.map(([href,label,icon])=><Link href={href} onClick={()=>setOpen(false)} key={href}><Icon name={icon}/><span><Copy text={label==="START"&&locale==="en"?"HOME":label}/></span></Link>)}
         </div>
         <div className="drawer-links">{more.map(([href,label])=><Link href={href} onClick={()=>setOpen(false)} key={href}><Copy text={label}/><b>→</b></Link>)}</div>
         <p><Copy text={"Normal ist langweilig."}/></p>
