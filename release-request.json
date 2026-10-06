@@ -8,6 +8,6 @@
     "ios"
   ],
   "android_track": "internal",
-  "auto_submit": false,
+  "auto_submit": true,
   "release_notes": "Athlete System redesign: new brand typography, score cockpit, consistent forms and navigation across the app."
 }
