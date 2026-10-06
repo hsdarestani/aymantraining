@@ -1,0 +1,32 @@
+/* Explicit layouts for settings and conversations, independent of compact editors. */
+.settings-admin-grid{align-items:start;gap:24px}
+.settings-form-card{display:grid;gap:18px;align-content:start;min-width:0}
+.settings-form-card h2{margin:0 0 6px}
+.settings-form-card>label,.ai-message-field,.ai-settings-form>label:not(.checkline){display:grid;gap:8px;min-width:0;align-content:start}
+.settings-form-card input:not([type=checkbox]),.settings-form-card select,.settings-form-card textarea,.ai-message-field textarea,.ai-settings-form input:not([type=checkbox]),.ai-settings-form textarea,.ai-review details textarea{box-sizing:border-box;width:100%;min-width:0;max-width:100%;font:inherit;font-size:16px;line-height:1.5;background:var(--steel);color:var(--white);border:1px solid #3e4a52;border-radius:10px;padding:12px 14px;min-height:48px;outline:none}
+.settings-form-card textarea,.ai-settings-form textarea,.ai-review details textarea{min-height:120px;resize:vertical}
+.settings-form-card input:focus-visible,.settings-form-card select:focus-visible,.settings-form-card textarea:focus-visible,.ai-conversation textarea:focus-visible,.ai-settings-form input:focus-visible,.ai-settings-form textarea:focus-visible,.ai-review details textarea:focus-visible{border-color:var(--volt);box-shadow:0 0 0 3px rgba(215,255,0,.12)}
+.settings-form-card .checkline,.ai-settings-form .checkline{display:flex;gap:12px;min-height:48px;align-items:center}
+.settings-form-card input[type=checkbox],.ai-settings-form input[type=checkbox]{width:20px;height:20px;min-height:20px;flex:0 0 20px;margin:0;accent-color:var(--volt)}
+.ai-review{display:grid;gap:24px}
+.ai-review .admin-header{margin-bottom:0}
+.ai-review details{padding:18px 0;border-top:1px solid var(--line)}
+.ai-review summary{cursor:pointer;line-height:1.5}
+.ai-settings-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.ai-settings-form h2,.ai-settings-form .checkline,.ai-settings-form>label:last-of-type,.ai-settings-form>button{grid-column:1/-1}
+.ai-settings-form>button{justify-self:start;width:auto;min-width:180px}
+.ai-conversation{display:grid;gap:24px}
+.ai-message-field textarea{min-height:160px;resize:vertical}
+.ai-conversation .ai-actions{gap:12px}
+.ai-conversation .ai-actions button{width:auto;min-width:160px;flex:0 1 auto}
+.ai-message{padding:18px 20px;border:1px solid var(--line);border-radius:14px;max-width:85%;background:var(--steel);overflow-wrap:anywhere}
+.ai-message-user{justify-self:end;background:rgba(215,255,0,.06);border-color:rgba(215,255,0,.2)}
+.ai-message strong{font-size:11px;letter-spacing:.06em;color:var(--volt)}
+.ai-message p{margin-bottom:0;white-space:pre-wrap}
+.customer-table .athlete-row{grid-template-columns:12px minmax(140px,1.4fr) minmax(70px,.5fr) minmax(90px,.6fr) minmax(70px,.5fr) minmax(120px,1fr) auto;gap:16px;padding:20px 0}
+.customer-table .athlete-row strong,.customer-table .athlete-row small{min-width:0;overflow-wrap:anywhere}
+.customer-table .athlete-row .secondary{padding:10px 18px;min-width:90px;justify-self:end}
+.customer-table .athlete-row:last-child{border-bottom:0}
+@media(max-width:1100px){.customer-table .athlete-row{grid-template-columns:12px minmax(0,1fr) auto}.customer-table .athlete-row strong{grid-column:2;grid-row:1}.customer-table .athlete-row .secondary{grid-column:3;grid-row:1/4}.customer-table .athlete-row span,.customer-table .athlete-row small{grid-column:2;display:block}.customer-table .athlete-row{gap:8px 12px}}
+@media(max-width:800px){.settings-admin-grid{grid-template-columns:1fr}.ai-settings-form{grid-template-columns:1fr 1fr}.ai-review{gap:18px}.ai-message{max-width:100%}}
+@media(max-width:500px){.ai-settings-form{grid-template-columns:1fr}.ai-conversation .ai-actions{display:grid;grid-template-columns:1fr}.ai-conversation .ai-actions button{width:100%;min-width:0}.settings-form-card{gap:16px}.admin-header h1{overflow-wrap:anywhere}.customer-table .athlete-row .secondary{min-width:0;padding-inline:12px}}
