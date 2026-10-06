@@ -10,15 +10,16 @@
     "ios": {
       "bundleIdentifier": "com.smarbiz.bedifferent",
       "infoPlist": {
-        "NSHealthShareUsageDescription": "BE DIFFERENT nutzt freigegebene Health-Daten für Score, Recovery und persönliche Trainingsempfehlungen.",
-        "NSHealthUpdateUsageDescription": "BE DIFFERENT kann von dir gewählte Fitnessdaten in Apple Health speichern.",
-        "NSMicrophoneUsageDescription": "Das Mikrofon wird nur für Voice Messages an deinen Coach verwendet.",
-        "NSCameraUsageDescription": "Die Kamera wird für freiwillige Fortschritts- und Technikvideos sowie den BE FUEL Barcode Scan verwendet."
+        "NSHealthShareUsageDescription": "BE DIFFERENT nutzt freigegebene Health-Daten f\u00fcr Score, Recovery und pers\u00f6nliche Trainingsempfehlungen.",
+        "NSHealthUpdateUsageDescription": "BE DIFFERENT kann von dir gew\u00e4hlte Fitnessdaten in Apple Health speichern.",
+        "NSMicrophoneUsageDescription": "Das Mikrofon wird nur f\u00fcr Voice Messages an deinen Coach verwendet.",
+        "NSCameraUsageDescription": "Die Kamera wird f\u00fcr freiwillige Fortschritts- und Technikvideos sowie den BE FUEL Barcode Scan verwendet.",
+        "ITSAppUsesNonExemptEncryption": false
       },
       "icon": "./assets/favicon.png",
       "appleTeamId": "884MVA2MD5",
       "entitlements": {},
-      "buildNumber": "2"
+      "buildNumber": "9"
     },
     "android": {
       "package": "com.smarbiz.bedifferent",
@@ -41,7 +42,7 @@
         "foregroundImage": "./assets/favicon.png",
         "backgroundColor": "#D7FF00"
       },
-      "versionCode": 2,
+      "versionCode": 9,
       "blockedPermissions": [
         "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
         "android.permission.FOREGROUND_SERVICE"
@@ -54,8 +55,8 @@
       [
         "@kingstinct/react-native-healthkit",
         {
-          "NSHealthShareUsageDescription": "BE DIFFERENT nutzt freigegebene Health Daten für Score, Recovery und persönliche Trainingsempfehlungen.",
-          "NSHealthUpdateUsageDescription": "BE DIFFERENT kann von dir gewählte Fitnessdaten in Apple Health speichern.",
+          "NSHealthShareUsageDescription": "BE DIFFERENT nutzt freigegebene Health Daten f\u00fcr Score, Recovery und pers\u00f6nliche Trainingsempfehlungen.",
+          "NSHealthUpdateUsageDescription": "BE DIFFERENT kann von dir gew\u00e4hlte Fitnessdaten in Apple Health speichern.",
           "background": true
         }
       ],
@@ -74,15 +75,15 @@
       [
         "expo-audio",
         {
-          "microphonePermission": "BE DIFFERENT benötigt dein Mikrofon für Sprachnachrichten an deinen Trainer."
+          "microphonePermission": "BE DIFFERENT ben\u00f6tigt dein Mikrofon f\u00fcr Sprachnachrichten an deinen Trainer."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "BE DIFFERENT benötigt Zugriff auf deine Mediathek für Technikvideos und Fortschrittsbilder.",
-          "cameraPermission": "BE DIFFERENT benötigt deine Kamera für Technikvideos und Fortschrittsbilder.",
-          "microphonePermission": "BE DIFFERENT benötigt dein Mikrofon für Technikvideos."
+          "photosPermission": "BE DIFFERENT ben\u00f6tigt Zugriff auf deine Mediathek f\u00fcr Technikvideos und Fortschrittsbilder.",
+          "cameraPermission": "BE DIFFERENT ben\u00f6tigt deine Kamera f\u00fcr Technikvideos und Fortschrittsbilder.",
+          "microphonePermission": "BE DIFFERENT ben\u00f6tigt dein Mikrofon f\u00fcr Technikvideos."
         }
       ],
       "@bacons/apple-targets",
@@ -107,11 +108,11 @@
     "locales": {
       "de": {
         "ios": {
-          "NSHealthShareUsageDescription": "BE DIFFERENT nutzt freigegebene Health-Daten für Score, Recovery und persönliche Trainingsempfehlungen.",
-          "NSHealthUpdateUsageDescription": "BE DIFFERENT kann von dir gewählte Fitnessdaten in Apple Health speichern.",
-          "NSMicrophoneUsageDescription": "Das Mikrofon wird nur für Voice Messages an deinen Coach verwendet.",
-          "NSCameraUsageDescription": "Die Kamera wird für freiwillige Fortschritts- und Technikvideos sowie den BE FUEL Barcode Scan verwendet.",
-          "NSPhotoLibraryUsageDescription": "BE DIFFERENT benötigt Zugriff auf deine Mediathek für Technikvideos und Fortschrittsbilder."
+          "NSHealthShareUsageDescription": "BE DIFFERENT nutzt freigegebene Health-Daten f\u00fcr Score, Recovery und pers\u00f6nliche Trainingsempfehlungen.",
+          "NSHealthUpdateUsageDescription": "BE DIFFERENT kann von dir gew\u00e4hlte Fitnessdaten in Apple Health speichern.",
+          "NSMicrophoneUsageDescription": "Das Mikrofon wird nur f\u00fcr Voice Messages an deinen Coach verwendet.",
+          "NSCameraUsageDescription": "Die Kamera wird f\u00fcr freiwillige Fortschritts- und Technikvideos sowie den BE FUEL Barcode Scan verwendet.",
+          "NSPhotoLibraryUsageDescription": "BE DIFFERENT ben\u00f6tigt Zugriff auf deine Mediathek f\u00fcr Technikvideos und Fortschrittsbilder."
         }
       },
       "en": {
