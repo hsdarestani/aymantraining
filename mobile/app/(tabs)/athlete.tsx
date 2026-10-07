@@ -27,10 +27,10 @@ export default function Athlete(){
  const s0=d?.score,p=d?.pillarPreview||{};
  const pillars=[["S",p.strength],["E",p.endurance],["A",p.athleticism],["M",p.mobility],["R",p.recovery],["F",p.fuel],["C",p.consistency]] as const;
  return <Screen>
-  <View style={st.hero}><Eyebrow>ATHLETE SYSTEM</Eyebrow><Text style={st.big}>{(d?.user?.name||"DEIN ATHLET").toUpperCase()}</Text><Text style={st.heroCopy}>Alles, was deinen BD SCORE verändert, an einem Ort.</Text></View>
+  <View style={st.hero}><Eyebrow><Copy text="ATHLETEN SYSTEM"/></Eyebrow><Text style={st.big}>{(d?.user?.name||"DEIN ATHLET").toUpperCase()}</Text><Text style={st.heroCopy}><Copy text="Alles, was deinen BD SCORE verändert, an einem Ort."/></Text></View>
 
   <Pressable onPress={()=>router.push("/digital-twin")} style={st.identity}>
-   <View><Text style={st.scoreLabel}>BD SCORE · ZIEL 100%</Text><Text style={st.score}>{s0?.total??0}<Text style={st.percent}>%</Text></Text><Text style={[st.level,{color:scoreColor(s0?.total)}]}>{s0?.level||"NORMAL"}</Text></View>
+   <View><Text style={st.scoreLabel}><Copy text="BD SCORE · ZIEL 100%"/></Text><Text style={st.score}>{s0?.total??0}<Text style={st.percent}>%</Text></Text><Text style={[st.level,{color:scoreColor(s0?.total)}]}>{s0?.level||"NORMAL"}</Text></View>
    <View style={st.miniPillars}>{pillars.map(([key,value])=><View key={key} style={st.miniPillar}><View style={st.miniTrack}><View style={[st.miniFill,{height:`${Math.max(5,value??0)}%`,backgroundColor:scoreColor(value)}]}/></View><Text style={st.miniKey}>{key}</Text></View>)}</View>
   </Pressable>
 
