@@ -24,19 +24,19 @@ function Icon({name}:{name:IconName}){
 const items=[
   ["/dashboard","START","home"],
   ["/training","TRAINING","training"],
-  ["/progress","FORTSCHRITT","progress"],
-  ["/coach","TRAINER","coach"],
+  ["/progress","SCORE","progress"],
+  ["/coach","COACH","coach"],
   ["/athlete","ATHLET","athlete"]
 ] as const;
 
 const more=[
-  ["/ai","Different AI"],
+  ["/focus","BE FOCUSED"],\n  ["/ai","Different AI"],
   ["/wearables","Wearables"],
   ["/report","Wochenbericht"],
   ["/plans","Trainingspläne"],
   ["/library","Übungsbibliothek"],
-  ["/lifestyle","Regeneration"],
-  ["/fuel","Ernährung"],
+  ["/lifestyle","BE RESTED"],
+  ["/fuel","BE FUEL"],
   ["/tests","Leistungstests"],
   ["/checkin","Wochencheck"],
   ["/community","Gemeinschaft"],
