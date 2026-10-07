@@ -11,19 +11,21 @@ async function unlock(userId:string,key:string,name:string){
 
 export async function gamificationSnapshot(userId:string){
   const now=new Date(),since=new Date(Date.now()-120*dayMs);
-  const [workouts,checks,wearables,tests,score,badges,entries]=await Promise.all([
+  const [workouts,checks,wearables,tests,score,badges,entries,appOpens]=await Promise.all([
     prisma.workout.findMany({where:{userId,completedAt:{gte:since}},select:{completedAt:true,sets:true}}),
     prisma.dailyCheck.findMany({where:{userId,date:{gte:since}},select:{date:true,energy:true,mood:true,stress:true,soreness:true,sleepHours:true}}),
     prisma.wearableDaily.findMany({where:{userId,date:{gte:new Date(Date.now()-14*dayMs)}},select:{date:true,sleepMinutes:true}}),
     prisma.performanceTest.findMany({where:{userId,completedAt:{not:null}},include:{results:true}}),
     prisma.scoreSnapshot.findFirst({where:{userId},orderBy:{date:"desc"}}),
     prisma.badge.findMany({where:{userId},orderBy:{unlockedAt:"desc"}}),
-    prisma.challengeEntry.findMany({where:{userId}})
+    prisma.challengeEntry.findMany({where:{userId}}),
+    prisma.analyticsEvent.findMany({where:{userId,name:"app_open",createdAt:{gte:since}},select:{createdAt:true}})
   ]);
 
   const active=new Set<string>();
   workouts.forEach(w=>w.completedAt&&active.add(keyOf(w.completedAt)));
   checks.forEach(c=>active.add(keyOf(c.date)));
+  appOpens.forEach(e=>active.add(keyOf(e.createdAt)));
 
   let cursor=dateOnly(now);
   if(!active.has(keyOf(cursor)))cursor=new Date(cursor.getTime()-dayMs);

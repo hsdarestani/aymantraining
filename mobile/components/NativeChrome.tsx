@@ -10,16 +10,17 @@ import Animated,{FadeInDown,FadeInUp} from "react-native-reanimated";
 import {C,radius} from "../theme";
 
 const links=[
-  {label:"Different AI",path:"/different-ai",icon:MessageCircle},
+  {label:"BE FOCUSED",path:"/focus",icon:MessageCircle},
+  {label:"DIFFERENT AI",path:"/different-ai",icon:MessageCircle},
   {label:"Wearables",path:"/wearables",icon:HeartPulse},
   {label:"START",path:"/(tabs)",icon:House},
   {label:"TRAINING",path:"/(tabs)/training",icon:Dumbbell},
   {label:"FORTSCHRITT",path:"/(tabs)/progress",icon:TrendingUp},
-  {label:"TRAINER",path:"/(tabs)/coach",icon:MessageCircle},
+  {label:"COACH",path:"/(tabs)/coach",icon:MessageCircle},
   {label:"ATHLET",path:"/(tabs)/athlete",icon:UserRound},
   {label:"ÜBUNGEN",path:"/library",icon:BookOpen},
-  {label:"ERNÄHRUNG",path:"/fuel",icon:Utensils},
-  {label:"REGENERATION",path:"/lifestyle",icon:HeartPulse},
+  {label:"BE FUEL",path:"/fuel",icon:Utensils},
+  {label:"BE RESTED",path:"/lifestyle",icon:HeartPulse},
   {label:"GEMEINSCHAFT",path:"/community",icon:Users},
   {label:"EINSTELLUNGEN",path:"/settings",icon:Settings}
 ] as const;
@@ -63,7 +64,7 @@ const s=StyleSheet.create({
  chrome:{position:"absolute",zIndex:90,left:12,right:12,bottom:14,height:58,borderRadius:29,backgroundColor:"#101313F3",borderWidth:1,borderColor:C.line,flexDirection:"row",alignItems:"center",padding:6,gap:6,shadowColor:"#000",shadowOpacity:.38,shadowRadius:16,shadowOffset:{width:0,height:9}},
  quick:{height:46,borderRadius:23,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingHorizontal:13,backgroundColor:C.panel2,borderWidth:1,borderColor:C.line},quickText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1},
  iconQuick:{width:46,height:46,borderRadius:23,alignItems:"center",justifyContent:"center",backgroundColor:C.panel2,borderWidth:1,borderColor:C.line},
- menuPill:{flex:1,height:46,borderRadius:23,backgroundColor:C.volt,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:7,paddingHorizontal:15},menuText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.2},
+ menuPill:{flex:1,height:46,borderRadius:23,backgroundColor:C.red,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:7,paddingHorizontal:15},menuText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.2},
  modal:{flex:1,backgroundColor:"rgba(0,0,0,.62)",justifyContent:"flex-end"},sheetWrap:{width:"100%"},
  sheet:{backgroundColor:"#090B0A",borderTopLeftRadius:30,borderTopRightRadius:30,borderWidth:1,borderColor:C.line,padding:18,paddingBottom:28},
  head:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",marginBottom:18},brand:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:20,letterSpacing:-1},volt:{color:C.volt},caption:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.5,marginTop:3},
