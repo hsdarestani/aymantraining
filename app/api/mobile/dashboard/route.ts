@@ -20,6 +20,9 @@ function cycleSummary(enabled:boolean|undefined,start:Date|null|undefined,length
 export async function GET(){
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
  const today=dateOnly();
+ const tomorrow=new Date(today.getTime()+dayMs);
+ const opened=await prisma.analyticsEvent.findFirst({where:{userId:user.id,name:"app_open",createdAt:{gte:today,lt:tomorrow}},select:{id:true}});
+ if(!opened)await prisma.analyticsEvent.create({data:{userId:user.id,name:"app_open",properties:{surface:"mobile_home"}}});
  const timelineStart=new Date(today.getTime()-dayMs);
  const timelineEnd=new Date(today.getTime()+2*dayMs);
  const [score,check,wearable,nextWorkout,recommendations,nutrition,radarFull,scoreDetails,advancedWearable,context,timelineWorkouts,lineSetting]=await Promise.all([
