@@ -30,7 +30,8 @@ const items=[
 ] as const;
 
 const more=[
-  ["/focus","BE FOCUSED"],\n  ["/ai","Different AI"],
+  ["/focus","BE FOCUSED"],
+  ["/ai","Different AI"],
   ["/wearables","Wearables"],
   ["/report","Wochenbericht"],
   ["/plans","Trainingspläne"],
