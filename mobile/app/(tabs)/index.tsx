@@ -57,7 +57,7 @@ export default function Home(){
  const priority=useMemo(()=>d?.recommendations?.[0]||null,[d]);
  if(!d)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
  return <SafeAreaView edges={["top"]} style={s.safe}><ScrollView style={s.safe} contentContainerStyle={s.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
-  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,(score?.total??0)<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}>BD SCORE</Text><Text style={s.scorePillValue}>{score?.total??0}%</Text></Pressable></View>
+  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,(score?.total??0)<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}><Copy text="BD SCORE"/></Text><Text style={s.scorePillValue}>{score?.total??0}%</Text></Pressable></View>
 
   <View style={s.hero}>
    <View style={s.athleteGhost}><View style={s.ghostHead}/><View style={s.ghostTorso}/><View style={s.ghostLegs}/></View>
@@ -72,9 +72,9 @@ export default function Home(){
   </Pressable>:null}
 
   <Card style={s.scoreCard}>
-   <View style={s.scoreTop}><View style={s.scoreIdentity}><Eyebrow>BE DIFFERENT SCORE</Eyebrow><Text style={s.scoreCaption}><Copy text="DEIN TAGESZIEL: 100%"/></Text><Text style={s.data}><Copy text={"DATEN"}/> {score?.completeness??0}%</Text></View><ScoreSignature score={score?.total??0} level={score?.level||"NORMAL"}/></View>
+   <View style={s.scoreTop}><View style={s.scoreIdentity}><Eyebrow><Copy text="BE DIFFERENT SCORE"/></Eyebrow><Text style={s.scoreCaption}><Copy text="DEIN TAGESZIEL: 100%"/></Text><Text style={s.data}><Copy text={"DATEN"}/> {score?.completeness??0}%</Text></View><ScoreSignature score={score?.total??0} level={score?.level||"NORMAL"}/></View>
    <Pillars values={pillars}/>
-   <Pressable onPress={()=>router.push("/digital-twin")}><Text style={s.scoreLink}>ATHLETE DIGITAL TWIN ÖFFNEN →</Text></Pressable>
+   <Pressable onPress={()=>router.push("/digital-twin")}><Text style={s.scoreLink}><Copy text="ATHLETE DIGITAL TWIN ÖFFNEN →"/></Text></Pressable>
   </Card>
 
   <View style={s.sectionHead}><View><Eyebrow>DEINE 72 STUNDEN</Eyebrow><Text style={s.sectionTitle}>BELASTUNG IM BLICK.</Text></View></View>
@@ -87,7 +87,7 @@ export default function Home(){
 
   <View style={s.teaserRow}>
    <Pressable style={s.teaser} onPress={()=>router.push("/lifestyle")}><Text style={s.teaserTag}>BE RESTED</Text><Text style={s.teaserBig}>{sleep==null?"—":sleep+" h"}</Text><Text style={s.teaserCopy}>Schlaf und Recovery</Text></Pressable>
-   <Pressable style={s.teaser} onPress={()=>router.push("/fuel")}><Text style={s.teaserTag}>BE FUEL</Text><Text style={s.teaserBig}>{Math.round(a.proteinG||0)} g</Text><Text style={s.teaserCopy}>Protein heute</Text></Pressable>
+   <Pressable style={s.teaser} onPress={()=>router.push("/fuel")}><Text style={s.teaserTag}><Copy text="BE FUEL"/></Text><Text style={s.teaserBig}>{Math.round(a.proteinG||0)} g</Text><Text style={s.teaserCopy}>Protein heute</Text></Pressable>
   </View>
   <View style={s.teaserRow}>
    <Pressable style={s.teaser} onPress={()=>router.push("/focus")}><Text style={s.teaserTag}>BE FOCUSED</Text><Text style={s.teaserBig}>02:00</Text><Text style={s.teaserCopy}>Atmung und Tagescheck</Text></Pressable>
