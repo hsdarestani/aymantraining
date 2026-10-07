@@ -86,7 +86,7 @@ export default function Home(){
   </Pressable>})}</View>
 
   <View style={s.teaserRow}>
-   <Pressable style={s.teaser} onPress={()=>router.push("/lifestyle")}><Text style={s.teaserTag}>BE RESTED</Text><Text style={s.teaserBig}>{sleep==null?"—":sleep+" h"}</Text><Text style={s.teaserCopy}>Schlaf und Recovery</Text></Pressable>
+   <Pressable style={s.teaser} onPress={()=>router.push("/lifestyle")}><Text style={s.teaserTag}>BE RESTED</Text><Text style={s.teaserBig}>{sleep==null?"Keine Angabe":sleep+" h"}</Text><Text style={s.teaserCopy}><Copy text="Schlaf und Erholung"/></Text></Pressable>
    <Pressable style={s.teaser} onPress={()=>router.push("/fuel")}><Text style={s.teaserTag}><Copy text="BE FUEL"/></Text><Text style={s.teaserBig}>{Math.round(a.proteinG||0)} g</Text><Text style={s.teaserCopy}>Protein heute</Text></Pressable>
   </View>
   <View style={s.teaserRow}>
