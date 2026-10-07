@@ -10,7 +10,8 @@ import Animated,{FadeInDown,FadeInUp} from "react-native-reanimated";
 import {C,radius} from "../theme";
 
 const links=[
-  {label:"BE FOCUSED",path:"/focus",icon:MessageCircle},\n  {label:"DIFFERENT AI",path:"/different-ai",icon:MessageCircle},
+  {label:"BE FOCUSED",path:"/focus",icon:MessageCircle},
+  {label:"DIFFERENT AI",path:"/different-ai",icon:MessageCircle},
   {label:"Wearables",path:"/wearables",icon:HeartPulse},
   {label:"START",path:"/(tabs)",icon:House},
   {label:"TRAINING",path:"/(tabs)/training",icon:Dumbbell},
