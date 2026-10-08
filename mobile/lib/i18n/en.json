@@ -1579,5 +1579,16 @@
   "Im Schlaf": "During sleep",
   "Momentaufnahme": "Current snapshot",
   "7 TAGE RUHEPULS": "7 DAY RESTING HR",
-  "Heute": "Today"
+  "Heute": "Today",
+  "PRIVATE ATHLETENFOTOS": "PRIVATE ATHLETE PHOTOS",
+  "Fotos für dein Athlete Profil": "Photos for your athlete profile",
+  "Die Bilder werden verschlüsselt gespeichert und nicht im öffentlichen GitHub Repository abgelegt.": "The images are stored encrypted and are not placed in the public GitHub repository.",
+  "WIRD HOCHGELADEN…": "UPLOADING…",
+  "FOTOS AUSWÄHLEN": "SELECT PHOTOS",
+  "HOCHGELADEN": "UPLOADED",
+  "ATHLETENFOTOS": "ATHLETE PHOTOS",
+  "Dein Profil. Deine Bilder.": "Your profile. Your photos.",
+  "Diese Bilder bleiben privat in deinem Account und können für deine Athlete Ansicht verwendet werden.": "These images stay private in your account and can be used for your athlete view.",
+  "GALERIE": "GALLERY",
+  "Noch keine privaten Athlete Bilder hochgeladen.": "No private athlete photos uploaded yet."
 }
