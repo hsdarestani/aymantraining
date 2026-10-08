@@ -11,12 +11,12 @@ import {C} from "../../theme";
 const modules=[
  {label:"ATHLETE DIGITAL TWIN",sub:"Radar · Ziel · Prognose",path:"/digital-twin",accent:"score"},
  {label:"BE FUEL",sub:"Ernährung · Barcode · Wasser",path:"/fuel",accent:"red"},
- {label:"BE RESTED",sub:"Schlaf · Recovery Bibliothek",path:"/lifestyle",accent:"rest"},
+ {label:"BE RESTED",sub:"Schlaf · Regenerationsbibliothek",path:"/lifestyle",accent:"rest"},
  {label:"BE FOCUSED",sub:"2 Min Atmung · Tagescheck",path:"/focus",accent:"red"},
  {label:"GADGETS",sub:"Apple · Samsung · Xiaomi · mehr",path:"/wearables",accent:"rest"},
  {label:"ZYKLUS & KONTEXT",sub:"Zyklus · Spieltag · Reise",path:"/context",accent:"red"},
- {label:"CHALLENGES",sub:"Streak · Leaderboard · Badges",path:"/community",accent:"rest"},
- {label:"COACH",sub:"Chat · Briefing · Feedback",path:"/(tabs)/coach",accent:"score"}
+ {label:"HERAUSFORDERUNGEN",sub:"Serie · Rangliste · Abzeichen",path:"/community",accent:"rest"},
+ {label:"COACH",sub:"Chat · Überblick · Rückmeldung",path:"/(tabs)/coach",accent:"score"}
 ] as const;
 
 function scoreColor(v:number|null|undefined){return v==null?C.dim:v<60?C.red:v<80?C.amber:C.green}
