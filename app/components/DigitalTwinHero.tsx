@@ -1,3 +1,4 @@
+import {Copy} from "./Locale";
 export default function DigitalTwinHero(){
   return <div className="bd-digital-twin-hero" aria-hidden="true">
     <div className="bd-twin-orbit bd-twin-orbit-a"/>
@@ -88,8 +89,8 @@ export default function DigitalTwinHero(){
       </g>
     </svg>
     <div className="bd-twin-hud">
-      <span>DIGITAL TWIN</span>
-      <b>LIVE</b>
+      <span><Copy text="DIGITAL TWIN"/></span>
+      <b><Copy text="LIVE"/></b>
     </div>
   </div>;
 }
