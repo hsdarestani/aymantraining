@@ -11,12 +11,12 @@ import {C} from "../../theme";
 const modules=[
  {label:"ATHLETE DIGITAL TWIN",sub:"Radar · Ziel · Prognose",path:"/digital-twin",accent:"score"},
  {label:"BE FUEL",sub:"Ernährung · Barcode · Wasser",path:"/fuel",accent:"red"},
- {label:"BE RESTED",sub:"Schlaf · Recovery Bibliothek",path:"/lifestyle",accent:"rest"},
+ {label:"BE RESTED",sub:"Schlaf · Regenerationsbibliothek",path:"/lifestyle",accent:"rest"},
  {label:"BE FOCUSED",sub:"2 Min Atmung · Tagescheck",path:"/focus",accent:"red"},
  {label:"GADGETS",sub:"Apple · Samsung · Xiaomi · mehr",path:"/wearables",accent:"rest"},
- {label:"CYCLE & CONTEXT",sub:"Zyklus · Spieltag · Reise",path:"/context",accent:"red"},
- {label:"CHALLENGES",sub:"Streak · Leaderboard · Badges",path:"/community",accent:"rest"},
- {label:"COACH",sub:"Chat · Briefing · Feedback",path:"/(tabs)/coach",accent:"score"}
+ {label:"ZYKLUS & KONTEXT",sub:"Zyklus · Spieltag · Reise",path:"/context",accent:"red"},
+ {label:"HERAUSFORDERUNGEN",sub:"Serie · Rangliste · Abzeichen",path:"/community",accent:"rest"},
+ {label:"COACH",sub:"Chat · Überblick · Rückmeldung",path:"/(tabs)/coach",accent:"score"}
 ] as const;
 
 function scoreColor(v:number|null|undefined){return v==null?C.dim:v<60?C.red:v<80?C.amber:C.green}
@@ -30,24 +30,24 @@ export default function Athlete(){
   <View style={st.hero}><Eyebrow><Copy text="ATHLETEN SYSTEM"/></Eyebrow><Text style={st.big}>{(d?.user?.name||"DEIN ATHLET").toUpperCase()}</Text><Text style={st.heroCopy}><Copy text="Alles, was deinen BD SCORE verändert, an einem Ort."/></Text></View>
 
   <Pressable onPress={()=>router.push("/digital-twin")} style={st.identity}>
-   <View><Text style={st.scoreLabel}><Copy text="BD SCORE · ZIEL 100%"/></Text><Text style={st.score}>{s0?.total??0}<Text style={st.percent}>%</Text></Text><Text style={[st.level,{color:scoreColor(s0?.total)}]}>{s0?.level||"NORMAL"}</Text></View>
+   <View><Text style={st.scoreLabel}><Copy text="BD SCORE · ZIEL 100%"/></Text><Text style={st.score}>{s0?.total??0}<Text style={st.percent}>%</Text></Text><Text style={[st.level,{color:scoreColor(s0?.total)}]}><Copy text={s0?.level||"NORMAL"}/></Text></View>
    <View style={st.miniPillars}>{pillars.map(([key,value])=><View key={key} style={st.miniPillar}><View style={st.miniTrack}><View style={[st.miniFill,{height:`${Math.max(5,value??0)}%`,backgroundColor:scoreColor(value)}]}/></View><Text style={st.miniKey}>{key}</Text></View>)}</View>
   </Pressable>
 
   <View style={st.grid}>{modules.map(item=><Pressable key={item.label} onPress={()=>router.push(item.path as any)} style={[st.module,item.accent==="red"&&st.moduleRed,item.accent==="score"&&st.moduleScore]}>
-   <Text style={[st.moduleLabel,item.accent==="red"&&{color:C.red}]}>{item.label}</Text>
-   <Text style={st.moduleSub}>{item.sub}</Text><Text style={st.arrow}>→</Text>
+   <Text style={[st.moduleLabel,item.accent==="red"&&{color:C.red}]}><Copy text={item.label}/></Text>
+   <Text style={st.moduleSub}><Copy text={item.sub}/></Text><Text style={st.arrow}>→</Text>
   </Pressable>)}</View>
 
-  <Card><Eyebrow>MEHR</Eyebrow>
+  <Card><Eyebrow><Copy text="MEHR"/></Eyebrow>
    <View style={st.actions}>
     {[
      ["TRAININGSPLÄNE","/plans"],["ÜBUNGSBIBLIOTHEK","/library"],["LEISTUNGSTESTS","/tests"],["WOCHENBERICHT","/report"],
-     ["PERFORMANCE TIMELINE","/performance-timeline"],["APPLE WATCH & WIDGET","/watch"],["DIFFERENT AI","/different-ai"],
-     ["EVENTS & VIDEO CALLS","/events"],["FREUNDE EINLADEN","/referral"],["WOCHENCHECK","/checkin"],
-     ["EINSTELLUNGEN & DATENSCHUTZ","/settings"],["MITGLIEDSCHAFT","/membership"],["PROFIL & HEALTH DATEN","/onboarding"]
-    ].map(([label,path])=><Pressable key={path} onPress={()=>router.push(path as any)} style={st.row}><Text style={st.rowText}>{label}</Text><Text style={st.rowArrow}>→</Text></Pressable>)}
-    <Pressable onPress={async()=>{await clearSession();router.replace("/")}} style={st.row}><Text style={st.rowText}>ABMELDEN</Text><Text style={st.rowArrow}>→</Text></Pressable>
+     ["LEISTUNGSVERLAUF","/performance-timeline"],["APPLE WATCH & WIDGET","/watch"],["DIFFERENT AI","/different-ai"],
+     ["TERMINE & VIDEOANRUFE","/events"],["FREUNDE EINLADEN","/referral"],["WOCHENCHECK","/checkin"],
+     ["EINSTELLUNGEN & DATENSCHUTZ","/settings"],["MITGLIEDSCHAFT","/membership"],["PROFIL & GESUNDHEITSDATEN","/onboarding"]
+    ].map(([label,path])=><Pressable key={path} onPress={()=>router.push(path as any)} style={st.row}><Text style={st.rowText}><Copy text={label}/></Text><Text style={st.rowArrow}>→</Text></Pressable>)}
+    <Pressable onPress={async()=>{await clearSession();router.replace("/")}} style={st.row}><Text style={st.rowText}><Copy text="ABMELDEN"/></Text><Text style={st.rowArrow}>→</Text></Pressable>
    </View>
   </Card>
  </Screen>
