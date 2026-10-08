@@ -56,7 +56,7 @@ export default async function Dashboard(){
   return <main className="bd-web-home">
     <header className="bd-home-top">
       <Link href="/dashboard" className="bd-home-wordmark">BE DIFFERENT</Link>
-      <Link href="/athlete" className={"bd-score-chip "+signal(total)}><span>BD SCORE</span><strong>{total}%</strong></Link>
+      <Link href="/athlete" className={"bd-score-chip "+signal(total)}><span><Copy text="BD SCORE"/></span><strong>{total}%</strong></Link>
     </header>
 
     <section className="bd-home-hero">
@@ -73,7 +73,7 @@ export default async function Dashboard(){
 
     <section className="bd-score-panel">
       <div className="bd-score-head">
-        <div><span className="eyebrow">BE DIFFERENT SCORE</span><h2>DEIN TAGESZIEL: 100%</h2><small>DATEN {score?.completeness??0}%</small></div>
+        <div><span className="eyebrow"><Copy text="BE DIFFERENT SCORE"/></span><h2>DEIN TAGESZIEL: 100%</h2><small>DATEN {score?.completeness??0}%</small></div>
         <div className={"bd-score-ring "+signal(total)} style={{"--score":`${total}%`} as React.CSSProperties}>
           <div><strong>{total}<small>%</small></strong><span>{levelForScore(total)}</span></div>
         </div>
@@ -84,7 +84,7 @@ export default async function Dashboard(){
           <b>{letter}</b><strong>{value==null?"Keine Angabe":Math.round(value)}</strong><span>{label}</span>
         </Link>)}
       </div>
-      <Link href="/athlete" className="bd-volt-link">ATHLETE DIGITAL TWIN ÖFFNEN →</Link>
+      <Link href="/athlete" className="bd-volt-link"><Copy text="ATHLETE DIGITAL TWIN ÖFFNEN →"/></Link>
     </section>
 
     <section className="bd-section-title"><span className="eyebrow">DEINE 72 STUNDEN</span><h2>BELASTUNG IM BLICK.</h2></section>
@@ -102,12 +102,12 @@ export default async function Dashboard(){
 
     <section className="bd-module-grid">
       <Link href="/lifestyle" className="bd-module-card"><span>BE RESTED</span><strong>{sleepHours==null?"Keine Angabe":sleepHours+" h"}</strong><p>Schlaf und Erholung</p></Link>
-      <Link href="/fuel" className="bd-module-card"><span>BE FUEL</span><strong>{protein} g</strong><p>Protein heute</p></Link>
+      <Link href="/fuel" className="bd-module-card"><span><Copy text="BE FUEL"/></span><strong>{protein} g</strong><p>Protein heute</p></Link>
       <Link href="/focus" className="bd-module-card red"><span>BE FOCUSED</span><strong>02:00</strong><p>Atmung und Tagescheck</p></Link>
-      <Link href="/community" className="bd-module-card red"><span>CHALLENGES</span><strong>→</strong><p>Streak · Leaderboard · Badges</p></Link>
+      <Link href="/community" className="bd-module-card red"><span><Copy text="CHALLENGES"/></span><strong>→</strong><p><Copy text="Streak · Leaderboard · Badges"/></p></Link>
     </section>
 
-    {cycle&&<Link href="/context" className="bd-cycle-card"><span>CYCLE CONTEXT</span><strong>TAG {cycle.day} · {cycle.phase}</strong><p>Training und Recovery berücksichtigen deinen freiwilligen Zykluskontext.</p></Link>}
+    {cycle&&<Link href="/context" className="bd-cycle-card"><span>CYCLE CONTEXT</span><strong>TAG {cycle.day} · {cycle.phase}</strong><p><Copy text="Training und Recovery berücksichtigen deinen freiwilligen Zykluskontext."/></p></Link>}
 
     <Link href={nextWorkout?`/training/${nextWorkout.id}`:"/training"} className="bd-workout-card">
       <span>HEUTIGES TRAINING</span><h2>{nextWorkout?.title||"REGENERATIONSTAG"}</h2>
@@ -117,8 +117,8 @@ export default async function Dashboard(){
 
     <section className="bd-quick-links">
       <Link href="/wearables"><span>GADGETS</span><strong>Apple · Samsung · Xiaomi</strong></Link>
-      <Link href="/athlete"><span>ATHLETE DIGITAL TWIN</span><strong>Radar · Ziel · Prognose</strong></Link>
-      <Link href="/coach"><span>COACH</span><strong>Chat · Briefing · Feedback</strong></Link>
+      <Link href="/athlete"><span><Copy text="ATHLETE DIGITAL TWIN"/></span><strong>Radar · Ziel · Prognose</strong></Link>
+      <Link href="/coach"><span><Copy text="COACH"/></span><strong>Chat · Briefing · Feedback</strong></Link>
     </section>
   </main>;
 }
