@@ -1,54 +1,124 @@
-
 import {Copy,LocalizedValue} from "../components/Locale";
 import Link from "next/link";
 import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";
 import {levelForScore} from "../../lib/scoring";
 import {dateOnly} from "../../lib/http";
-import {hasFeature} from "../../lib/entitlements";
 export const dynamic="force-dynamic";
-function v(x:number|null|undefined){return x==null?"Keine Angabe":Math.round(x)}
+
+const dayMs=86400000;
+function signal(value:number|null|undefined){return value==null?"empty":value<60?"red":value<80?"amber":"green"}
+function sameDay(a:Date,b:Date){return dateOnly(a).getTime()===dateOnly(b).getTime()}
 
 export default async function Dashboard(){
   const user=await requireUser();
-  const [score,check,wearable,nextWorkout,recs,scoreDetails,radarFull]=await Promise.all([
+  const today=dateOnly();
+  const timelineStart=new Date(today.getTime()-dayMs);
+  const timelineEnd=new Date(today.getTime()+2*dayMs);
+  const [score,check,wearable,nextWorkout,recs,nutrition,context,timelineWorkouts,lineSetting]=await Promise.all([
     prisma.scoreSnapshot.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
-    prisma.dailyCheck.findUnique({where:{userId_date:{userId:user.id,date:dateOnly()}}}),
+    prisma.dailyCheck.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
     prisma.wearableDaily.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
     prisma.workout.findFirst({where:{userId:user.id,completedAt:null,scheduledAt:{gte:new Date(Date.now()-12*60*60*1000)}},orderBy:{scheduledAt:"asc"}}),
-    prisma.recommendation.findMany({where:{userId:user.id,date:dateOnly()},orderBy:{createdAt:"desc"},take:3}),
-    hasFeature(user.subscriptionTier,"score_details"),
-    hasFeature(user.subscriptionTier,"coach_radar_full")
+    prisma.recommendation.findMany({where:{userId:user.id,date:today},orderBy:{createdAt:"desc"},take:3}),
+    prisma.nutritionDaily.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
+    prisma.athleteContext.findUnique({where:{userId:user.id}}),
+    prisma.workout.findMany({where:{userId:user.id,scheduledAt:{gte:timelineStart,lt:timelineEnd}},select:{id:true,title:true,scheduledAt:true,completedAt:true},orderBy:{scheduledAt:"asc"}}),
+    prisma.systemSetting.findUnique({where:{key:"different_lines"}})
   ]);
+
   const total=score?.total??0;
-  const pillars=[["KRAFT",score?.strength],["AUSDAUER",score?.endurance],["ATHLETIK",score?.athleticism],["BEWEGLICHKEIT",score?.mobility],["REGENERATION",score?.recovery],["ERNÄHRUNG",score?.fuel],["BESTÄNDIGKEIT",score?.consistency]] as const;
-  const rec=recs[0];
+  const pillars=[
+    ["S","KRAFT",score?.strength],["E","AUSDAUER",score?.endurance],["A","ATHLETIK",score?.athleticism],
+    ["M","MOBILITY",score?.mobility],["R","RECOVERY",score?.recovery],["F","FUEL",score?.fuel],["C","KONSTANZ",score?.consistency]
+  ] as const;
+  const lines=Array.isArray(lineSetting?.value)?lineSetting.value as string[]:[];
+  const dailyLine=String(lines[Math.floor(Date.now()/dayMs)%Math.max(1,lines.length)]||"Heute zählt die nächste saubere Entscheidung.");
+  const dayStrip=[-1,0,1].map(offset=>{
+    const date=new Date(today.getTime()+offset*dayMs);
+    const workouts=timelineWorkouts.filter(w=>w.scheduledAt&&sameDay(w.scheduledAt,date));
+    return {offset,date,workouts};
+  });
+  const dayNames=["GESTERN","HEUTE","MORGEN"];
+  const sleepHours=wearable?.sleepMinutes!=null?Math.round(wearable.sleepMinutes/6)/10:check?.sleepHours;
+  const protein=Math.round(nutrition?.proteinG??check?.proteinG??0);
+  const cycle=(()=>{
+    if(!context?.cycleTrackingEnabled||!context.cycleStartDate)return null;
+    const length=Math.max(20,Math.min(45,context.cycleLengthDays||28));
+    const days=Math.max(0,Math.floor((today.getTime()-dateOnly(context.cycleStartDate).getTime())/dayMs));
+    const day=days%length+1;
+    const ovulation=Math.max(10,Math.round(length-14));
+    const phase=day<=5?"MENSTRUATION":day<ovulation-1?"FOLLICULAR":day<=ovulation+1?"OVULATION":"LUTEAL";
+    return {day,phase};
+  })();
+  const priority=recs[0];
 
-  return <main className="shell">
-    <header className="topbar"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><div className="top-actions"><Link href="/report" className="ghost"><Copy text={"Wochenbericht"}/></Link><Link href="/settings" className="ghost"><Copy text={"Einstellungen"}/></Link><div className="avatar">{(user.name||"A").slice(0,2).toUpperCase()}</div></div></header>
+  return <main className="bd-web-home">
+    <header className="bd-home-top">
+      <Link href="/dashboard" className="bd-home-wordmark">BE DIFFERENT</Link>
+      <Link href="/athlete" className={"bd-score-chip "+signal(total)}><span>BD SCORE</span><strong>{total}%</strong></Link>
+    </header>
 
-    <section className="athlete-intro"><div><span className="eyebrow" lang="en">BUILD YOUR ATHLETE</span><h1><Copy text="GUTEN MORGEN,"/> {user.name||"Athlet"}.</h1></div><span className="intro-note"><Copy text="Deine Daten werden zu einer klaren Entscheidung für heute."/></span></section>
-    <section className="athlete-cockpit">
-      <article className="score-command"><div><span className="eyebrow" lang="en">BE DIFFERENT SCORE</span><h2><Copy text="Dein Athlet."/></h2><span className="level">{levelForScore(total)}</span><p><Copy text="Du trainierst nicht. Du entwickelst dich."/></p><div className="live"><i/><Copy text="DATEN VOLLSTÄNDIG"/> {score?.completeness??0}%</div></div><div className="score-ring" role="img" aria-label={`BE DIFFERENT ${total}%`} style={{background:`conic-gradient(var(--volt) 0 ${total}%, #303b42 ${total}% 100%)`}}><div className="score-inner"><strong>{total}<span className="score-unit">%</span></strong><small>DIFFERENT</small></div></div></article>
-      <article className="panel today-command"><div className="command-footer"><span className="eyebrow"><Copy text="HEUTIGES TRAINING"/></span><span><Copy text={nextWorkout?"BEREIT":"PAUSE"}/></span></div><h2><Copy text={nextWorkout?.title||"Regeneration zählt auch"}/></h2><p>{nextWorkout?.scheduledAt?<LocalizedValue value={nextWorkout.scheduledAt}/>:<Copy text="Dein Trainer kann den nächsten Plan zuweisen."/>}</p><Link href={nextWorkout?`/training/${nextWorkout.id}`:"/training"} className="primary"><Copy text={nextWorkout?"TRAINING STARTEN":"TRAINING ÖFFNEN"}/><b aria-hidden="true">↗</b></Link></article>
+    <section className="bd-home-hero">
+      <div className="bd-athlete-ghost" aria-hidden="true"><i/><b/><em/></div>
+      <span className="eyebrow"><Copy text="GUTEN MORGEN"/></span>
+      <h1>{(user.name||"ATHLET").toUpperCase()}</h1>
+      <p>{dailyLine}</p>
+      <Link href="/focus" className="bd-red-link">BE FOCUSED · 2 MIN ATMUNG →</Link>
     </section>
-    <section className="dashboard-grid">
-      <article className={radarFull?"panel":"panel locked-radar"}>
-        <div className="panel-head"><div><span className="eyebrow"><Copy text={"TRAINER RADAR"}/></span><h2><Copy text={radarFull?(rec?.title||"Daten sammeln."):"Dein Tageszustand."}/></h2></div><span className="tag amber"><Copy text={radarFull?`REGENERATION ${v(score?.recovery)}`:"PRO"}/></span></div>
-        <div className="radar-wrap">
-          <div className="data-completeness"><strong>{score?.completeness??0}%</strong><span><Copy text={"DATEN VOLLSTÄNDIG"}/></span></div>
-          <div className={!radarFull?"radar-locked-content":""}><span className="signal"><Copy text={"HEUTIGE EMPFEHLUNG"}/></span><h3><Copy text={radarFull?(rec?.action||"Mach deinen täglichen Tagescheck."):"Persönliche Empfehlung freischalten"}/></h3><p><Copy text={radarFull?(rec?.explanation||"Sobald Training, Wearable oder Tagescheck Daten vorliegen, erklärt der Trainer Radar den Tageszustand."):"KOSTENLOS zeigt den Gesamtzustand. PRO erklärt warum und was du heute konkret tun solltest."}/></p>{radarFull?<Link href="/settings" className="secondary"><Copy text={"TAGESCHECK"}/></Link>:<Link href="/pricing" className="secondary"><Copy text={"PRO TESTEN"}/></Link>}</div>
+
+    {priority&&<Link href="/lifestyle" className="bd-priority">
+      <span>HEUTE WICHTIG</span><strong>{priority.title}</strong><p>{priority.action}</p>
+    </Link>}
+
+    <section className="bd-score-panel">
+      <div className="bd-score-head">
+        <div><span className="eyebrow">BE DIFFERENT SCORE</span><h2>DEIN TAGESZIEL: 100%</h2><small>DATEN {score?.completeness??0}%</small></div>
+        <div className={"bd-score-ring "+signal(total)} style={{"--score":`${total}%`} as React.CSSProperties}>
+          <div><strong>{total}<small>%</small></strong><span>{levelForScore(total)}</span></div>
         </div>
-      </article>
-
-      <article className="panel"><div className="panel-head"><div><span className="eyebrow"><Copy text={"HEUTE"}/></span><h2><Copy text={"Tageswerte"}/></h2></div></div><div className="metrics"><div><span><Copy text={"SCHLAF"}/></span><strong><Copy text={wearable?.sleepMinutes?`${Math.floor(wearable.sleepMinutes/60)}:${String(wearable.sleepMinutes%60).padStart(2,"0")}`:check?.sleepHours?`${check.sleepHours}h`:"Keine Angabe"}/></strong><small><Copy text={wearable?.sleepMinutes?"Gerätedaten":"Tagescheck"}/></small></div><div><span><Copy text={"SCHRITTE"}/></span><strong>{(wearable?.steps??check?.steps)==null?<Copy text="Keine Angabe"/>:<LocalizedValue value={wearable?.steps??check?.steps}/>}</strong><small><Copy text={"letzte Aktualisierung"}/></small></div><div><span><Copy text={"WASSER"}/></span><strong><Copy text={check?.waterMl?`${(check.waterMl/1000).toFixed(1)}L`:"Keine Angabe"}/></strong><small><Copy text={"Tagescheck"}/></small></div><div><span>PROTEIN</span><strong><Copy text={check?.proteinG?`${Math.round(check.proteinG)}g`:"Keine Angabe"}/></strong><small><Copy text={"Tagescheck"}/></small></div></div></article>
-
-      <article className="panel coach"><div className="coach-head"><div className="coach-pic">A</div><div><span className="eyebrow"><Copy text={"DEIN TRAINER"}/></span><h2>Ayman</h2></div><span className="online"><Copy text={"TRAINER"}/></span></div><blockquote><Copy text={"“Regeneration gehört zum Training. Sei anders und erhole dich bewusst.”"}/></blockquote><div className="coach-actions"><Link href="/coach" className="secondary"><Copy text={"NACHRICHT"}/></Link><Link href="/report" className="secondary"><Copy text={"WOCHENBERICHT"}/></Link></div></article>
+      </div>
+      <div className="bd-pillar-strip">
+        {pillars.map(([letter,label,value])=><Link href="/athlete" className="bd-pillar-mini" key={letter}>
+          <div className="bd-pillar-rail"><i className={signal(value)} style={{height:`${Math.max(6,value??0)}%`}}/></div>
+          <b>{letter}</b><strong>{value==null?"Keine Angabe":Math.round(value)}</strong><span>{label}</span>
+        </Link>)}
+      </div>
+      <Link href="/athlete" className="bd-volt-link">ATHLETE DIGITAL TWIN ÖFFNEN →</Link>
     </section>
 
-    <section className={scoreDetails?"pillars":"pillars locked-score-details"}>
-      <div className="section-head"><div><span className="eyebrow"><Copy text={"DEIN ATHLET"}/></span><h2><Copy text={"Du trainierst nicht. Du entwickelst dich."}/></h2></div><span className="week"><Copy text={scoreDetails?(score?"AKTUELLES PROFIL":"AUSGANGSWERT"):"PRO DETAILS"}/></span></div>
-      {scoreDetails?<div className="pillar-grid">{pillars.map(([name,p])=><div className="pillar" key={name}><div><span><Copy text={name}/></span><strong><Copy text={p??"Keine Angabe"}/></strong></div><div className="bar"><i style={{width:`${p??0}%`}}/></div><small><Copy text={p==null?"Daten fehlen":"aktuell"}/></small></div>)}</div>:<div className="locked-feature-inline"><div className="blur-pillars">{pillars.slice(0,4).map(([name],i)=><div className="pillar" key={name}><div><span><Copy text={name}/></span><strong>{[78,64,71,58][i]}</strong></div><div className="bar"><i style={{width:`${[78,64,71,58][i]}%`}}/></div></div>)}</div><div><strong><Copy text={"Teilwerte, Verlauf und Erklärungen sind PRO."}/></strong><Link href="/pricing" className="secondary"><Copy text={"PRO FREISCHALTEN"}/></Link></div></div>}
+    <section className="bd-section-title"><span className="eyebrow">DEINE 72 STUNDEN</span><h2>BELASTUNG IM BLICK.</h2></section>
+    <section className="bd-day-strip">
+      {dayStrip.map((day,i)=>{
+        const first=day.workouts[0];
+        return <Link href="/training" className={i===1?"bd-day-card active":"bd-day-card"} key={day.date.toISOString()}>
+          <span>{dayNames[i]}</span>
+          <strong><LocalizedValue value={day.date} format="toLocaleDateString"/></strong>
+          <p>{first?.title||(i===1?"REGENERATION ODER FREI":"NOCH NICHTS GEPLANT")}</p>
+          {first?.completedAt&&<small>ERLEDIGT</small>}
+        </Link>
+      })}
+    </section>
+
+    <section className="bd-module-grid">
+      <Link href="/lifestyle" className="bd-module-card"><span>BE RESTED</span><strong>{sleepHours==null?"Keine Angabe":sleepHours+" h"}</strong><p>Schlaf und Erholung</p></Link>
+      <Link href="/fuel" className="bd-module-card"><span>BE FUEL</span><strong>{protein} g</strong><p>Protein heute</p></Link>
+      <Link href="/focus" className="bd-module-card red"><span>BE FOCUSED</span><strong>02:00</strong><p>Atmung und Tagescheck</p></Link>
+      <Link href="/community" className="bd-module-card red"><span>CHALLENGES</span><strong>→</strong><p>Streak · Leaderboard · Badges</p></Link>
+    </section>
+
+    {cycle&&<Link href="/context" className="bd-cycle-card"><span>CYCLE CONTEXT</span><strong>TAG {cycle.day} · {cycle.phase}</strong><p>Training und Recovery berücksichtigen deinen freiwilligen Zykluskontext.</p></Link>}
+
+    <Link href={nextWorkout?`/training/${nextWorkout.id}`:"/training"} className="bd-workout-card">
+      <span>HEUTIGES TRAINING</span><h2>{nextWorkout?.title||"REGENERATIONSTAG"}</h2>
+      <p>{nextWorkout?.scheduledAt?<LocalizedValue value={nextWorkout.scheduledAt}/>:<Copy text="Regeneration gehört zum Training."/>}</p>
+      <b>{nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}</b>
+    </Link>
+
+    <section className="bd-quick-links">
+      <Link href="/wearables"><span>GADGETS</span><strong>Apple · Samsung · Xiaomi</strong></Link>
+      <Link href="/athlete"><span>ATHLETE DIGITAL TWIN</span><strong>Radar · Ziel · Prognose</strong></Link>
+      <Link href="/coach"><span>COACH</span><strong>Chat · Briefing · Feedback</strong></Link>
     </section>
   </main>;
 }
