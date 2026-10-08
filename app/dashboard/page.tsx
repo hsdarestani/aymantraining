@@ -80,7 +80,7 @@ export default async function Dashboard(){
         <p><Copy text={dailyLine}/></p>
         <Link href="/focus" className="bd-red-link"><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Link>
       </div>
-      <div className="bd-hero-index"><span>01</span><b><Copy text="ATHLETE MODE"/></b></div>
+      <div className="bd-hero-index"><span>01</span><b><Copy text="ATHLETENMODUS"/></b></div>
     </section>
 
     {priority&&<Link href="/lifestyle" className="bd-priority bd-priority-line">
@@ -138,7 +138,7 @@ export default async function Dashboard(){
     {cycle&&<Link href="/context" className="bd-cycle-card bd-cycle-line"><span><Copy text="ZYKLUS KONTEXT"/></span><strong><Copy text="TAG"/> {cycle.day} · <Copy text={cycle.phase}/></strong><p><Copy text="Training und Recovery berücksichtigen deinen freiwilligen Zykluskontext."/></p></Link>}
 
     <Link href={nextWorkout?"/training/"+nextWorkout.id:"/training"} className="bd-workout-card bd-workout-editorial">
-      <div className="bd-workout-index">NEXT</div>
+      <div className="bd-workout-index"><Copy text="NÄCHSTE EINHEIT"/></div>
       <span><Copy text="HEUTIGES TRAINING"/></span><h2>{nextWorkout?.title||<Copy text="REGENERATIONSTAG"/>}</h2>
       <p>{nextWorkout?.scheduledAt?<LocalizedValue value={nextWorkout.scheduledAt}/>:<Copy text="Regeneration gehört zum Training."/>}</p>
       <b><Copy text={nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></b>
