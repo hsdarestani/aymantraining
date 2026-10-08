@@ -13,7 +13,7 @@ function cycleSummary(enabled:boolean|undefined,start:Date|null|undefined,length
  const days=Math.max(0,Math.floor((dateOnly(new Date()).getTime()-dateOnly(start).getTime())/dayMs));
  const day=days%length+1;
  const ovulation=Math.max(10,Math.round(length-14));
- const phase=day<=5?"MENSTRUATION":day<ovulation-1?"FOLLICULAR":day<=ovulation+1?"OVULATION":"LUTEAL";
+ const phase=day<=5?"MENSTRUATION":day<ovulation-1?"FOLLIKELPHASE":day<=ovulation+1?"OVULATIONSFENSTER":"LUTEALPHASE";
  return {day,length,phase};
 }
 
