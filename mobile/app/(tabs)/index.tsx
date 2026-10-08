@@ -91,7 +91,7 @@ export default function Home(){
   </View>
   <View style={s.teaserRow}>
    <Pressable style={s.teaser} onPress={()=>router.push("/focus")}><Text style={s.teaserTag}><Copy text="BE FOCUSED"/></Text><Text style={s.teaserBig}>02:00</Text><Text style={s.teaserCopy}><Copy text="Atmung und Tagescheck"/></Text></Pressable>
-   <Pressable style={[s.teaser,s.teaserRed]} onPress={()=>router.push("/community")}><Text style={s.teaserTag}><Copy text="DIFFERENT STREAK"/></Text><Text style={s.teaserBig}>{gamification?.streak??0}</Text><Text style={s.teaserCopy}><Copy text="Tage locked in"/></Text></Pressable>
+   <Pressable style={[s.teaser,s.teaserRed]} onPress={()=>router.push("/community")}><Text style={s.teaserTag}><Copy text="DIFFERENT STREAK"/></Text><Text style={s.teaserBig}>{gamification?.streak??0}</Text><Text style={s.teaserCopy}><Copy text="Tage in Folge"/></Text></Pressable>
   </View>
 
   {d.cycle?<Pressable onPress={()=>router.push("/context")} style={s.cycle}><Text style={s.cycleTag}><Copy text="ZYKLUS KONTEXT"/></Text><Text style={s.cycleTitle}><Copy text="TAG"/> {d.cycle.day} · <Copy text={d.cycle.phase}/></Text><Text style={s.cycleCopy}><Copy text="Training und Recovery berücksichtigen deinen freiwillig hinterlegten Zykluskontext."/></Text></Pressable>:null}
