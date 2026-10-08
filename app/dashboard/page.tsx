@@ -5,6 +5,7 @@ import {prisma} from "../../lib/db";
 import {levelForScore} from "../../lib/scoring";
 import {dateOnly} from "../../lib/http";
 import DigitalTwinHero from "../components/DigitalTwinHero";
+import ScoreRadar from "../components/ScoreRadar";
 export const dynamic="force-dynamic";
 
 const dayMs=86400000;
@@ -31,9 +32,16 @@ export default async function Dashboard(){
 
   const total=score?.total??0;
   const pillars=[
-    ["S","KRAFT",score?.strength],["E","AUSDAUER",score?.endurance],["A","ATHLETIK",score?.athleticism],
-    ["M","BEWEGLICHKEIT",score?.mobility],["R","REGENERATION",score?.recovery],["F","ERNÄHRUNG",score?.fuel],["C","KONSTANZ",score?.consistency]
-  ] as const;
+    {letter:"S",key:"strength",label:"KRAFT",value:score?.strength},
+    {letter:"E",key:"endurance",label:"AUSDAUER",value:score?.endurance},
+    {letter:"A",key:"athleticism",label:"ATHLETIK",value:score?.athleticism},
+    {letter:"M",key:"mobility",label:"BEWEGLICHKEIT",value:score?.mobility},
+    {letter:"R",key:"recovery",label:"REGENERATION",value:score?.recovery},
+    {letter:"F",key:"fuel",label:"ERNÄHRUNG",value:score?.fuel},
+    {letter:"C",key:"consistency",label:"KONSTANZ",value:score?.consistency}
+  ];
+  const present=pillars.filter(p=>p.value!=null);
+  const focus=[...present].sort((a,b)=>(a.value??101)-(b.value??101))[0]??pillars[0];
   const lines=Array.isArray(lineSetting?.value)?lineSetting.value as string[]:[];
   const dailyLine=String(lines[Math.floor(Date.now()/dayMs)%Math.max(1,lines.length)]||"Heute zählt die nächste saubere Entscheidung.");
   const dayStrip=[-1,0,1].map(offset=>{
@@ -58,46 +66,52 @@ export default async function Dashboard(){
   })();
   const priority=recs[0];
 
-  return <main className="bd-web-home">
+  return <main className="bd-web-home bd-editorial-home">
     <header className="bd-home-top">
       <Link href="/dashboard" className="bd-home-wordmark">BE DIFFERENT</Link>
       <Link href="/athlete" className={"bd-score-chip "+signal(total)}><span><Copy text="BD SCORE"/></span><strong>{total}%</strong></Link>
     </header>
 
-    <section className="bd-home-hero">
-      {heroPhoto?<div className="bd-athlete-private-photo"><img src={"/api/media/"+heroPhoto.id} alt=""/></div>:null}
-      <DigitalTwinHero/>
-      <span className="eyebrow"><Copy text="GUTEN MORGEN"/></span>
-      <h1>{(user.name||"ATHLET").toUpperCase()}</h1>
-      <p><Copy text={dailyLine}/></p>
-      <Link href="/focus" className="bd-red-link"><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Link>
+    <section className={"bd-home-hero bd-hero-editorial "+(heroPhoto?"has-photo":"")}>
+      {heroPhoto?<div className="bd-athlete-private-photo"><img src={"/api/media/"+heroPhoto.id} alt=""/></div>:<DigitalTwinHero/>}
+      <div className="bd-hero-copy">
+        <span className="eyebrow"><Copy text="GUTEN MORGEN"/></span>
+        <h1>{(user.name||"ATHLET").toUpperCase()}</h1>
+        <p><Copy text={dailyLine}/></p>
+        <Link href="/focus" className="bd-red-link"><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Link>
+      </div>
+      <div className="bd-hero-index"><span>01</span><b><Copy text="ATHLETE MODE"/></b></div>
     </section>
 
-    {priority&&<Link href="/lifestyle" className="bd-priority">
-      <span><Copy text="HEUTE WICHTIG"/></span><strong><Copy text={priority.title}/></strong><p><Copy text={priority.action}/></p>
+    {priority&&<Link href="/lifestyle" className="bd-priority bd-priority-line">
+      <span><Copy text="HEUTE WICHTIG"/></span><strong><Copy text={priority.title}/></strong><p><Copy text={priority.action}/></p><b>→</b>
     </Link>}
 
-    <section className="bd-score-panel">
-      <div className="bd-score-head">
-        <div><span className="eyebrow"><Copy text="BE DIFFERENT SCORE"/></span><h2><Copy text="DEIN TAGESZIEL: 100%"/></h2><small><Copy text="DATEN"/> {score?.completeness??0}%</small></div>
-        <div className={"bd-score-ring "+signal(total)} style={{"--score":`${total}%`} as React.CSSProperties}>
-          <div><strong>{total}<small>%</small></strong><span><Copy text={levelForScore(total)}/></span></div>
-        </div>
+    <section className="bd-score-editorial">
+      <div className="bd-score-intro">
+        <span className="eyebrow"><Copy text="BE DIFFERENT SCORE"/></span>
+        <div className="bd-score-number"><strong>{total}</strong><i>%</i></div>
+        <span className={"bd-score-state "+signal(total)}><Copy text={levelForScore(total)}/></span>
+        <p><Copy text="DEIN TAGESZIEL: 100%"/></p>
+        <small><Copy text="DATEN"/> {score?.completeness??0}%</small>
       </div>
-      <div className="bd-pillar-strip">
-        {pillars.map(([letter,label,value])=><Link href="/athlete" className="bd-pillar-mini" key={letter}>
-          <div className="bd-pillar-rail"><i className={signal(value)} style={{height:`${Math.max(6,value??0)}%`}}/></div>
-          <b>{letter}</b><strong>{value==null?<Copy text="Keine Angabe"/>:Math.round(value)}</strong><span><Copy text={label}/></span>
+      <div className="bd-radar-stage">
+        <ScoreRadar pillars={pillars}/>
+        <div className="bd-radar-caption"><span><Copy text="NÄCHSTER FOKUS"/></span><strong><Copy text={focus.label}/></strong><b>{focus.value==null?"—":Math.round(focus.value)}%</b></div>
+      </div>
+      <div className="bd-pillar-list">
+        {pillars.map(p=><Link href="/athlete" key={p.key} className={"bd-pillar-row "+signal(p.value)}>
+          <span>{p.letter}</span><strong><Copy text={p.label}/></strong><b>{p.value==null?"—":Math.round(p.value)}</b>
         </Link>)}
+        <Link href="/athlete" className="bd-score-open"><Copy text="ATHLETE DIGITAL TWIN ÖFFNEN →"/></Link>
       </div>
-      <Link href="/athlete" className="bd-volt-link"><Copy text="ATHLETE DIGITAL TWIN ÖFFNEN →"/></Link>
     </section>
 
-    <section className="bd-section-title"><span className="eyebrow"><Copy text="DEINE 72 STUNDEN"/></span><h2><Copy text="BELASTUNG IM BLICK."/></h2></section>
-    <section className="bd-day-strip">
+    <section className="bd-section-title bd-timeline-title"><span className="eyebrow"><Copy text="DEINE 72 STUNDEN"/></span><h2><Copy text="BELASTUNG IM BLICK."/></h2></section>
+    <section className="bd-day-line">
       {dayStrip.map((day,i)=>{
         const first=day.workouts[0];
-        return <Link href="/training" className={i===1?"bd-day-card active":"bd-day-card"} key={day.date.toISOString()}>
+        return <Link href="/training" className={i===1?"bd-day-item active":"bd-day-item"} key={day.date.toISOString()}>
           <span><Copy text={dayNames[i]}/></span>
           <strong><LocalizedValue value={day.date} format="toLocaleDateString"/></strong>
           <p>{first?.title||<Copy text={i===1?"REGENERATION ODER FREI":"NOCH NICHTS GEPLANT"}/>}</p>
@@ -106,25 +120,34 @@ export default async function Dashboard(){
       })}
     </section>
 
-    <section className="bd-module-grid">
-      <Link href="/lifestyle" className="bd-module-card"><span><Copy text="BE RESTED"/></span><strong>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</strong><p>{wearable?.restingHr!=null?<><Copy text="RUHEPULS"/> {Math.round(wearable.restingHr)} · </>:null}{currentHeartRate!=null?<><Copy text="PULS"/> {currentHeartRate}</>:<Copy text="Schlaf und Erholung"/>}</p></Link>
-      <Link href="/fuel" className="bd-module-card"><span><Copy text="BE FUEL"/></span><strong>{protein} g</strong><p><Copy text="Protein heute"/></p></Link>
-      <Link href="/focus" className="bd-module-card red"><span><Copy text="BE FOCUSED"/></span><strong>02:00</strong><p><Copy text="Atmung und Tagescheck"/></p></Link>
-      <Link href="/community" className="bd-module-card red"><span><Copy text="HERAUSFORDERUNGEN"/></span><strong>→</strong><p><Copy text="Serie · Rangliste · Abzeichen"/></p></Link>
+    <section className="bd-performance-stream">
+      <Link href="/lifestyle" className="bd-stream-row featured">
+        <span className="bd-stream-index">R</span><div><small><Copy text="BE RESTED"/></small><strong>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</strong><p>{wearable?.restingHr!=null?<><Copy text="RUHEPULS"/> {Math.round(wearable.restingHr)} · </>:null}{currentHeartRate!=null?<><Copy text="PULS"/> {currentHeartRate}</>:<Copy text="Schlaf und Erholung"/>}</p></div><b>→</b>
+      </Link>
+      <Link href="/fuel" className="bd-stream-row">
+        <span className="bd-stream-index">F</span><div><small><Copy text="BE FUEL"/></small><strong>{protein} g</strong><p><Copy text="Protein heute"/></p></div><b>→</b>
+      </Link>
+      <Link href="/focus" className="bd-stream-row accent">
+        <span className="bd-stream-index">M</span><div><small><Copy text="BE FOCUSED"/></small><strong>02:00</strong><p><Copy text="Atmung und Tagescheck"/></p></div><b>→</b>
+      </Link>
+      <Link href="/community" className="bd-stream-row">
+        <span className="bd-stream-index">C</span><div><small><Copy text="HERAUSFORDERUNGEN"/></small><strong><Copy text="SERIE & RANGLISTE"/></strong><p><Copy text="Serie · Rangliste · Abzeichen"/></p></div><b>→</b>
+      </Link>
     </section>
 
-    {cycle&&<Link href="/context" className="bd-cycle-card"><span><Copy text="ZYKLUS KONTEXT"/></span><strong><Copy text="TAG"/> {cycle.day} · <Copy text={cycle.phase}/></strong><p><Copy text="Training und Recovery berücksichtigen deinen freiwilligen Zykluskontext."/></p></Link>}
+    {cycle&&<Link href="/context" className="bd-cycle-card bd-cycle-line"><span><Copy text="ZYKLUS KONTEXT"/></span><strong><Copy text="TAG"/> {cycle.day} · <Copy text={cycle.phase}/></strong><p><Copy text="Training und Recovery berücksichtigen deinen freiwilligen Zykluskontext."/></p></Link>}
 
-    <Link href={nextWorkout?`/training/${nextWorkout.id}`:"/training"} className="bd-workout-card">
+    <Link href={nextWorkout?"/training/"+nextWorkout.id:"/training"} className="bd-workout-card bd-workout-editorial">
+      <div className="bd-workout-index">NEXT</div>
       <span><Copy text="HEUTIGES TRAINING"/></span><h2>{nextWorkout?.title||<Copy text="REGENERATIONSTAG"/>}</h2>
       <p>{nextWorkout?.scheduledAt?<LocalizedValue value={nextWorkout.scheduledAt}/>:<Copy text="Regeneration gehört zum Training."/>}</p>
       <b><Copy text={nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></b>
     </Link>
 
-    <section className="bd-quick-links">
-      <Link href="/wearables"><span><Copy text="GADGETS"/></span><strong>Apple · Samsung · Xiaomi</strong></Link>
-      <Link href="/athlete"><span><Copy text="ATHLETE DIGITAL TWIN"/></span><strong><Copy text="Radar · Ziel · Prognose"/></strong></Link>
-      <Link href="/coach"><span><Copy text="COACH"/></span><strong><Copy text="Chat · Überblick · Rückmeldung"/></strong></Link>
+    <section className="bd-quick-lines">
+      <Link href="/wearables"><span><Copy text="GADGETS"/></span><strong>Apple · Samsung · Xiaomi</strong><b>→</b></Link>
+      <Link href="/athlete"><span><Copy text="ATHLETE DIGITAL TWIN"/></span><strong><Copy text="Radar · Ziel · Prognose"/></strong><b>→</b></Link>
+      <Link href="/coach"><span><Copy text="COACH"/></span><strong><Copy text="Chat · Überblick · Rückmeldung"/></strong><b>→</b></Link>
     </section>
   </main>;
 }
