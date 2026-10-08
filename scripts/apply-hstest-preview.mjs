@@ -3,6 +3,7 @@ import {PrismaClient} from "@prisma/client";
 const prisma=new PrismaClient();
 const dayMs=86400000;
 const reference=new Date("2026-10-08T00:00:00.000Z");
+// Intermediate resting-HR points are reconstructed approximately from the client-provided 7-day chart for preview purposes.
 const restingHrSeries=[76,64,60,55,61,64,62];
 
 function day(offset){
@@ -49,7 +50,8 @@ async function main(){
       currentHeartRate:74,
       sleepTargetMinutes:480,
       providedBy:"client_screenshot",
-      capturedAt:"2026-10-08"
+      capturedAt:"2026-10-08",
+      restingHrSeriesApproximate:true
     }:undefined;
     await prisma.wearableDaily.upsert({
       where:{userId_date_source:{userId:user.id,date,source:"manual_import"}},
