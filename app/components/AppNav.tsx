@@ -93,7 +93,7 @@ export default function AppNav(){
     </header>
 
     <div className="app-mobile-top">
-      {workout?<Link href="/training" className="mobile-back"><Icon name="back"/><span>TRAINING</span></Link>:<Link href="/dashboard" className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></Link>}
+      {workout?<Link href="/training" className="mobile-back"><Icon name="back"/><span><Copy text="TRAINING"/></span></Link>:<Link href="/dashboard" className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></Link>}
       <LocalizedElement as="button" aria-label="Menü öffnen" aria-expanded={open} onClick={()=>setOpen(true)}><Icon name="menu"/></LocalizedElement>
     </div>
 
