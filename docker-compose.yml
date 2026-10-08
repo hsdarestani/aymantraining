@@ -64,8 +64,8 @@ services:
       - -c
       - |
         while true; do
+          curl -fsS -X POST -H "x-cron-secret: $CRON_SECRET" http://web:3000/api/internal/maintenance || true
           sleep 3600
-          curl -fsS -X POST -H "x-cron-secret: $$CRON_SECRET" http://web:3000/api/internal/maintenance || true
         done
     depends_on:
       - web

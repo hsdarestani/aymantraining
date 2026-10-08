@@ -16,7 +16,7 @@ export default async function Dashboard(){
   const today=dateOnly();
   const timelineStart=new Date(today.getTime()-dayMs);
   const timelineEnd=new Date(today.getTime()+2*dayMs);
-  const [score,check,wearable,nextWorkout,recs,nutrition,context,timelineWorkouts,lineSetting]=await Promise.all([
+  const [score,check,wearable,nextWorkout,recs,nutrition,context,timelineWorkouts,lineSetting,heroPhoto]=await Promise.all([
     prisma.scoreSnapshot.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
     prisma.dailyCheck.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
     prisma.wearableDaily.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
@@ -25,7 +25,8 @@ export default async function Dashboard(){
     prisma.nutritionDaily.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
     prisma.athleteContext.findUnique({where:{userId:user.id}}),
     prisma.workout.findMany({where:{userId:user.id,scheduledAt:{gte:timelineStart,lt:timelineEnd}},select:{id:true,title:true,scheduledAt:true,completedAt:true},orderBy:{scheduledAt:"asc"}}),
-    prisma.systemSetting.findUnique({where:{key:"different_lines"}})
+    prisma.systemSetting.findUnique({where:{key:"different_lines"}}),
+    user.name?.trim().toUpperCase()==="HSTEST"?prisma.mediaAsset.findFirst({where:{relatedUserId:user.id,kind:"PROGRESS_PHOTO"},orderBy:{createdAt:"desc"}}):Promise.resolve(null)
   ]);
 
   const total=score?.total??0;
@@ -42,6 +43,9 @@ export default async function Dashboard(){
   });
   const dayNames=["GESTERN","HEUTE","MORGEN"];
   const sleepHours=wearable?.sleepMinutes!=null?Math.round(wearable.sleepMinutes/6)/10:check?.sleepHours;
+  const sleepDisplay=wearable?.sleepMinutes!=null?Math.floor(wearable.sleepMinutes/60)+":"+String(wearable.sleepMinutes%60).padStart(2,"0"):sleepHours==null?null:String(sleepHours);
+  const sleepStageObject=wearable?.sleepStages&&typeof wearable.sleepStages==="object"&&!Array.isArray(wearable.sleepStages)?wearable.sleepStages as Record<string,unknown>:null;
+  const currentHeartRate=typeof sleepStageObject?.currentHeartRate==="number"?sleepStageObject.currentHeartRate:null;
   const protein=Math.round(nutrition?.proteinG??check?.proteinG??0);
   const cycle=(()=>{
     if(!context?.cycleTrackingEnabled||!context.cycleStartDate)return null;
@@ -61,6 +65,7 @@ export default async function Dashboard(){
     </header>
 
     <section className="bd-home-hero">
+      {heroPhoto?<div className="bd-athlete-private-photo"><img src={"/api/media/"+heroPhoto.id} alt=""/></div>:null}
       <DigitalTwinHero/>
       <span className="eyebrow"><Copy text="GUTEN MORGEN"/></span>
       <h1>{(user.name||"ATHLET").toUpperCase()}</h1>
@@ -102,7 +107,7 @@ export default async function Dashboard(){
     </section>
 
     <section className="bd-module-grid">
-      <Link href="/lifestyle" className="bd-module-card"><span><Copy text="BE RESTED"/></span><strong>{sleepHours==null?<Copy text="Keine Angabe"/>:sleepHours+" h"}</strong><p><Copy text="Schlaf und Erholung"/></p></Link>
+      <Link href="/lifestyle" className="bd-module-card"><span><Copy text="BE RESTED"/></span><strong>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</strong><p>{wearable?.restingHr!=null?<><Copy text="RUHEPULS"/> {Math.round(wearable.restingHr)} · </>:null}{currentHeartRate!=null?<><Copy text="PULS"/> {currentHeartRate}</>:<Copy text="Schlaf und Erholung"/>}</p></Link>
       <Link href="/fuel" className="bd-module-card"><span><Copy text="BE FUEL"/></span><strong>{protein} g</strong><p><Copy text="Protein heute"/></p></Link>
       <Link href="/focus" className="bd-module-card red"><span><Copy text="BE FOCUSED"/></span><strong>02:00</strong><p><Copy text="Atmung und Tagescheck"/></p></Link>
       <Link href="/community" className="bd-module-card red"><span><Copy text="HERAUSFORDERUNGEN"/></span><strong>→</strong><p><Copy text="Serie · Rangliste · Abzeichen"/></p></Link>

@@ -30,6 +30,17 @@ export async function GET(){
  const scoreSleep=sleepScore(average7,targetHours,regularity);
  const hrv=wearables.map(x=>x.hrv).filter((x):x is number=>x!=null),rhr=wearables.map(x=>x.restingHr).filter((x):x is number=>x!=null);
  const stages=wearables.find(x=>x.sleepStages&&typeof x.sleepStages==="object")?.sleepStages??null;
+ const stageObject=stages&&typeof stages==="object"&&!Array.isArray(stages)?stages as Record<string,unknown>:null;
+ const metric=(key:string)=>{const value=stageObject?.[key];return typeof value==="number"&&Number.isFinite(value)?value:null};
+ const sleepDetails=advanced&&stageObject?{
+  deepPercent:metric("deepPercent"),
+  lightPercent:metric("lightPercent"),
+  awakenings:metric("awakenings"),
+  averageSleepHr:metric("averageSleepHr"),
+  currentHeartRate:metric("currentHeartRate"),
+  targetMinutes:metric("sleepTargetMinutes")
+ }:null;
+ const restingHrHistory=advanced?wearables.filter(x=>x.restingHr!=null).slice(0,7).reverse().map(x=>({date:x.date,restingHr:x.restingHr})):[];
  const tips:string[]=[];
  if(average7!=null&&average7<7)tips.push("Plane heute mehr Schlafzeit ein.");
  if(regularity!=null&&regularity<70)tips.push("Halte Schlafenszeit und Aufstehzeit konstanter.");
@@ -39,10 +50,10 @@ export async function GET(){
   ok:true,advanced,score:scoreView(score,await hasFeature(user.subscriptionTier,"score_details")),
   sleep:{
    hoursLatest:sleepHours[0]??checks[0]?.sleepHours??null,average7,average30,
-   change7:trend(average7,avg(prior7)),regularity,score:scoreSleep,stages:advanced?stages:null,
-   bedtimeTarget:ctx?.bedtimeTarget??"22:30",tips:advanced?tips:[],dataDays:sleepHours.length
+   change7:trend(average7,avg(prior7)),regularity,score:scoreSleep,stages:advanced?stages:null,details:sleepDetails,
+   targetHours:sleepDetails?.targetMinutes?Math.round(sleepDetails.targetMinutes/6)/10:8,bedtimeTarget:ctx?.bedtimeTarget??"22:30",tips:advanced?tips:[],dataDays:sleepHours.length
   },
-  recovery:{hrvLatest:advanced?(hrv[0]??null):null,hrvAverage7:advanced?avg(hrv.slice(0,7)):null,restingHrLatest:advanced?(rhr[0]??null):null,restingHrAverage7:advanced?avg(rhr.slice(0,7)):null},
+  recovery:{hrvLatest:advanced?(hrv[0]??null):null,hrvAverage7:advanced?avg(hrv.slice(0,7)):null,restingHrLatest:advanced?(rhr[0]??null):null,restingHrAverage7:advanced?avg(rhr.slice(0,7)):null,restingHrHistory},
   wearables:advanced?wearables:wearables.map(x=>({date:x.date,steps:x.steps,activeCalories:x.activeCalories,totalCalories:x.totalCalories,sleepMinutes:x.sleepMinutes})),
   checks
  });
