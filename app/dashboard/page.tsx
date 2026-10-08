@@ -31,7 +31,7 @@ export default async function Dashboard(){
   const total=score?.total??0;
   const pillars=[
     ["S","KRAFT",score?.strength],["E","AUSDAUER",score?.endurance],["A","ATHLETIK",score?.athleticism],
-    ["M","MOBILITY",score?.mobility],["R","RECOVERY",score?.recovery],["F","FUEL",score?.fuel],["C","KONSTANZ",score?.consistency]
+    ["M","BEWEGLICHKEIT",score?.mobility],["R","REGENERATION",score?.recovery],["F","ERNÄHRUNG",score?.fuel],["C","KONSTANZ",score?.consistency]
   ] as const;
   const lines=Array.isArray(lineSetting?.value)?lineSetting.value as string[]:[];
   const dailyLine=String(lines[Math.floor(Date.now()/dayMs)%Math.max(1,lines.length)]||"Heute zählt die nächste saubere Entscheidung.");
@@ -108,7 +108,7 @@ export default async function Dashboard(){
       <Link href="/community" className="bd-module-card red"><span><Copy text="CHALLENGES"/></span><strong>→</strong><p><Copy text="Streak · Leaderboard · Badges"/></p></Link>
     </section>
 
-    {cycle&&<Link href="/context" className="bd-cycle-card"><span><Copy text="CYCLE CONTEXT"/></span><strong><Copy text="TAG"/> {cycle.day} · <Copy text={cycle.phase}/></strong><p><Copy text="Training und Recovery berücksichtigen deinen freiwilligen Zykluskontext."/></p></Link>}
+    {cycle&&<Link href="/context" className="bd-cycle-card"><span><Copy text="ZYKLUS KONTEXT"/></span><strong><Copy text="TAG"/> {cycle.day} · <Copy text={cycle.phase}/></strong><p><Copy text="Training und Recovery berücksichtigen deinen freiwilligen Zykluskontext."/></p></Link>}
 
     <Link href={nextWorkout?`/training/${nextWorkout.id}`:"/training"} className="bd-workout-card">
       <span><Copy text="HEUTIGES TRAINING"/></span><h2>{nextWorkout?.title||<Copy text="REGENERATIONSTAG"/>}</h2>
