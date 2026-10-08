@@ -54,6 +54,6 @@ export default async function AthletePage(){
     </section>
 
     <section className="panel badge-panel"><div><span className="eyebrow"><Copy text={"ABZEICHEN"}/></span><h2><Copy text={"Deine Meilensteine"}/></h2></div><div className="badge-strip">{badges.length?badges.map(b=><span key={b.id}><b>◆</b>{b.name}</span>):<span className="muted"><Copy text={"Dein erstes Abzeichen wartet auf dich."}/></span>}</div></section>
-    <section className="share-card panel"><div><span className="eyebrow"><Copy text={"GEMEINSCHAFT UND TEILEN"}/></span><h2><Copy text={"Aufgaben, Fortschrittsbild und Einladung"}/></h2></div><div className="share-actions"><Link className="secondary" href="/api/story" target="_blank"><Copy text={"FORTSCHRITTSBILD"}/></Link><Link className="primary compact" href="/community"><Copy text={"ÖFFNEN"}/></Link></div></section>
+    <section className="share-card panel"><div><span className="eyebrow"><Copy text={"GEMEINSCHAFT UND TEILEN"}/></span><h2><Copy text={"Aufgaben, Fortschrittsbild und Einladung"}/></h2></div><div className="share-actions"><Link className="secondary" href="/athlete/photos"><Copy text={"ATHLETENFOTOS"}/></Link><Link className="secondary" href="/api/story" target="_blank"><Copy text={"FORTSCHRITTSBILD"}/></Link><Link className="primary compact" href="/community"><Copy text={"ÖFFNEN"}/></Link></div></section>
   </main>;
 }
