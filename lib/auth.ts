@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import {cache} from "react";
 import { prisma } from "./db";
 
 export const SESSION_COOKIE = "bd_session";
@@ -56,7 +57,7 @@ async function currentToken() {
   return store.get(SESSION_COOKIE)?.value ?? null;
 }
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async function getCurrentUser() {
   const token = await currentToken();
   if (!token) return null;
   const tokenHash = hashToken(token);
@@ -69,7 +70,7 @@ export async function getCurrentUser() {
     await prisma.authSession.update({ where: { id: session.id }, data: { lastSeenAt: new Date() } }).catch(() => undefined);
   }
   return session.user;
-}
+});
 
 export async function requireUser() {
   const user = await getCurrentUser();
