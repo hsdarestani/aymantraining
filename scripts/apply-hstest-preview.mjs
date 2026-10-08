@@ -73,9 +73,10 @@ async function main(){
     create:{userId:user.id,date:reference,sleepHours:4.1,restingHr:62}
   });
 
-  await prisma.consentRecord.create({
+  const previewConsent=await prisma.consentRecord.findFirst({where:{userId:user.id,type:"health_data",version:"client-preview-2026-10-08"}});
+  if(!previewConsent)await prisma.consentRecord.create({
     data:{userId:user.id,type:"health_data",version:"client-preview-2026-10-08",granted:true}
-  }).catch(()=>undefined);
+  });
 
   console.log(`HSTEST preview applied to ${user.id}: sleep 4h06, target 8h, deep 23%, light 77%, awakenings 1, sleep HR 57, current HR 74, resting HR 62`);
 }
