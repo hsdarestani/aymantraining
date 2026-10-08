@@ -16,8 +16,7 @@ export function LocaleProvider({initialLocale,children}:{initialLocale:Locale,ch
   fetch('/api/profile',{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({locale:value})}).catch(()=>{});
   startTransition(()=>router.refresh());
  }
- const languageLabel=locale==='en'?'Language':'Sprache';
- return <Context.Provider value={{locale,setLocale}}>{children}<label className="language-picker" aria-label={languageLabel}><select aria-label={languageLabel} value={locale} onChange={e=>setLocale(e.target.value as Locale)}><option value="de">Deutsch</option><option value="en">English</option></select></label></Context.Provider>;
+ return <Context.Provider value={{locale,setLocale}}>{children}<label className="language-picker" aria-label="Language"><select aria-label="Language" value={locale} onChange={e=>setLocale(e.target.value as Locale)}><option value="de">Deutsch</option><option value="en">English</option></select></label></Context.Provider>;
 }
 export function useLocale(){return useContext(Context).locale}
 export function useT(){const locale=useLocale();return (text:string)=>translate(text,locale)}
