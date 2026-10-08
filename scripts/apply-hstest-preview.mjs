@@ -75,12 +75,85 @@ async function main(){
     create:{userId:user.id,date:reference,sleepHours:4.1,restingHr:62}
   });
 
+
+  // Non-client measurements below are clearly marked preview data. They exist only to make the HSTEST
+  // athlete account exercise all seven BD SCORE pillars until real performance tests are supplied.
+  const previewTests=[
+    {id:"hstest-preview-strength",metric:"strength",baseline:50,current:57.2,name:"HSTEST Preview Kraft"},
+    {id:"hstest-preview-endurance",metric:"endurance",baseline:50,current:55.6,name:"HSTEST Preview Ausdauer"},
+    {id:"hstest-preview-athleticism",metric:"athleticism",baseline:50,current:58.8,name:"HSTEST Preview Athletik"},
+    {id:"hstest-preview-mobility",metric:"mobility_score",baseline:50,current:54.4,name:"HSTEST Preview Beweglichkeit"}
+  ];
+  for(const t of previewTests){
+    const baselineId=t.id+"-baseline",currentId=t.id+"-current";
+    await prisma.performanceTest.upsert({
+      where:{id:baselineId},
+      update:{name:t.name+" Baseline",completedAt:day(-60),notes:"client_preview"},
+      create:{id:baselineId,userId:user.id,name:t.name+" Baseline",completedAt:day(-60),notes:"client_preview"}
+    });
+    await prisma.performanceTest.upsert({
+      where:{id:currentId},
+      update:{name:t.name,completedAt:day(-1),notes:"client_preview"},
+      create:{id:currentId,userId:user.id,name:t.name,completedAt:day(-1),notes:"client_preview"}
+    });
+    await prisma.testResult.upsert({
+      where:{id:baselineId+"-result"},
+      update:{testId:baselineId,metric:t.metric,value:t.baseline,unit:"preview",createdAt:day(-60)},
+      create:{id:baselineId+"-result",testId:baselineId,metric:t.metric,value:t.baseline,unit:"preview",createdAt:day(-60)}
+    });
+    await prisma.testResult.upsert({
+      where:{id:currentId+"-result"},
+      update:{testId:currentId,metric:t.metric,value:t.current,unit:"preview",createdAt:day(-1)},
+      create:{id:currentId+"-result",testId:currentId,metric:t.metric,value:t.current,unit:"preview",createdAt:day(-1)}
+    });
+  }
+
+  for(let offset=-6;offset<=0;offset++){
+    const date=day(offset);
+    await prisma.nutritionDaily.upsert({
+      where:{userId_date:{userId:user.id,date}},
+      update:{proteinG:90,waterMl:2000,fuelScore:70,source:"client_preview"},
+      create:{userId:user.id,date,proteinG:90,waterMl:2000,fuelScore:70,source:"client_preview"}
+    });
+    if(offset>=-4){
+      await prisma.dailyCheck.upsert({
+        where:{userId_date:{userId:user.id,date}},
+        update:{
+          energy:offset===0?6:7,mood:7,stress:4,soreness:3,
+          ...(offset===0?{sleepHours:4.1,restingHr:62}:{}),
+          waterMl:2000,proteinG:90
+        },
+        create:{
+          userId:user.id,date,energy:offset===0?6:7,mood:7,stress:4,soreness:3,
+          ...(offset===0?{sleepHours:4.1,restingHr:62}:{}),
+          waterMl:2000,proteinG:90
+        }
+      });
+    }
+  }
+
+  const previewWorkouts=[
+    {id:"hstest-preview-w1",offset:-5,title:"Kraft Basis 01",done:true},
+    {id:"hstest-preview-w2",offset:-4,title:"Athletik Basis 01",done:false},
+    {id:"hstest-preview-w3",offset:-3,title:"Ausdauer Basis 01",done:true},
+    {id:"hstest-preview-w4",offset:-2,title:"Mobility Basis 01",done:false},
+    {id:"hstest-preview-w5",offset:-1,title:"Kraft Basis 02",done:true}
+  ];
+  for(const w of previewWorkouts){
+    const scheduledAt=new Date(day(w.offset).getTime()+18*3600000);
+    await prisma.workout.upsert({
+      where:{id:w.id},
+      update:{userId:user.id,title:w.title,scheduledAt,completedAt:w.done?new Date(scheduledAt.getTime()+3600000):null,notes:"client_preview"},
+      create:{id:w.id,userId:user.id,title:w.title,scheduledAt,completedAt:w.done?new Date(scheduledAt.getTime()+3600000):null,notes:"client_preview"}
+    });
+  }
+
   const previewConsent=await prisma.consentRecord.findFirst({where:{userId:user.id,type:"health_data",version:"client-preview-2026-10-08"}});
   if(!previewConsent)await prisma.consentRecord.create({
     data:{userId:user.id,type:"health_data",version:"client-preview-2026-10-08",granted:true}
   });
 
-  console.log(`HSTEST preview applied to ${user.id}: sleep 4h06, target 8h, deep 23%, light 77%, awakenings 1, sleep HR 57, current HR 74, resting HR 62`);
+  console.log(`HSTEST preview applied to ${user.id}: real wearable snapshot + seven-pillar client_preview dataset`);
 }
 
 main().finally(()=>prisma.$disconnect());
