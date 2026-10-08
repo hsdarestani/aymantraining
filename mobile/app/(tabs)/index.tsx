@@ -54,6 +54,10 @@ export default function Home(){
  const dayLabels=["GESTERN","HEUTE","MORGEN"];
  const line=String(d?.differentLine||"Heute zählt die nächste saubere Entscheidung.");
  const sleep=a.sleepHours;
+ const wearable=d?.wearable||{};
+ const sleepStageObject=wearable?.sleepStages&&typeof wearable.sleepStages==="object"&&!Array.isArray(wearable.sleepStages)?wearable.sleepStages:{};
+ const currentHeartRate=typeof sleepStageObject?.currentHeartRate==="number"?sleepStageObject.currentHeartRate:null;
+ const sleepDisplay=wearable?.sleepMinutes!=null?Math.floor(wearable.sleepMinutes/60)+":"+String(wearable.sleepMinutes%60).padStart(2,"0"):sleep==null?null:String(sleep);
  const priority=useMemo(()=>d?.recommendations?.[0]||null,[d]);
  if(!d)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
  return <SafeAreaView edges={["top"]} style={s.safe}><ScrollView style={s.safe} contentContainerStyle={s.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
@@ -86,7 +90,7 @@ export default function Home(){
   </Pressable>})}</View>
 
   <View style={s.teaserRow}>
-   <Pressable style={s.teaser} onPress={()=>router.push("/lifestyle")}><Text style={s.teaserTag}><Copy text="BE RESTED"/></Text><Text style={s.teaserBig}>{sleep==null?<Copy text="Keine Angabe"/>:sleep+" h"}</Text><Text style={s.teaserCopy}><Copy text="Schlaf und Erholung"/></Text></Pressable>
+   <Pressable style={s.teaser} onPress={()=>router.push("/lifestyle")}><Text style={s.teaserTag}><Copy text="BE RESTED"/></Text><Text style={s.teaserBig}>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</Text><Text style={s.teaserCopy}>{wearable?.restingHr!=null?<><Copy text="RUHEPULS"/> {Math.round(wearable.restingHr)} · </>:null}{currentHeartRate!=null?<><Copy text="PULS"/> {currentHeartRate}</>:<Copy text="Schlaf und Erholung"/>}</Text></Pressable>
    <Pressable style={s.teaser} onPress={()=>router.push("/fuel")}><Text style={s.teaserTag}><Copy text="BE FUEL"/></Text><Text style={s.teaserBig}>{Math.round(a.proteinG||0)} g</Text><Text style={s.teaserCopy}><Copy text="Protein heute"/></Text></Pressable>
   </View>
   <View style={s.teaserRow}>
