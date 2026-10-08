@@ -4,6 +4,7 @@ import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";
 import {levelForScore} from "../../lib/scoring";
 import {dateOnly} from "../../lib/http";
+import DigitalTwinHero from "../components/DigitalTwinHero";
 export const dynamic="force-dynamic";
 
 const dayMs=86400000;
@@ -60,7 +61,7 @@ export default async function Dashboard(){
     </header>
 
     <section className="bd-home-hero">
-      <div className="bd-athlete-ghost" aria-hidden="true"><i/><b/><em/></div>
+      <DigitalTwinHero/>
       <span className="eyebrow"><Copy text="GUTEN MORGEN"/></span>
       <h1>{(user.name||"ATHLET").toUpperCase()}</h1>
       <p>{dailyLine}</p>
