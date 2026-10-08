@@ -1,96 +1,97 @@
-import {Copy} from "./Locale";
 export default function DigitalTwinHero(){
-  return <div className="bd-digital-twin-hero" aria-hidden="true">
+  return <div className="bd-digital-twin-hero bd-digital-twin-refined" aria-hidden="true">
     <div className="bd-twin-orbit bd-twin-orbit-a"/>
     <div className="bd-twin-orbit bd-twin-orbit-b"/>
     <div className="bd-twin-scan"/>
-    <svg className="bd-twin-svg" viewBox="0 0 260 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg className="bd-twin-svg" viewBox="0 0 300 330" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="twinBody" x1="64" y1="30" x2="218" y2="300" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#8CE9FF" stopOpacity=".96"/>
-          <stop offset=".28" stopColor="#3CB9E8" stopOpacity=".72"/>
-          <stop offset=".66" stopColor="#163744" stopOpacity=".58"/>
-          <stop offset="1" stopColor="#081217" stopOpacity=".92"/>
+        <linearGradient id="rimCool" x1="66" y1="40" x2="214" y2="298" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#B9F5FF"/>
+          <stop offset=".36" stopColor="#5DC7E9"/>
+          <stop offset=".72" stopColor="#1F6E88" stopOpacity=".78"/>
+          <stop offset="1" stopColor="#0B222B" stopOpacity=".08"/>
         </linearGradient>
-        <linearGradient id="twinHot" x1="172" y1="52" x2="240" y2="286" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#FF6B8C"/>
-          <stop offset=".5" stopColor="#FF3557"/>
-          <stop offset="1" stopColor="#8E0D26" stopOpacity=".25"/>
+        <linearGradient id="rimHot" x1="205" y1="44" x2="246" y2="286" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FF8EA7"/>
+          <stop offset=".42" stopColor="#FF4969"/>
+          <stop offset="1" stopColor="#5E1021" stopOpacity=".18"/>
         </linearGradient>
-        <radialGradient id="twinCore" cx="0" cy="0" r="1" gradientTransform="translate(154 154) rotate(90) scale(78 96)" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#AEEFFF" stopOpacity=".24"/>
-          <stop offset=".58" stopColor="#1A7DA6" stopOpacity=".08"/>
-          <stop offset="1" stopColor="#071114" stopOpacity="0"/>
+        <linearGradient id="glassFill" x1="116" y1="79" x2="182" y2="286" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#A7EFFF" stopOpacity=".08"/>
+          <stop offset=".48" stopColor="#2B9BC0" stopOpacity=".045"/>
+          <stop offset="1" stopColor="#061014" stopOpacity=".01"/>
+        </linearGradient>
+        <radialGradient id="chestGlow" cx="0" cy="0" r="1" gradientTransform="translate(180 168) rotate(90) scale(88 106)" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#54D9FF" stopOpacity=".14"/>
+          <stop offset=".58" stopColor="#216A82" stopOpacity=".035"/>
+          <stop offset="1" stopColor="#061014" stopOpacity="0"/>
         </radialGradient>
-        <filter id="twinGlowBlue" x="-80%" y="-80%" width="260%" height="260%">
-          <feGaussianBlur stdDeviation="5" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        <filter id="softBlue" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="4.2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
-        <filter id="twinGlowRed" x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur stdDeviation="6" result="r"/>
-          <feMerge><feMergeNode in="r"/><feMergeNode in="SourceGraphic"/></feMerge>
+        <filter id="softRed" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="4.8" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
-        <clipPath id="torsoClip">
-          <path d="M116 101C89 110 77 126 72 151L62 210C59 230 72 253 96 269L117 283C127 290 138 290 148 283L170 268C194 252 207 230 203 207L194 151C190 125 178 111 152 101C142 98 126 98 116 101Z"/>
+        <clipPath id="bustClip">
+          <path d="M129 103C107 109 91 124 82 145C74 164 69 192 68 227C82 244 99 256 118 263C135 270 153 273 174 271C199 269 218 260 235 245C235 211 231 184 223 161C214 136 197 116 174 106C162 101 143 100 129 103Z"/>
         </clipPath>
       </defs>
 
-      <g className="bd-twin-aura">
-        <ellipse cx="145" cy="171" rx="92" ry="128" fill="url(#twinCore)"/>
+      <ellipse className="bd-twin-aura" cx="176" cy="169" rx="101" ry="132" fill="url(#chestGlow)"/>
+
+      <g className="bd-twin-bust">
+        <path d="M143 31C129 35 118 44 112 58C107 70 106 86 111 98C115 108 124 115 136 118C147 121 159 119 168 113C178 107 185 96 188 82C191 67 188 53 180 43C171 32 157 27 143 31Z" fill="url(#glassFill)" stroke="url(#rimCool)" strokeWidth="1.2"/>
+        <path d="M180 43C189 52 192 66 189 82C186 98 178 109 167 115" stroke="url(#rimHot)" strokeWidth="1.35" strokeLinecap="round"/>
+
+        <path d="M129 103C107 109 91 124 82 145C74 164 69 192 68 227C82 244 99 256 118 263C135 270 153 273 174 271C199 269 218 260 235 245C235 211 231 184 223 161C214 136 197 116 174 106C162 101 143 100 129 103Z" fill="url(#glassFill)" stroke="url(#rimCool)" strokeWidth="1.35"/>
+        <path d="M176 106C198 117 214 137 222 161C230 184 234 210 235 244" stroke="url(#rimHot)" strokeWidth="1.6" strokeLinecap="round"/>
+
+        <path d="M135 118C128 129 124 143 124 158M162 117C171 129 177 143 178 158" stroke="#9BE8FB" strokeOpacity=".22" strokeWidth=".8"/>
+        <path d="M101 145C115 135 130 130 147 130C164 130 181 136 196 148" stroke="#9BE8FB" strokeOpacity=".17"/>
+        <path d="M92 166C110 154 128 150 148 150C169 150 189 156 207 168" stroke="#9BE8FB" strokeOpacity=".12"/>
+        <path d="M86 189C107 177 128 172 150 172C174 172 195 179 216 192" stroke="#9BE8FB" strokeOpacity=".095"/>
+        <path d="M83 213C104 203 127 198 151 198C177 198 200 205 222 218" stroke="#9BE8FB" strokeOpacity=".075"/>
+
+        <path d="M115 132C109 160 108 197 115 243M138 126C135 164 136 215 141 265M160 125C165 165 165 218 162 268M184 132C193 163 197 199 195 257" stroke="#77D6EF" strokeOpacity=".085" strokeWidth=".7"/>
+
+        <path d="M126 107C113 113 104 124 99 136C91 154 86 182 84 219" stroke="#C7F7FF" strokeOpacity=".48" strokeWidth="1.05" strokeLinecap="round"/>
+        <path d="M101 246C120 257 140 262 161 262" stroke="#89E5FA" strokeOpacity=".22"/>
       </g>
 
-      <g className="bd-twin-body">
-        <ellipse cx="137" cy="61" rx="36" ry="43" fill="url(#twinBody)" stroke="#9AEFFF" strokeOpacity=".72" strokeWidth="1.4"/>
-        <path d="M106 58C112 39 122 29 138 27C154 26 165 36 170 54" stroke="#D9F7FF" strokeOpacity=".55"/>
-        <path d="M102 67C118 60 153 60 171 67" stroke="#85DDF7" strokeOpacity=".35"/>
-        <path d="M108 48C125 51 151 51 167 47" stroke="#85DDF7" strokeOpacity=".28"/>
-        <path d="M137 20V101" stroke="#B6F1FF" strokeOpacity=".16"/>
-
-        <path d="M116 101C89 110 77 126 72 151L62 210C59 230 72 253 96 269L117 283C127 290 138 290 148 283L170 268C194 252 207 230 203 207L194 151C190 125 178 111 152 101C142 98 126 98 116 101Z" fill="url(#twinBody)" stroke="#82DDF6" strokeWidth="1.5"/>
-        <path d="M95 120C103 110 117 104 130 104C143 104 157 109 166 121L177 143C164 151 151 155 133 155C114 155 101 151 88 142L95 120Z" fill="#57C4E8" fillOpacity=".12"/>
-        <path d="M130 104V282" stroke="#C5F5FF" strokeOpacity=".18"/>
-
-        <path d="M82 136C61 145 48 165 43 194L35 244C32 261 41 274 55 275C68 276 77 266 80 250L90 194C94 172 101 154 111 142" fill="#0A1C22" fillOpacity=".88" stroke="#59C1E4" strokeWidth="1.3"/>
-        <path d="M184 134C207 143 220 162 226 190L237 240C241 258 232 272 217 274C203 276 194 267 191 251L181 194C177 170 170 153 159 141" fill="#151018" fillOpacity=".88" stroke="url(#twinHot)" strokeWidth="2"/>
-
-        <path d="M101 269C89 286 81 305 79 327" stroke="#4CB9DC" strokeWidth="9" strokeLinecap="round" opacity=".55"/>
-        <path d="M163 268C176 286 184 306 186 329" stroke="#FF4766" strokeWidth="9" strokeLinecap="round" opacity=".48"/>
+      <g className="bd-twin-face-lines">
+        <path d="M118 67C132 62 153 62 174 67" stroke="#9BE8FB" strokeOpacity=".18"/>
+        <path d="M120 83C135 80 155 80 175 84" stroke="#9BE8FB" strokeOpacity=".12"/>
+        <path d="M146 34V116" stroke="#B8F2FF" strokeOpacity=".10"/>
+        <path d="M129 44C139 51 150 53 164 51" stroke="#D0F9FF" strokeOpacity=".16"/>
       </g>
 
-      <g clipPath="url(#torsoClip)" className="bd-twin-grid">
-        {Array.from({length:9}).map((_,i)=><path key={"h"+i} d={"M58 "+(120+i*18)+" C96 "+(113+i*18)+", 166 "+(113+i*18)+", 210 "+(122+i*18)} stroke="#9EEBFF" strokeOpacity=".13" strokeWidth=".8"/>)}
-        {Array.from({length:7}).map((_,i)=><path key={"v"+i} d={"M"+(83+i*17)+" 98 C"+(72+i*20)+" 157, "+(83+i*19)+" 226, "+(97+i*15)+" 286"} stroke="#8ADFF6" strokeOpacity=".12" strokeWidth=".75"/>)}
+      <g className="bd-twin-hotspots" filter="url(#softRed)">
+        <circle cx="184" cy="134" r="2.6" fill="#FF4A69"/>
+        <circle cx="205" cy="177" r="2.2" fill="#FF4A69"/>
+        <circle cx="195" cy="225" r="1.8" fill="#FF4A69"/>
+        <path d="M178 111C197 122 211 145 216 171" stroke="#FF4A69" strokeOpacity=".55" strokeWidth="1"/>
       </g>
 
-      <g className="bd-twin-hotspots" filter="url(#twinGlowRed)">
-        <circle cx="183" cy="116" r="3.5" fill="#FF4766"/>
-        <circle cx="194" cy="166" r="2.8" fill="#FF4766"/>
-        <circle cx="176" cy="214" r="2.4" fill="#FF4766"/>
-        <path d="M180 100C202 116 213 143 214 172" stroke="#FF4766" strokeWidth="1.2" strokeLinecap="round"/>
-      </g>
-
-      <g className="bd-twin-cool" filter="url(#twinGlowBlue)">
-        <path d="M108 28C96 48 94 75 104 91" stroke="#8EE9FF" strokeWidth="1.3"/>
-        <path d="M77 152C68 187 66 223 74 253" stroke="#79DDF8" strokeWidth="1.1"/>
-        <circle cx="116" cy="155" r="2.4" fill="#9EEFFF"/>
+      <g className="bd-twin-cool" filter="url(#softBlue)">
+        <path d="M115 47C108 60 108 81 114 95" stroke="#8EEAFF" strokeWidth="1"/>
+        <path d="M80 148C73 171 70 197 71 224" stroke="#78DDF6" strokeWidth=".9"/>
+        <circle cx="122" cy="159" r="1.8" fill="#9CEBFF"/>
       </g>
 
       <g className="bd-twin-core-pulse">
-        <circle cx="137" cy="157" r="8" fill="#FF3557" fillOpacity=".08" stroke="#FF4667" strokeOpacity=".45"/>
-        <circle cx="137" cy="157" r="2.5" fill="#FF4968"/>
+        <circle cx="154" cy="164" r="8.5" fill="#FF3C5D" fillOpacity=".045" stroke="#FF5571" strokeOpacity=".28"/>
+        <circle cx="154" cy="164" r="1.7" fill="#FF5571"/>
       </g>
 
-      <g className="bd-twin-dots">
-        <circle cx="82" cy="86" r="1" fill="#8AEAFF"/>
-        <circle cx="207" cy="108" r="1.2" fill="#FF4766"/>
-        <circle cx="222" cy="147" r=".8" fill="#FF91A5"/>
-        <circle cx="65" cy="182" r=".9" fill="#8AEAFF"/>
-        <circle cx="216" cy="227" r=".8" fill="#FF4766"/>
+      <g className="bd-twin-particles">
+        <circle cx="231" cy="113" r=".8" fill="#FF6B85"/>
+        <circle cx="241" cy="148" r=".55" fill="#7EE7FF"/>
+        <circle cx="219" cy="94" r=".55" fill="#7EE7FF"/>
+        <circle cx="82" cy="118" r=".55" fill="#7EE7FF"/>
+        <circle cx="245" cy="203" r=".65" fill="#FF5A76"/>
       </g>
     </svg>
-    <div className="bd-twin-hud">
-      <span><Copy text="DIGITAL TWIN"/></span>
-      <b><Copy text="LIVE"/></b>
-    </div>
   </div>;
 }
