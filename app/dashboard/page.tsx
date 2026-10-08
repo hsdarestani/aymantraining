@@ -16,7 +16,7 @@ export default async function Dashboard(){
   const today=dateOnly();
   const timelineStart=new Date(today.getTime()-dayMs);
   const timelineEnd=new Date(today.getTime()+2*dayMs);
-  const [score,check,wearable,nextWorkout,recs,nutrition,context,timelineWorkouts,lineSetting]=await Promise.all([
+  const [score,check,wearable,nextWorkout,recs,nutrition,context,timelineWorkouts,lineSetting,heroPhoto]=await Promise.all([
     prisma.scoreSnapshot.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
     prisma.dailyCheck.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
     prisma.wearableDaily.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
@@ -25,7 +25,8 @@ export default async function Dashboard(){
     prisma.nutritionDaily.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
     prisma.athleteContext.findUnique({where:{userId:user.id}}),
     prisma.workout.findMany({where:{userId:user.id,scheduledAt:{gte:timelineStart,lt:timelineEnd}},select:{id:true,title:true,scheduledAt:true,completedAt:true},orderBy:{scheduledAt:"asc"}}),
-    prisma.systemSetting.findUnique({where:{key:"different_lines"}})
+    prisma.systemSetting.findUnique({where:{key:"different_lines"}}),
+    user.name?.trim().toUpperCase()==="HSTEST"?prisma.mediaAsset.findFirst({where:{relatedUserId:user.id,kind:"PROGRESS_PHOTO"},orderBy:{createdAt:"desc"}}):Promise.resolve(null)
   ]);
 
   const total=score?.total??0;
@@ -64,6 +65,7 @@ export default async function Dashboard(){
     </header>
 
     <section className="bd-home-hero">
+      {heroPhoto?<div className="bd-athlete-private-photo"><img src={"/api/media/"+heroPhoto.id} alt=""/></div>:null}
       <DigitalTwinHero/>
       <span className="eyebrow"><Copy text="GUTEN MORGEN"/></span>
       <h1>{(user.name||"ATHLET").toUpperCase()}</h1>
