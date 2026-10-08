@@ -16,7 +16,7 @@ function grid(scale:number,count=7){
 }
 
 export default function ScoreRadar({pillars}:{pillars:PillarPoint[]}){
-  return <svg className="bd-score-radar" viewBox="0 0 300 300" role="img" aria-label="BD Score Radar">
+  return <svg className="bd-score-radar" viewBox="0 0 300 300" aria-hidden="true">
     <defs>
       <radialGradient id="bdRadarFill" cx="50%" cy="45%" r="62%">
         <stop offset="0%" stopColor="#ff3657" stopOpacity=".24"/>
