@@ -22,6 +22,10 @@ export default async function Lifestyle(){
     prisma.scoreSnapshot.findFirst({where:{userId:user.id},orderBy:{date:"desc"}})
   ]);
   const latest=wearables[0];
+  const stageObject=latest?.sleepStages&&typeof latest.sleepStages==="object"&&!Array.isArray(latest.sleepStages)?latest.sleepStages as Record<string,unknown>:null;
+  const stageMetric=(key:string)=>{const value=stageObject?.[key];return typeof value==="number"&&Number.isFinite(value)?value:null};
+  const deepPercent=stageMetric("deepPercent"),lightPercent=stageMetric("lightPercent"),awakenings=stageMetric("awakenings"),averageSleepHr=stageMetric("averageSleepHr"),currentHeartRate=stageMetric("currentHeartRate"),sleepTargetMinutes=stageMetric("sleepTargetMinutes");
+  const rhrHistory=wearables.filter(x=>x.restingHr!=null).slice(0,7).reverse();
   const sleep7=wearables.filter(x=>x.date>=since7).map(x=>x.sleepMinutes).filter((v):v is number=>v!=null).map(v=>v/60);
   const sleep30=wearables.map(x=>x.sleepMinutes).filter((v):v is number=>v!=null).map(v=>v/60);
   const s7=avg(sleep7),s30=avg(sleep30);
@@ -52,9 +56,16 @@ export default async function Lifestyle(){
         <div className="sleep-number"><strong>{sleepText}</strong><span><Copy text={"LETZTE NACHT"}/></span></div>
         {advanced?<><div className="body-stats">
           <div><span><Copy text={"SCHLAFWERT"}/></span><strong>{sleepScore??"—"}</strong><small><Copy text={"0 bis 100"}/></small></div>
-          <div><span><Copy text={"7 TAGE"}/></span><strong>{s7?.toFixed(1)??"—"} h</strong><small><Copy text={"Durchschnitt"}/></small></div>
-          <div><span><Copy text={"30 TAGE"}/></span><strong>{s30?.toFixed(1)??"—"} h</strong><small><Copy text={"persönlicher Trend"}/></small></div>
-        </div><p className="muted"><Copy text={s7==null?"Für einen Schlaftrend fehlen noch Schlafdaten.":s7<7?"Schlaf liegt aktuell unter deinem Ziel. Heute Abend früher runterfahren und die nächste Belastung im Kontext deiner Regeneration betrachten.":"Dein Schlaftrend ist stabil. Regelmäßigkeit beibehalten."}/></p></>:<div className="locked-copy"><p className="muted"><Copy text={"KOSTENLOS zeigt die Schlafdauer. Qualität, Trend und persönliche Tipps sind PRO."}/></p><Link href="/pricing" className="secondary"><Copy text={"PRO TESTEN"}/></Link></div>}
+          <div><span><Copy text={"ZIEL"}/></span><strong>{sleepTargetMinutes?Math.round(sleepTargetMinutes/60*10)/10:8} h</strong><small><Copy text={"Schlafziel"}/></small></div>
+          <div><span><Copy text={"TIEFSCHLAF"}/></span><strong>{deepPercent==null?"—":deepPercent+"%"}</strong><small><Copy text={"Letzte Nacht"}/></small></div>
+          <div><span><Copy text={"LEICHTSCHLAF"}/></span><strong>{lightPercent==null?"—":lightPercent+"%"}</strong><small><Copy text={"Letzte Nacht"}/></small></div>
+          <div><span><Copy text={"AUFWACHEN"}/></span><strong>{awakenings??"—"}</strong><small><Copy text={"Letzte Nacht"}/></small></div>
+          <div><span><Copy text={"Ø SCHLAF HR"}/></span><strong>{averageSleepHr==null?"—":averageSleepHr+" bpm"}</strong><small><Copy text={"Im Schlaf"}/></small></div>
+          <div><span><Copy text={"RUHEPULS"}/></span><strong>{latest?.restingHr==null?"—":Math.round(latest.restingHr)+" bpm"}</strong><small><Copy text={"Heute"}/></small></div>
+          <div><span><Copy text={"PULS JETZT"}/></span><strong>{currentHeartRate==null?"—":currentHeartRate+" bpm"}</strong><small><Copy text={"Momentaufnahme"}/></small></div>
+        </div>
+        {rhrHistory.length>1?<div className="bd-rhr-trend"><div className="bd-rhr-trend-head"><span><Copy text={"7 TAGE RUHEPULS"}/></span><strong>{latest?.restingHr==null?"—":Math.round(latest.restingHr)+" bpm"}</strong></div><div className="bd-rhr-bars">{rhrHistory.map((x,i)=><i key={x.id} style={{height:Math.max(12,Math.min(58,12+((x.restingHr??55)-50)*2))}}><span>{Math.round(x.restingHr??0)}</span></i>)}</div></div>:null}
+        <p className="muted"><Copy text={s7==null?"Für einen Schlaftrend fehlen noch Schlafdaten.":s7<7?"Schlaf liegt aktuell unter deinem Ziel. Heute Abend früher runterfahren und die nächste Belastung im Kontext deiner Regeneration betrachten.":"Dein Schlaftrend ist stabil. Regelmäßigkeit beibehalten."}/></p></>:<div className="locked-copy"><p className="muted"><Copy text={"KOSTENLOS zeigt die Schlafdauer. Qualität, Trend und persönliche Tipps sind PRO."}/></p><Link href="/pricing" className="secondary"><Copy text={"PRO TESTEN"}/></Link></div>}
       </article>
       <article className="panel active-card">
         <span className="eyebrow"><Copy text={"AKTIVITÄT"}/></span><h2><Copy text={"Heute bewegen."}/></h2>
