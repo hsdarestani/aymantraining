@@ -42,6 +42,9 @@ export default async function Dashboard(){
   });
   const dayNames=["GESTERN","HEUTE","MORGEN"];
   const sleepHours=wearable?.sleepMinutes!=null?Math.round(wearable.sleepMinutes/6)/10:check?.sleepHours;
+  const sleepDisplay=wearable?.sleepMinutes!=null?Math.floor(wearable.sleepMinutes/60)+":"+String(wearable.sleepMinutes%60).padStart(2,"0"):sleepHours==null?null:String(sleepHours);
+  const sleepStageObject=wearable?.sleepStages&&typeof wearable.sleepStages==="object"&&!Array.isArray(wearable.sleepStages)?wearable.sleepStages as Record<string,unknown>:null;
+  const currentHeartRate=typeof sleepStageObject?.currentHeartRate==="number"?sleepStageObject.currentHeartRate:null;
   const protein=Math.round(nutrition?.proteinG??check?.proteinG??0);
   const cycle=(()=>{
     if(!context?.cycleTrackingEnabled||!context.cycleStartDate)return null;
@@ -102,7 +105,7 @@ export default async function Dashboard(){
     </section>
 
     <section className="bd-module-grid">
-      <Link href="/lifestyle" className="bd-module-card"><span><Copy text="BE RESTED"/></span><strong>{sleepHours==null?<Copy text="Keine Angabe"/>:sleepHours+" h"}</strong><p><Copy text="Schlaf und Erholung"/></p></Link>
+      <Link href="/lifestyle" className="bd-module-card"><span><Copy text="BE RESTED"/></span><strong>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</strong><p>{wearable?.restingHr!=null?<><Copy text="RUHEPULS"/> {Math.round(wearable.restingHr)} · </>:null}{currentHeartRate!=null?<><Copy text="PULS"/> {currentHeartRate}</>:<Copy text="Schlaf und Erholung"/>}</p></Link>
       <Link href="/fuel" className="bd-module-card"><span><Copy text="BE FUEL"/></span><strong>{protein} g</strong><p><Copy text="Protein heute"/></p></Link>
       <Link href="/focus" className="bd-module-card red"><span><Copy text="BE FOCUSED"/></span><strong>02:00</strong><p><Copy text="Atmung und Tagescheck"/></p></Link>
       <Link href="/community" className="bd-module-card red"><span><Copy text="HERAUSFORDERUNGEN"/></span><strong>→</strong><p><Copy text="Serie · Rangliste · Abzeichen"/></p></Link>
