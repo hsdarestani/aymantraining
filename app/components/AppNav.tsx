@@ -5,7 +5,7 @@ import {Copy,LocalizedElement,useLocale} from "./Locale";
 
 
 import Link from "next/link";
-import {usePathname} from "next/navigation";
+import {usePathname,useRouter} from "next/navigation";
 import {useEffect,useRef,useState} from "react";
 
 type IconName="home"|"training"|"progress"|"coach"|"athlete"|"menu"|"close"|"back";
@@ -49,9 +49,15 @@ const more=[
 
 export default function AppNav(){
   const path=usePathname();
+  const router=useRouter();
   const locale=useLocale();
   const [open,setOpen]=useState(false);
   const drawer=useRef<HTMLElement>(null);
+  useEffect(()=>{
+    const routes=["/dashboard","/training","/progress","/coach","/athlete","/focus","/lifestyle","/fuel","/community","/wearables"];
+    const id=window.setTimeout(()=>routes.forEach(route=>router.prefetch(route)),120);
+    return()=>window.clearTimeout(id);
+  },[router]);
   useEffect(()=>{
     if(!open)return;
     const previous=document.activeElement as HTMLElement|null;
