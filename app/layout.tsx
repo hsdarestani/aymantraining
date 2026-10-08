@@ -18,6 +18,7 @@ import "./mobile-viewport-fix.css";
 import "./completion.css";
 import "./brand-system.css";
 import "./form-layout.css";
+import "./web-athlete-2026.css";
 import {cookies} from "next/headers";
 import {LocaleProvider} from "./components/Locale";
 import {getCurrentUser} from "../lib/auth";
