@@ -97,7 +97,7 @@ export default async function Dashboard(){
       </div>
       <div className="bd-radar-stage">
         <ScoreRadar pillars={pillars}/>
-        <div className="bd-radar-caption"><span><Copy text="NÄCHSTER FOKUS"/></span><strong><Copy text={focus.label}/></strong><b>{focus.value==null?"—":Math.round(focus.value)}%</b></div>
+        <div className="bd-radar-caption"><span><Copy text="NÄCHSTER FOKUS"/></span><strong><Copy text={focus.label}/></strong><b>{focus.value==null?<Copy text="Keine Angabe"/>:Math.round(focus.value)+"%"}</b></div>
       </div>
       <div className="bd-pillar-list">
         {pillars.map(p=><Link href="/athlete" key={p.key} className={"bd-pillar-row "+signal(p.value)}>
