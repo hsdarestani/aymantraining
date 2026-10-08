@@ -105,7 +105,7 @@ export default async function Dashboard(){
       <Link href="/lifestyle" className="bd-module-card"><span><Copy text="BE RESTED"/></span><strong>{sleepHours==null?<Copy text="Keine Angabe"/>:sleepHours+" h"}</strong><p><Copy text="Schlaf und Erholung"/></p></Link>
       <Link href="/fuel" className="bd-module-card"><span><Copy text="BE FUEL"/></span><strong>{protein} g</strong><p><Copy text="Protein heute"/></p></Link>
       <Link href="/focus" className="bd-module-card red"><span><Copy text="BE FOCUSED"/></span><strong>02:00</strong><p><Copy text="Atmung und Tagescheck"/></p></Link>
-      <Link href="/community" className="bd-module-card red"><span><Copy text="CHALLENGES"/></span><strong>→</strong><p><Copy text="Streak · Leaderboard · Badges"/></p></Link>
+      <Link href="/community" className="bd-module-card red"><span><Copy text="HERAUSFORDERUNGEN"/></span><strong>→</strong><p><Copy text="Serie · Rangliste · Abzeichen"/></p></Link>
     </section>
 
     {cycle&&<Link href="/context" className="bd-cycle-card"><span><Copy text="ZYKLUS KONTEXT"/></span><strong><Copy text="TAG"/> {cycle.day} · <Copy text={cycle.phase}/></strong><p><Copy text="Training und Recovery berücksichtigen deinen freiwilligen Zykluskontext."/></p></Link>}
@@ -119,7 +119,7 @@ export default async function Dashboard(){
     <section className="bd-quick-links">
       <Link href="/wearables"><span><Copy text="GADGETS"/></span><strong>Apple · Samsung · Xiaomi</strong></Link>
       <Link href="/athlete"><span><Copy text="ATHLETE DIGITAL TWIN"/></span><strong><Copy text="Radar · Ziel · Prognose"/></strong></Link>
-      <Link href="/coach"><span><Copy text="COACH"/></span><strong><Copy text="Chat · Briefing · Feedback"/></strong></Link>
+      <Link href="/coach"><span><Copy text="COACH"/></span><strong><Copy text="Chat · Überblick · Rückmeldung"/></strong></Link>
     </section>
   </main>;
 }
