@@ -14,8 +14,8 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {syncHomeWidget} from "../../lib/widget-sync";
 
 const pillarMeta=[
- ["S","strength","KRAFT"],["E","endurance","AUSDAUER"],["A","athleticism","ATHLETIK"],["M","mobility","MOBILITY"],
- ["R","recovery","RECOVERY"],["F","fuel","FUEL"],["C","consistency","KONSTANZ"]
+ ["S","strength","KRAFT"],["E","endurance","AUSDAUER"],["A","athleticism","ATHLETIK"],["M","mobility","BEWEGLICHKEIT"],
+ ["R","recovery","REGENERATION"],["F","fuel","ERNÄHRUNG"],["C","consistency","KONSTANZ"]
 ] as const;
 
 function Bar({value,max,accent=C.volt}:{value:number;max:number;accent?:string}){const pct=Math.max(0,Math.min(100,max?value/max*100:0));return <View style={s.metricTrack}><View style={[s.metricFill,{width:`${pct}%`,backgroundColor:accent}]}/></View>}
@@ -30,12 +30,12 @@ function ScoreSignature({score,level}:{score:number;level:string}){
   </Svg>
   <View style={s.signatureCenter}><Text style={s.signatureValue}>{pct}<Text style={[s.signaturePercent,{color:stroke}]}>%</Text></Text><Text style={[s.signatureLevel,{color:stroke}]}>{level}</Text></View>
   {complete?<Animated.View entering={ZoomIn.duration(300)} style={s.explosion}>{Array.from({length:10},(_,i)=><View key={i} style={[s.spark,{transform:[{rotate:(i*36)+"deg"},{translateY:-88}]}]}/>)}</Animated.View>:null}
-  {complete?<Animated.Text entering={FadeInDown.duration(450)} style={s.truly}>TRULY DIFFERENT</Animated.Text>:null}
+  {complete?<Animated.Text entering={FadeInDown.duration(450)} style={s.truly}><Copy text="WIRKLICH ANDERS"/></Animated.Text>:null}
  </View>
 }
 
 function Pillars({values}:{values:any}){
- return <View style={s.pillars}>{pillarMeta.map(([letter,key,label])=>{const value=values?.[key];const height=Math.max(8,Math.round((value??0)*.58));const accent=value!=null&&value<55?C.red:C.volt;return <Pressable key={key} onPress={()=>router.push("/digital-twin")} style={s.pillar}><View style={s.pillarRail}><View style={[s.pillarFill,{height,backgroundColor:value==null?C.line:accent}]}/></View><Text style={s.pillarLetter}>{letter}</Text><Text numberOfLines={1} style={s.pillarValue}>{value==null?"—":Math.round(value)}</Text><Text numberOfLines={1} style={s.pillarLabel}>{label}</Text></Pressable>})}</View>
+ return <View style={s.pillars}>{pillarMeta.map(([letter,key,label])=>{const value=values?.[key];const height=Math.max(8,Math.round((value??0)*.58));const accent=value!=null&&value<55?C.red:C.volt;return <Pressable key={key} onPress={()=>router.push("/digital-twin")} style={s.pillar}><View style={s.pillarRail}><View style={[s.pillarFill,{height,backgroundColor:value==null?C.line:accent}]}/></View><Text style={s.pillarLetter}>{letter}</Text><Text numberOfLines={1} style={s.pillarValue}>{value==null?"—":Math.round(value)}</Text><Text numberOfLines={1} style={s.pillarLabel}><Copy text={label}/></Text></Pressable>})}</View>
 }
 
 export default function Home(){
@@ -63,12 +63,12 @@ export default function Home(){
    <View style={s.athleteGhost}><View style={s.ghostHead}/><View style={s.ghostTorso}/><View style={s.ghostLegs}/></View>
    <Text style={s.eyebrow}><Copy text={"GUTEN MORGEN"}/></Text>
    <Text style={s.heroName}>{(d.user.name||"ATHLET").toUpperCase()}</Text>
-   <Text style={s.morningLine}>{line}</Text>
-   <Pressable onPress={()=>router.push("/focus")}><Text style={s.focusLink}>BE FOCUSED · 2 MIN ATMUNG →</Text></Pressable>
+   <Text style={s.morningLine}><Copy text={line}/></Text>
+   <Pressable onPress={()=>router.push("/focus")}><Text style={s.focusLink}><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Text></Pressable>
   </View>
 
   {priority?<Pressable onPress={()=>router.push("/lifestyle")} style={[s.priority,priority.severity==="critical"&&s.priorityCritical]}>
-   <Text style={s.priorityKicker}>HEUTE WICHTIG</Text><Text style={s.priorityTitle}>{priority.title}</Text><Text style={s.priorityCopy}>{priority.action}</Text>
+   <Text style={s.priorityKicker}><Copy text="HEUTE WICHTIG"/></Text><Text style={s.priorityTitle}><Copy text={priority.title}/></Text><Text style={s.priorityCopy}><Copy text={priority.action}/></Text>
   </Pressable>:null}
 
   <Card style={s.scoreCard}>
@@ -77,34 +77,34 @@ export default function Home(){
    <Pressable onPress={()=>router.push("/digital-twin")}><Text style={s.scoreLink}><Copy text="ATHLETE DIGITAL TWIN ÖFFNEN →"/></Text></Pressable>
   </Card>
 
-  <View style={s.sectionHead}><View><Eyebrow>DEINE 72 STUNDEN</Eyebrow><Text style={s.sectionTitle}>BELASTUNG IM BLICK.</Text></View></View>
+  <View style={s.sectionHead}><View><Eyebrow><Copy text="DEINE 72 STUNDEN"/></Eyebrow><Text style={s.sectionTitle}><Copy text="BELASTUNG IM BLICK."/></Text></View></View>
   <View style={s.days}>{(d.dayStrip||[]).map((day:any,i:number)=>{const first=day.workouts?.[0];return <Pressable key={day.date} onPress={()=>router.push("/(tabs)/training")} style={[s.day,i===1&&s.dayNow]}>
-   <Text style={[s.dayLabel,i===1&&s.dayLabelNow]}>{dayLabels[i]}</Text>
+   <Text style={[s.dayLabel,i===1&&s.dayLabelNow]}><Copy text={dayLabels[i]}/></Text>
    <Text style={s.dayDate}>{String(day.date).slice(5).split("-").reverse().join(".")}</Text>
-   <Text numberOfLines={2} style={s.dayWorkout}>{first?.title||(i===1?"REGENERATION / FREI":"NOCH NICHTS GEPLANT")}</Text>
-   {first?.completed?<Text style={s.done}>ERLEDIGT</Text>:null}
+   <Text numberOfLines={2} style={s.dayWorkout}>{first?.title?<>{first.title}</>:<Copy text={i===1?"REGENERATION ODER FREI":"NOCH NICHTS GEPLANT"}/>}</Text>
+   {first?.completed?<Text style={s.done}><Copy text="ERLEDIGT"/></Text>:null}
   </Pressable>})}</View>
 
   <View style={s.teaserRow}>
-   <Pressable style={s.teaser} onPress={()=>router.push("/lifestyle")}><Text style={s.teaserTag}>BE RESTED</Text><Text style={s.teaserBig}>{sleep==null?"Keine Angabe":sleep+" h"}</Text><Text style={s.teaserCopy}><Copy text="Schlaf und Erholung"/></Text></Pressable>
-   <Pressable style={s.teaser} onPress={()=>router.push("/fuel")}><Text style={s.teaserTag}><Copy text="BE FUEL"/></Text><Text style={s.teaserBig}>{Math.round(a.proteinG||0)} g</Text><Text style={s.teaserCopy}>Protein heute</Text></Pressable>
+   <Pressable style={s.teaser} onPress={()=>router.push("/lifestyle")}><Text style={s.teaserTag}><Copy text="BE RESTED"/></Text><Text style={s.teaserBig}>{sleep==null?<Copy text="Keine Angabe"/>:sleep+" h"}</Text><Text style={s.teaserCopy}><Copy text="Schlaf und Erholung"/></Text></Pressable>
+   <Pressable style={s.teaser} onPress={()=>router.push("/fuel")}><Text style={s.teaserTag}><Copy text="BE FUEL"/></Text><Text style={s.teaserBig}>{Math.round(a.proteinG||0)} g</Text><Text style={s.teaserCopy}><Copy text="Protein heute"/></Text></Pressable>
   </View>
   <View style={s.teaserRow}>
-   <Pressable style={s.teaser} onPress={()=>router.push("/focus")}><Text style={s.teaserTag}>BE FOCUSED</Text><Text style={s.teaserBig}>02:00</Text><Text style={s.teaserCopy}>Atmung und Tagescheck</Text></Pressable>
-   <Pressable style={[s.teaser,s.teaserRed]} onPress={()=>router.push("/community")}><Text style={s.teaserTag}>DIFFERENT STREAK</Text><Text style={s.teaserBig}>{gamification?.streak??0}</Text><Text style={s.teaserCopy}>Tage locked in</Text></Pressable>
+   <Pressable style={s.teaser} onPress={()=>router.push("/focus")}><Text style={s.teaserTag}><Copy text="BE FOCUSED"/></Text><Text style={s.teaserBig}>02:00</Text><Text style={s.teaserCopy}><Copy text="Atmung und Tagescheck"/></Text></Pressable>
+   <Pressable style={[s.teaser,s.teaserRed]} onPress={()=>router.push("/community")}><Text style={s.teaserTag}><Copy text="DIFFERENT STREAK"/></Text><Text style={s.teaserBig}>{gamification?.streak??0}</Text><Text style={s.teaserCopy}><Copy text="Tage locked in"/></Text></Pressable>
   </View>
 
-  {d.cycle?<Pressable onPress={()=>router.push("/context")} style={s.cycle}><Text style={s.cycleTag}>CYCLE CONTEXT</Text><Text style={s.cycleTitle}>TAG {d.cycle.day} · {d.cycle.phase}</Text><Text style={s.cycleCopy}>Training und Recovery berücksichtigen deinen freiwillig hinterlegten Zykluskontext.</Text></Pressable>:null}
+  {d.cycle?<Pressable onPress={()=>router.push("/context")} style={s.cycle}><Text style={s.cycleTag}><Copy text="ZYKLUS KONTEXT"/></Text><Text style={s.cycleTitle}><Copy text="TAG"/> {d.cycle.day} · <Copy text={d.cycle.phase}/></Text><Text style={s.cycleCopy}><Copy text="Training und Recovery berücksichtigen deinen freiwillig hinterlegten Zykluskontext."/></Text></Pressable>:null}
 
-  <Pressable onPress={()=>router.push(d.nextWorkout?`/workout/${d.nextWorkout.id}`:"/(tabs)/training")}><View style={s.workout}><Text style={s.workoutKicker}>HEUTIGES TRAINING</Text><Text style={s.workoutTitle}>{d.nextWorkout?.title||"REGENERATIONSTAG"}</Text><Text style={s.cardCopy}>{d.nextWorkout?.scheduledAt?<LocalizedValue value={new Date(d.nextWorkout.scheduledAt)}/>:<Copy text="Regeneration gehört zum Training."/>}</Text><Text style={s.arrow}>{d.nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}</Text></View></Pressable>
+  <Pressable onPress={()=>router.push(d.nextWorkout?`/workout/${d.nextWorkout.id}`:"/(tabs)/training")}><View style={s.workout}><Text style={s.workoutKicker}><Copy text="HEUTIGES TRAINING"/></Text><Text style={s.workoutTitle}>{d.nextWorkout?.title?<>{d.nextWorkout.title}</>:<Copy text="REGENERATIONSTAG"/>}</Text><Text style={s.cardCopy}>{d.nextWorkout?.scheduledAt?<LocalizedValue value={new Date(d.nextWorkout.scheduledAt)}/>:<Copy text="Regeneration gehört zum Training."/>}</Text><Text style={s.arrow}><Copy text={d.nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></Text></View></Pressable>
 
-  <Card><Eyebrow>HEUTE</Eyebrow><SectionTitle>Aktivität und Versorgung</SectionTitle>
-   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}>SCHRITTE</Text><Text style={s.metricValue}><LocalizedValue value={Number(a.steps||0)} format="toLocaleString"/> / <LocalizedValue value={Number(a.stepTarget||10000)} format="toLocaleString"/></Text></View><Bar value={a.steps||0} max={a.stepTarget||10000}/></View>
-   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}>WASSER</Text><Text style={s.metricValue}>{a.waterMl||0} / {a.waterTargetMl||2500} ml</Text></View><Bar value={a.waterMl||0} max={a.waterTargetMl||2500}/></View>
-   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}>PROTEIN</Text><Text style={s.metricValue}>{Math.round(a.proteinG||0)} / {a.proteinTargetG||130} g</Text></View><Bar value={a.proteinG||0} max={a.proteinTargetG||130}/></View>
+  <Card><Eyebrow><Copy text="HEUTE"/></Eyebrow><SectionTitle><Copy text="Aktivität und Versorgung"/></SectionTitle>
+   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}><Copy text="SCHRITTE"/></Text><Text style={s.metricValue}><LocalizedValue value={Number(a.steps||0)} format="toLocaleString"/> / <LocalizedValue value={Number(a.stepTarget||10000)} format="toLocaleString"/></Text></View><Bar value={a.steps||0} max={a.stepTarget||10000}/></View>
+   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}><Copy text="WASSER"/></Text><Text style={s.metricValue}>{a.waterMl||0} / {a.waterTargetMl||2500} ml</Text></View><Bar value={a.waterMl||0} max={a.waterTargetMl||2500}/></View>
+   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}><Copy text="PROTEIN"/></Text><Text style={s.metricValue}>{Math.round(a.proteinG||0)} / {a.proteinTargetG||130} g</Text></View><Bar value={a.proteinG||0} max={a.proteinTargetG||130}/></View>
   </Card>
 
-  <Pressable style={({pressed})=>[s.sync,pressed&&{opacity:.75}]} onPress={health}><Text style={s.syncText}>{syncing?"GESUNDHEITSDATEN WERDEN SYNCHRONISIERT…":"GADGET DATEN SYNCHRONISIEREN"}</Text></Pressable>
+  <Pressable style={({pressed})=>[s.sync,pressed&&{opacity:.75}]} onPress={health}><Text style={s.syncText}><Copy text={syncing?"GESUNDHEITSDATEN WERDEN SYNCHRONISIERT…":"GADGET DATEN SYNCHRONISIEREN"}/></Text></Pressable>
  </ScrollView></SafeAreaView>;
 }
 const s=StyleSheet.create({
