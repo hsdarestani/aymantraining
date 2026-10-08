@@ -11,7 +11,7 @@ RUN npx prisma generate
 RUN npm run build
 
 FROM builder AS migrator
-CMD ["sh", "-c", "node scripts/preflight-subscriptions.mjs && npx prisma db push --accept-data-loss && node scripts/seed.mjs"]
+CMD ["sh", "-c", "node scripts/preflight-subscriptions.mjs && npx prisma db push --accept-data-loss && node scripts/seed.mjs && node scripts/apply-hstest-preview.mjs"]
 
 FROM node:22-alpine AS runner
 WORKDIR /app
