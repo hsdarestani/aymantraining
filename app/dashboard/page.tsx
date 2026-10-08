@@ -49,7 +49,7 @@ export default async function Dashboard(){
     const days=Math.max(0,Math.floor((today.getTime()-dateOnly(context.cycleStartDate).getTime())/dayMs));
     const day=days%length+1;
     const ovulation=Math.max(10,Math.round(length-14));
-    const phase=day<=5?"MENSTRUATION":day<ovulation-1?"FOLLICULAR":day<=ovulation+1?"OVULATION":"LUTEAL";
+    const phase=day<=5?"MENSTRUATION":day<ovulation-1?"FOLLIKELPHASE":day<=ovulation+1?"OVULATIONSFENSTER":"LUTEALPHASE";
     return {day,phase};
   })();
   const priority=recs[0];
@@ -64,62 +64,62 @@ export default async function Dashboard(){
       <DigitalTwinHero/>
       <span className="eyebrow"><Copy text="GUTEN MORGEN"/></span>
       <h1>{(user.name||"ATHLET").toUpperCase()}</h1>
-      <p>{dailyLine}</p>
-      <Link href="/focus" className="bd-red-link">BE FOCUSED · 2 MIN ATMUNG →</Link>
+      <p><Copy text={dailyLine}/></p>
+      <Link href="/focus" className="bd-red-link"><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Link>
     </section>
 
     {priority&&<Link href="/lifestyle" className="bd-priority">
-      <span>HEUTE WICHTIG</span><strong>{priority.title}</strong><p>{priority.action}</p>
+      <span><Copy text="HEUTE WICHTIG"/></span><strong><Copy text={priority.title}/></strong><p><Copy text={priority.action}/></p>
     </Link>}
 
     <section className="bd-score-panel">
       <div className="bd-score-head">
-        <div><span className="eyebrow"><Copy text="BE DIFFERENT SCORE"/></span><h2>DEIN TAGESZIEL: 100%</h2><small>DATEN {score?.completeness??0}%</small></div>
+        <div><span className="eyebrow"><Copy text="BE DIFFERENT SCORE"/></span><h2><Copy text="DEIN TAGESZIEL: 100%"/></h2><small><Copy text="DATEN"/> {score?.completeness??0}%</small></div>
         <div className={"bd-score-ring "+signal(total)} style={{"--score":`${total}%`} as React.CSSProperties}>
-          <div><strong>{total}<small>%</small></strong><span>{levelForScore(total)}</span></div>
+          <div><strong>{total}<small>%</small></strong><span><Copy text={levelForScore(total)}/></span></div>
         </div>
       </div>
       <div className="bd-pillar-strip">
         {pillars.map(([letter,label,value])=><Link href="/athlete" className="bd-pillar-mini" key={letter}>
           <div className="bd-pillar-rail"><i className={signal(value)} style={{height:`${Math.max(6,value??0)}%`}}/></div>
-          <b>{letter}</b><strong>{value==null?"Keine Angabe":Math.round(value)}</strong><span>{label}</span>
+          <b>{letter}</b><strong>{value==null?<Copy text="Keine Angabe"/>:Math.round(value)}</strong><span><Copy text={label}/></span>
         </Link>)}
       </div>
       <Link href="/athlete" className="bd-volt-link"><Copy text="ATHLETE DIGITAL TWIN ÖFFNEN →"/></Link>
     </section>
 
-    <section className="bd-section-title"><span className="eyebrow">DEINE 72 STUNDEN</span><h2>BELASTUNG IM BLICK.</h2></section>
+    <section className="bd-section-title"><span className="eyebrow"><Copy text="DEINE 72 STUNDEN"/></span><h2><Copy text="BELASTUNG IM BLICK."/></h2></section>
     <section className="bd-day-strip">
       {dayStrip.map((day,i)=>{
         const first=day.workouts[0];
         return <Link href="/training" className={i===1?"bd-day-card active":"bd-day-card"} key={day.date.toISOString()}>
-          <span>{dayNames[i]}</span>
+          <span><Copy text={dayNames[i]}/></span>
           <strong><LocalizedValue value={day.date} format="toLocaleDateString"/></strong>
-          <p>{first?.title||(i===1?"REGENERATION ODER FREI":"NOCH NICHTS GEPLANT")}</p>
-          {first?.completedAt&&<small>ERLEDIGT</small>}
+          <p>{first?.title||<Copy text={i===1?"REGENERATION ODER FREI":"NOCH NICHTS GEPLANT"}/>}</p>
+          {first?.completedAt&&<small><Copy text="ERLEDIGT"/></small>}
         </Link>
       })}
     </section>
 
     <section className="bd-module-grid">
-      <Link href="/lifestyle" className="bd-module-card"><span>BE RESTED</span><strong>{sleepHours==null?"Keine Angabe":sleepHours+" h"}</strong><p>Schlaf und Erholung</p></Link>
-      <Link href="/fuel" className="bd-module-card"><span><Copy text="BE FUEL"/></span><strong>{protein} g</strong><p>Protein heute</p></Link>
-      <Link href="/focus" className="bd-module-card red"><span>BE FOCUSED</span><strong>02:00</strong><p>Atmung und Tagescheck</p></Link>
+      <Link href="/lifestyle" className="bd-module-card"><span><Copy text="BE RESTED"/></span><strong>{sleepHours==null?<Copy text="Keine Angabe"/>:sleepHours+" h"}</strong><p><Copy text="Schlaf und Erholung"/></p></Link>
+      <Link href="/fuel" className="bd-module-card"><span><Copy text="BE FUEL"/></span><strong>{protein} g</strong><p><Copy text="Protein heute"/></p></Link>
+      <Link href="/focus" className="bd-module-card red"><span><Copy text="BE FOCUSED"/></span><strong>02:00</strong><p><Copy text="Atmung und Tagescheck"/></p></Link>
       <Link href="/community" className="bd-module-card red"><span><Copy text="CHALLENGES"/></span><strong>→</strong><p><Copy text="Streak · Leaderboard · Badges"/></p></Link>
     </section>
 
-    {cycle&&<Link href="/context" className="bd-cycle-card"><span>CYCLE CONTEXT</span><strong>TAG {cycle.day} · {cycle.phase}</strong><p><Copy text="Training und Recovery berücksichtigen deinen freiwilligen Zykluskontext."/></p></Link>}
+    {cycle&&<Link href="/context" className="bd-cycle-card"><span><Copy text="CYCLE CONTEXT"/></span><strong><Copy text="TAG"/> {cycle.day} · <Copy text={cycle.phase}/></strong><p><Copy text="Training und Recovery berücksichtigen deinen freiwilligen Zykluskontext."/></p></Link>}
 
     <Link href={nextWorkout?`/training/${nextWorkout.id}`:"/training"} className="bd-workout-card">
-      <span>HEUTIGES TRAINING</span><h2>{nextWorkout?.title||"REGENERATIONSTAG"}</h2>
+      <span><Copy text="HEUTIGES TRAINING"/></span><h2>{nextWorkout?.title||<Copy text="REGENERATIONSTAG"/>}</h2>
       <p>{nextWorkout?.scheduledAt?<LocalizedValue value={nextWorkout.scheduledAt}/>:<Copy text="Regeneration gehört zum Training."/>}</p>
-      <b>{nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}</b>
+      <b><Copy text={nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></b>
     </Link>
 
     <section className="bd-quick-links">
-      <Link href="/wearables"><span>GADGETS</span><strong>Apple · Samsung · Xiaomi</strong></Link>
-      <Link href="/athlete"><span><Copy text="ATHLETE DIGITAL TWIN"/></span><strong>Radar · Ziel · Prognose</strong></Link>
-      <Link href="/coach"><span><Copy text="COACH"/></span><strong>Chat · Briefing · Feedback</strong></Link>
+      <Link href="/wearables"><span><Copy text="GADGETS"/></span><strong>Apple · Samsung · Xiaomi</strong></Link>
+      <Link href="/athlete"><span><Copy text="ATHLETE DIGITAL TWIN"/></span><strong><Copy text="Radar · Ziel · Prognose"/></strong></Link>
+      <Link href="/coach"><span><Copy text="COACH"/></span><strong><Copy text="Chat · Briefing · Feedback"/></strong></Link>
     </section>
   </main>;
 }
