@@ -60,25 +60,25 @@ async function main(){
       create:{id:coachMsg,athleteId:uid,coachId:coach.id,senderId:coach.id,kind:"TEXT",
         text:"DEMO · Gerne, wir passen dein Training schrittweise an.",createdAt:when(-1,13)}});
     if(i===1){
-      await db.aiHandoff.upsert({where:{id:"bd-demo-admin-ai-handoff"}},update:{},
+      await db.aiHandoff.upsert({where:{id:"bd-demo-admin-ai-handoff"},update:{},
         create:{id:"bd-demo-admin-ai-handoff",userId:uid,coachId:coach.id,
           reason:"DEMO · Trainerentscheidung erforderlich",summary:"DEMO · Beispielhafter AI Handover zur Trainingsanpassung."}});
-      await db.aiMessage.upsert({where:{id:"bd-demo-admin-ai-message"}},update:{},
+      await db.aiMessage.upsert({where:{id:"bd-demo-admin-ai-message"},update:{},
         create:{id:"bd-demo-admin-ai-message",userId:uid,role:"assistant",
           content:"DEMO · Achte auf kontrollierte Bewegungen und konsistente Regeneration.",
           sourceContext:{demo:true}}});
     }
   }
-  await db.coachBrief.upsert({where:{id:"bd-demo-admin-brief"}},update:{},
+  await db.coachBrief.upsert({where:{id:"bd-demo-admin-brief"},update:{},
     create:{id:"bd-demo-admin-brief",coachId:coach.id,title:"DEMO · Morgenübersicht",
       body:"Beispiel einer täglichen Traineransage. Heute Fokus auf saubere Ausführung und aktive Erholung.",
       audienceTier:"PRO",publishAt:when(-1,8)}});
-  await db.event.upsert({where:{id:"bd-demo-admin-event"}},update:{},
+  await db.event.upsert({where:{id:"bd-demo-admin-event"},update:{},
     create:{id:"bd-demo-admin-event",title:"DEMO · Mobility Gruppenstunde",
       description:"Beispiel Event, kein echter Termin und keine buchbare Sitzung.",
       type:"MEETUP",startsAt:when(7,17),endsAt:when(7,18),location:"DEMO · Online",capacity:20,
       minTier:"FREE",active:true}});
-  await db.notification.upsert({where:{id:"bd-demo-admin-campaign"}},update:{},
+  await db.notification.upsert({where:{id:"bd-demo-admin-campaign"},update:{},
     create:{id:"bd-demo-admin-campaign",userId:admin.id,category:"coach_campaign",
       title:"DEMO · Trainingsmotivation",body:"Beispiel einer Push Kampagne. Nicht wirklich versendet.",
       sentAt:now,readAt:now}});
