@@ -27,7 +27,7 @@ export default async function Dashboard(){
     prisma.athleteContext.findUnique({where:{userId:user.id}}),
     prisma.workout.findMany({where:{userId:user.id,scheduledAt:{gte:timelineStart,lt:timelineEnd}},select:{id:true,title:true,scheduledAt:true,completedAt:true},orderBy:{scheduledAt:"asc"}}),
     prisma.systemSetting.findUnique({where:{key:"different_lines"}}),
-    user.name?.trim().toUpperCase()==="HSTEST"?prisma.mediaAsset.findFirst({where:{relatedUserId:user.id,kind:"PROGRESS_PHOTO"},orderBy:{createdAt:"desc"}}):Promise.resolve(null)
+    prisma.mediaAsset.findFirst({where:{relatedUserId:user.id,kind:"PROGRESS_PHOTO"},orderBy:{createdAt:"desc"}})
   ]);
 
   const total=score?.total??0;
