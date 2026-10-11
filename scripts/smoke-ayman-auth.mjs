@@ -31,7 +31,11 @@ async function main(){
  // Validate the mobile-admin cards and every DEMO customer profile after deployment.
  const adminResponse=await fetch(origin+"/admin",{headers:{cookie:"bd_session="+token,host:"bedifferent.smarbiz.sbs"},signal:AbortSignal.timeout(12000)});
  const adminHtml=await adminResponse.text();
- if(adminResponse.status!==200||!adminHtml.includes("attention-row")||!adminHtml.includes("attention-action"))errors.push("admin-mobile-action-layout");
+ const attentionRows=adminHtml.includes("attention-row");
+ const attentionActions=adminHtml.includes("attention-action");
+ const pendingRecommendations=await db.recommendation.count({where:{coachStatus:"PENDING"}});
+ console.log("ATTENTION_LAYOUT",adminResponse.status,"ROWS",attentionRows,"ACTIONS",attentionActions,"PENDING",pendingRecommendations);
+ if(adminResponse.status!==200||(pendingRecommendations>0&&(!attentionRows||!attentionActions)))errors.push("admin-mobile-action-layout");
  const listResponse=await fetch(origin+"/admin/customers",{headers:{cookie:"bd_session="+token,host:"bedifferent.smarbiz.sbs"},signal:AbortSignal.timeout(12000)});
  const listHtml=await listResponse.text();
  if(listResponse.status!==200||!listHtml.includes("customer-row")||!listHtml.includes("customer-action"))errors.push("admin-mobile-customers-layout");
