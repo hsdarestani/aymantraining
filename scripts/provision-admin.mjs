@@ -7,8 +7,8 @@ const prisma = new PrismaClient();
 const email = String(process.env.BD_ADMIN_EMAIL || "").trim().toLowerCase();
 const password = String(process.env.BD_ADMIN_PASSWORD || "");
 
-if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || password.length < 20 || password.length > 128) {
-  console.error("Admin provisioning requires a valid email and a 20-128 character password in private environment variables.");
+if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || password.length < 8 || password.length > 128) {
+  console.error("Admin provisioning requires a valid email and a 8-128 character password in private environment variables.");
   process.exit(2);
 }
 
