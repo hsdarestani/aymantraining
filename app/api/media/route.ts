@@ -42,7 +42,7 @@ export async function POST(request:Request){
       if(used>=limit)return errorJson(`Dein Kontingent von ${limit} Videoanalysen für diesen Monat ist erreicht.`,403);
     }
   }
-  if(kind==="PROGRESS_PHOTO"&&user.subscriptionTier==="FREE"){
+  if(kind==="PROGRESS_PHOTO"&&user.role==="ATHLETE"&&user.subscriptionTier==="FREE"){
     const count=await prisma.mediaAsset.count({where:{relatedUserId:user.id,kind:"PROGRESS_PHOTO"}});
     if(count>=3)return errorJson("Im FREE Plan sind maximal 3 Fortschrittsbilder möglich.",403);
   }
