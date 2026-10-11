@@ -12,7 +12,7 @@ const checks=[
 "/dashboard","/progress","/training","/tests","/lifestyle",
 "/fuel","/report","/community","/athlete","/focus","/wearables","/coach","/ai"
 ];
-const browser=await chromium.launch({channel:"chrome",headless:true,args:["--no-sandbox"]});
+const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
 const failures=[];
 try{
  for(const vp of [
