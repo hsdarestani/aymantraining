@@ -39,6 +39,21 @@ async function main(){
       if(html.length<1800)missing.push(route+":short");
     }catch(e){console.log(JSON.stringify({route,error:String(e).slice(0,160)}));failures.push(route+":request_error")}
   }
+  const models=[
+    "trainingPlan","trainingPlanItem","exercise","referenceNorm","coachingRule",
+    "scoreSnapshot","performanceTest","weeklyCheckIn","bodyMetric","wearableDaily","nutritionDaily",
+    "challenge","challengeEntry","badge","message","notification","event","coachBrief",
+    "aiMessage","aiHandoff","recommendation","subscription","waitlistEntry","wearableConnection"
+  ];
+  for(const model of models){
+    try{const count=await db[model].count();console.log("DEMO_DB_COVERAGE_"+model.toUpperCase()+"="+count)}
+    catch(e){console.log("DEMO_DB_COVERAGE_"+model.toUpperCase()+"=UNAVAILABLE")}
+  }
+  console.log("DEMO_AYMAN_CHAT_MESSAGES="+await db.message.count({where:{athleteId:user.id}}));
+  console.log("DEMO_AYMAN_AI_MESSAGES="+await db.aiMessage.count({where:{userId:user.id}}));
+  console.log("DEMO_AYMAN_WEEKLY_CHECKINS="+await db.weeklyCheckIn.count({where:{userId:user.id}}));
+  console.log("DEMO_AYMAN_BODYMETRICS="+await db.bodyMetric.count({where:{userId:user.id}}));
+  console.log("DEMO_AYMAN_PICTURES="+await db.mediaAsset.count({where:{relatedUserId:user.id,kind:"PROGRESS_PHOTO"}}));
   console.log("ROUTE_AUDIT_TOTAL="+routes.length);
   console.log("ROUTE_AUDIT_ERRORS="+JSON.stringify(failures));
   console.log("ROUTE_AUDIT_THIN_PAGES="+JSON.stringify(missing));
