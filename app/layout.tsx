@@ -40,6 +40,8 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({children}:{children:React.ReactNode}) {
   const preferred=(await cookies()).get("bd_locale")?.value;
-  const locale=language(preferred??(await getCurrentUser())?.locale);
-  return <html lang={locale}><body><LocaleProvider initialLocale={locale}><ServiceWorker/>{children}</LocaleProvider></body></html>;
+  const user=await getCurrentUser();
+  const locale=language(preferred??user?.locale);
+  const demo=user?.email==="admin@bedifferent.smarbiz.sbs" && user?.name==="Ayman";
+  return <html lang={locale}><body><LocaleProvider initialLocale={locale}><ServiceWorker/>{demo&&<div role="status" style={{background:"#263014",color:"#dbff73",textAlign:"center",padding:"7px 12px",fontSize:11,fontWeight:800,letterSpacing:".04em",borderBottom:"1px solid #4a5d27"}}>DEMO ANSICHT · Beispieldaten, keine bestätigten persönlichen Messwerte oder echten Geräteverbindungen</div>}{children}</LocaleProvider></body></html>;
 }
