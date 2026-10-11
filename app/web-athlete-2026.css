@@ -65,8 +65,8 @@
 .bd-editorial-home{--editorial-border:#242a2d;--editorial-soft:#8f979b}
 .bd-hero-editorial{min-height:390px;margin:0 -28px;padding:54px 28px 34px;border-bottom:1px solid var(--editorial-border);background:#07090a}
 .bd-hero-editorial.has-photo{min-height:430px}
-.bd-hero-copy{position:relative;z-index:5;max-width:520px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;min-height:300px}
-.bd-hero-editorial h1{max-width:62%;font-size:clamp(52px,7.5vw,94px);margin:10px 0 14px;letter-spacing:-.075em}
+.bd-hero-copy{position:relative;z-index:5;width:min(100%,680px);max-width:680px;min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;min-height:300px}
+.bd-hero-editorial h1{width:100%;max-width:100%;font-size:clamp(40px,5.3vw,68px);line-height:1.02;margin:10px 0 14px;letter-spacing:-.065em;overflow-wrap:normal;word-break:normal;hyphens:none;text-wrap:wrap}
 .bd-hero-editorial p{max-width:390px;font-size:15px;color:#f0f1ed}
 .bd-hero-index{position:absolute;right:26px;bottom:20px;z-index:6;display:flex;align-items:center;gap:9px;color:#fff}
 .bd-hero-index span{font-size:9px;color:var(--red);font-weight:900}.bd-hero-index b{font-size:8px;letter-spacing:.15em}
@@ -111,7 +111,7 @@
 
 @media(max-width:760px){
  .bd-hero-editorial{margin:0 -14px;padding:30px 14px 24px;min-height:320px}.bd-hero-editorial.has-photo{min-height:350px}
- .bd-hero-copy{min-height:250px}.bd-hero-editorial h1{font-size:43px;max-width:62%;margin-bottom:12px}.bd-hero-editorial p{font-size:12px;max-width:235px;line-height:1.55}
+ .bd-hero-copy{width:calc(100% - 80px);max-width:calc(100% - 80px);min-height:250px}.bd-hero-editorial h1{font-size:clamp(28px,7vw,43px);max-width:100%;margin-bottom:12px;letter-spacing:-.045em}.bd-hero-editorial p{font-size:12px;max-width:235px;line-height:1.55}
  .bd-hero-editorial .bd-athlete-private-photo{width:72%;right:-10px;opacity:.76}.bd-hero-index{right:14px;bottom:14px}.bd-hero-editorial:not(.has-photo) .bd-digital-twin-hero{right:-52px;top:18px;width:205px;height:250px;opacity:.48}
  .bd-priority-line{margin:0 -14px;padding:13px 44px 13px 14px}.bd-priority-line>b{right:14px}.bd-priority-line strong{font-size:15px}.bd-priority-line p{font-size:9px}
  .bd-score-editorial{grid-template-columns:115px 1fr;gap:9px 12px;padding:30px 0}.bd-score-intro{align-self:start;padding-top:18px}.bd-score-number strong{font-size:58px}.bd-score-number i{font-size:18px}.bd-score-intro p{font-size:10px;margin-top:15px}.bd-score-intro small{font-size:7px}
