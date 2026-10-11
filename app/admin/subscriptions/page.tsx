@@ -4,10 +4,13 @@ import {Copy,LocalizedValue} from "../../components/Locale";
 
 import Link from "next/link";
 import {prisma} from "../../../lib/db";
+import {getCurrentUser} from "../../../lib/auth";
 export const dynamic="force-dynamic";
 const pct=(n:number,d:number)=>d?Math.round(n/d*1000)/10:0;
 
 export default async function Subscriptions(){
+ const viewer=await getCurrentUser();
+ const demo=viewer?.role==="ADMIN"&&viewer?.email==="admin@bedifferent.smarbiz.sbs";
  const now=new Date(),d7=new Date(Date.now()-7*86400000),d30=new Date(Date.now()-30*86400000),d60=new Date(Date.now()-60*86400000);
  const [users,subs,wearableUsers,waitlist,messages,settingsRow]=await Promise.all([
    prisma.user.findMany({where:{role:"ATHLETE"},select:{id:true,createdAt:true,onboardingCompleted:true,subscriptionTier:true,sessions:{select:{lastSeenAt:true}}}}),
@@ -52,6 +55,18 @@ export default async function Subscriptions(){
      ].map(([label,value,target])=><article className="panel kpi-target" key={String(label)}><span className="eyebrow"><Copy text={label}/></span><strong>{Number(value).toFixed(1)}%</strong><div className="kpi-track"><i style={{width:`${Math.min(100,Number(value))}%`}}/></div><small><Copy text={"Ziel"}/>{label==="MONTHLY CHURN"?"<":"≥"} {target}%</small></article>)}
    </section>
    <article className="panel"><div className="panel-head"><div><span className="eyebrow"><Copy text={"TRAINERBETREUUNG"}/></span><h2><Copy text={"Antwortzeit"}/></h2></div><span className="tag"><Copy text={avgResponse==null?"KEINE DATEN":`${avgResponse.toFixed(1)} H AVG`}/></span></div><p className="muted"><Copy text={"Gemessen von der Nachricht des Athleten bis zur nächsten Antwort des Trainers innerhalb der letzten 30 Tage."}/></p></article>
+   {demo&&<article className="panel bd-billing-demo">
+  <span className="eyebrow">DEMO · ABONNEMENT ÜBERSICHT</span>
+  <h2>So funktioniert das Bezahlmodell</h2>
+  <p className="muted">Fiktiver Ablauf zur Präsentation. Es gibt keine Testzahlung, keinen aktiven App Store Kauf und keinen echten Umsatz.</p>
+  <div className="bd-billing-demo-steps">
+    <div><span>01</span><strong>FREE</strong><small>Basiszugang</small></div>
+    <div><span>02</span><strong>PRO</strong><small>Erweiterte Trainingstools</small></div>
+    <div><span>03</span><strong>ELITE</strong><small>Coach und Analyse</small></div>
+    <div><span>04</span><strong>STORE</strong><small>Abrechnung nur mit echter Integration</small></div>
+  </div>
+  <p className="muted">Die Kennzahl EST. MRR oben basiert weiterhin ausschließlich auf echten bestätigten Store Subscriptions. Keine Demo Buchungen werden eingerechnet.</p>
+</article>}
    <article className="panel"><span className="eyebrow">BILLING EVENTS</span><h2><Copy text={"ANBIETERÜBERSICHT"}/></h2>{latest.length?latest.map(s=><div className="history-row" key={s.id}><strong>{s.provider} · {s.tier}</strong><span>{s.status} · {s.renewsAt?.toLocaleDateString("de-DE")||"—"}</span></div>):<p className="muted"><Copy text={"Noch keine Store Subscription Events."}/></p>}</article>
  </main>;
 }
