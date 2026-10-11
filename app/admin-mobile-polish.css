@@ -167,3 +167,108 @@
   .admin-content .body-stats strong.customer-email { font-size: 15px; }
   .admin-content .athlete-row > a.secondary { min-width: 90px; padding-inline: 12px; }
 }
+
+/* Site-wide mobile fit-and-finish: tame long translated text and real user input. */
+.sub-shell, .shell, .member-stage, .admin-content,
+.sub-shell .panel, .sub-shell .history-row, .sub-shell .body-stats,
+.sub-shell .body-stats > div, .sub-shell .exercise-row,
+.sub-shell .page-hero, .sub-shell .coach-layout, .sub-shell .sub-top,
+.sub-shell .setting-row, .sub-shell .row-actions,
+.admin-content .mini-form, .admin-content .setting-row,
+.admin-content .panel-head, .admin-content .row-actions {
+  min-width: 0;
+  max-width: 100%;
+}
+.sub-shell .history-row > *,
+.sub-shell .body-stats strong,
+.sub-shell .setting-row > *,
+.sub-shell .exercise-row > *,
+.sub-shell .panel > p,
+.sub-shell .panel > strong,
+.sub-shell .panel h2,
+.sub-shell .panel h3,
+.admin-content .history-row > *,
+.admin-content .setting-row > *,
+.admin-content .panel h2,
+.admin-content .panel h3 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.sub-shell .body-stats > div {min-width: 0; overflow: hidden;}
+.sub-shell .body-stats strong {
+  display: block;
+  max-width: 100%;
+  font-size: clamp(18px,2.8vw,26px);
+  line-height: 1.4;
+}
+.sub-shell .history-row, .admin-content .history-row { max-width:100%; }
+.sub-shell .history-row small, .admin-content .history-row small {
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.sub-shell input, .sub-shell select, .sub-shell textarea,
+.admin-content input, .admin-content select, .admin-content textarea {
+  min-width:0;
+  max-width:100%;
+}
+.sub-shell .row-actions, .admin-content .row-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
+.sub-shell .row-actions > button, .admin-content .row-actions > button,
+.sub-shell .row-actions > a, .admin-content .row-actions > a {
+  min-height:44px;
+  max-width:100%;
+  align-items:center;
+  justify-content:center;
+  overflow-wrap:break-word;
+  text-align:center;
+}
+@media (max-width:760px) {
+  .sub-shell .body-stats { grid-template-columns: minmax(0,1fr); }
+  .sub-shell .page-hero { grid-template-columns:minmax(0,1fr); }
+  .sub-shell .page-hero > *, .admin-content .admin-header > * { min-width:0;max-width:100%; }
+  .sub-shell .history-row, .admin-content .history-row { min-width:0; }
+  .sub-shell .history-row > span, .admin-content .history-row > span { line-height:1.55; }
+  .admin-content .athlete-row:not(.attention-row):not(.customer-row) {
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:9px 11px;
+    padding:16px 0;
+  }
+  .admin-content .athlete-row:not(.attention-row):not(.customer-row) > .risk {
+    flex:0 0 9px;
+  }
+  .admin-content .athlete-row:not(.attention-row):not(.customer-row) > strong {
+    flex:1 1 calc(100% - 30px);
+    white-space:normal;
+    overflow-wrap:anywhere;
+    font-size:13px;
+  }
+  .admin-content .athlete-row:not(.attention-row):not(.customer-row) > span,
+  .admin-content .athlete-row:not(.attention-row):not(.customer-row) > small {
+    display:inline;
+    flex:0 1 auto;
+    max-width:100%;
+    font-size:11px;
+    white-space:normal;
+  }
+  .admin-content .athlete-row:not(.attention-row):not(.customer-row) > a,
+  .admin-content .athlete-row:not(.attention-row):not(.customer-row) > button {
+    flex:0 0 auto;
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
+    min-width:94px;
+    min-height:44px;
+    margin-left:auto;
+    padding:10px 14px;
+    border-radius:11px;
+    white-space:nowrap;
+  }
+}
