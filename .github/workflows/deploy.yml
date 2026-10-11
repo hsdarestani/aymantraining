@@ -51,8 +51,8 @@ jobs:
             set -euo pipefail
             # Fail closed before any package, Docker, firewall or Nginx operation.
             # A+ Solution owns ports 80/443 and production services on shared STRATO.
-            if [ -d /opt/aplussolution ] || [ -f /opt/aplussolution/Caddyfile ]; then
-              echo "REFUSING DEPLOY: This host runs A+ Solution. Use an isolated shared-host deployment instead." >&2
+            if [ -d /opt/aplussolution ] || [ -f /opt/aplussolution/Caddyfile ] || [ -d /opt/a-esthetic-mobile ] || [ -d /opt/aesthetic-book ]; then
+              echo "REFUSING DEPLOY: This host already runs A+ Solution or A+ Esthetic. Use an isolated shared-host deployment instead." >&2
               exit 1
             fi
             export DEBIAN_FRONTEND=noninteractive
