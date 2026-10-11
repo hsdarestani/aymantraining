@@ -1,8 +1,8 @@
 name: Deploy BE DIFFERENT
 
+# Run manually only. This standalone-server installer must not run automatically
+# against the shared STRATO host used by A+ Solution.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -49,6 +49,12 @@ jobs:
           command_timeout: 30m
           script: |
             set -euo pipefail
+            # Fail closed before any package, Docker, firewall or Nginx operation.
+            # A+ Solution owns ports 80/443 and production services on shared STRATO.
+            if [ -d /opt/aplussolution ] || [ -f /opt/aplussolution/Caddyfile ]; then
+              echo "REFUSING DEPLOY: This host runs A+ Solution. Use an isolated shared-host deployment instead." >&2
+              exit 1
+            fi
             export DEBIAN_FRONTEND=noninteractive
 
             apt-get update
