@@ -62,15 +62,21 @@ try{
   const first=page.locator("a.customer-action").first();
   if(await first.count()){
     await first.click();
-    await page.waitForLoadState("domcontentloaded");
-    const ok=await page.evaluate(()=>{
+    await page.waitForURL(/\\/admin\\/customers\\/[^/?#]+/,{timeout:20000});
+    await page.locator(".customer-email").waitFor({state:"visible",timeout:15000});
+    await page.waitForTimeout(180);
+    const geometry=await page.evaluate(()=>{
       const e=document.querySelector(".customer-email"),p=e?.parentElement;
-      if(!e||!p)return false;
+      if(!e||!p)return {ok:false,reason:"missing element or card"};
       const er=e.getBoundingClientRect(),pr=p.getBoundingClientRect();
-      return er.left>=pr.left-1&&er.right<=pr.right+1&&er.width>10;
+      return {ok:er.left>=pr.left-1&&er.right<=pr.right+1&&er.width>10,
+        emailLeft:Math.round(er.left),emailRight:Math.round(er.right),
+        cardLeft:Math.round(pr.left),cardRight:Math.round(pr.right),
+        emailWidth:Math.round(er.width),cardWidth:Math.round(pr.width)};
     });
-    console.log("CUSTOMER_LONG_EMAIL_FITS",vp.width,ok);
-    if(!ok)failures.push(vp.width+":customer_email_overflow");
+    console.log("CUSTOMER_EMAIL_GEOMETRY",vp.width,JSON.stringify(geometry));
+    console.log("CUSTOMER_LONG_EMAIL_FITS",vp.width,geometry.ok);
+    if(!geometry.ok)failures.push(vp.width+":customer_email_overflow");
   }else failures.push(vp.width+":missing_customer_detail_link");
   await ctx.close();
  }
