@@ -62,7 +62,7 @@ try{
   const first=page.locator("a.customer-action").first();
   if(await first.count()){
     await first.click();
-    await page.waitForURL(/\\/admin\\/customers\\/[^/?#]+/,{timeout:20000});
+    await page.waitForURL(/\/admin\/customers\/[^/?#]+/,{timeout:20000});
     await page.locator(".customer-email").waitFor({state:"visible",timeout:15000});
     await page.waitForTimeout(180);
     const geometry=await page.evaluate(()=>{
