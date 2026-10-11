@@ -52,6 +52,11 @@ try{
       }
       return {width,scroll,broken:visiblyBroken.slice(0,6)};
     });
+    if(route==="/admin"){
+      const demoButtons=await page.locator(".attention-row .attention-action").count();
+      console.log("DEMO_ATTENTION_BUTTONS_VISIBLE",vp.width,demoButtons);
+      if(demoButtons<1)failures.push(vp.width+":demo_attention_buttons_missing");
+    }
     const overflow=info.scroll>info.width+10;
     console.log("MOBILE_LAYOUT",vp.width,route,"OVERFLOW",overflow,"ACTIONS_OK",info.broken.length===0);
     if(overflow||info.broken.length)failures.push(vp.width+":"+route+":"+(overflow?"horizontal_overflow":"broken_action_"+info.broken.join("|")));
