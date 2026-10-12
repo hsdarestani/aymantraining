@@ -37,7 +37,7 @@ export default function Athlete(){
   </Pressable>
 
   <Pressable accessibilityRole="button" onPress={()=>router.push("/digital-twin")} style={st.twinStage}>
-    <AthleteTwin compact/><View style={st.twinCopy}><Text style={st.twinOverline}>DIGITAL TWIN / 01</Text><Text style={st.twinTitle}><Copy text="DEIN DIGITALER ATHLET"/></Text><Text style={st.twinDescription}><Copy text="Animierte Vorschau öffnen und Leistungsprofil erkunden."/></Text><Text style={st.twinAction}><Copy text="ERKUNDEN ↗"/></Text></View>
+    <AthleteTwin compact/><View style={st.twinCopy}><Text style={st.twinOverline}>DIGITALES ABBILD / 01</Text><Text style={st.twinTitle}><Copy text="DEIN DIGITALER ATHLET"/></Text><Text style={st.twinDescription}><Copy text="Animierte Vorschau öffnen und Leistungsprofil erkunden."/></Text><Text style={st.twinAction}><Copy text="ERKUNDEN ↗"/></Text></View>
    </Pressable>
   <Eyebrow><Copy text="ENTDECKE DEIN SYSTEM"/></Eyebrow>
   <View style={st.grid}>{modules.map((item,i)=><Pressable accessibilityRole="button" key={item.label} onPress={()=>router.push(item.path as any)} style={[st.module,item.accent==="red"&&st.moduleRed,item.accent==="score"&&st.moduleScore,item.accent==="awake"&&st.moduleAwake]}>
