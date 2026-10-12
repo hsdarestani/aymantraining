@@ -12,6 +12,7 @@ import {syncHealth} from "../../lib/health";
 import {C,radius} from "../../theme";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {syncHomeWidget} from "../../lib/widget-sync";
+import AthleteTwin from "../../components/AthleteTwin";
 
 const pillarMeta=[
  ["S","strength","KRAFT"],["E","endurance","AUSDAUER"],["A","athleticism","ATHLETIK"],["M","mobility","BEWEGLICHKEIT"],
@@ -64,8 +65,8 @@ export default function Home(){
   <View style={s.top}><Brand compact/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,(score?.total??0)<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}><Copy text="BD SCORE"/></Text><Text style={s.scorePillValue}>{score?.total??0}%</Text></Pressable></View>
 
   <View style={s.hero}>
-   <View style={s.athleteGhost}><View style={s.ghostHead}/><View style={s.ghostTorso}/><View style={s.ghostLegs}/></View>
-   <Text style={s.eyebrow}><Copy text={"GUTEN MORGEN"}/></Text>
+   <View pointerEvents="none" style={s.heroTwin}><AthleteTwin compact/></View>
+   <Text style={s.eyebrow}><Copy text={"DEIN ATHLETEN DASHBOARD"}/></Text>
    <Text style={s.heroName}>{(d.user.name||"ATHLET").toUpperCase()}</Text>
    <Text style={s.morningLine}><Copy text={line}/></Text>
    <Pressable onPress={()=>router.push("/focus")}><Text style={s.focusLink}><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Text></Pressable>
@@ -81,13 +82,18 @@ export default function Home(){
    <Pressable onPress={()=>router.push("/digital-twin")}><Text style={s.scoreLink}><Copy text="ATHLETE DIGITAL TWIN ÖFFNEN →"/></Text></Pressable>
   </Card>
 
-  <View style={s.sectionHead}><View><Eyebrow><Copy text="DEINE 72 STUNDEN"/></Eyebrow><Text style={s.sectionTitle}><Copy text="BELASTUNG IM BLICK."/></Text></View></View>
-  <View style={s.days}>{(d.dayStrip||[]).map((day:any,i:number)=>{const first=day.workouts?.[0];return <Pressable key={day.date} onPress={()=>router.push("/(tabs)/training")} style={[s.day,i===1&&s.dayNow]}>
-   <Text style={[s.dayLabel,i===1&&s.dayLabelNow]}><Copy text={dayLabels[i]}/></Text>
-   <Text style={s.dayDate}>{String(day.date).slice(5).split("-").reverse().join(".")}</Text>
-   <Text numberOfLines={2} style={s.dayWorkout}>{first?.title?<>{first.title}</>:<Copy text={i===1?"REGENERATION ODER FREI":"NOCH NICHTS GEPLANT"}/>}</Text>
-   {first?.completed?<Text style={s.done}><Copy text="ERLEDIGT"/></Text>:null}
-  </Pressable>})}</View>
+  <View style={s.loadSection}>
+   <View style={s.loadHeading}><Text style={s.loadEyebrow}>BELASTUNGSÜBERSICHT</Text><Text style={s.loadMark}>↗</Text></View>
+   <Text style={s.loadTitle}><Copy text="DEINE LAST. DEIN RHYTHMUS."/></Text>
+   <Text style={s.loadSub}><Copy text="72 STUNDEN IM BLICK"/></Text>
+   <View style={s.loadDays}>{(d.dayStrip||[]).map((day:any,i:number)=>{const first=day.workouts?.[0];const count=day.workouts?.length||0;const date=String(day.date);return <Pressable accessibilityRole="button" key={date} onPress={()=>router.push("/(tabs)/training")} style={[s.loadDay,i===1&&s.loadToday]}>
+    <Text style={[s.loadLabel,i===1&&s.loadLabelCurrent]}><Copy text={dayLabels[i]}/></Text>
+    <Text style={s.loadNumber}>{date.slice(8,10)}</Text>
+    <Text style={s.loadStatus}>{first?.completed?<Copy text="ERLEDIGT"/>:count?<Copy text="EINHEIT GEPLANT"/>:<Copy text={i===0?"VERGANGEN":i===1?"AKTUELL":"VORAUS"}/>}</Text>
+    <Text numberOfLines={2} style={s.loadWorkout}>{first?.title||<Copy text="NOCH NICHTS GEPLANT"/>}</Text>
+   </Pressable>})}</View>
+   <Text style={s.loadFooter}><Copy text="Deine Einheiten, nicht geschätzte Belastungswerte."/></Text>
+  </View>
 
   <View style={s.teaserRow}>
    <Pressable style={s.teaser} onPress={()=>router.push("/lifestyle")}><Text style={s.teaserTag}><Copy text="BE RESTED"/></Text><Text style={s.teaserBig}>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</Text><Text style={s.teaserCopy}>{wearable?.restingHr!=null?<><Copy text="RUHEPULS"/> {Math.round(wearable.restingHr)} · </>:null}{currentHeartRate!=null?<><Copy text="PULS"/> {currentHeartRate}</>:<Copy text="Schlaf und Erholung"/>}</Text></Pressable>
@@ -114,11 +120,25 @@ export default function Home(){
 const s=StyleSheet.create({
  safe:{flex:1,backgroundColor:C.bg},content:{padding:16,paddingBottom:108,gap:12},center:{flex:1,backgroundColor:C.bg,alignItems:"center",justifyContent:"center"},
  top:{height:52,flexDirection:"row",justifyContent:"space-between",alignItems:"center"},scorePill:{minWidth:92,borderRadius:20,borderWidth:1,borderColor:"#D4FF0050",paddingVertical:6,paddingHorizontal:10,alignItems:"flex-end"},scorePillAlert:{borderColor:"#FF566A88",backgroundColor:"#FF566A0D"},scorePillLabel:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:8,letterSpacing:1.2},scorePillValue:{color:C.ink,fontFamily:"Archivo",fontSize:18},
- hero:{minHeight:242,justifyContent:"flex-end",paddingVertical:22,paddingHorizontal:2,overflow:"hidden"},athleteGhost:{position:"absolute",right:16,top:9,width:112,height:220,opacity:.16,alignItems:"center"},ghostHead:{width:38,height:38,borderRadius:19,borderWidth:2,borderColor:C.ink},ghostTorso:{width:72,height:95,borderTopLeftRadius:30,borderTopRightRadius:30,borderWidth:2,borderColor:C.ink,marginTop:5},ghostLegs:{width:54,height:66,borderLeftWidth:2,borderRightWidth:2,borderColor:C.ink,marginTop:3},eyebrow:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:2.2},heroName:{color:C.ink,fontFamily:"Archivo",fontSize:48,lineHeight:49,letterSpacing:-1.4,marginTop:8,maxWidth:"78%"},morningLine:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:15,lineHeight:22,maxWidth:300,marginTop:16},focusLink:{color:C.red,fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:1.15,marginTop:13},
+ heroTwin:{position:"absolute",top:0,right:-12,opacity:.62},hero:{minHeight:242,justifyContent:"flex-end",paddingVertical:22,paddingHorizontal:2,overflow:"hidden"},athleteGhost:{position:"absolute",right:16,top:9,width:112,height:220,opacity:.16,alignItems:"center"},ghostHead:{width:38,height:38,borderRadius:19,borderWidth:2,borderColor:C.ink},ghostTorso:{width:72,height:95,borderTopLeftRadius:30,borderTopRightRadius:30,borderWidth:2,borderColor:C.ink,marginTop:5},ghostLegs:{width:54,height:66,borderLeftWidth:2,borderRightWidth:2,borderColor:C.ink,marginTop:3},eyebrow:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:2.2},heroName:{color:C.ink,fontFamily:"Archivo",fontSize:48,lineHeight:49,letterSpacing:-1.4,marginTop:8,maxWidth:"78%"},morningLine:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:15,lineHeight:22,maxWidth:300,marginTop:16},focusLink:{color:C.red,fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:1.15,marginTop:13},
  priority:{borderLeftWidth:3,borderLeftColor:C.red,paddingHorizontal:16,paddingVertical:13,backgroundColor:"#2A1115"},priorityCritical:{backgroundColor:"#3A1017"},priorityKicker:{color:C.red,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.8},priorityTitle:{color:C.ink,fontFamily:"Archivo",fontSize:20,marginTop:4},priorityCopy:{color:C.dim,fontFamily:"Manrope",fontSize:12,lineHeight:18,marginTop:5},
  scoreCard:{padding:18},scoreTop:{flexDirection:"row",alignItems:"center",justifyContent:"space-between"},scoreIdentity:{flex:1,gap:8},scoreCaption:{fontFamily:"Archivo",fontSize:19,color:C.ink,maxWidth:145,lineHeight:22},data:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.4},signature:{width:140,height:148,alignItems:"center",justifyContent:"center"},signatureSvg:{position:"absolute",top:0},signatureCenter:{position:"absolute",top:37,width:140,alignItems:"center"},signatureValue:{fontVariant:["tabular-nums"],color:C.ink,fontFamily:"Archivo",fontSize:42,letterSpacing:-1},signaturePercent:{fontFamily:"Manrope",fontSize:18},signatureLevel:{fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:.4},explosion:{position:"absolute",top:75,left:69,width:2,height:2},spark:{position:"absolute",width:3,height:14,borderRadius:2,backgroundColor:C.volt},truly:{position:"absolute",bottom:0,color:C.volt,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.6},
  pillars:{flexDirection:"row",justifyContent:"space-between",gap:4,borderTopWidth:1,borderTopColor:C.line,paddingTop:16,marginTop:4},pillar:{flex:1,alignItems:"center"},pillarRail:{width:8,height:62,backgroundColor:"#252A2D",borderRadius:4,justifyContent:"flex-end",overflow:"hidden"},pillarFill:{width:"100%",borderRadius:4},pillarLetter:{color:C.ink,fontFamily:"Archivo",fontSize:13,marginTop:5},pillarValue:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:8,marginTop:2},pillarLabel:{color:"#70777C",fontFamily:"ManropeSemiBold",fontSize:6,marginTop:2},scoreLink:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:1.1,marginTop:18},
  sectionHead:{paddingTop:8},sectionTitle:{color:C.ink,fontFamily:"Archivo",fontSize:25,letterSpacing:-.8,marginTop:4},days:{flexDirection:"row",gap:7},day:{flex:1,minHeight:135,padding:12,borderTopWidth:2,borderTopColor:C.line,backgroundColor:"#101416"},dayNow:{borderTopColor:C.red,backgroundColor:"#191215"},dayLabel:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:8,letterSpacing:1.3},dayLabelNow:{color:C.red},dayDate:{color:C.ink,fontFamily:"Archivo",fontSize:19,marginTop:7},dayWorkout:{color:C.dim,fontFamily:"Manrope",fontSize:10,lineHeight:14,marginTop:10},done:{color:C.green,fontFamily:"ManropeSemiBold",fontSize:8,letterSpacing:1,marginTop:8},
+ loadSection:{backgroundColor:"#0C1010",borderRadius:22,borderWidth:1,borderColor:"#2B3332",padding:16,marginTop:8},
+ loadHeading:{flexDirection:"row",alignItems:"center",justifyContent:"space-between"},
+ loadEyebrow:{color:"#A3ACA9",fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.6},
+ loadMark:{color:C.red,fontFamily:"Archivo",fontSize:25},
+ loadTitle:{color:C.ink,fontFamily:"Archivo",fontSize:25,lineHeight:28,letterSpacing:-.5,marginTop:8},
+ loadSub:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.1,marginTop:12,marginBottom:14},
+ loadDays:{flexDirection:"row",gap:7},
+ loadDay:{flex:1,minWidth:0,minHeight:153,borderRadius:14,backgroundColor:"#242827",padding:10,justifyContent:"flex-start",borderWidth:1,borderColor:"#282D2B"},
+ loadToday:{backgroundColor:"#3A2420",borderColor:"#EB6652",borderWidth:1.5},
+ loadLabel:{color:"#B0B4B2",fontFamily:"ManropeSemiBold",fontSize:9},
+ loadLabelCurrent:{color:"#FF9787"},loadNumber:{fontFamily:"Archivo",fontSize:31,color:C.ink,marginTop:10},
+ loadStatus:{color:"#ABB0AE",fontFamily:"ManropeSemiBold",fontSize:9,marginTop:5},
+ loadWorkout:{color:C.dim,fontFamily:"Manrope",fontSize:9,lineHeight:13,marginTop:8},
+ loadFooter:{color:"#8B9690",fontFamily:"Manrope",fontSize:9,marginTop:12},
  teaserRow:{flexDirection:"row",gap:8},teaser:{flex:1,minHeight:118,padding:14,backgroundColor:"#111517",borderTopWidth:1,borderTopColor:C.line},teaserRed:{borderTopColor:C.red},teaserTag:{color:C.red,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.35},teaserBig:{color:C.ink,fontFamily:"Archivo",fontSize:30,marginTop:12},teaserCopy:{color:C.dim,fontFamily:"Manrope",fontSize:10,marginTop:4},
  cycle:{padding:16,borderLeftWidth:3,borderLeftColor:C.red,backgroundColor:"#171113"},cycleTag:{color:C.red,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.4},cycleTitle:{color:C.ink,fontFamily:"Archivo",fontSize:21,marginTop:6},cycleCopy:{color:C.dim,fontFamily:"Manrope",fontSize:10,lineHeight:15,marginTop:5},
  workout:{minHeight:175,justifyContent:"flex-end",backgroundColor:"#101416",borderTopWidth:3,borderTopColor:C.volt,padding:20},workoutKicker:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.8},workoutTitle:{color:C.ink,fontFamily:"Archivo",fontSize:28,letterSpacing:-.8,marginTop:8},cardCopy:{color:C.dim,fontFamily:"Manrope",fontSize:12,lineHeight:18,marginTop:8},arrow:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:1.4,marginTop:16},

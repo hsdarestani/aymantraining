@@ -26,7 +26,7 @@ export default async function ProgressPage(){
 
   return <main className="sub-shell">
     <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard"><Copy text={"BEGINN"}/></Link><Link href="/training">TRAINING</Link><Link className="active" href="/progress"><Copy text={"FORTSCHRITT"}/></Link><Link href="/coach"><Copy text={"TRAINER"}/></Link><Link href="/athlete"><Copy text={"ATHLET"}/></Link></nav></header>
-    <section className="page-hero compact-hero"><div><span className="eyebrow"><Copy text={"FORTSCHRITT"}/></span><h1><Copy text={"Leistung wird sichtbar."}/></h1><p><Copy text={"Leistungswert, Tests und Körperdaten zeigen die Entwicklung über Zeit. Keine Prognose wird als Garantie dargestellt."}/></p></div><div className="hero-stat"><span><Copy text={"LEISTUNGSWERT"}/></span><strong>{current?.total??0}</strong><small><Copy text={details?`${scores.length} MESSPUNKTE`:"KOSTENLOSER GESAMTWERT"}/></small></div></section>
+    <section className="page-hero compact-hero"><div><span className="eyebrow"><Copy text={"FORTSCHRITT"}/></span><h1><Copy text={"DEIN GRIND. DEINE SPUREN."}/></h1><p><Copy text={"Leistungswert, Tests und Körperdaten zeigen die Entwicklung über Zeit. Keine Prognose wird als Garantie dargestellt."}/></p></div><div className="hero-stat"><span><Copy text={"LEISTUNGSWERT"}/></span><strong>{current?.total??0}</strong><small><Copy text={details?`${scores.length} MESSPUNKTE`:"KOSTENLOSER GESAMTWERT"}/></small></div></section>
 
     <section className="progress-cards">
       <article className={details?"panel chart-panel":"panel chart-panel locked-chart"}>

@@ -31,6 +31,7 @@ const items=[
 
 const more=[
   ["/focus","BE FOCUSED"],
+  ["/awake","BE AWAKE"],
   ["/ai","Different AI"],
   ["/wearables","Wearables"],
   ["/report","Wochenbericht"],
