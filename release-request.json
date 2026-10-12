@@ -8,5 +8,6 @@
   ],
   "android_track": "production",
   "auto_submit": true,
-  "release_notes": "Neue Athletenansicht mit individuellem Dashboard, 72 Stunden Überblick, animiertem Digital Twin, BE AWAKE und verbesserter Synchronisierung der Gesundheitsdaten."
+  "release_notes": "Neue Athletenansicht mit individuellem Dashboard, 72 Stunden Überblick, animiertem Digital Twin, BE AWAKE und verbesserter Synchronisierung der Gesundheitsdaten.",
+  "source_branch": "main"
 }
