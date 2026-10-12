@@ -4,10 +4,11 @@
   "version_name": "1.2.0",
   "build_number": 10,
   "platforms": [
-    "android"
+    "android",
+    "ios"
   ],
   "android_track": "production",
   "auto_submit": true,
-  "release_notes": "Neue Athletenansicht mit individuellem Dashboard, 72 Stunden Überblick, animiertem Digital Twin, BE AWAKE und verbesserter Synchronisierung der Gesundheitsdaten.",
+  "release_notes": "BE DIFFERENT 1.2.0: Neu gestaltetes Athleten Dashboard, 72 Stunden Trainingsübersicht, animierter Digital Twin, BE AWAKE, individuellere App Navigation und verbesserte Wearable Synchronisierung.",
   "source_branch": "main"
 }
