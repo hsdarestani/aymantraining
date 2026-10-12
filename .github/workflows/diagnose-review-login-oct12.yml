@@ -1,0 +1,45 @@
+name: Check BE DIFFERENT Apple reviewer user without passwords
+
+on:
+  push:
+    branches: [diagnostic/bedifferent-review-login-oct12]
+    paths: ['.github/workflows/diagnose-review-login-oct12.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Read only reviewer state on production app server
+        shell: bash
+        env:
+          HOST: ${{ secrets.HOST }}
+          PASS: ${{ secrets.PASS }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+        run: |
+          set -euo pipefail
+          test -n "$HOST" && test -n "$PASS"
+          sudo apt-get update -qq && sudo apt-get install -y -qq sshpass >/dev/null
+          PORT="${SSH_PORT:-22}"
+          sshpass -p "$PASS" ssh -p "$PORT" -o BatchMode=no -o StrictHostKeyChecking=accept-new root@"$HOST" 'bash -se' <<'REMOTE'
+          set -euo pipefail
+          cd /opt/bedifferent
+          docker compose --env-file .env.production exec -T db psql -U bedifferent -d bedifferent -v ON_ERROR_STOP=1 -t -A <<'SQL'
+          SELECT 'REVIEW_ACCOUNT_AUDIT=' || json_build_object(
+             'found',count(*)>0,
+             'athlete_role',bool_or(role='ATHLETE'),
+             'active_onboarding',bool_or("onboardingCompleted"),
+             'password_hash_present',bool_or(length("passwordHash")>25),
+             'tier',max("subscriptionTier")::text,
+             'last_update',max("updatedAt")::text
+          )::text
+          FROM "User"
+          WHERE email='appreview@bedifferent.smarbiz.sbs';
+          SQL
+          echo "LOGIN_ENDPOINT_STATUS:"
+          curl -s -o /dev/null -w 'status=%{http_code}\n' --connect-timeout 5 --max-time 12 https://bedifferent.smarbiz.sbs/login
+          REMOTE
