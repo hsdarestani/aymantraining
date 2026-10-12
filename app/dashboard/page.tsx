@@ -75,7 +75,7 @@ export default async function Dashboard(){
     <section className={"bd-home-hero bd-hero-editorial "+(heroPhoto?"has-photo":"")}>
       {heroPhoto?<div className="bd-athlete-private-photo"><img src={"/api/media/"+heroPhoto.id} alt=""/></div>:<DigitalTwinHero/>}
       <div className="bd-hero-copy">
-        <span className="eyebrow"><Copy text="GUTEN MORGEN"/></span>
+        <span className="eyebrow"><Copy text="DEIN ATHLETEN DASHBOARD"/></span>
         <h1>{(user.name||"ATHLET").toUpperCase()}</h1>
         <p><Copy text={dailyLine}/></p>
         <Link href="/focus" className="bd-red-link"><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Link>
@@ -107,17 +107,22 @@ export default async function Dashboard(){
       </div>
     </section>
 
-    <section className="bd-section-title bd-timeline-title"><span className="eyebrow"><Copy text="DEINE 72 STUNDEN"/></span><h2><Copy text="BELASTUNG IM BLICK."/></h2></section>
+    <section className="bd-load-experience" aria-label="Belastungsübersicht">
+     <div className="bd-load-head"><div><span className="eyebrow"><Copy text="BELASTUNGSÜBERSICHT"/></span><h2><Copy text="DEINE LAST. DEIN RHYTHMUS."/></h2></div><span aria-hidden="true">↗</span></div>
+     <p className="bd-load-caption"><Copy text="72 STUNDEN IM BLICK"/></p>
     <section className="bd-day-line">
       {dayStrip.map((day,i)=>{
         const first=day.workouts[0];
         return <Link href="/training" className={i===1?"bd-day-item active":"bd-day-item"} key={day.date.toISOString()}>
           <span><Copy text={dayNames[i]}/></span>
-          <strong><LocalizedValue value={day.date} format="toLocaleDateString"/></strong>
-          <p>{first?.title||<Copy text={i===1?"REGENERATION ODER FREI":"NOCH NICHTS GEPLANT"}/>}</p>
+          <strong className="bd-load-number">{String(day.date.getUTCDate()).padStart(2,"0")}</strong>
+          <small className="bd-load-status"><Copy text={first?first.completedAt?"ERLEDIGT":"EINHEIT GEPLANT":i===0?"VERGANGEN":i===1?"AKTUELL":"VORAUS"}/></small>
+          <p>{first?.title||<Copy text="NOCH NICHTS GEPLANT"/>}</p>
           {first?.completedAt&&<small><Copy text="ERLEDIGT"/></small>}
         </Link>
       })}
+    </section>
+    <p className="bd-load-disclaimer"><Copy text="Geplante Einheiten · keine geschätzten Belastungswerte."/></p>
     </section>
 
     <section className="bd-performance-stream">
@@ -145,6 +150,7 @@ export default async function Dashboard(){
     </Link>
 
     <section className="bd-quick-lines">
+      <Link href="/awake"><span><Copy text="BE AWAKE"/></span><strong><Copy text="Morgenroutine · Tagesstart"/></strong><b>→</b></Link>
       <Link href="/wearables"><span><Copy text="GADGETS"/></span><strong>Apple · Samsung · Xiaomi</strong><b>→</b></Link>
       <Link href="/athlete"><span><Copy text="ATHLETE DIGITAL TWIN"/></span><strong><Copy text="Radar · Ziel · Prognose"/></strong><b>→</b></Link>
       <Link href="/coach"><span><Copy text="COACH"/></span><strong><Copy text="Chat · Überblick · Rückmeldung"/></strong><b>→</b></Link>
