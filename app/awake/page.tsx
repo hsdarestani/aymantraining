@@ -5,7 +5,7 @@ export const dynamic="force-dynamic";
 const actions=[
  {number:"01",title:"BE FOCUSED",description:"Zwei Minuten Atmung für deinen Start",href:"/focus"},
  {number:"02",title:"BE RESTED",description:"Schlaf und Erholung ansehen",href:"/lifestyle"},
- {number:"03",title:"DAILY CHECK",description:"Deinen Zustand reflektieren",href:"/checkin"},
+ {number:"03",title:"WOCHENCHECK",description:"Deine Woche und deinen Zustand reflektieren",href:"/checkin"},
  {number:"04",title:"GADGETS",description:"Gesundheitsdaten synchronisieren",href:"/wearables"}
 ];
 export default async function Awake(){
