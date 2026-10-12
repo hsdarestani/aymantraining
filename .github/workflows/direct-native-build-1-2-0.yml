@@ -1,0 +1,166 @@
+name: BE DIFFERENT 1.2.0 Direct Android and iOS Builds
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/direct-native-build-1-2-0.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bedifferent-direct-1-2-0
+  cancel-in-progress: false
+
+jobs:
+  android:
+    name: Android direct build (APK and signed AAB if credentials exist)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Check version and dependencies
+        run: |
+          node -e 'const c=require("./app.json").expo; if(c.version!=="1.2.0"||c.android.versionCode!==10)process.exit(1)'
+          npm ci --include=dev
+          npm run typecheck
+      - name: Generate Android native project
+        run: |
+          node scripts/prepare-native-config.mjs --require-android
+          CI=1 npx expo prebuild --platform android --clean --non-interactive
+      - name: Build installable debug APK independently of Publisher
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew --no-daemon :app:assembleDebug
+          test -s app/build/outputs/apk/debug/app-debug.apk
+      - name: Save debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BE-DIFFERENT-1.2.0-build10-Android-debug-APK
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: Detect signing credentials for Play Store AAB
+        id: signing
+        env:
+          KEYSTORE: ${{ secrets.BEDIFFERENT_ANDROID_KEYSTORE_B64 }}
+          STORE_PASS: ${{ secrets.BEDIFFERENT_ANDROID_KEYSTORE_PASSWORD }}
+          ALIAS: ${{ secrets.BEDIFFERENT_ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.BEDIFFERENT_ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE" ] && [ -n "$STORE_PASS" ] && [ -n "$ALIAS" ] && [ -n "$KEY_PASS" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "Signed AAB possible with configured credentials."
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Android upload signing credentials unavailable in this repository. Generated debug APK, not a Play Store update."
+          fi
+      - name: Build production signed AAB if key available
+        if: steps.signing.outputs.ready == 'true'
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.BEDIFFERENT_ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.BEDIFFERENT_ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.BEDIFFERENT_ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.BEDIFFERENT_ANDROID_KEY_PASSWORD }}
+        run: |
+          bash scripts/build-android.sh
+          test -n "$(find android/app/build/outputs/bundle/release -name '*.aab' -print -quit)"
+      - name: Save signed Google Play AAB
+        if: steps.signing.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: BE-DIFFERENT-1.2.0-build10-Android-signed-AAB
+          path: mobile/android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+          retention-days: 14
+
+  ios:
+    name: iOS direct build (simulator and signed IPA if credentials exist)
+    runs-on: macos-15
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Check version and native code
+        run: |
+          node -e 'const c=require("./app.json").expo; if(c.version!=="1.2.0"||c.ios.buildNumber!=="10")process.exit(1)'
+          npm ci --include=dev
+          npm run typecheck
+      - name: Generate iOS project and companion targets
+        run: |
+          node scripts/prepare-native-config.mjs --require-ios
+          CI=1 npx expo prebuild --platform ios --clean --non-interactive
+      - name: Build iOS simulator app without Publisher
+        run: |
+          cd ios
+          workspace="$(find . -maxdepth 1 -name '*.xcworkspace' -print -quit)"
+          test -n "$workspace"
+          scheme="$(xcodebuild -list -json -workspace "$workspace" | python3 -c 'import json,sys; print(json.load(sys.stdin)["workspace"]["schemes"][0])')"
+          set -o pipefail
+          xcodebuild -workspace "$workspace" -scheme "$scheme" -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/bd-ios-direct CODE_SIGNING_ALLOWED=NO build > /tmp/bd-direct-ios.log 2>&1 || { tail -n 200 /tmp/bd-direct-ios.log; exit 1; }
+          app="$(find /tmp/bd-ios-direct/Build/Products/Debug-iphonesimulator -maxdepth 1 -name '*.app' -type d -print -quit)"
+          test -n "$app"
+          mkdir -p build/direct
+          ditto -c -k --sequesterRsrc --keepParent "$app" build/direct/BE-DIFFERENT-1.2.0-build10-iOS-Simulator.app.zip
+      - name: Save iOS simulator app
+        uses: actions/upload-artifact@v4
+        with:
+          name: BE-DIFFERENT-1.2.0-build10-iOS-Simulator
+          path: mobile/ios/build/direct/BE-DIFFERENT-1.2.0-build10-iOS-Simulator.app.zip
+          if-no-files-found: error
+          retention-days: 14
+      - name: Detect Apple distribution credentials
+        id: apple
+        env:
+          TEAM: ${{ secrets.BEDIFFERENT_APPLE_TEAM_ID }}
+          KEY: ${{ secrets.BEDIFFERENT_ASC_KEY_ID }}
+          ISSUER: ${{ secrets.BEDIFFERENT_ASC_ISSUER_ID }}
+          PRIVATE_KEY: ${{ secrets.BEDIFFERENT_ASC_PRIVATE_KEY_B64 }}
+        run: |
+          if [ -n "$TEAM" ] && [ -n "$KEY" ] && [ -n "$ISSUER" ] && [ -n "$PRIVATE_KEY" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "Apple signing credentials configured."
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Apple signing credentials unavailable. Simulator build succeeds independently, but iPhone-installable IPA requires signing."
+          fi
+      - name: Build signed iOS IPA when Apple credentials exist
+        if: steps.apple.outputs.ready == 'true'
+        env:
+          APPLE_TEAM_ID: ${{ secrets.BEDIFFERENT_APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.BEDIFFERENT_ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.BEDIFFERENT_ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY_B64: ${{ secrets.BEDIFFERENT_ASC_PRIVATE_KEY_B64 }}
+        run: |
+          bash scripts/build-ios.sh
+          test -n "$(find ios/build/export -name '*.ipa' -print -quit)"
+      - name: Save signed iOS IPA
+        if: steps.apple.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: BE-DIFFERENT-1.2.0-build10-iOS-signed-IPA
+          path: mobile/ios/build/export/*.ipa
+          if-no-files-found: error
+          retention-days: 14
