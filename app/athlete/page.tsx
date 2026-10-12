@@ -5,6 +5,7 @@ import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";
 import {hasFeature} from "../../lib/entitlements";
 import {levelForScore} from "../../lib/scoring";
+import DigitalTwinHero from "../components/DigitalTwinHero";
 export const dynamic="force-dynamic";
 
 function radarPoints(values:number[]){
@@ -31,11 +32,12 @@ export default async function AthletePage(){
 
   return <main className="sub-shell">
     <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard"><Copy text={"BEGINN"}/></Link><Link href="/training">TRAINING</Link><Link href="/progress"><Copy text={"FORTSCHRITT"}/></Link><Link href="/coach"><Copy text={"TRAINER"}/></Link><Link className="active" href="/athlete"><Copy text={"ATHLET"}/></Link></nav></header>
-    <section className="page-hero"><div><span className="eyebrow"><Copy text={"ATHLETENPROFIL"}/></span><h1><Copy text={"Von Training zu Identität."}/></h1><p><Copy text={"Deine Entwicklung über alle Säulen. Prognosen werden als Trend und nie als Garantie dargestellt."}/></p></div><div className="hero-stat"><span><Copy text={"STUFE"}/></span><strong>{score?.total??0}%</strong><small>{levelForScore(score?.total??0)}</small></div></section>
+    <section className="page-hero"><div><span className="eyebrow"><Copy text={"ATHLETENANSICHT · DEIN BEREICH"}/></span><h1><Copy text={"Von Training zu Identität."}/></h1><p><Copy text={"Deine Entwicklung über alle Säulen. Prognosen werden als Trend und nie als Garantie dargestellt."}/></p></div><div className="hero-stat"><span><Copy text={"STUFE"}/></span><strong>{score?.total??0}%</strong><small>{levelForScore(score?.total??0)}</small></div></section>
 
     <section className="athlete-grid">
       <article className={digital?"panel twin-panel":"panel twin-panel twin-preview"}>
         <span className="tag"><Copy text={digital?"DIGITALES ABBILD":"PRO VORSCHAU"}/></span>
+        <div className="bd-athlete-twin-view"><DigitalTwinHero/><span><Copy text="SCHEMATISCHE ANIMATION · KEIN KÖRPERSCAN"/></span></div>
         <div className="digital-radar">
           <LocalizedElement as="svg" viewBox="0 0 300 300" role="img" aria-label="Radar des digitalen Athletenabbilds">
             {[.25,.5,.75,1].map(s=><polygon key={s} points={gridPoints(s)} className="radar-grid"/> )}
