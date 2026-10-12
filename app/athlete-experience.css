@@ -88,3 +88,33 @@
 }
 @media(max-width:375px){.bd-load-head h2{font-size:21px}.bd-load-experience .bd-day-item .bd-load-number{font-size:27px}}
 @media(prefers-reduced-motion:reduce){.bd-load-experience .bd-day-item,.bd-awake-step{transition:none!important}}
+
+/* Athlete discovery rooms: distinct surfaces but one typography system. */
+.bd-experience-hub{padding:42px 0;margin:20px 0 28px}
+.bd-experience-heading{margin-bottom:22px}
+.bd-experience-heading h2{font-family:Archivo,system-ui,sans-serif;font-size:clamp(27px,4vw,46px);line-height:1.08;margin:10px 0}
+.bd-experience-heading p{color:#99a49e;font-size:13px}
+.bd-experience-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.bd-experience-card{--room:#d4ff00;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:start;
+ min-height:198px;border-radius:19px;border:1px solid color-mix(in srgb,var(--room) 35%,#242928);
+ padding:20px;background:linear-gradient(135deg,color-mix(in srgb,var(--room) 14%,#101415),#0d1111 80%);
+ transition:transform .2s,border-color .2s}
+.bd-experience-card:after{content:"";position:absolute;width:150px;height:150px;right:-65px;top:-65px;
+ border:1px solid color-mix(in srgb,var(--room) 30%,transparent);border-radius:50%;
+ box-shadow:0 0 0 29px color-mix(in srgb,var(--room) 4%,transparent),0 0 0 60px color-mix(in srgb,var(--room) 2%,transparent);pointer-events:none}
+.bd-experience-card:hover{transform:translateY(-4px);border-color:var(--room)}
+.bd-experience-card>span{font-family:Archivo,system-ui,sans-serif;font-size:18px;color:var(--room);opacity:.85}
+.bd-experience-card strong{position:relative;z-index:2;margin-top:auto;font-family:Archivo,system-ui,sans-serif;font-size:clamp(21px,2.5vw,33px);line-height:1.05}
+.bd-experience-card p{color:#b2bdb9;font-size:11px;line-height:1.5;margin:10px 26px 0 0}
+.bd-experience-card b{position:absolute;bottom:18px;right:18px;color:var(--room);font-size:22px}
+.bd-experience-card.awake{--room:#d4ff00}
+.bd-experience-card.fuel{--room:#ff8359}
+.bd-experience-card.rest{--room:#76d9e0}
+.bd-experience-card.focus{--room:#e364ae}
+.bd-experience-card.gadget{--room:#9b91fa}
+.bd-experience-card.coach{--room:#c5e1a9}
+@media(max-width:760px){.bd-experience-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .bd-experience-hub{padding:26px 0}.bd-experience-card{min-height:163px;padding:15px;border-radius:14px}
+ .bd-experience-card strong{font-size:22px}.bd-experience-card>span{font-size:14px}
+ .bd-experience-card p{font-size:10px}.bd-experience-card b{bottom:13px;right:13px}}
+@media(prefers-reduced-motion:reduce){.bd-experience-card{transition:none}}
