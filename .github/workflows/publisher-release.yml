@@ -37,5 +37,23 @@ jobs:
           oidc_token="$(printf '%s' "$token_response" | jq -r '.value')"
           test -n "$oidc_token"
           payload="$(jq --arg sha "$GITHUB_SHA" '.source_commit = $sha | del(.enabled)' release-request.json)"
-          curl -fsS --retry 12 --retry-all-errors --retry-delay 10 --connect-timeout 10 --max-time 60             -X POST "${PUBLISHER_URL%/}/apps/automation/release/"             -H "X-GitHub-OIDC: $oidc_token"             -H "Content-Type: application/json"             --data "$payload" | tee /tmp/publisher-response.json
+          # Preserve the Publisher response on validation errors instead of hiding
+          # it with curl -f. Never log the OIDC token or full payload.
+          status="$(curl -sS --connect-timeout 10 --max-time 60 \
+            --retry 4 --retry-delay 6 --retry-connrefused \
+            -o /tmp/publisher-response.json -w '%{http_code}' \
+            -X POST "${PUBLISHER_URL%/}/apps/automation/release/" \
+            -H "X-GitHub-OIDC: $oidc_token" \
+            -H "Content-Type: application/json" \
+            --data "$payload")"
+          echo "Publisher release request HTTP status: $status"
+          # Log only the whitelisted server error code and a short detail.
+          if [ "$status" != "200" ]; then
+            jq -r '"Publisher error: " + (.error // "non_json_response" | tostring) + " · " + ((.detail // "") | tostring | .[0:300])' /tmp/publisher-response.json 2>/dev/null || {
+              echo "Publisher returned a non JSON error page"
+              head -c 180 /tmp/publisher-response.json | tr '\\n' ' '
+            }
+            exit 1
+          fi
           jq -e '.ok == true' /tmp/publisher-response.json >/dev/null
+          jq '{ok,app,version_name,build_number,queued,skipped,release_id}' /tmp/publisher-response.json
