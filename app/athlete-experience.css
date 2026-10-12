@@ -1,0 +1,90 @@
+/* App-first athlete experience. Overrides the older editorial web rows without
+   changing workout data, access rules, or navigation behavior. */
+.bd-load-experience{
+  position:relative;isolation:isolate;margin-top:38px;padding:25px 25px 18px;
+  border:1px solid #303838;border-radius:24px;
+  background:radial-gradient(circle at 90% -20%,rgba(255,99,77,.08),transparent 44%),#101314;
+  box-shadow:0 20px 44px rgba(0,0,0,.22);overflow:hidden
+}
+.bd-load-experience:before{content:"";position:absolute;top:0;left:24px;right:24px;height:1px;
+ background:linear-gradient(90deg,transparent,#686b63,transparent);opacity:.35}
+.bd-load-head{display:flex;justify-content:space-between;gap:18px;align-items:start}
+.bd-load-head .eyebrow{font-size:11px;color:#949d9d;letter-spacing:.12em}
+.bd-load-head h2{font-family:Archivo,system-ui,sans-serif;font-size:clamp(24px,3.1vw,46px);
+ line-height:1.05;letter-spacing:-.03em;max-width:700px;margin:12px 0 0}
+.bd-load-head>span{font-size:32px;line-height:1;color:#ff715b}
+.bd-load-caption{font-family:Manrope,system-ui,sans-serif;letter-spacing:.14em;font-size:13px;
+ font-weight:800;color:#abb3b3;margin:20px 0 16px}
+.bd-load-experience .bd-day-line{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ border:0;gap:12px}
+.bd-load-experience .bd-day-item,.bd-load-experience .bd-day-item:nth-child(2),.bd-load-experience .bd-day-item:last-child{
+ position:relative;display:flex;flex-direction:column;min-height:164px;min-width:0;
+ border:1px solid #343b3b;border-radius:16px;padding:16px;background:#242829;
+ box-shadow:0 10px 30px rgba(0,0,0,.12);transition:transform .2s ease,border-color .2s ease,background .2s ease}
+.bd-load-experience .bd-day-item:hover{transform:translateY(-3px);border-color:#929d8a}
+.bd-load-experience .bd-day-item.active{background:linear-gradient(145deg,#3b2824,#38211f);
+ border:1.5px solid #f37460;box-shadow:0 0 0 1px rgba(243,116,96,.22),0 12px 34px rgba(0,0,0,.22)}
+.bd-load-experience .bd-day-item>span{font-size:11px;letter-spacing:.035em;color:#b7bcba}
+.bd-load-experience .bd-day-item.active>span{color:#ffa091}
+.bd-load-experience .bd-day-item .bd-load-number{font-family:Archivo,system-ui,sans-serif;
+ font-size:43px;line-height:1.12;margin-top:10px;letter-spacing:-.04em}
+.bd-load-experience .bd-day-item .bd-load-status{font-size:12px;font-weight:800;
+ line-height:1.25;color:#a8b0ae;margin-top:4px}
+.bd-load-experience .bd-day-item p{font-size:11px;line-height:1.5;margin:auto 0 0;padding-top:16px;color:#b7bdb9}
+.bd-load-experience .bd-day-item small:last-child{font-size:9px;color:#cbff77;margin-top:6px}
+.bd-load-disclaimer{margin:14px 0 0;color:#8e9797;font-size:10px;letter-spacing:.02em}
+.bd-athlete-twin-view{position:relative;height:292px;overflow:hidden;margin:12px 0 8px;
+ background:radial-gradient(circle at 50% 38%,rgba(215,255,0,.055),transparent 60%),#090e0f;
+ border:1px solid #2a3531;border-radius:18px}
+.bd-athlete-twin-view .bd-digital-twin-hero{top:-7px;right:50%;transform:translateX(50%);
+ width:252px;height:290px;opacity:1;filter:drop-shadow(0 0 24px rgba(110,220,255,.16))}
+.bd-athlete-twin-view>span{position:absolute;bottom:8px;left:0;right:0;text-align:center;
+ z-index:4;color:#aab0aa;letter-spacing:.09em;font-size:9px;font-weight:850}
+.bd-awake-page{max-width:920px;margin:auto}
+.bd-awake-intro{padding:64px 0 38px;border-bottom:1px solid #39482d}
+.bd-awake-intro h1{font-family:Archivo,system-ui,sans-serif;font-size:clamp(65px,12vw,130px);
+ line-height:.88;letter-spacing:-.07em;margin:20px 0}
+.bd-awake-intro h1 em{color:var(--bd-volt);font-style:normal}
+.bd-awake-intro>p{color:#abb6aa;max-width:430px;line-height:1.65}
+.bd-awake-steps{display:grid;gap:12px;padding-top:24px}
+.bd-awake-step{border:1px solid #334232;border-radius:16px;background:#121a15;
+ display:grid;grid-template-columns:60px 1fr 40px;gap:20px;min-height:105px;
+ align-items:center;padding:18px 24px;transition:transform .2s,border-color .2s}
+.bd-awake-step:hover{transform:translateX(5px);border-color:var(--bd-volt)}
+.bd-awake-step>span{color:var(--bd-volt);font-family:Archivo,system-ui,sans-serif;font-size:32px}
+.bd-awake-step strong{display:block;font-family:Archivo,system-ui,sans-serif;font-size:23px}
+.bd-awake-step small{display:block;color:#a5b0a5;margin-top:5px;font-size:12px}
+.bd-awake-step b{font-size:24px;color:var(--bd-volt)}
+.bd-awake-privacy{font-size:12px;color:var(--bd-dim);margin-top:22px}
+
+/* Drawers should feel like app destinations rather than a long website sitemap. */
+.app-drawer aside{box-shadow:-36px 0 90px rgba(0,0,0,.65)}
+.drawer-primary a{position:relative;overflow:hidden;min-height:60px;
+ border:1px solid #3e4938;border-radius:15px;background:linear-gradient(140deg,#182019,#101414)}
+.drawer-primary a:hover,.drawer-primary a:focus-visible{background:#273522;border-color:#a2cf40}
+.drawer-primary a:first-child{border-color:#5b6d2b;background:#263019}
+.drawer-primary a:nth-child(2){border-color:#563832;background:#291c1a}
+.drawer-primary a:nth-child(3){border-color:#3c4b5a;background:#182229}
+.drawer-primary a:nth-child(4){border-color:#51404f;background:#211a22}
+.drawer-primary a:nth-child(5){border-color:#454f27;background:#1e2619}
+@media(max-width:760px){
+ .bd-load-experience{margin:25px -2px 0;padding:18px 12px 16px;border-radius:20px}
+ .bd-load-head .eyebrow{font-size:9px}
+ .bd-load-head h2{font-size:clamp(22px,6.3vw,32px);line-height:1.12}
+ .bd-load-caption{font-size:10px;margin:14px 0 11px}
+ .bd-load-experience .bd-day-line{gap:7px}
+ .bd-load-experience .bd-day-item,.bd-load-experience .bd-day-item:nth-child(2),.bd-load-experience .bd-day-item:last-child{
+  min-height:155px;padding:10px 8px;border-radius:12px}
+ .bd-load-experience .bd-day-item>span{font-size:9px}
+ .bd-load-experience .bd-day-item .bd-load-number{font-size:31px;margin-top:8px}
+ .bd-load-experience .bd-day-item .bd-load-status{font-size:9px}
+ .bd-load-experience .bd-day-item p{font-size:9px;padding-top:9px}
+ .bd-awake-intro{padding:30px 0 27px}.bd-awake-intro h1{font-size:clamp(59px,15vw,92px)}
+ .bd-awake-step{grid-template-columns:34px minmax(0,1fr) 24px;gap:11px;min-height:86px;padding:13px}
+ .bd-awake-step>span{font-size:25px}.bd-awake-step strong{font-size:17px}.bd-awake-step small{font-size:10px}
+ .drawer-primary{gap:9px}.drawer-primary a{min-height:68px}
+ .drawer-identity{padding:25px 0 20px}.drawer-identity strong{font-size:34px}
+ .app-drawer aside{width:min(91vw,390px)}
+}
+@media(max-width:375px){.bd-load-head h2{font-size:21px}.bd-load-experience .bd-day-item .bd-load-number{font-size:27px}}
+@media(prefers-reduced-motion:reduce){.bd-load-experience .bd-day-item,.bd-awake-step{transition:none!important}}
