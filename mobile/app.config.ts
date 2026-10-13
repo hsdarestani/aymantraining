@@ -3,7 +3,8 @@ import path from "node:path";
 import base from "./app.json";
 
 export default () => {
-  const buildNumber=process.env.APP_BUILD_NUMBER||"1";
+  const buildNumber=process.env.APP_BUILD_NUMBER||String(base.expo.ios?.buildNumber||"1");
+  const androidBuildNumber=process.env.ANDROID_BUILD_NUMBER||process.env.APP_BUILD_NUMBER||String(base.expo.android?.versionCode||"1");
   const androidServices=path.join(__dirname,"firebase","google-services.json");
   const iosServices=path.join(__dirname,"firebase","GoogleService-Info.plist");
   const hasAndroidFirebase=fs.existsSync(androidServices);
@@ -43,7 +44,7 @@ export default () => {
     },
     android:{
       ...base.expo.android,
-      versionCode:Math.max(1,Number(buildNumber)||1),
+      versionCode:Math.max(1,Number(androidBuildNumber)||1),
       ...(hasAndroidFirebase?{googleServicesFile:"./firebase/google-services.json"}:{})
     }
   };
