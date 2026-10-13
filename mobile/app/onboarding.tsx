@@ -75,7 +75,7 @@ export default function Onboarding(){
   function next(){
     setError("");
     if(step===4){completeSetup();return}
-    if(step===5){router.replace("/membership?onboarding=1");return}
+    if(step===5){router.replace("/(tabs)");return}
     setStep(step+1);
   }
 
@@ -98,13 +98,13 @@ export default function Onboarding(){
       {error?<Text style={s.error}><Copy text={error}/></Text>:null}
     </>}
 
-    {step===3&&<><Text style={s.kicker}><Copy text={"03 · DATEN"}/></Text><Text style={s.title}><Copy text={"GESUNDHEIT"}/>{"\n"}<Copy text={"VERBINDEN."}/></Text><Text style={s.copy}><Copy text={"Schlaf, HRV, Ruhepuls, Schritte, Kalorien, VO2max und Gewicht werden nur nach deiner Einwilligung genutzt. Fehlende Werte bleiben sichtbar unvollständig."}/></Text><View style={s.switch}><Text style={s.switchText}><Copy text={"GESUNDHEITSDATEN ERLAUBEN"}/></Text><Switch value={health} onValueChange={setHealth} trackColor={{true:C.volt}} thumbColor={health?C.bg:"#eee"}/></View></>}
+    {step===3&&<><Text style={s.kicker}><Copy text={"03 · DATEN"}/></Text><Text style={s.title}><Copy text={"GESUNDHEIT"}/>{"\n"}<Copy text={"VERBINDEN."}/></Text><Text style={s.copy}><Copy text={"Auf dem iPhone kannst du Apple Health freiwillig verbinden. BE DIFFERENT liest nur die freigegebenen Schritte, Schlafdaten, Ruhepuls, HRV, Kalorien, VO2max und dein Gewicht für persönliche Trainings- und Erholungsempfehlungen. Die App schreibt keine Daten in Apple Health. Du kannst den Zugriff jederzeit in Apple Health widerrufen. Fehlende Werte werden nicht geschätzt."}/></Text><View style={s.switch}><Text style={s.switchText}><Copy text={"GESUNDHEITSDATEN ERLAUBEN"}/></Text><Switch value={health} onValueChange={setHealth} trackColor={{true:C.volt}} thumbColor={health?C.bg:"#eee"}/></View></>}
 
     {step===4&&<><Text style={s.kicker}><Copy text={"04 · STARTTEST"}/></Text><Text style={s.title}><Copy text={"DEIN ERSTER"}/>{"\n"}<Copy text={"MESSPUNKT."}/></Text><Text style={s.copy}><Copy text={"Führe zwei einfache Tests sauber aus. Der 5 km Lauf ist optional."}/></Text><LocalizedTextInput style={s.input} value={pushups} onChangeText={setPushups} keyboardType="number-pad" placeholder="Liegestütze Wiederholungen" placeholderTextColor={C.dim}/><LocalizedTextInput style={s.input} value={plank} onChangeText={setPlank} keyboardType="number-pad" placeholder="Unterarmstütz Sekunden" placeholderTextColor={C.dim}/><LocalizedTextInput style={s.input} value={run5k} onChangeText={setRun5k} keyboardType="decimal-pad" placeholder="5 km Lauf Minuten optional" placeholderTextColor={C.dim}/>{error?<Text style={s.error}><Copy text={error}/></Text>:null}</>}
 
-    {step===5&&<><Text style={s.kicker}><Copy text={"05 · DEIN ERGEBNIS"}/></Text><Text style={s.result}>{score?.total??0}<Text style={s.resultPercent}>%</Text></Text><Text style={s.resultTitle}><Copy text={"DU BIST"}/>{score?.level||"NORMAL"}.</Text><Text style={s.copy}><Copy text={"Das ist dein erster messbarer Ausgangspunkt. Jetzt entwickeln wir ihn Schritt für Schritt weiter."}/></Text><View style={s.resultCard}><Text style={s.resultCardLabel}><Copy text={"DATENVOLLSTÄNDIGKEIT"}/></Text><Text style={s.resultCardValue}>{score?.completeness??0}%</Text></View><Text style={s.trial}><Copy text={"Als Nächstes kannst du PRO sieben Tage kostenlos testen."}/></Text></>}
+    {step===5&&<><Text style={s.kicker}><Copy text={"05 · DEIN ERGEBNIS"}/></Text><Text style={s.result}>{score?.total??0}<Text style={s.resultPercent}>%</Text></Text><Text style={s.resultTitle}><Copy text={"DU BIST"}/>{score?.level||"NORMAL"}.</Text><Text style={s.copy}><Copy text={"Das ist dein erster messbarer Ausgangspunkt. Jetzt entwickeln wir ihn Schritt für Schritt weiter."}/></Text><View style={s.resultCard}><Text style={s.resultCardLabel}><Copy text={"DATENVOLLSTÄNDIGKEIT"}/></Text><Text style={s.resultCardValue}>{score?.completeness??0}%</Text></View><Text style={s.trial}><Copy text={"Dein Profil ist bereit. Entdecke jetzt dein Dashboard und deine Trainingseinheiten."}/></Text></>}
 
-    <Pressable style={[s.next,busy&&{opacity:.55}]} disabled={busy} onPress={next}><Text style={s.nextText}><Copy text={busy?"WIRD BERECHNET":step===4?"LEISTUNGSWERT BERECHNEN →":step===5?"PRO TESTEN →":"WEITER →"}/></Text></Pressable>
+    <Pressable style={[s.next,busy&&{opacity:.55}]} disabled={busy} onPress={next}><Text style={s.nextText}><Copy text={busy?"WIRD BERECHNET":step===4?"LEISTUNGSWERT BERECHNEN →":step===5?"ZUM DASHBOARD →":"WEITER →"}/></Text></Pressable>
     {step>1&&step<5&&<Pressable onPress={()=>setStep(step-1)}><Text style={s.back}><Copy text={"← ZURÜCK"}/></Text></Pressable>}
   </ScrollView></SafeAreaView>;
 }
