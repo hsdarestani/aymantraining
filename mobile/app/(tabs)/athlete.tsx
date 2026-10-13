@@ -15,7 +15,7 @@ const modules=[
  {label:"BE FUEL",sub:"Ernährung · Barcode · Wasser",path:"/fuel",accent:"red"},
  {label:"BE RESTED",sub:"Schlaf · Regenerationsbibliothek",path:"/lifestyle",accent:"rest"},
  {label:"BE FOCUSED",sub:"2 Min Atmung · Tagescheck",path:"/focus",accent:"red"},
- {label:"GADGETS",sub:"Apple · Samsung · Xiaomi · mehr",path:"/wearables",accent:"rest"},
+ {label:"APPLE HEALTH & GADGETS",sub:"Apple Health · Schlaf · Schritte · mehr",path:"/wearables",accent:"rest"},
  {label:"ZYKLUS & KONTEXT",sub:"Zyklus · Spieltag · Reise",path:"/context",accent:"red"},
  {label:"HERAUSFORDERUNGEN",sub:"Serie · Rangliste · Abzeichen",path:"/community",accent:"rest"},
  {label:"COACH",sub:"Chat · Überblick · Rückmeldung",path:"/(tabs)/coach",accent:"score"}
@@ -52,7 +52,7 @@ export default function Athlete(){
      ["TRAININGSPLÄNE","/plans"],["ÜBUNGSBIBLIOTHEK","/library"],["LEISTUNGSTESTS","/tests"],["WOCHENBERICHT","/report"],
      ["LEISTUNGSVERLAUF","/performance-timeline"],["APPLE WATCH & WIDGET","/watch"],["DIFFERENT AI","/different-ai"],
      ["TERMINE & VIDEOANRUFE","/events"],["FREUNDE EINLADEN","/referral"],["WOCHENCHECK","/checkin"],
-     ["EINSTELLUNGEN & DATENSCHUTZ","/settings"],["MITGLIEDSCHAFT","/membership"],["PROFIL & GESUNDHEITSDATEN","/onboarding"]
+     ["EINSTELLUNGEN & DATENSCHUTZ","/settings"],["KONTOSTATUS","/membership"],["PROFIL & GESUNDHEITSDATEN","/onboarding"]
     ].map(([label,path])=><Pressable key={path} onPress={()=>router.push(path as any)} style={st.row}><Text style={st.rowText}><Copy text={label}/></Text><Text style={st.rowArrow}>→</Text></Pressable>)}
     <Pressable onPress={async()=>{await clearSession();router.replace("/")}} style={st.row}><Text style={st.rowText}><Copy text="ABMELDEN"/></Text><Text style={st.rowArrow}>→</Text></Pressable>
    </View>

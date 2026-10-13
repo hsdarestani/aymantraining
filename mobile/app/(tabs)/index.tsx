@@ -1,6 +1,6 @@
 import {Copy,LocalizedValue} from "../../components/Locale";
 import {useCallback,useMemo,useState} from "react";
-import {ActivityIndicator,Pressable,RefreshControl,ScrollView,StyleSheet,Text,View} from "react-native";
+import {ActivityIndicator,Platform,Pressable,RefreshControl,ScrollView,StyleSheet,Text,View} from "react-native";
 import Svg,{Circle} from "react-native-svg";
 import Animated,{FadeInDown,ZoomIn} from "react-native-reanimated";
 import {router,useFocusEffect} from "expo-router";
@@ -114,7 +114,8 @@ export default function Home(){
    <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}><Copy text="PROTEIN"/></Text><Text style={s.metricValue}>{Math.round(a.proteinG||0)} / {a.proteinTargetG||130} g</Text></View><Bar value={a.proteinG||0} max={a.proteinTargetG||130}/></View>
   </Card>
 
-  <Pressable style={({pressed})=>[s.sync,pressed&&{opacity:.75}]} onPress={health}><Text style={s.syncText}><Copy text={syncing?"GESUNDHEITSDATEN WERDEN SYNCHRONISIERT…":"GADGET DATEN SYNCHRONISIEREN"}/></Text></Pressable>
+  <Pressable style={({pressed})=>[s.sync,pressed&&{opacity:.75}]} onPress={health}><Text style={s.syncText}><Copy text={syncing?"GESUNDHEITSDATEN WERDEN SYNCHRONISIERT…":Platform.OS==="ios"?"APPLE HEALTH DATEN SYNCHRONISIEREN":"GADGET DATEN SYNCHRONISIEREN"}/></Text></Pressable>
+  {Platform.OS==="ios"?<Pressable onPress={()=>router.push("/wearables")}><Text style={s.syncText}><Copy text="APPLE HEALTH VERBINDUNG UND DATENSCHUTZ →"/></Text></Pressable>:null}
  </ScrollView></SafeAreaView>;
 }
 const s=StyleSheet.create({
