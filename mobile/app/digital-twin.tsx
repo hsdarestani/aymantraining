@@ -29,7 +29,7 @@ export default function DigitalTwin(){
  const [d,setD]=useState<any>(null),[error,setError]=useState("");
  useEffect(()=>{api("/api/digital-twin").then(setD).catch(e=>setError(e.message||"Nicht verfügbar"))},[]);
  const trend=useMemo(()=>{if(!d?.history?.length)return 0;return d.history.at(-1).total-d.history[0].total},[d]);
- if(error)return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}><Brand compact/><Card><SectionTitle><Copy text={"Der digitale Athlet ist PRO."}/></SectionTitle><Text style={s.copy}><Copy text={error}/></Text><Pressable style={s.primary} onPress={()=>router.push("/membership")}><Text style={s.primaryText}><Copy text={"PRO FREISCHALTEN"}/></Text></Pressable></Card></ScrollView></SafeAreaView>;
+ if(error)return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}><Brand compact/><Card><SectionTitle><Copy text={"Der digitale Athlet ist PRO."}/></SectionTitle><Text style={s.copy}><Copy text={error}/></Text><Pressable style={s.primary} onPress={()=>router.push("/(tabs)")}><Text style={s.primaryText}><Copy text={"ZUM DASHBOARD"}/></Text></Pressable></Card></ScrollView></SafeAreaView>;
  if(!d?.current)return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
   <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text="ZURÜCK"/></Text></Pressable></View>
   <View style={s.animatedTwin}><AthleteTwin/><Text style={s.twinInfo}><Copy text="SCHEMATISCHE ANIMATION · KEIN KÖRPERSCAN"/></Text></View>
