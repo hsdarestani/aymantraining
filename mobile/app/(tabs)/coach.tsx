@@ -93,7 +93,7 @@ export default function Coach(){
     }catch(e:any){setStatus(e.message||"Upload fehlgeschlagen")}
   }
 
-  if(locked)return <Screen><View style={s.hero}><Eyebrow><Copy text={"DEIN TRAINER"}/></Eyebrow><Text style={s.big}><Copy text={"DIREKT."}/>{"\n"}<Copy text={"PERSÖNLICH."}/>{"\n"}PRO.</Text></View><Card><SectionTitle><Copy text={"Trainer Chat ist PRO."}/></SectionTitle><Text style={s.copy}><Copy text={"Text, Sprachnachrichten, Technikvideo und persönliche Antworten."}/></Text><Pressable style={s.primary} onPress={()=>router.push("/membership")}><Text style={s.primaryText}><Copy text={"PRO FREISCHALTEN →"}/></Text></Pressable></Card></Screen>;
+  if(locked)return <Screen><View style={s.hero}><Eyebrow><Copy text={"DEIN TRAINER"}/></Eyebrow><Text style={s.big}><Copy text={"DIREKT."}/>{"\n"}<Copy text={"PERSÖNLICH."}/>{"\n"}PRO.</Text></View><Card><SectionTitle><Copy text={"Trainer Chat ist PRO."}/></SectionTitle><Text style={s.copy}><Copy text={"Text, Sprachnachrichten, Technikvideo und persönliche Antworten."}/></Text><Text style={s.copy}><Copy text="Diese Funktion ist mit deinem aktuellen Zugang nicht verfügbar."/></Text></Card></Screen>;
 
   return <Screen>
     <View style={s.hero}><Eyebrow><Copy text={"DEIN TRAINER"}/></Eyebrow><Text style={s.big}>AYMAN.</Text><Text style={s.online}><Copy text={"● AKTIVE BETREUUNG"}/></Text></View>

@@ -14,9 +14,9 @@ import {C,radius} from "../theme";
 
 export default function Checkin(){
  const [v,setV]=useState({weightKg:"",energy:"7",recovery:"7",training:"7",note:"",questions:""});
- const [history,setHistory]=useState<any[]>([]),[status,setStatus]=useState(""),[photo,setPhoto]=useState<{uri:string;mediaId?:string}|null>(null);
+ const [history,setHistory]=useState<any[]>([]),[status,setStatus]=useState(""),[locked,setLocked]=useState(false),[photo,setPhoto]=useState<{uri:string;mediaId?:string}|null>(null);
  async function load(){const x:any=await api("/api/checkin");setHistory(x.items||[])}
- useEffect(()=>{load().catch(e=>{if(String(e.message).includes("PRO"))router.replace("/membership")})},[]);
+ useEffect(()=>{load().catch(e=>{if(e.status===403||String(e.message).includes("PRO"))setLocked(true);else setStatus(e.message||"Daten nicht verfügbar.")})},[]);
 
  async function choosePhoto(){
   const permission=await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -37,6 +37,7 @@ export default function Checkin(){
    setStatus("WOCHENCHECK GESPEICHERT");await load();
   }catch(e:any){setStatus(e.message||"Fehler")}
  }
+ if(locked)return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}><View style={s.top}><Brand compact/><Pressable accessibilityRole="button" onPress={()=>router.back()}><Text style={s.back}><Copy text="ZURÜCK"/></Text></Pressable></View><Eyebrow><Copy text="WOCHENCHECK"/></Eyebrow><Card><SectionTitle><Copy text="Für diesen Zugang nicht verfügbar"/></SectionTitle><Text style={s.note}><Copy text="Der persönliche Wochencheck ist mit deinem aktuellen Zugang nicht verfügbar. Es wird keine Kaufoption angeboten."/></Text></Card></ScrollView></SafeAreaView>;
  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
   <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text={"ZURÜCK"}/></Text></Pressable></View>
   <Eyebrow><Copy text={"WOCHENCHECK"}/></Eyebrow><Text style={s.title}><Copy text={"WIE LÄUFT"}/>{"\n"}<Copy text={"DEINE WOCHE?"}/></Text>

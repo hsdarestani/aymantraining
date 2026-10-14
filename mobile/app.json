@@ -19,7 +19,7 @@
       "icon": "./assets/favicon.png",
       "appleTeamId": "884MVA2MD5",
       "entitlements": {},
-      "buildNumber": "11"
+      "buildNumber": "12"
     },
     "android": {
       "package": "com.smarbiz.bedifferent",
