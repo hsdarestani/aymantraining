@@ -5,6 +5,9 @@ on:
       - feature/athlete-experience-oct14
     paths:
       - .github/workflows/appetize-ios-simulator.yml
+  pull_request:
+    paths:
+      - .github/workflows/appetize-ios-simulator.yml
   workflow_dispatch:
 permissions:
   contents: read
