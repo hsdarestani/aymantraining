@@ -1,0 +1,52 @@
+name: iOS review purchase path regression
+on:
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/ios-review-pro-gates.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-ui-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm run typecheck
+      - name: No misleading purchase actions before IAP launches
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const root='app';const issues=[];
+          const banned=[
+            /PRO\s+FREISCHALTEN/i,
+            /PRO\s+TESTEN/i,
+            /JETZT\s+KAUFEN/i,
+            /ABONNIEREN/i,
+            /UPGRADE\s+JETZT/i,
+            /router\.(?:push|replace)\(["']\/membership["']\)/
+          ];
+          function walk(dir){
+            for(const ent of fs.readdirSync(dir,{withFileTypes:true})){
+              const f=path.join(dir,ent.name);
+              if(ent.isDirectory())walk(f);
+              else if(/\.(tsx|jsx)$/.test(f)){
+                const code=fs.readFileSync(f,'utf8');
+                for(const pattern of banned)if(pattern.test(code))issues.push(f+': '+pattern);
+              }
+            }
+          }
+          walk(root);
+          if(issues.length){console.error('Misleading CTA paths:',issues.join('\n'));process.exit(1)}
+          console.log('PASS: no inactive PRO purchase controls or redirect to account status');
+          NODE
