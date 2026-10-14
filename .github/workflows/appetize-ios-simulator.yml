@@ -37,6 +37,9 @@ jobs:
           FIREBASE_IOS_GOOGLE_SERVICE_INFO_B64: ${{ secrets.FIREBASE_IOS_GOOGLE_SERVICE_INFO_B64 }}
         run: |
           node scripts/prepare-native-config.mjs
+          # The remote iPhone simulator cannot test watchOS companions.
+          # Exclude only watchOS-specific targets for this Appetize preview build.
+          rm -rf targets/watch targets/watch-widget
           CI=1 npx expo prebuild --platform ios --clean --non-interactive
       - name: Build self-contained iOS Simulator Release app
         run: |
@@ -46,7 +49,7 @@ jobs:
           test -n "$workspace"
           scheme="$(xcodebuild -list -json -workspace "$workspace" | python3 -c 'import json,sys; print(json.load(sys.stdin)["workspace"]["schemes"][0])')"
           echo "Building scheme $scheme"
-          xcodebuild -workspace "$workspace" -scheme "$scheme" -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/be-different-appetize CODE_SIGNING_ALLOWED=NO build > /tmp/be-different-appetize-build.log 2>&1 || { tail -n 170 /tmp/be-different-appetize-build.log; exit 1; }
+          xcodebuild -workspace "$workspace" -scheme "$scheme" -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/be-different-appetize CODE_SIGNING_ALLOWED=NO build > /tmp/be-different-appetize-build.log 2>&1 || { grep -nE 'error:|fatal error:|SwiftCompile.*failed|BUILD FAILED' /tmp/be-different-appetize-build.log | tail -n 70 || true; tail -n 100 /tmp/be-different-appetize-build.log; exit 1; }
           app="$(find /tmp/be-different-appetize/Build/Products/Release-iphonesimulator -maxdepth 1 -name '*.app' -type d -print -quit)"
           test -d "$app"
           test -s "$app/main.jsbundle"
