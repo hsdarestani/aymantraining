@@ -2,12 +2,12 @@
   "enabled": true,
   "app_identifier": "com.smarbiz.bedifferent",
   "version_name": "1.2.0",
-  "build_number": 11,
+  "build_number": 12,
   "platforms": [
     "ios"
   ],
   "android_track": "production",
   "auto_submit": false,
-  "release_notes": "iOS App Review: Google Play Verweise und nicht verfügbare In App Käufe aus der App entfernt, Onboarding korrigiert, Apple Health und Datenschutz klar gekennzeichnet.",
+  "release_notes": "iOS App Review 2.1(b): unbrauchbare PRO Freischalten Schaltflächen in Coach, Different AI, Recovery und Leistungsverlauf entfernt; gesperrte Funktionen erklären Kontostatus ohne Kaufversprechen. IAP Produkte vor Prüfung aus Review Submission entfernen.",
   "source_branch": "main"
 }
