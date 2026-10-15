@@ -24,3 +24,5 @@ jobs:
           SELECT email,role,"subscriptionTier" FROM "User" WHERE email='appreview@bedifferent.smarbiz.sbs';
           SQL
 
+
+# Recheck reviewer ELITE entitlement before build 1.2.0 (12) review, 2026-10-15.
