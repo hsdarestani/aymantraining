@@ -9,20 +9,41 @@ permissions:
 jobs:
   review:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
-      - run: sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
-      - name: Grant all features only to isolated review athlete
+      - name: Grant ELITE to isolated Apple reviewer using key authentication
         env:
           HOST: ${{ secrets.HOST }}
-          PASS: ${{ secrets.PASS }}
           SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KEY_PASSPHRASE: ${{ secrets.SSH_KEY_PASSPHRASE }}
         run: |
           set -euo pipefail
+          if [ -z "$HOST" ] || [ -z "$SSH_PRIVATE_KEY" ]; then
+            echo "::error::App host or SSH private key not configured in this repository."
+            exit 1
+          fi
           PORT="${SSH_PORT:-22}"
-          sshpass -p "$PASS" ssh -p "$PORT" -o StrictHostKeyChecking=no root@"$HOST" 'cd /opt/bedifferent && docker compose --env-file .env.production exec -T db psql -U bedifferent -d bedifferent -v ON_ERROR_STOP=1' <<'SQL'
-          UPDATE "User" SET "subscriptionTier"='ELITE', "updatedAt"=NOW() WHERE email='appreview@bedifferent.smarbiz.sbs' AND role='ATHLETE';
-          SELECT email,role,"subscriptionTier" FROM "User" WHERE email='appreview@bedifferent.smarbiz.sbs';
+          umask 077
+          KEY="$RUNNER_TEMP/bedifferent-review-key"
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > "$KEY"
+          chmod 600 "$KEY"
+          if [ -n "$SSH_KEY_PASSPHRASE" ]; then
+            eval "$(ssh-agent -s)" >/dev/null
+            ASKPASS="$RUNNER_TEMP/review-askpass"
+            printf '%s\n' '#!/bin/sh' 'printf "%s" "$SSH_KEY_PASSPHRASE"' > "$ASKPASS"
+            chmod 700 "$ASKPASS"
+            DISPLAY=:0 SSH_ASKPASS="$ASKPASS" SSH_ASKPASS_REQUIRE=force setsid ssh-add "$KEY" </dev/null
+          fi
+          install -d -m 700 "$HOME/.ssh"
+          ssh-keyscan -T 10 -p "$PORT" -H "$HOST" >> "$HOME/.ssh/known_hosts" 2>/dev/null
+          test -s "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          ssh -i "$KEY" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -p "$PORT" root@"$HOST" 'bash -se' <<'REMOTE'
+          set -euo pipefail
+          cd /opt/bedifferent
+          docker compose --env-file .env.production exec -T db psql -U bedifferent -d bedifferent -v ON_ERROR_STOP=1 <<'SQL'
+          UPDATE "User" SET "subscriptionTier"='ELITE', "updatedAt"=NOW() WHERE email='appreview@bedifferent.smarbiz.sbs' AND role='ATHLETE' AND "subscriptionTier"<>'ELITE';
+          SELECT role,"subscriptionTier" FROM "User" WHERE email='appreview@bedifferent.smarbiz.sbs';
           SQL
-
-
-# Recheck reviewer ELITE entitlement before build 1.2.0 (12) review, 2026-10-15.
+          REMOTE
