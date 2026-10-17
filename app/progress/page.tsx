@@ -80,7 +80,7 @@ export default async function ProgressPage(){
         <div><span><Copy text={t.name}/></span><strong><Copy text={t.results[0]?.value??"Keine Angabe"}/>{t.results[0]?.unit?" "+t.results[0].unit:""}</strong><small>{t.results[0]?.metric??<Copy text="LEISTUNGSTEST"/>}</small></div>
         <time><LocalizedValue value={t.completedAt} format="toLocaleDateString"/></time>
       </div>):<p className="bd-progress-no-data"><Copy text="Noch kein Leistungstest gespeichert."/></p>}</div>:<div className="bd-progress-locked compact">
-        <strong><Copy text="DEIN ERSTER TEST ZÄHLT."/></strong><p><Copy text={tests[0]?"Dein Starttest ist gespeichert. Weitere Tests und Verlauf sind mit PRO verfügbar.":"Dein Starttest erscheint nach dem Onboarding hier."/></p><Link href="/pricing"><Copy text="VERLAUF ANSEHEN"/> ↗</Link>
+        <strong><Copy text="DEIN ERSTER TEST ZÄHLT."/></strong><p><Copy text={tests[0]?"Dein Starttest ist gespeichert. Weitere Tests und Verlauf sind mit PRO verfügbar.":"Dein Starttest erscheint nach dem Onboarding hier."}/></p><Link href="/pricing"><Copy text="VERLAUF ANSEHEN"/> ↗</Link>
       </div>}
     </section>
 
