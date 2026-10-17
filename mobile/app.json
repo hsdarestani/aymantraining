@@ -42,7 +42,7 @@
         "foregroundImage": "./assets/favicon.png",
         "backgroundColor": "#D7FF00"
       },
-      "versionCode": 10,
+      "versionCode": 11,
       "blockedPermissions": [
         "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
         "android.permission.FOREGROUND_SERVICE"
