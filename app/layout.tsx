@@ -21,6 +21,7 @@ import "./form-layout.css";
 import "./web-athlete-2026.css";
 import "./admin-mobile-polish.css";
 import "./athlete-experience.css";
+import "./bd-art-direction.css";
 import {cookies} from "next/headers";
 import {LocaleProvider} from "./components/Locale";
 import {getCurrentUser} from "../lib/auth";
