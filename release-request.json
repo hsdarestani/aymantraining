@@ -1,13 +1,14 @@
 {
   "enabled": true,
   "app_identifier": "com.smarbiz.bedifferent",
-  "version_name": "1.2.1",
-  "build_number": 13,
+  "version_name": "1.2.2",
+  "build_number": 14,
   "platforms": [
-    "ios"
+    "ios",
+    "android"
   ],
   "android_track": "production",
   "auto_submit": true,
-  "release_notes": "iOS 1.2.1: Neue BE FOCUSED Atemsession mit optionaler deutscher Systemstimme, verbesserte ATHLET Übersicht und Digital Twin Darstellung sowie verständlichere Wearable und Health Daten Informationen. Keine In App Käufe. Geräte Kopplung und persönliche Trainerstimme werden nicht versprochen.",
+  "release_notes": "BE DIFFERENT 1.2.2: Neue interaktive Trainingsübersicht mit persönlichem Rhythmus, neu gestalteter Fortschrittsbereich und individuelle Athletenansicht. Bessere Navigation und klarere Leistungsdaten auf dem Smartphone.",
   "source_branch": "main"
 }
