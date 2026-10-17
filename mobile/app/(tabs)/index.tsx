@@ -72,6 +72,12 @@ export default function Home(){
    <Pressable onPress={()=>router.push("/focus")}><Text style={s.focusLink}><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Text></Pressable>
   </View>
 
+  <View style={s.exploreStrip}>
+   <View style={s.exploreCopy}><Text style={s.exploreOverline}>01 / DEIN SYSTEM</Text><Text style={s.exploreTitle}><Copy text="BE DIFFERENT ENTDECKEN"/></Text><Text style={s.exploreHint}><Copy text="START ist dein Dashboard. Im ATHLET Tab findest du alle Module."/></Text></View>
+   <Pressable accessibilityRole="button" onPress={()=>router.push("/(tabs)/athlete")} style={s.exploreButton}><Text style={s.exploreButtonText}>↗</Text></Pressable>
+  </View>
+  <Pressable accessibilityRole="button" onPress={()=>router.push("/awake")} style={s.awakeShortcut}><Text style={s.awakeOverline}>BE AWAKE / MORGENROUTINE</Text><Text style={s.awakeAction}><Copy text="DEN TAG BEWUSST STARTEN"/>  ↗</Text></Pressable>
+
   {priority?<Pressable onPress={()=>router.push("/lifestyle")} style={[s.priority,priority.severity==="critical"&&s.priorityCritical]}>
    <Text style={s.priorityKicker}><Copy text="HEUTE WICHTIG"/></Text><Text style={s.priorityTitle}><Copy text={priority.title}/></Text><Text style={s.priorityCopy}><Copy text={priority.action}/></Text>
   </Pressable>:null}
@@ -144,5 +150,7 @@ const s=StyleSheet.create({
  cycle:{padding:16,borderLeftWidth:3,borderLeftColor:C.red,backgroundColor:"#171113"},cycleTag:{color:C.red,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.4},cycleTitle:{color:C.ink,fontFamily:"Archivo",fontSize:21,marginTop:6},cycleCopy:{color:C.dim,fontFamily:"Manrope",fontSize:10,lineHeight:15,marginTop:5},
  workout:{minHeight:175,justifyContent:"flex-end",backgroundColor:"#101416",borderTopWidth:3,borderTopColor:C.volt,padding:20},workoutKicker:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.8},workoutTitle:{color:C.ink,fontFamily:"Archivo",fontSize:28,letterSpacing:-.8,marginTop:8},cardCopy:{color:C.dim,fontFamily:"Manrope",fontSize:12,lineHeight:18,marginTop:8},arrow:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:1.4,marginTop:16},
  metric:{marginTop:15},metricHead:{flexDirection:"row",justifyContent:"space-between",alignItems:"center"},metricName:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.1},metricValue:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:10},metricTrack:{height:5,backgroundColor:C.panel2,borderRadius:4,overflow:"hidden",marginTop:7},metricFill:{height:"100%"},
+ exploreStrip:{flexDirection:"row",alignItems:"center",borderWidth:1,borderColor:"#46572E",borderRadius:19,backgroundColor:"#17201A",padding:15,gap:12},exploreCopy:{flex:1},exploreOverline:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.4},exploreTitle:{color:C.ink,fontFamily:"Archivo",fontSize:21,marginTop:6},exploreHint:{color:C.dim,fontFamily:"Manrope",fontSize:10,lineHeight:16,marginTop:5},exploreButton:{width:47,height:47,borderRadius:15,backgroundColor:C.volt,alignItems:"center",justifyContent:"center"},exploreButtonText:{fontFamily:"Archivo",color:C.bg,fontSize:26},
+ awakeShortcut:{flexDirection:"row",justifyContent:"space-between",alignItems:"center",paddingVertical:13,paddingHorizontal:15,borderRadius:13,borderWidth:1,borderColor:"#514B2B",backgroundColor:"#201F16"},awakeOverline:{color:"#D4D2A2",fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:.8},awakeAction:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:9},
  sync:{height:50,borderRadius:radius.md,borderWidth:1,borderColor:C.line,alignItems:"center",justifyContent:"center"},syncText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:1.35}
 });

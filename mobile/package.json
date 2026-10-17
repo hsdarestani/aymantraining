@@ -32,6 +32,7 @@
     "expo-router": "~5.1.4",
     "expo-secure-store": "~14.2.3",
     "expo-sharing": "~13.1.5",
+    "expo-speech": "~13.1.7",
     "expo-status-bar": "~2.2.3",
     "expo-video": "~2.2.2",
     "lucide-react-native": "1.49.0",

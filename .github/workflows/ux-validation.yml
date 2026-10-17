@@ -1,0 +1,44 @@
+name: Athlete experience checks
+on:
+  pull_request:
+    paths:
+      - 'app/focus/**'
+      - 'mobile/**'
+      - 'docs/ASHKAN_FEEDBACK_2026_10_14.md'
+      - '.github/workflows/ux-validation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  web-typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      - run: npx tsc --noEmit
+
+  mobile-typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm run typecheck

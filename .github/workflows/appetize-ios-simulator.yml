@@ -1,0 +1,66 @@
+name: BE DIFFERENT Appetize iOS Simulator ZIP
+on:
+  push:
+    branches:
+      - feature/athlete-experience-oct14
+    paths:
+      - .github/workflows/appetize-ios-simulator.yml
+  pull_request:
+    paths:
+      - .github/workflows/appetize-ios-simulator.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bedifferent-appetize-preview
+  cancel-in-progress: false
+jobs:
+  ios-appetize:
+    runs-on: macos-15
+    timeout-minutes: 115
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Dependencies and typecheck
+        run: |
+          npm ci --include=dev
+          npm run typecheck
+      - name: Generate native simulator project
+        env:
+          FIREBASE_IOS_GOOGLE_SERVICE_INFO_B64: ${{ secrets.FIREBASE_IOS_GOOGLE_SERVICE_INFO_B64 }}
+        run: |
+          node scripts/prepare-native-config.mjs
+          # The remote iPhone simulator cannot test watchOS companions.
+          # Exclude only watchOS-specific targets for this Appetize preview build.
+          rm -rf targets/watch targets/watch-widget
+          CI=1 npx expo prebuild --platform ios --clean --non-interactive
+      - name: Build self-contained iOS Simulator Release app
+        run: |
+          set -euo pipefail
+          cd ios
+          workspace="$(find . -maxdepth 1 -name '*.xcworkspace' -print -quit)"
+          test -n "$workspace"
+          scheme="$(xcodebuild -list -json -workspace "$workspace" | python3 -c 'import json,sys; print(json.load(sys.stdin)["workspace"]["schemes"][0])')"
+          echo "Building scheme $scheme"
+          xcodebuild -workspace "$workspace" -scheme "$scheme" -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/be-different-appetize CODE_SIGNING_ALLOWED=NO build > /tmp/be-different-appetize-build.log 2>&1 || { grep -nE 'error:|fatal error:|SwiftCompile.*failed|BUILD FAILED' /tmp/be-different-appetize-build.log | tail -n 70 || true; tail -n 100 /tmp/be-different-appetize-build.log; exit 1; }
+          app="$(find /tmp/be-different-appetize/Build/Products/Release-iphonesimulator -maxdepth 1 -name '*.app' -type d -print -quit)"
+          test -d "$app"
+          test -s "$app/main.jsbundle"
+          mkdir -p build/appetize
+          ditto -c -k --sequesterRsrc --keepParent "$app" build/appetize/BE-DIFFERENT-iOS-Appetize-Simulator.zip
+          unzip -t build/appetize/BE-DIFFERENT-iOS-Appetize-Simulator.zip | tail -n 3
+          echo "APPETIZE_ZIP=$(pwd)/build/appetize/BE-DIFFERENT-iOS-Appetize-Simulator.zip" >> "$GITHUB_ENV"
+      - name: Upload simulator ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: BE-DIFFERENT-Appetize-iOS-Simulator
+          path: mobile/ios/build/appetize/BE-DIFFERENT-iOS-Appetize-Simulator.zip
+          if-no-files-found: error
+          retention-days: 7
