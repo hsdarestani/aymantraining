@@ -2,12 +2,12 @@
   "enabled": true,
   "app_identifier": "com.smarbiz.bedifferent",
   "version_name": "1.2.1",
-  "build_number": 13,
+  "build_number": 12,
   "platforms": [
-    "ios"
+    "android"
   ],
   "android_track": "production",
-  "auto_submit": false,
-  "release_notes": "iOS 1.2.1: Neue BE FOCUSED Atemsession mit optionaler deutscher Systemstimme, verbesserte ATHLET Übersicht und Digital Twin Darstellung sowie verständlichere Wearable und Health Daten Informationen. Keine In App Käufe. Geräte Kopplung und persönliche Trainerstimme werden nicht versprochen.",
+  "auto_submit": true,
+  "release_notes": "Android 1.2.1: Neue BE FOCUSED Atemsession mit optionaler deutscher Systemstimme, verbesserte ATHLET Übersicht, Digital Twin Darstellung und klarere Wearable und Health Connect Informationen. Keine In App Käufe; keine direkte Xiaomi Kopplung versprochen.",
   "source_branch": "main"
 }
