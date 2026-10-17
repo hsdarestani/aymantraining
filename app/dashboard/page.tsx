@@ -6,6 +6,7 @@ import {levelForScore} from "../../lib/scoring";
 import {dateOnly} from "../../lib/http";
 import DigitalTwinHero from "../components/DigitalTwinHero";
 import ScoreRadar from "../components/ScoreRadar";
+import RhythmHorizon from "../components/RhythmHorizon";
 export const dynamic="force-dynamic";
 
 const dayMs=86400000;
@@ -107,23 +108,17 @@ export default async function Dashboard(){
       </div>
     </section>
 
-    <section className="bd-load-experience" aria-label="Belastungsübersicht">
-     <div className="bd-load-head"><div><span className="eyebrow"><Copy text="BELASTUNGSÜBERSICHT"/></span><h2><Copy text="DEINE LAST. DEIN RHYTHMUS."/></h2></div><span aria-hidden="true">↗</span></div>
-     <p className="bd-load-caption"><Copy text="72 STUNDEN IM BLICK"/></p>
-    <section className="bd-day-line">
-      {dayStrip.map((day,i)=>{
-        const first=day.workouts[0];
-        return <Link href="/training" className={i===1?"bd-day-item active":"bd-day-item"} key={day.date.toISOString()}>
-          <span><Copy text={dayNames[i]}/></span>
-          <strong className="bd-load-number">{String(day.date.getUTCDate()).padStart(2,"0")}</strong>
-          <small className="bd-load-status"><Copy text={first?first.completedAt?"ERLEDIGT":"EINHEIT GEPLANT":i===0?"VERGANGEN":i===1?"AKTUELL":"VORAUS"}/></small>
-          <p>{first?.title||<Copy text="NOCH NICHTS GEPLANT"/>}</p>
-          {first?.completedAt&&<small><Copy text="ERLEDIGT"/></small>}
-        </Link>
-      })}
-    </section>
-    <p className="bd-load-disclaimer"><Copy text="Geplante Einheiten · keine geschätzten Belastungswerte."/></p>
-    </section>
+    <RhythmHorizon days={dayStrip.map((day,i)=>({
+      number:String(day.date.getUTCDate()).padStart(2,"0"),
+      month:new Intl.DateTimeFormat("de-DE",{month:"long",timeZone:"UTC"}).format(day.date).toUpperCase(),
+      label:dayNames[i],
+      workouts:day.workouts.map(workout=>({
+        id:workout.id,
+        title:workout.title,
+        time:workout.scheduledAt?new Intl.DateTimeFormat("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Berlin"}).format(workout.scheduledAt):"",
+        completed:Boolean(workout.completedAt)
+      }))
+    }))}/>
 
     <section className="bd-performance-stream">
       <Link href="/lifestyle" className="bd-stream-row featured">
