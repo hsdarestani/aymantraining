@@ -23,23 +23,66 @@ export default async function ProgressPage(){
     hasFeature(user.subscriptionTier,"performance_timeline")
   ]);
   const current=scores[0];
-
-  return <main className="sub-shell">
-    <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard"><Copy text={"BEGINN"}/></Link><Link href="/training">TRAINING</Link><Link className="active" href="/progress"><Copy text={"FORTSCHRITT"}/></Link><Link href="/coach"><Copy text={"TRAINER"}/></Link><Link href="/athlete"><Copy text={"ATHLET"}/></Link></nav></header>
-    <section className="page-hero compact-hero"><div><span className="eyebrow"><Copy text={"FORTSCHRITT"}/></span><h1><Copy text={"DEIN GRIND. DEINE SPUREN."}/></h1><p><Copy text={"Leistungswert, Tests und Körperdaten zeigen die Entwicklung über Zeit. Keine Prognose wird als Garantie dargestellt."}/></p></div><div className="hero-stat"><span><Copy text={"LEISTUNGSWERT"}/></span><strong>{current?.total??0}</strong><small><Copy text={details?`${scores.length} MESSPUNKTE`:"KOSTENLOSER GESAMTWERT"}/></small></div></section>
-
-    <section className="progress-cards">
-      <article className={details?"panel chart-panel":"panel chart-panel locked-chart"}>
-        <div className="panel-head"><div><span className="eyebrow"><Copy text={"VERLAUF"}/></span><h2><Copy text={details?"Letzte Messpunkte":"PRO Verlauf"}/></h2></div></div>
-        {details?<div className="fake-chart">{scores.slice().reverse().map(s=><i key={s.id} style={{height:`${Math.max(4,s.total)}%`}}/>)}</div>:<div className="locked-copy"><p className="muted"><Copy text={"KOSTENLOS zeigt den aktuellen Gesamtwert. Verlauf und Erklärungen sind PRO."}/></p><Link href="/pricing" className="secondary"><Copy text={"PRO TESTEN"}/></Link></div>}
-      </article>
-      <article className="panel"><span className="eyebrow"><Copy text={"KÖRPER"}/></span><h2><Copy text={"Aktuell"}/></h2><div className="body-stats"><div><span><Copy text={"GEWICHT"}/></span><strong>{metrics[0]?.weightKg??"Keine Angabe"} kg</strong><small>{metrics[0]?.date.toLocaleDateString("de-DE")??"keine Daten"}</small></div><div><span><Copy text={"TAILLE"}/></span><strong>{metrics[0]?.waistCm??"Keine Angabe"} cm</strong><small><Copy text={"letzter Wert"}/></small></div><div><span><Copy text={"FOTOS"}/></span><strong>{photos.length}</strong><small><Copy text={user.subscriptionTier==="FREE"?"max. 3":"privat"}/></small></div></div></article>
+  const series=scores.slice().reverse();
+  const chartPoints=series.map((s,i)=>({
+    x:series.length===1?400:40+(i/(series.length-1))*720,
+    y:234-Math.max(0,Math.min(100,s.total??0))*1.85,
+    value:s.total??0,
+    date:s.date
+  }));
+  const chartPolyline=chartPoints.map(p=>p.x.toFixed(2)+","+p.y.toFixed(2)).join(" ");
+  const change=scores.length>=2?(scores[0].total??0)-(scores[scores.length-1].total??0):null;
+  return <main className="sub-shell bd-progress">
+    <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard"><Copy text="BEGINN"/></Link><Link href="/training">TRAINING</Link><Link className="active" href="/progress"><Copy text="FORTSCHRITT"/></Link><Link href="/coach"><Copy text="TRAINER"/></Link><Link href="/athlete"><Copy text="ATHLET"/></Link></nav></header>
+    <section className="bd-progress-hero">
+      <div className="bd-progress-hero-main">
+        <span className="bd-section-serial">03 / <Copy text="DEINE ENTWICKLUNG"/></span>
+        <h1>DEIN GRIND.<br/><em>DEINE SPUREN.</em></h1>
+        <p><Copy text="Hier zählt, was du wirklich erreicht hast. Messwerte, Tests und Entwicklung im eigenen Tempo."/></p>
+      </div>
+      <div className="bd-progress-score">
+        <span><Copy text="AKTUELLER LEISTUNGSWERT"/></span>
+        <div><strong>{current?.total??"—"}</strong><small>{current?" / 100":""}</small></div>
+        <p><Copy text={details?`${scores.length} MESSPUNKTE`:"GESAMTWERT"}/></p>
+      </div>
     </section>
-
-    <article className="panel timeline-panel">
-      <div className="panel-head"><div><span className="eyebrow">BE DIFFERENT TEST</span><h2><Copy text={timeline?"Leistungsverlauf":"Starttest"}/></h2></div><Link className="secondary" href="/tests"><Copy text={"TESTS ÖFFNEN"}/></Link></div>
-      {timeline?<div className="test-timeline">{tests.length?tests.map((t,i)=><div className="test-card" key={t.id}><span>TEST {String(tests.length-i).padStart(2,"0")}</span><strong><Copy text={t.results[0]?.value??"Keine Angabe"}/></strong><small>{t.results[0]?.metric??t.name} {t.results[0]?.unit??""}</small><b><LocalizedValue value={t.completedAt} format="toLocaleDateString"/></b></div>):<p className="muted"><Copy text={"Noch kein Leistungstest gespeichert."}/></p>}</div>:<div className="locked-copy"><p className="muted"><Copy text={tests[0]?"Dein Starttest ist gespeichert. Wiederholungstests und Verlauf sind PRO.":"Dein Starttest erscheint nach dem Onboarding hier."}/></p><Link href="/pricing" className="secondary"><Copy text={"VERLAUF FREISCHALTEN"}/></Link></div>}
-    </article>
+    <section className="bd-progress-record">
+      <header className="bd-progress-record-head"><div><span className="bd-section-serial">01 / <Copy text="DEIN VERLAUF"/></span><h2><Copy text="NICHT GESCHÄTZT. GEMESSEN."/></h2></div>
+        {details&&change!==null&&<div className="bd-progress-delta"><span><Copy text="VERÄNDERUNG"/></span><strong>{change>0?"+":""}{change}</strong></div>}
+      </header>
+      {details&&series.length>0?<div className="bd-progress-chart">
+        <svg viewBox="0 0 800 260" preserveAspectRatio="none" role="img" aria-label="Tatsächlich gemessene Leistungswerte im zeitlichen Verlauf">
+          <defs><linearGradient id="bd-progress-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#d4ff00" stopOpacity=".23"/><stop offset="1" stopColor="#d4ff00" stopOpacity="0"/></linearGradient></defs>
+          {[0,25,50,75,100].map((level)=><g key={level}><line x1="38" y1={234-level*1.85} x2="766" y2={234-level*1.85} stroke="#344039" strokeWidth=".8" strokeDasharray="2 7"/><text x="0" y={238-level*1.85} fill="#8c9e93" fontSize="11">{level}</text></g>)}
+          {chartPoints.length>1&&<polygon points={`40,239 ${chartPolyline} 760,239`} fill="url(#bd-progress-fill)"/>}
+          {chartPoints.length>1&&<polyline fill="none" stroke="#d4ff00" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" points={chartPolyline}/>}
+          {chartPoints.map((pt,i)=><circle key={i} cx={pt.x} cy={pt.y} r={i===chartPoints.length-1?7:3} fill={i===chartPoints.length-1?"#d4ff00":"#101817"} stroke="#d4ff00" strokeWidth="2"/>)}
+        </svg>
+        <div className="bd-progress-chart-footer">
+          <span>{series[0]?.date.toLocaleDateString("de-DE")}</span><span><Copy text="ECHTE MESSPUNKTE"/></span><span>{series[series.length-1]?.date.toLocaleDateString("de-DE")}</span>
+        </div>
+      </div>:details?<div className="bd-progress-no-data"><Copy text="Noch keine Messwerte vorhanden. Dein Verlauf startet mit dem ersten gespeicherten Wert."/></div>:<div className="bd-progress-locked">
+        <span aria-hidden="true">↗</span><strong><Copy text="DEIN VERLAUF WARTET."/></strong><p><Copy text="Deinen Gesamtwert siehst du bereits. Detailverlauf und Erklärungen gibt es mit PRO."/></p><Link href="/pricing"><Copy text="DETAILS ANSEHEN"/> ↗</Link>
+      </div>}
+    </section>
+    <section className="bd-progress-measurements">
+      <div className="bd-progress-section-title"><span className="bd-section-serial">02 / <Copy text="KÖRPERDATEN"/></span><h2>FAKTEN STATT GEFÜHL.</h2></div>
+      <div className="bd-progress-facts">
+        <div><span><Copy text="GEWICHT"/></span><strong>{metrics[0]?.weightKg??"—"}<small>{metrics[0]?.weightKg==null?"":" kg"}</small></strong><p>{metrics[0]?.date.toLocaleDateString("de-DE")??"Keine Angabe"}</p></div>
+        <div><span><Copy text="TAILLE"/></span><strong>{metrics[0]?.waistCm??"—"}<small>{metrics[0]?.waistCm==null?"":" cm"}</small></strong><p><Copy text="LETZTER WERT"/></p></div>
+        <div><span><Copy text="FOTOS"/></span><strong>{photos.length.toString().padStart(2,"0")}</strong><p><Copy text={user.subscriptionTier==="FREE"?"MAXIMAL 3":"PRIVAT"}/></p></div>
+      </div>
+    </section>
+    <section className="bd-progress-tests">
+      <div className="bd-progress-section-title"><span className="bd-section-serial">03 / BE DIFFERENT TEST</span><h2><Copy text={timeline?"DEINE TESTHISTORIE.":"DEIN STARTPUNKT."}/></h2><Link href="/tests"><Copy text="TESTS ÖFFNEN"/> ↗</Link></div>
+      {timeline?<div className="bd-progress-test-list">{tests.length?tests.map((t,i)=><div key={t.id} className="bd-progress-test-row">
+        <span className="bd-progress-test-index">{String(tests.length-i).padStart(2,"0")}</span>
+        <div><span><Copy text={t.name}/></span><strong><Copy text={t.results[0]?.value??"Keine Angabe"}/>{t.results[0]?.unit?" "+t.results[0].unit:""}</strong><small>{t.results[0]?.metric??<Copy text="LEISTUNGSTEST"/>}</small></div>
+        <time><LocalizedValue value={t.completedAt} format="toLocaleDateString"/></time>
+      </div>):<p className="bd-progress-no-data"><Copy text="Noch kein Leistungstest gespeichert."/></p>}</div>:<div className="bd-progress-locked compact">
+        <strong><Copy text="DEIN ERSTER TEST ZÄHLT."/></strong><p><Copy text={tests[0]?"Dein Starttest ist gespeichert. Weitere Tests und Verlauf sind mit PRO verfügbar.":"Dein Starttest erscheint nach dem Onboarding hier."/></p><Link href="/pricing"><Copy text="VERLAUF ANSEHEN"/> ↗</Link>
+      </div>}
+    </section>
 
     {user.subscriptionTier!=="FREE"&&photos.length>=2&&<BeforeAfter beforeId={photos[photos.length-1].id} afterId={photos[0].id}/>}
     <ProgressClient/>
