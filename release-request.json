@@ -1,13 +1,13 @@
 {
   "enabled": true,
   "app_identifier": "com.smarbiz.bedifferent",
-  "version_name": "1.2.0",
-  "build_number": 11,
+  "version_name": "1.2.1",
+  "build_number": 13,
   "platforms": [
-    "android"
+    "ios"
   ],
   "android_track": "production",
-  "auto_submit": true,
-  "release_notes": "Android 1.2.0: stabilisierte PRO Funktionsanzeigen ohne nicht verfügbare Kaufbuttons, Verbesserungen bei Health Datenhinweisen, Training und Kontoansicht. Zahlungen bleiben vorerst deaktiviert.",
+  "auto_submit": false,
+  "release_notes": "iOS 1.2.1: Neue BE FOCUSED Atemsession mit optionaler deutscher Systemstimme, verbesserte ATHLET Übersicht und Digital Twin Darstellung sowie verständlichere Wearable und Health Daten Informationen. Keine In App Käufe. Geräte Kopplung und persönliche Trainerstimme werden nicht versprochen.",
   "source_branch": "main"
 }
