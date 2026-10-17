@@ -1,0 +1,50 @@
+name: BE DIFFERENT shared host inspection
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/bedifferent-host-inspect.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Inspect only the existing BE DIFFERENT service
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: root
+          password: ${{ secrets.PASS }}
+          command_timeout: 4m
+          script: |
+            set -eu
+            echo "BD_HOST_INSPECTION_BEGIN"
+            for path in /opt/bedifferent /opt/aplussolution /opt/a-esthetic-mobile /opt/aesthetic-book; do
+              if [ -d "$path" ]; then echo "PRESENT:$path"; else echo "ABSENT:$path"; fi
+            done
+            if [ -d /opt/bedifferent/.git ]; then
+              echo "BEDIFFERENT_REPOSITORY_SHA:"
+              git -C /opt/bedifferent rev-parse HEAD
+              echo "BEDIFFERENT_REPOSITORY_BRANCH:"
+              git -C /opt/bedifferent branch --show-current
+              echo "BEDIFFERENT_GIT_STATUS:"
+              git -C /opt/bedifferent status --short | head -25
+              if [ -f /opt/bedifferent/docker-compose.yml ]; then echo "BEDIFFERENT_COMPOSE_EXISTS"; fi
+              if [ -f /opt/bedifferent/.env.production ]; then echo "BEDIFFERENT_ENV_EXISTS"; fi
+            fi
+            if command -v docker >/dev/null 2>&1; then
+              echo "BD_CONTAINERS:"
+              docker ps --filter "name=bedifferent" --format '{{.Names}} {{.Status}} {{.Ports}}' || true
+              echo "BD_DOCKER_STATE:"
+              docker inspect bedifferent-web --format '{{.State.Status}} {{.Image}}' 2>/dev/null || true
+            fi
+            echo "BD_LOCAL_READINESS:"
+            curl -fsS --connect-timeout 5 --max-time 10 http://127.0.0.1:3100/api/ready || true
+            echo
+            echo "BD_HOST_INSPECTION_END"
