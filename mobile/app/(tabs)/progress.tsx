@@ -30,7 +30,7 @@ export default function Progress(){
 
   <Pressable accessibilityRole="button" onPress={()=>router.push("/digital-twin")} style={s.scoreStage}>
     <Text style={s.serial}>01 / <Copy text="LEISTUNGSWERT"/></Text>
-    <View style={s.scoreRow}><Text style={s.scoreNumber}>{total==null?"—":Math.round(total)}</Text><View style={s.scoreUnit}><Text style={s.scoreScale}>{total==null?"":" / 100"}</Text><Text style={s.scoreCaption}><Copy text="DEIN AKTUELLER WERT"/></Text></View></View>
+    <View style={s.scoreRow}><Text style={s.scoreNumber}>{total==null?"?":Math.round(total)}</Text><View style={s.scoreUnit}><Text style={s.scoreScale}>{total==null?"":" / 100"}</Text><Text style={s.scoreCaption}><Copy text="DEIN AKTUELLER WERT"/></Text></View></View>
     <View style={s.scoreRule}><View style={[s.scoreFill,{width:`${Math.max(0,Math.min(100,Number(total??0)))}%`}]}/></View>
     <Text style={s.scoreFoot}><Copy text="DIGITALEN ATHLETEN ÖFFNEN"/>  ↗</Text>
   </Pressable>
@@ -38,7 +38,7 @@ export default function Progress(){
   <View style={s.records}>
    <View style={s.section}><Text style={s.serial}>02 / <Copy text="KÖRPERDATEN"/></Text><Text style={s.sectionTitle}><Copy text="FAKTEN STATT GEFÜHL."/></Text></View>
    <View style={s.facts}>
-     <View style={s.fact}><Text style={s.factName}><Copy text="GEWICHT"/></Text><Text style={s.factNumber}>{body?.weightKg??"—"}<Text style={s.factUnit}>{body?.weightKg==null?"":" KG"}</Text></Text></View>
+     <View style={s.fact}><Text style={s.factName}><Copy text="GEWICHT"/></Text><Text style={s.factNumber}>{body?.weightKg??"?"}<Text style={s.factUnit}>{body?.weightKg==null?"":" KG"}</Text></Text></View>
      <View style={s.fact}><Text style={s.factName}><Copy text="MESSUNGEN"/></Text><Text style={s.factNumber}>{d.body?.length??0}</Text></View>
      <View style={s.fact}><Text style={s.factName}><Copy text="TESTS"/></Text><Text style={s.factNumber}>{d.tests?.length??0}</Text></View>
    </View>
@@ -57,7 +57,7 @@ export default function Progress(){
       <View style={s.recordBody}><Text style={s.recordName}><Copy text={label}/></Text>
        <View style={s.recordTrack}><View style={[s.recordFill,{width:`${Math.max(0,Math.min(100,Number(value??0)))}%`}]}/></View>
       </View>
-      <Text style={s.recordValue}>{value==null?"—":Math.round(Number(value))}</Text>
+      <Text style={s.recordValue}>{value==null?"?":Math.round(Number(value))}</Text>
     </View>;
    })}
   </View>
@@ -67,7 +67,7 @@ export default function Progress(){
    {(d.tests||[]).length?(d.tests||[]).slice(0,6).map((t:any,i:number)=><View key={t.id} style={s.testRow}>
      <Text style={s.testIndex}>{String(i+1).padStart(2,"0")}</Text>
      <View style={s.testInfo}><Text style={s.testName}>{t.name}</Text><Text style={s.muted}>{t.completedAt?new Date(t.completedAt).toLocaleDateString("de-DE"):"GEPLANT"}</Text></View>
-     <Text style={s.testValue}>{t.results?.[0]?.value??"—"} {t.results?.[0]?.unit??""}</Text>
+     <Text style={s.testValue}>{t.results?.[0]?.value??"?"} {t.results?.[0]?.unit??""}</Text>
    </View>):<Text style={s.noTests}><Copy text="Noch kein Test gespeichert. Dein erster Messpunkt wartet."/></Text>}
    {action("ALLE TESTS ÖFFNEN","/tests")}
   </View>
