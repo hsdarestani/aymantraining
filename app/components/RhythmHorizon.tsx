@@ -50,7 +50,7 @@ export default function RhythmHorizon({days}:{days:RhythmDay[]}){
       <div className="bd-rhythm-stage-info">
         <span className="bd-rhythm-stage-kicker">{current.workouts.length? <Copy text="BEWEGUNG GEPLANT"/>:<Copy text="ERHOLUNG IM PLAN"/>}</span>
         <strong>{first?<Copy text={first.title}/>:<Copy text="KEIN TRAINING. TROTZDEM FORTSCHRITT."/>}</strong>
-        <p>{first?<><Copy text={current.workouts.length===1?"1 Trainingseinheit":"Trainingseinheiten"}/>{current.workouts.length>1?" · "+current.workouts.length:""} · {first.time} {first.completed?"· ERLEDIGT":""}</>:<Copy text="Regeneration ist Teil deiner Trainingswoche. Kein Belastungswert ohne Messdaten."/ >}</p>
+        <p>{first?<><Copy text={current.workouts.length===1?"1 Trainingseinheit":"Trainingseinheiten"}/>{current.workouts.length>1?" · "+current.workouts.length:""} · {first.time} {first.completed?"· ERLEDIGT":""}</>:<Copy text="Regeneration ist Teil deiner Trainingswoche. Kein Belastungswert ohne Messdaten."/>}</p>
         <Link href={first?"/training/"+first.id:"/training"} className="bd-rhythm-action"><Copy text={first?"EINHEIT ANSEHEN":"TRAININGSPLAN ANSEHEN"}/><span aria-hidden="true">↗</span></Link>
       </div>
       <div className="bd-rhythm-stage-glyph" aria-hidden="true">
