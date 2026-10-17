@@ -1,33 +1,120 @@
-
 import {Copy} from "../../components/Locale";
-
-
 import {useCallback,useState} from "react";
 import {Pressable,StyleSheet,Text,View} from "react-native";
-import Svg,{Circle} from "react-native-svg";
 import {router,useFocusEffect} from "expo-router";
 import Screen from "../../components/Screen";
-import {Card,Eyebrow,SectionTitle} from "../../components/Card";
 import {api} from "../../lib/api";
-import {C,radius} from "../../theme";
+import {C} from "../../theme";
+
+const rows=[
+ ["KRAFT","strength"],["AUSDAUER","endurance"],["ATHLETIK","athleticism"],
+ ["BEWEGLICHKEIT","mobility"],["REGENERATION","recovery"],["ERNÄHRUNG","fuel"],["KONSTANZ","consistency"]
+] as const;
 
 export default function Progress(){
  const [d,setD]=useState<any>({});
- useFocusEffect(useCallback(()=>{Promise.all([api<any>("/api/mobile/dashboard"),api<any>("/api/body-metrics"),api<any>("/api/performance-tests")]).then(([dash,body,tests])=>setD({dash,body:body.items,tests:tests.items})).catch(()=>{})},[]));
+ useFocusEffect(useCallback(()=>{
+  Promise.all([api<any>("/api/mobile/dashboard"),api<any>("/api/body-metrics"),api<any>("/api/performance-tests")])
+   .then(([dash,body,tests])=>setD({dash,body:body.items,tests:tests.items})).catch(()=>{});
+ },[]));
  const score=d.dash?.score,body=d.body?.[0],locked=d.dash?.scoreDetailsLocked;
+ const total=score?.total;
+ const action=(label:string,route:string)=><Pressable accessibilityRole="button" onPress={()=>router.push(route as any)} style={s.action}><Text style={s.actionText}><Copy text={label}/></Text><Text style={s.actionArrow}>↗</Text></Pressable>;
  return <Screen>
-  <View style={s.hero}><Eyebrow><Copy text={"FORTSCHRITT"}/></Eyebrow><Text style={s.big}><Copy text={"DEIN GRIND."}/>{String.fromCharCode(10)}<Copy text={"DEINE SPUREN."}/></Text></View>
-  <Pressable accessibilityRole="button" onPress={()=>router.push("/digital-twin")} style={s.spotlight}>
-   <View style={s.spotlightCopy}><Text style={s.spotlightKicker}>01 / LEISTUNGSWERT</Text><Text style={s.spotlightHeading}><Copy text="DEIN MASSSTAB."/>{"\n"}<Text style={{color:C.volt}}><Copy text="DEIN WEG."/></Text></Text><Text style={s.spotlightAction}><Copy text="DIGITAL TWIN ERKUNDEN"/> ↗</Text></View>
-   <View style={s.dial}>
-    <Svg width={124} height={124} viewBox="0 0 124 124" style={s.dialSvg}><Circle cx="62" cy="62" r="49" fill="none" stroke="#374435" strokeWidth="7"/><Circle cx="62" cy="62" r="49" fill="none" stroke={C.volt} strokeWidth="7" strokeLinecap="round" strokeDasharray={2*Math.PI*49} strokeDashoffset={2*Math.PI*49*(1-Math.max(0,Math.min(100,Number(score?.total??0)))/100)} rotation={-90} originX="62" originY="62"/></Svg>
-    <Text style={s.dialValue}>{score?.total??"—"}<Text style={s.dialPercent}>%</Text></Text>
-   </View>
+  <View style={s.hero}>
+    <Text style={s.serial}>03 / <Copy text="FORTSCHRITT"/></Text>
+    <Text style={s.heroSolid}><Copy text="DEIN GRIND."/></Text>
+    <Text style={s.heroOutline}><Copy text="DEINE SPUREN."/></Text>
+    <Text style={s.heroNote}><Copy text="Hier zählt, was du wirklich erreicht hast. Kein Vergleich, kein erfundener Trend."/></Text>
+  </View>
+
+  <Pressable accessibilityRole="button" onPress={()=>router.push("/digital-twin")} style={s.scoreStage}>
+    <Text style={s.serial}>01 / <Copy text="LEISTUNGSWERT"/></Text>
+    <View style={s.scoreRow}><Text style={s.scoreNumber}>{total==null?"—":Math.round(total)}</Text><View style={s.scoreUnit}><Text style={s.scoreScale}>{total==null?"":" / 100"}</Text><Text style={s.scoreCaption}><Copy text="DEIN AKTUELLER WERT"/></Text></View></View>
+    <View style={s.scoreRule}><View style={[s.scoreFill,{width:`${Math.max(0,Math.min(100,Number(total??0)))}%`}]}/></View>
+    <Text style={s.scoreFoot}><Copy text="DIGITALEN ATHLETEN ÖFFNEN"/>  ↗</Text>
   </Pressable>
-  <View style={s.grid}><Card style={s.metric}><Eyebrow><Copy text="GEWICHT"/></Eyebrow><Text style={s.number}>{body?.weightKg??"—"}</Text><Text style={s.unit}>KG</Text></Card><Card style={s.metric}><Eyebrow><Copy text="LEISTUNGSTESTS"/></Eyebrow><Text style={s.number}>{d.tests?.length??"—"}</Text><Text style={s.unit}><Copy text="ERFASST"/></Text></Card></View>
-  {locked?<Card><Eyebrow>PRO</Eyebrow><SectionTitle><Copy text={"Dein vollständiges Leistungsprofil"}/></SectionTitle><Text style={s.copy}><Copy text={"KOSTENLOS zeigt den Gesamtwert. PRO zeigt alle Leistungsbereiche, deren Verlauf und die Erklärungen dahinter."}/></Text><Text style={s.copy}><Copy text="Die erweiterten Leistungsbereiche sind für dieses Konto momentan nicht verfügbar."/></Text></Card>:<Card><Eyebrow><Copy text={"LEISTUNGSBEREICHE"}/></Eyebrow><SectionTitle><Copy text={"Leistungsprofil"}/></SectionTitle>{[["Kraft",score?.strength],["Ausdauer",score?.endurance],["Athletik",score?.athleticism],["Beweglichkeit",score?.mobility],["Regeneration",score?.recovery],["Ernährung",score?.fuel],["Beständigkeit",score?.consistency]].map(([n,v]:any)=><View style={s.pillar} key={n}><Text style={s.pillarName}>{String(n).toUpperCase()}</Text><View style={s.track}><View style={[s.fill,{width:`${v??0}%`}]}/></View><Text style={s.val}>{v??"Keine Angabe"}</Text></View>)}</Card>}
-  <Card><Eyebrow>BE DIFFERENT TEST</Eyebrow><SectionTitle><Copy text={"Verlauf"}/></SectionTitle>{d.tests?.length?d.tests.slice(0,6).map((t:any)=><View style={s.test} key={t.id}><View><Text style={s.pillarName}>{t.name}</Text><Text style={s.unit}><Copy text={t.completedAt?new Date(t.completedAt).toLocaleDateString("de-DE"):"GEPLANT"}/></Text></View><Text style={s.testVal}>{t.results?.[0]?.value??"Keine Angabe"} {t.results?.[0]?.unit??""}</Text></View>):<Text style={s.empty}><Copy text={"Noch kein Test gespeichert."}/></Text>}<Pressable style={s.link} onPress={()=>router.push("/tests")}><Text style={s.linkText}><Copy text={"ALLE TESTS →"}/></Text></Pressable></Card>
-  <Card><Eyebrow><Copy text={"DEINE ENTWICKLUNG"}/></Eyebrow><Pressable style={s.row} onPress={()=>router.push("/progress-photos")}><Text style={s.rowText}><Copy text={"VORHER NACHHER VERGLEICH"}/></Text><Text style={s.arrow}>→</Text></Pressable><Pressable style={s.row} onPress={()=>router.push("/digital-twin")}><Text style={s.rowText}><Copy text={"DIGITALER ATHLET"}/></Text><Text style={s.arrow}>→</Text></Pressable><Pressable style={s.row} onPress={()=>router.push("/performance-timeline")}><Text style={s.rowText}><Copy text={"LEISTUNGSVERLAUF"}/></Text><Text style={s.arrow}>→</Text></Pressable><Pressable style={s.row} onPress={()=>router.push("/report")}><Text style={s.rowText}><Copy text={"WOCHENBERICHT"}/></Text><Text style={s.arrow}>→</Text></Pressable></Card>
- </Screen>
+
+  <View style={s.records}>
+   <View style={s.section}><Text style={s.serial}>02 / <Copy text="KÖRPERDATEN"/></Text><Text style={s.sectionTitle}><Copy text="FAKTEN STATT GEFÜHL."/></Text></View>
+   <View style={s.facts}>
+     <View style={s.fact}><Text style={s.factName}><Copy text="GEWICHT"/></Text><Text style={s.factNumber}>{body?.weightKg??"—"}<Text style={s.factUnit}>{body?.weightKg==null?"":" KG"}</Text></Text></View>
+     <View style={s.fact}><Text style={s.factName}><Copy text="MESSUNGEN"/></Text><Text style={s.factNumber}>{d.body?.length??0}</Text></View>
+     <View style={s.fact}><Text style={s.factName}><Copy text="TESTS"/></Text><Text style={s.factNumber}>{d.tests?.length??0}</Text></View>
+   </View>
+  </View>
+
+  <View style={s.profile}>
+   <View style={s.section}><Text style={s.serial}>03 / <Copy text="LEISTUNGSPROFIL"/></Text><Text style={s.sectionTitle}><Copy text="DEINE DISZIPLINEN."/></Text></View>
+   {locked?<View style={s.locked}>
+      <Text style={s.lockedTitle}><Copy text="MEHR TIEFE. DEIN PRO."/></Text>
+      <Text style={s.muted}><Copy text="Dein Gesamtwert ist sichtbar. Einzelwerte und die Erläuterungen gehören zu PRO."/></Text>
+      {action("DETAILS ANSEHEN","/pricing")}
+   </View>:rows.map(([label,key],i)=>{
+    const value=score?.[key];
+    return <View key={key} style={s.recordRow}>
+      <Text style={s.recordIndex}>{String(i+1).padStart(2,"0")}</Text>
+      <View style={s.recordBody}><Text style={s.recordName}><Copy text={label}/></Text>
+       <View style={s.recordTrack}><View style={[s.recordFill,{width:`${Math.max(0,Math.min(100,Number(value??0)))}%`}]}/></View>
+      </View>
+      <Text style={s.recordValue}>{value==null?"—":Math.round(Number(value))}</Text>
+    </View>;
+   })}
+  </View>
+
+  <View style={s.tests}>
+   <View style={s.section}><Text style={s.serial}>04 / BE DIFFERENT TEST</Text><Text style={s.sectionTitle}><Copy text="DEINE PRÜFSTEINE."/></Text></View>
+   {(d.tests||[]).length?(d.tests||[]).slice(0,6).map((t:any,i:number)=><View key={t.id} style={s.testRow}>
+     <Text style={s.testIndex}>{String(i+1).padStart(2,"0")}</Text>
+     <View style={s.testInfo}><Text style={s.testName}>{t.name}</Text><Text style={s.muted}>{t.completedAt?new Date(t.completedAt).toLocaleDateString("de-DE"):"GEPLANT"}</Text></View>
+     <Text style={s.testValue}>{t.results?.[0]?.value??"—"} {t.results?.[0]?.unit??""}</Text>
+   </View>):<Text style={s.noTests}><Copy text="Noch kein Test gespeichert. Dein erster Messpunkt wartet."/></Text>}
+   {action("ALLE TESTS ÖFFNEN","/tests")}
+  </View>
+  <View style={s.nav}><Text style={s.serial}>05 / <Copy text="WEITER ENTDECKEN"/></Text>
+    {action("VORHER NACHHER VERGLEICH","/progress-photos")}
+    {action("DIGITALER ATHLET","/digital-twin")}
+    {action("LEISTUNGSVERLAUF","/performance-timeline")}
+    {action("WOCHENBERICHT","/report")}
+  </View>
+ </Screen>;
 }
-const s=StyleSheet.create({spotlight:{minHeight:201,backgroundColor:"#162019",borderColor:"#4A5C31",borderWidth:1,borderRadius:22,padding:18,flexDirection:"row",alignItems:"center",justifyContent:"space-between",gap:5},spotlightCopy:{flex:1},spotlightKicker:{fontFamily:"ManropeSemiBold",color:C.volt,fontSize:9,letterSpacing:1.5},spotlightHeading:{fontFamily:"Archivo",fontSize:24,lineHeight:26,color:C.ink,marginTop:12,letterSpacing:-.6},spotlightAction:{fontFamily:"ManropeSemiBold",fontSize:9,color:C.volt,marginTop:28,letterSpacing:.3},dial:{width:124,height:124,justifyContent:"center",alignItems:"center"},dialSvg:{position:"absolute"},dialValue:{fontFamily:"Archivo",color:C.ink,fontSize:36},dialPercent:{fontFamily:"ManropeSemiBold",fontSize:13,color:C.volt},hero:{paddingVertical:18},big:{color:C.ink,fontFamily:"Archivo",fontSize:36,lineHeight:40,letterSpacing:-.8,marginTop:10},grid:{flexDirection:"row",gap:10},metric:{flex:1},number:{color:C.ink,fontFamily:"Archivo",fontSize:44,letterSpacing:-.8,marginTop:10},unit:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1},pillar:{flexDirection:"row",alignItems:"center",gap:9,paddingVertical:10},pillarName:{width:96,color:C.dim,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:.8},track:{flex:1,height:4,backgroundColor:"#282C2A"},fill:{height:"100%",backgroundColor:C.volt},val:{width:48,textAlign:"right",color:C.ink,fontFamily:"ManropeSemiBold",fontSize:11,},test:{flexDirection:"row",justifyContent:"space-between",alignItems:"center",paddingVertical:13,borderBottomWidth:1,borderBottomColor:C.line},testVal:{color:C.ink,fontWeight:"900"},empty:{color:C.dim,fontFamily:"Manrope",fontSize:12,marginTop:16},copy:{color:C.dim,fontFamily:"Manrope",fontSize:11,lineHeight:18,marginTop:10},primary:{height:48,borderRadius:radius.md,backgroundColor:C.volt,alignItems:"center",justifyContent:"center",marginTop:14},primaryText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:11,},link:{height:44,alignItems:"center",justifyContent:"center",marginTop:8},linkText:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:11,},row:{height:52,flexDirection:"row",alignItems:"center",borderBottomWidth:1,borderBottomColor:C.line},rowText:{flex:1,color:C.ink,fontFamily:"ManropeSemiBold",fontSize:11,},arrow:{color:C.volt,fontFamily:"Manrope",fontSize:17}});
+
+const acid=C.volt;
+const s=StyleSheet.create({
+ serial:{fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.4,color:"#A6BEAA"},
+ hero:{borderTopWidth:2,borderTopColor:acid,paddingTop:25,paddingBottom:29,marginTop:12,marginBottom:16,backgroundColor:"#121913",paddingHorizontal:11},
+ heroSolid:{fontFamily:"Archivo",fontSize:44,lineHeight:48,letterSpacing:-1.8,color:"#F3F6E9",marginTop:16},
+ heroOutline:{fontFamily:"Archivo",fontSize:44,lineHeight:48,letterSpacing:-1.8,color:acid},
+ heroNote:{fontFamily:"Manrope",fontSize:12,lineHeight:19,color:"#A4B7A7",marginTop:16,maxWidth:320},
+ scoreStage:{borderBottomWidth:2,borderBottomColor:acid,paddingVertical:22,paddingHorizontal:10,backgroundColor:"#182119",marginBottom:28},
+ scoreRow:{flexDirection:"row",alignItems:"flex-end",gap:13,marginTop:10},
+ scoreNumber:{color:acid,fontFamily:"Archivo",fontSize:105,lineHeight:111,letterSpacing:-6},
+ scoreUnit:{flex:1,paddingBottom:19},
+ scoreScale:{color:"#D1E9C0",fontFamily:"ManropeSemiBold",fontSize:16},
+ scoreCaption:{color:"#94A895",fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:.7,marginTop:9},
+ scoreRule:{height:4,backgroundColor:"#3D4C3B"},scoreFill:{height:"100%",backgroundColor:acid},
+ scoreFoot:{color:acid,fontFamily:"ManropeSemiBold",fontSize:10,marginTop:18,letterSpacing:1},
+ section:{marginBottom:18},sectionTitle:{fontFamily:"Archivo",color:"#F0F4E9",fontSize:30,lineHeight:34,letterSpacing:-.8,marginTop:8},
+ records:{marginBottom:33},facts:{flexDirection:"row",borderTopWidth:1,borderBottomWidth:1,borderColor:"#4A5E47"},
+ fact:{flex:1,minHeight:125,paddingVertical:18,paddingLeft:8,borderRightWidth:1,borderRightColor:"#3B4B39"},
+ factName:{fontFamily:"ManropeSemiBold",fontSize:8,color:"#A5B6A6",letterSpacing:.6},
+ factNumber:{fontFamily:"Archivo",fontSize:35,color:"#F2F6EB",marginTop:13,letterSpacing:-1.5},
+ factUnit:{fontFamily:"ManropeSemiBold",fontSize:9,color:"#9BAC9B"},
+ profile:{marginBottom:35},recordRow:{flexDirection:"row",alignItems:"center",borderTopWidth:1,borderTopColor:"#364536",minHeight:78,gap:12},
+ recordIndex:{fontFamily:"Archivo",fontSize:25,color:"#6B8868",width:32},
+ recordBody:{flex:1},recordName:{fontFamily:"ManropeSemiBold",fontSize:11,color:"#E8F0E4",letterSpacing:.5},
+ recordTrack:{height:3,backgroundColor:"#354436",marginTop:10},recordFill:{height:"100%",backgroundColor:acid},
+ recordValue:{fontFamily:"Archivo",fontSize:26,color:"#E9F4D8",minWidth:36,textAlign:"right"},
+ locked:{borderTopWidth:1,borderTopColor:"#718553",paddingVertical:25},
+ lockedTitle:{fontFamily:"Archivo",color:acid,fontSize:27,letterSpacing:-.4},
+ muted:{fontFamily:"Manrope",fontSize:10,color:"#99AC9C",lineHeight:16,marginTop:5},
+ action:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",borderBottomWidth:1,borderBottomColor:"#3B4C3C",minHeight:53},
+ actionText:{fontFamily:"ManropeSemiBold",fontSize:10,color:"#E4F0DE",letterSpacing:.7},actionArrow:{fontFamily:"Archivo",color:acid,fontSize:21},
+ tests:{marginBottom:27},testRow:{flexDirection:"row",alignItems:"center",gap:12,borderTopWidth:1,borderTopColor:"#3B4C3C",minHeight:79},
+ testIndex:{fontFamily:"Archivo",fontSize:25,color:"#618260",width:35},
+ testInfo:{flex:1},testName:{color:"#E8F0E4",fontFamily:"Archivo",fontSize:14},
+ testValue:{color:acid,fontFamily:"Archivo",fontSize:17},
+ noTests:{fontFamily:"Manrope",fontSize:12,color:"#A5B5A6",paddingVertical:23,borderTopWidth:1,borderColor:"#3B4C3C"},
+ nav:{marginBottom:30}
+});
