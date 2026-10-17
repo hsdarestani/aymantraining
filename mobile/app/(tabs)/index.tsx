@@ -13,6 +13,7 @@ import {C,radius} from "../../theme";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {syncHomeWidget} from "../../lib/widget-sync";
 import AthleteTwin from "../../components/AthleteTwin";
+import RhythmHorizon from "../../components/RhythmHorizon";
 
 const pillarMeta=[
  ["S","strength","KRAFT"],["E","endurance","AUSDAUER"],["A","athleticism","ATHLETIK"],["M","mobility","BEWEGLICHKEIT"],
@@ -88,18 +89,7 @@ export default function Home(){
    <Pressable onPress={()=>router.push("/digital-twin")}><Text style={s.scoreLink}><Copy text="ATHLETE DIGITAL TWIN ÖFFNEN →"/></Text></Pressable>
   </Card>
 
-  <View style={s.loadSection}>
-   <View style={s.loadHeading}><Text style={s.loadEyebrow}>BELASTUNGSÜBERSICHT</Text><Text style={s.loadMark}>↗</Text></View>
-   <Text style={s.loadTitle}><Copy text="DEINE LAST. DEIN RHYTHMUS."/></Text>
-   <Text style={s.loadSub}><Copy text="72 STUNDEN IM BLICK"/></Text>
-   <View style={s.loadDays}>{(d.dayStrip||[]).map((day:any,i:number)=>{const first=day.workouts?.[0];const count=day.workouts?.length||0;const date=String(day.date);return <Pressable accessibilityRole="button" key={date} onPress={()=>router.push("/(tabs)/training")} style={[s.loadDay,i===1&&s.loadToday]}>
-    <Text style={[s.loadLabel,i===1&&s.loadLabelCurrent]}><Copy text={dayLabels[i]}/></Text>
-    <Text style={s.loadNumber}>{date.slice(8,10)}</Text>
-    <Text style={s.loadStatus}>{first?.completed?<Copy text="ERLEDIGT"/>:count?<Copy text="EINHEIT GEPLANT"/>:<Copy text={i===0?"VERGANGEN":i===1?"AKTUELL":"VORAUS"}/>}</Text>
-    <Text numberOfLines={2} style={s.loadWorkout}>{first?.title||<Copy text="NOCH NICHTS GEPLANT"/>}</Text>
-   </Pressable>})}</View>
-   <Text style={s.loadFooter}><Copy text="Deine Einheiten, nicht geschätzte Belastungswerte."/></Text>
-  </View>
+  <RhythmHorizon days={d.dayStrip||[]}/>
 
   <View style={s.teaserRow}>
    <Pressable style={s.teaser} onPress={()=>router.push("/lifestyle")}><Text style={s.teaserTag}><Copy text="BE RESTED"/></Text><Text style={s.teaserBig}>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</Text><Text style={s.teaserCopy}>{wearable?.restingHr!=null?<><Copy text="RUHEPULS"/> {Math.round(wearable.restingHr)} · </>:null}{currentHeartRate!=null?<><Copy text="PULS"/> {currentHeartRate}</>:<Copy text="Schlaf und Erholung"/>}</Text></Pressable>
