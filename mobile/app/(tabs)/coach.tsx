@@ -3,7 +3,7 @@ import {translate} from "../../lib/i18n/locale";
 import {Copy,LocalizedTextInput,LocalizedValue} from "../../components/Locale";
 
 
-import {useCallback,useEffect,useMemo,useState} from "react";
+import {useCallback,useMemo,useState} from "react";
 import {Alert,Pressable,StyleSheet,Text,View} from "react-native";
 import {BrandInput as TextInput} from "../../components/BrandInput";
 import {useFocusEffect,router} from "expo-router";
@@ -41,7 +41,6 @@ export default function Coach(){
   const load=useCallback(()=>api<any>("/api/messages").then(x=>{setMessages(x.items);setLocked(false)}).catch(e=>{if(String(e.message).includes("PRO"))setLocked(true)}),[]);
   useFocusEffect(useCallback(()=>{load();getSession().then(x=>setToken(x||""))},[load]));
 
-  useEffect(()=>{AudioModule.requestRecordingPermissionsAsync().catch(()=>undefined)},[]);
 
   async function send(){
     if(!text.trim())return;
@@ -96,7 +95,8 @@ export default function Coach(){
   if(locked)return <Screen><View style={s.hero}><Eyebrow><Copy text={"DEIN TRAINER"}/></Eyebrow><Text style={s.big}><Copy text={"DIREKT."}/>{"\n"}<Copy text={"PERSÖNLICH."}/>{"\n"}PRO.</Text></View><Card><SectionTitle><Copy text={"Trainer Chat ist PRO."}/></SectionTitle><Text style={s.copy}><Copy text={"Text, Sprachnachrichten, Technikvideo und persönliche Antworten."}/></Text><Text style={s.copy}><Copy text="Diese Funktion ist mit deinem aktuellen Zugang nicht verfügbar."/></Text></Card></Screen>;
 
   return <Screen>
-    <View style={s.hero}><Eyebrow><Copy text={"DEIN TRAINER"}/></Eyebrow><Text style={s.big}>AYMAN.</Text><Text style={s.online}><Copy text={"● AKTIVE BETREUUNG"}/></Text></View>
+    <View style={s.hero}><Eyebrow><Copy text="BE DIFFERENT / COACH CONNECTION"/></Eyebrow><Text style={s.big}>DEIN COACH.{"\n"}<Text style={s.brandName}>DEIN LEVEL.</Text></Text><Text style={s.online}><Copy text="DIREKTER DRAHT ZU AYMAN"/></Text></View>
+    <View style={s.coachBand}><View style={s.bandNumber}><Text style={s.bandNumberText}>03</Text><Text style={s.bandSlash}>/ CONNECT</Text></View><View style={s.bandCopy}><Text style={s.bandTitle}><Copy text="MEHR ALS EIN CHAT."/></Text><Text style={s.bandSubtitle}><Copy text="Text. Sprache. Technikvideo. Alles an einem Ort."/></Text></View></View>
     <Card style={s.chat}>
       <View style={s.messages}>{messages.map(m=>{
         const mine=m.senderId===m.athleteId;
@@ -117,6 +117,7 @@ export default function Coach(){
   </Screen>;
 }
 const s=StyleSheet.create({
+  coachBand:{backgroundColor:"#17201B",borderWidth:1,borderColor:"#425B35",borderRadius:19,padding:16,flexDirection:"row",gap:17,alignItems:"center"},bandNumber:{width:86,borderRightWidth:1,borderRightColor:"#40513B",paddingRight:10},bandNumberText:{fontFamily:"Archivo",fontSize:44,color:C.volt,lineHeight:45},bandSlash:{fontFamily:"ManropeSemiBold",fontSize:9,color:C.dim,letterSpacing:.9},bandCopy:{flex:1},bandTitle:{fontFamily:"Archivo",fontSize:19,color:C.ink},bandSubtitle:{fontFamily:"Manrope",fontSize:11,lineHeight:16,color:C.dim,marginTop:6},brandName:{color:C.volt},
   hero:{paddingVertical:18},big:{color:C.ink,fontFamily:"Archivo",fontSize:36,lineHeight:40,letterSpacing:-.8,marginTop:10},online:{color:C.green,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.5,marginTop:12},copy:{color:C.dim,fontFamily:"Manrope",fontSize:13,lineHeight:20,marginVertical:14},
   chat:{minHeight:560},messages:{gap:8,flex:1},bubble:{maxWidth:"88%",paddingHorizontal:14,paddingVertical:11,borderRadius:16},mine:{alignSelf:"flex-end",backgroundColor:C.volt},theirs:{alignSelf:"flex-start",backgroundColor:C.panel2},bubbleText:{color:C.ink,fontFamily:"Manrope",fontSize:13,lineHeight:19},mineText:{color:C.bg},time:{color:C.dim,fontFamily:"Manrope",fontSize:11,marginTop:6},
   composer:{flexDirection:"row",gap:8,alignItems:"flex-end",marginTop:10},input:{flex:1,minHeight:50,maxHeight:110,backgroundColor:C.panel2,borderWidth:1,borderColor:C.line,borderRadius:radius.md,paddingHorizontal:14,paddingVertical:13,color:C.ink},send:{width:50,height:50,borderRadius:25,backgroundColor:C.volt,alignItems:"center",justifyContent:"center"},sendText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:23,},

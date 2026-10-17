@@ -3,7 +3,7 @@
     "name": "BE DIFFERENT",
     "slug": "be-different",
     "scheme": "bedifferent",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
@@ -19,7 +19,7 @@
       "icon": "./assets/favicon.png",
       "appleTeamId": "884MVA2MD5",
       "entitlements": {},
-      "buildNumber": "12"
+      "buildNumber": "13"
     },
     "android": {
       "package": "com.smarbiz.bedifferent",
