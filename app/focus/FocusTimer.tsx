@@ -53,7 +53,7 @@ export default function FocusTimer(){
  const phase=Math.floor(elapsed/4)%2===0?"EINATMEN":"AUSATMEN";
  return <section className={styles.layout} aria-label="Zwei Minuten Atemtraining">
   <div className={styles.stage}>
-   <div className={styles.stageHeader}><span className={styles.eyebrow}>GUIDED RESET / 001</span><span className={styles.stageCount}>120 SEKUNDEN</span></div>
+   <div className={styles.stageHeader}><span className={styles.eyebrow}>GEFÜHRTE ATEMPAUSE / 001</span><span className={styles.stageCount}>120 SEKUNDEN</span></div>
    <div className={styles.orbitSpace}>
     <div className={styles.halo+" "+(running?styles.haloActive:"")} aria-hidden="true"/>
     <div className={styles.orbit} role="timer" aria-label={"Verbleibende Zeit "+clock(remaining)} style={{background:"conic-gradient(#D4FF00 "+(elapsed/LENGTH*100)+"%,#2C393C 0%)"}}>

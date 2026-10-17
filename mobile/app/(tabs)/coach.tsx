@@ -95,7 +95,7 @@ export default function Coach(){
   if(locked)return <Screen><View style={s.hero}><Eyebrow><Copy text={"DEIN TRAINER"}/></Eyebrow><Text style={s.big}><Copy text={"DIREKT."}/>{"\n"}<Copy text={"PERSÖNLICH."}/>{"\n"}PRO.</Text></View><Card><SectionTitle><Copy text={"Trainer Chat ist PRO."}/></SectionTitle><Text style={s.copy}><Copy text={"Text, Sprachnachrichten, Technikvideo und persönliche Antworten."}/></Text><Text style={s.copy}><Copy text="Diese Funktion ist mit deinem aktuellen Zugang nicht verfügbar."/></Text></Card></Screen>;
 
   return <Screen>
-    <View style={s.hero}><Eyebrow><Copy text="BE DIFFERENT / COACH CONNECTION"/></Eyebrow><Text style={s.big}>DEIN COACH.{"\n"}<Text style={s.brandName}>DEIN LEVEL.</Text></Text><Text style={s.online}><Copy text="DIREKTER DRAHT ZU AYMAN"/></Text></View>
+    <View style={s.hero}><Eyebrow><Copy text="BE DIFFERENT / COACH CONNECTION"/></Eyebrow><Text style={s.big}>DEIN TRAINER.{"\n"}<Text style={s.brandName}>DEIN WEG.</Text></Text><Text style={s.online}><Copy text="DIREKTER DRAHT ZU AYMAN"/></Text></View>
     <View style={s.coachBand}><View style={s.bandNumber}><Text style={s.bandNumberText}>03</Text><Text style={s.bandSlash}>/ CONNECT</Text></View><View style={s.bandCopy}><Text style={s.bandTitle}><Copy text="MEHR ALS EIN CHAT."/></Text><Text style={s.bandSubtitle}><Copy text="Text. Sprache. Technikvideo. Alles an einem Ort."/></Text></View></View>
     <Card style={s.chat}>
       <View style={s.messages}>{messages.map(m=>{

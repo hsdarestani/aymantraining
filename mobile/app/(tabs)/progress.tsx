@@ -18,7 +18,7 @@ export default function Progress(){
  return <Screen>
   <View style={s.hero}><Eyebrow><Copy text={"FORTSCHRITT"}/></Eyebrow><Text style={s.big}><Copy text={"DEIN GRIND."}/>{String.fromCharCode(10)}<Copy text={"DEINE SPUREN."}/></Text></View>
   <Pressable accessibilityRole="button" onPress={()=>router.push("/digital-twin")} style={s.spotlight}>
-   <View style={s.spotlightCopy}><Text style={s.spotlightKicker}>01 / ATHLETE SCORE</Text><Text style={s.spotlightHeading}><Copy text="DEIN MASSSTAB."/>{"\n"}<Text style={{color:C.volt}}><Copy text="DEIN WEG."/></Text></Text><Text style={s.spotlightAction}><Copy text="DIGITAL TWIN ERKUNDEN"/> ↗</Text></View>
+   <View style={s.spotlightCopy}><Text style={s.spotlightKicker}>01 / LEISTUNGSWERT</Text><Text style={s.spotlightHeading}><Copy text="DEIN MASSSTAB."/>{"\n"}<Text style={{color:C.volt}}><Copy text="DEIN WEG."/></Text></Text><Text style={s.spotlightAction}><Copy text="DIGITAL TWIN ERKUNDEN"/> ↗</Text></View>
    <View style={s.dial}>
     <Svg width={124} height={124} viewBox="0 0 124 124" style={s.dialSvg}><Circle cx="62" cy="62" r="49" fill="none" stroke="#374435" strokeWidth="7"/><Circle cx="62" cy="62" r="49" fill="none" stroke={C.volt} strokeWidth="7" strokeLinecap="round" strokeDasharray={2*Math.PI*49} strokeDashoffset={2*Math.PI*49*(1-Math.max(0,Math.min(100,Number(score?.total??0)))/100)} rotation={-90} originX="62" originY="62"/></Svg>
     <Text style={s.dialValue}>{score?.total??"—"}<Text style={s.dialPercent}>%</Text></Text>
