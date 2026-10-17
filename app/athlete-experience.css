@@ -118,3 +118,70 @@
  .bd-experience-card strong{font-size:22px}.bd-experience-card>span{font-size:14px}
  .bd-experience-card p{font-size:10px}.bd-experience-card b{bottom:13px;right:13px}}
 @media(prefers-reduced-motion:reduce){.bd-experience-card{transition:none}}
+
+
+/* BE DIFFERENT training cockpit. Own the layout without changing workout data. */
+.bd-train{--train-volt:#d4ff00;--train-line:#303a35;--train-muted:#a5b1aa;--train-surface:#151a19}
+.bd-train .sub-top{margin-bottom:10px}
+.bd-train-hero{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(250px,.55fr);gap:22px;min-height:322px;border-radius:26px;border:1px solid #354238;background:radial-gradient(ellipse at 88% 8%,rgba(212,255,0,.12),transparent 43%),linear-gradient(127deg,#17231c 0%,#0e1212 67%,#161b1b 100%);padding:36px;margin:22px 0 30px}
+.bd-train-hero:before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(137deg,transparent 0 54px,rgba(212,255,0,.021) 55px 56px);mask-image:linear-gradient(90deg,transparent,black)}
+.bd-train-hero-main{position:relative;z-index:1}
+.bd-train-hero .eyebrow{color:#d5fcb0;letter-spacing:.18em}
+.bd-train-hero h1{font-family:Archivo,system-ui,sans-serif;font-size:clamp(40px,5.6vw,78px);line-height:.94;letter-spacing:-.065em;margin:19px 0 16px}
+.bd-train-hero h1 em{font-style:normal;color:var(--train-volt)}
+.bd-train-hero-main>p{max-width:530px;line-height:1.65;font-size:13px;color:#bac5be}
+.bd-train-shortcuts{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px}
+.bd-train-shortcuts a{display:inline-flex;justify-content:space-between;align-items:center;gap:20px;border:1px solid #596e4a;background:#263822;border-radius:12px;padding:13px 16px;font-size:11px;font-weight:850;transition:background .2s,transform .2s}
+.bd-train-shortcuts a:hover{background:#354e27;transform:translateY(-2px)}
+.bd-train-shortcuts a span{color:var(--train-volt);font-size:16px}
+.bd-train-hero-numbers{position:relative;display:grid;align-content:center;gap:13px;max-width:310px;margin-left:auto;width:100%}
+.bd-train-hero-numbers>div:not(.bd-train-hero-mark){background:rgba(0,0,0,.27);border:1px solid #354339;border-radius:15px;padding:15px 20px;display:grid;grid-template-columns:1fr auto;gap:3px}
+.bd-train-hero-numbers span{font-size:10px;color:#c4d0c2;letter-spacing:.1em}
+.bd-train-hero-numbers strong{font-family:Archivo,system-ui,sans-serif;font-size:36px;grid-column:2;grid-row:1/3;color:var(--train-volt);line-height:1}
+.bd-train-hero-numbers small{font-size:10px;color:#9eaaa2}
+.bd-train-hero-mark{font-family:Archivo,system-ui,sans-serif;font-size:54px;font-weight:900;letter-spacing:-.09em;color:#242f27;position:absolute;bottom:-49px;right:4px;transform:rotate(-13deg);pointer-events:none}
+.bd-train-hero-mark span{color:#354a32;font-size:25px}
+.bd-train-section-heading{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:18px}
+.bd-train-section-heading .eyebrow{color:#aebdb0;letter-spacing:.14em}
+.bd-train-section-heading h2{font-family:Archivo,system-ui,sans-serif;font-size:clamp(24px,2.5vw,36px);letter-spacing:-.05em;line-height:1.08;margin:6px 0 0}
+.bd-train-section-heading>small{color:var(--train-muted);font-size:11px;padding-bottom:4px}
+.bd-train-count{font-size:10px;font-weight:900;letter-spacing:.06em;border:1px solid #414c43;border-radius:999px;padding:8px 10px;color:#d4f5b9;white-space:nowrap}
+.bd-train-week{margin:20px 0 35px}
+.bd-train-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+.bd-train-day{position:relative;display:flex;flex-direction:column;min-height:164px;gap:6px;overflow:hidden;border:1px solid #303936;border-radius:15px;background:#161b1b;padding:15px 12px;transition:transform .2s,border-color .2s,background .2s}
+.bd-train-day.is-today{background:linear-gradient(165deg,#2b351c,#151d17);border-color:#bed33b}
+.bd-train-day.has-workout:not(.is-today){border-color:#56694b}
+a.bd-train-day:hover{transform:translateY(-5px);border-color:var(--train-volt);background:#253024}
+.bd-train-day-label{font-size:10px;text-transform:uppercase;color:#a0afa7;font-weight:800}
+.bd-train-day strong{font-family:Archivo,system-ui,sans-serif;font-size:38px;line-height:1.12;letter-spacing:-.06em}
+.bd-train-day-count{font-size:10px;font-weight:850;color:var(--train-volt);letter-spacing:.05em}
+.bd-train-day:not(.has-workout) .bd-train-day-count{color:#d0d7d0}
+.bd-train-day small{color:#aab7b0;font-size:10px;margin-top:auto;line-height:1.45;overflow-wrap:anywhere}
+.bd-train-day b{position:absolute;top:11px;right:11px;color:var(--train-volt)}
+.bd-train-grid{display:grid;grid-template-columns:minmax(0,1.58fr) minmax(270px,1fr);gap:16px;align-items:start;margin-bottom:40px}
+.bd-train-next,.bd-train-history{border:1px solid var(--train-line);border-radius:22px;background:#131818;padding:24px;min-width:0}
+.bd-train-next{min-height:410px}
+.bd-train-workouts{display:grid;gap:3px}
+.bd-train-workout{display:grid;grid-template-columns:44px minmax(0,1fr) auto auto 20px;gap:15px;align-items:center;min-height:84px;padding:15px 12px;border-bottom:1px solid #303937;border-radius:8px;transition:background .2s,transform .2s}
+.bd-train-workout:hover{background:#243025;transform:translateX(3px)}
+.bd-train-workout-index{font-family:Archivo,system-ui,sans-serif;font-size:27px;letter-spacing:-.04em;color:#6f9175}
+.bd-train-workout-info{min-width:0}.bd-train-workout-info strong{display:block;font-family:Archivo,system-ui,sans-serif;font-size:15px;line-height:1.35;overflow-wrap:anywhere}
+.bd-train-workout-info small{display:block;margin-top:6px;color:#a9b7ae;font-size:10px}
+.bd-train-workout-meta,.bd-train-workout-state{font-size:10px;color:#adbbb2;white-space:nowrap}
+.bd-train-workout-state{color:#d8fbaa}
+.bd-train-workout>b{font-size:21px;color:var(--train-volt)}
+.bd-train-empty{padding:36px 12px}.bd-train-empty strong{font-family:Archivo,system-ui,sans-serif;font-size:23px}.bd-train-empty p{font-size:12px;color:var(--train-muted);line-height:1.6}.bd-train-empty a{display:inline-block;margin-top:16px;color:var(--train-volt);font-weight:900;font-size:11px}
+.bd-train-aside{display:grid;gap:14px}
+.bd-train-history{max-height:520px;overflow:auto}
+.bd-train-history-row{display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;padding:15px 0;border-bottom:1px solid #303937}
+.bd-train-history-row>span{font-family:Archivo,system-ui,sans-serif;color:#6f8c7e;font-size:16px}
+.bd-train-history-row strong{font-size:12px;font-family:Archivo,system-ui,sans-serif;line-height:1.4;display:block}
+.bd-train-history-row small{display:block;margin-top:5px;font-size:10px;color:#9aaea5}
+.bd-train-history-empty{font-size:12px;color:var(--train-muted);line-height:1.6}
+.bd-train-recovery{border:1px solid #4b3a3a;border-radius:20px;padding:25px;background:radial-gradient(circle at 95% 12%,rgba(249,103,76,.16),transparent 50%),#221a1b}
+.bd-train-recovery .eyebrow{color:#ffaf9c}
+.bd-train-recovery>strong{display:block;font:900 clamp(26px,3vw,40px)/1.06 Archivo,system-ui,sans-serif;letter-spacing:-.05em;margin:15px 0;color:#fff4e9}
+.bd-train-recovery p{font-size:11px;line-height:1.6;max-width:320px;color:#d4bcb9}
+@media(max-width:1050px){.bd-train-days{grid-template-columns:repeat(4,minmax(0,1fr))}.bd-train-grid{grid-template-columns:1fr}.bd-train-history{max-height:380px}}
+@media(max-width:680px){.bd-train-hero{grid-template-columns:1fr;padding:23px 19px;border-radius:21px;min-height:0;gap:20px;margin-top:14px}.bd-train-hero h1{font-size:clamp(39px,10vw,64px)}.bd-train-hero-main>p{font-size:12px}.bd-train-shortcuts a{padding:11px;font-size:10px}.bd-train-hero-numbers{max-width:none;grid-template-columns:1fr 1fr;gap:8px}.bd-train-hero-numbers>div:not(.bd-train-hero-mark){padding:12px 10px;grid-template-columns:1fr}.bd-train-hero-numbers strong{font-size:31px;grid-column:1;grid-row:auto}.bd-train-hero-mark{display:none}.bd-train-week{margin-bottom:23px}.bd-train-days{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.bd-train-day{min-height:130px;padding:12px}.bd-train-day strong{font-size:33px}.bd-train-next,.bd-train-history{padding:17px 13px;border-radius:18px}.bd-train-workout{grid-template-columns:29px minmax(0,1fr) 18px;gap:7px}.bd-train-workout-index{font-size:20px}.bd-train-workout-meta,.bd-train-workout-state{grid-column:2;white-space:normal}.bd-train-workout>b{grid-row:1;grid-column:3}.bd-train-section-heading h2{font-size:26px}}
+@media(prefers-reduced-motion:reduce){.bd-train-shortcuts a,.bd-train-day,.bd-train-workout{transition:none!important}}
