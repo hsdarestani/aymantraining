@@ -41,9 +41,9 @@ export default function Athlete(){
     <AthleteTwin compact/><View style={st.twinCopy}><Text style={st.twinOverline}>DIGITALES ABBILD / 01</Text><Text style={st.twinTitle}><Copy text="DEIN DIGITALER ATHLET"/></Text><Text style={st.twinDescription}><Copy text="Animierte Vorschau öffnen und Leistungsprofil erkunden."/></Text><Text style={st.twinAction}><Copy text="ERKUNDEN ↗"/></Text></View>
    </Pressable>
   <View style={st.discovery}><Text style={st.discoveryIndex}>04 / <Copy text="DEINE MODULE"/></Text><Text style={st.discoveryTitle}><Copy text="JEDER RAUM."/></Text><Text style={st.discoveryAccent}><Copy text="EIN NEUER IMPULS."/></Text></View>
-  <View style={st.grid}>{modules.map((item,i)=><Pressable accessibilityRole="button" key={item.label} onPress={()=>router.push(item.path as any)} style={[st.module,i===0&&st.moduleFeature,i===3&&st.moduleWide,item.accent==="red"&&st.moduleRed,item.accent==="score"&&st.moduleScore,item.accent==="awake"&&st.moduleAwake]}>
+  <View style={st.grid}>{modules.map((item,i)=><Pressable accessibilityRole="button" key={item.label} onPress={()=>router.push(item.path as any)} style={[st.module,i===0&&st.moduleFeature,i===3&&st.moduleWide,item.accent==="red"&&st.moduleRed,item.accent==="score"&&st.moduleScore]}>
    <Text style={st.moduleNumber}>0{i+3}</Text>
-   <Text style={[st.moduleLabel,item.accent==="red"&&{color:C.red},item.accent==="awake"&&{color:C.volt}]}><Copy text={item.label}/></Text>
+   <Text style={[st.moduleLabel,item.accent==="red"&&{color:C.red}]}><Copy text={item.label}/></Text>
    <Text style={st.moduleSub}><Copy text={item.sub}/></Text><Text style={st.arrow}>↗</Text>
   </Pressable>)}</View>
 
