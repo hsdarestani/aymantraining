@@ -2,7 +2,8 @@ import {translate} from "../lib/i18n/locale";
 
 import {Copy} from "./Locale";
 import {useState} from "react";
-import {Modal,Pressable,SafeAreaView,StyleSheet,Text,View} from "react-native";
+import {Modal,Platform,Pressable,SafeAreaView,StyleSheet,Text,View} from "react-native";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {router,useSegments} from "expo-router";
 import {ArrowLeft,Menu,X,House,Dumbbell,TrendingUp,MessageCircle,UserRound,BookOpen,Utensils,HeartPulse,Settings,Users} from "lucide-react-native";
 import * as Haptics from "expo-haptics";
@@ -27,6 +28,8 @@ const links=[
 
 export default function NativeChrome(){
   const segments=useSegments();
+  const insets=useSafeAreaInsets();
+  const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):insets.bottom;
   const [open,setOpen]=useState(false);
   const first=String((segments as readonly string[])[0]||"");
   const inTabs=first==="(tabs)";
@@ -39,7 +42,7 @@ export default function NativeChrome(){
   function back(){Haptics.selectionAsync().catch(()=>undefined);if(router.canGoBack())router.back();else router.replace("/(tabs)")}
 
   return <>
-    <Animated.View entering={FadeInUp.duration(420)} pointerEvents="box-none" style={s.chrome}>
+    <Animated.View entering={FadeInUp.duration(420)} pointerEvents="box-none" style={[s.chrome,{bottom:bottomClearance+14}]}>
       <Pressable accessibilityLabel={translate("Zurück")} onPress={back} style={s.quick}><ArrowLeft color={C.ink} size={18}/><Text style={s.quickText}><Copy text={"ZURÜCK"}/></Text></Pressable>
       <Pressable accessibilityLabel={translate("Start öffnen")} onPress={()=>go("/(tabs)")} style={s.iconQuick}><House color={C.ink} size={18}/></Pressable>
       <Pressable accessibilityLabel={translate("Training öffnen")} onPress={()=>go("/(tabs)/training")} style={s.iconQuick}><Dumbbell color={C.ink} size={18}/></Pressable>
