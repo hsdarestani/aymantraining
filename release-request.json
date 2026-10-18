@@ -1,14 +1,14 @@
 {
   "enabled": true,
   "app_identifier": "com.smarbiz.bedifferent",
-  "version_name": "1.2.5",
+  "version_name": "1.2.6",
   "build_number": 17,
   "platforms": [
-    "android"
+    "ios"
   ],
   "android_track": "production",
   "auto_submit": true,
-  "release_notes": "BE DIFFERENT 1.2.5: Korrigierte Android-Navigation. Die fünf Tabs bleiben auch auf Android 16 mit Gestensteuerung oder drei Navigationstasten vollständig sichtbar. Dunkle Systemleiste und optimierte Abstände für alle mobilen Ansichten.",
+  "release_notes": "BE DIFFERENT 1.2.6: Verbesserte iPhone Navigation. Die fünf Tabs berücksichtigen jetzt den sicheren Abstand zum Home Indicator. Optimierter Seitenabstand, vollständige Lesbarkeit und zuverlässiges Scrollen. Auch für iPhone Simulator getestet.",
   "source_branch": "main",
   "request_revision": 1
 }
