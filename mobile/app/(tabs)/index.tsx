@@ -10,7 +10,7 @@ import {getSession} from "../../lib/session";
 import {registerPush} from "../../lib/push";
 import {syncHealth} from "../../lib/health";
 import {C,radius} from "../../theme";
-import {SafeAreaView} from "react-native-safe-area-context";
+import {SafeAreaView,useSafeAreaInsets} from "react-native-safe-area-context";
 import {syncHomeWidget} from "../../lib/widget-sync";
 import ScoreRadar from "../../components/ScoreRadar";
 import RhythmHorizon from "../../components/RhythmHorizon";
@@ -23,6 +23,8 @@ const pillarMeta=[
 function Bar({value,max,accent=C.volt}:{value:number;max:number;accent?:string}){const pct=Math.max(0,Math.min(100,max?value/max*100:0));return <View style={s.metricTrack}><View style={[s.metricFill,{width:`${pct}%`,backgroundColor:accent}]}/></View>}
 
 export default function Home(){
+ const insets=useSafeAreaInsets();
+ const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):insets.bottom;
  const [d,setD]=useState<any>(null),[gamification,setGamification]=useState<any>(null),[refreshing,setRefreshing]=useState(false),[syncing,setSyncing]=useState(false);
  const [mediaToken,setMediaToken]=useState<string|null>(null);
  const [photoFailed,setPhotoFailed]=useState(false);
@@ -45,7 +47,7 @@ export default function Home(){
  const scorePillars=pillarMeta.map(([letter,key,label])=>({letter,key,label,value:typeof pillars?.[key]==="number"&&Number.isFinite(pillars[key])?Number(pillars[key]):null}));
  const nextFocus=[...scorePillars].filter(p=>p.value!=null).sort((a,b)=>(a.value??101)-(b.value??101))[0];
  if(!d)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
- return <SafeAreaView edges={["top"]} style={s.safe}><ScrollView style={s.safe} contentContainerStyle={s.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
+ return <SafeAreaView edges={["top"]} style={s.safe}><ScrollView style={s.safe} contentContainerStyle={[s.content,{paddingBottom:126+bottomClearance}]} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
   <View style={s.top}><Brand compact/><View style={s.topActions}><LanguagePicker inline/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,(score?.total??0)<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}><Copy text="BD SCORE"/></Text><Text style={s.scorePillValue}>{score?.total??0}%</Text></Pressable></View></View>
 
   <View style={s.heroEditorial}>
