@@ -63,7 +63,7 @@ jobs:
           # when login attempts to read/write its session token.
           # Give only the simulator preview an ad-hoc signature and a dedicated
           # Keychain access group. Store builds use their normal Apple signing.
-          entitlements="$(mktemp /tmp/bedifferent-simulator-entitlements.XXXXXX.plist)"
+          entitlements="$(mktemp /tmp/bedifferent-simulator-entitlements.XXXXXX)"
           python3 - "$entitlements" <<'PY'
           import plistlib
           import sys
