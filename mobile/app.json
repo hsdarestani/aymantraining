@@ -46,7 +46,8 @@
       "blockedPermissions": [
         "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
         "android.permission.FOREGROUND_SERVICE"
-      ]
+      ],
+      "backgroundColor": "#050606"
     },
     "plugins": [
       "expo-router",
@@ -94,7 +95,8 @@
           "supportsBackgroundPlayback": false,
           "supportsPictureInPicture": false
         }
-      ]
+      ],
+      "./plugins/with-android-navigation-contrast"
     ],
     "extra": {
       "apiUrl": "https://bedifferent.smarbiz.sbs"
