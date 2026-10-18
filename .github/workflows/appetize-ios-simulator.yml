@@ -58,6 +58,43 @@ jobs:
           app="$(find /tmp/be-different-appetize/Build/Products/Release-iphonesimulator -maxdepth 1 -name '*.app' -type d -print -quit)"
           test -d "$app"
           test -s "$app/main.jsbundle"
+          # A simulator app built with CODE_SIGNING_ALLOWED=NO cannot access
+          # iOS Keychain. Expo SecureStore then throws errSecMissingEntitlement
+          # when login attempts to read/write its session token.
+          # Give only the simulator preview an ad-hoc signature and a dedicated
+          # Keychain access group. Store builds use their normal Apple signing.
+          entitlements="$(mktemp /tmp/bedifferent-simulator-entitlements.XXXXXX.plist)"
+          python3 - "$entitlements" <<'PY'
+          import plistlib
+          import sys
+          team = "884MVA2MD5"
+          bundle = "com.smarbiz.bedifferent"
+          plist = {
+              "application-identifier": f"{team}.{bundle}",
+              "com.apple.developer.team-identifier": team,
+              "keychain-access-groups": [f"{team}.{bundle}"],
+          }
+          with open(sys.argv[1], "wb") as f:
+              plistlib.dump(plist, f)
+          PY
+          if test -d "$app/Frameworks/hermes.framework"; then
+            codesign --force --sign - "$app/Frameworks/hermes.framework"
+          fi
+          if test -d "$app/PlugIns/widget.appex"; then
+            codesign --force --sign - "$app/PlugIns/widget.appex"
+          fi
+          codesign --force --sign - --entitlements "$entitlements" "$app"
+          codesign --verify --deep --strict "$app"
+          codesign -d --entitlements :- "$app" > /tmp/bedifferent-simulator-signed-entitlements.plist 2>/dev/null
+          python3 - /tmp/bedifferent-simulator-signed-entitlements.plist <<'PY'
+          import plistlib
+          import sys
+          with open(sys.argv[1], "rb") as f:
+              granted = plistlib.load(f)
+          group = "884MVA2MD5.com.smarbiz.bedifferent"
+          assert group in granted.get("keychain-access-groups", []), granted
+          print("Verified simulator Keychain entitlement:", group)
+          PY
           mkdir -p build/appetize
           ditto -c -k --sequesterRsrc --keepParent "$app" build/appetize/BE-DIFFERENT-iOS-Appetize-Simulator.zip
           unzip -t build/appetize/BE-DIFFERENT-iOS-Appetize-Simulator.zip | tail -n 3
