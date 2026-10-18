@@ -10,7 +10,7 @@ export default function TabsLayout(){
  const insets=useSafeAreaInsets();
  // Android 15/16 can draw 3-button navigation over the app. Keep our floating
  // controls above the actual safe area, with a fallback for devices returning 0.
- const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):insets.bottom;
+ const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):Math.max(insets.bottom,12);
  return <Tabs screenOptions={{
   headerShown:false,tabBarHideOnKeyboard:true,tabBarActiveTintColor:C.volt,tabBarInactiveTintColor:C.dim,
   tabBarStyle:{position:"absolute",left:10,right:10,bottom:bottomClearance+10,height:70,borderTopWidth:0,borderWidth:1,borderColor:C.line,borderRadius:22,backgroundColor:"#0F1412",paddingTop:9,paddingBottom:8,elevation:10,shadowColor:"#000",shadowOpacity:.4,shadowRadius:14,shadowOffset:{width:0,height:6}},
