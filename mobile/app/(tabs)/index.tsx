@@ -36,12 +36,9 @@ export default function Home(){
  async function refresh(){setRefreshing(true);await load().catch(()=>{});setRefreshing(false)}
  async function health(){setSyncing(true);await syncHealth().then(load).catch(()=>{});setSyncing(false)}
  const score=d?.score,a=d?.activity||{},pillars=d?.pillarPreview||d?.score||{};
- const dayLabels=["GESTERN","HEUTE","MORGEN"];
  const line=String(d?.differentLine||"Heute zählt die nächste saubere Entscheidung.");
  const sleep=a.sleepHours;
  const wearable=d?.wearable||{};
- const sleepStageObject=wearable?.sleepStages&&typeof wearable.sleepStages==="object"&&!Array.isArray(wearable.sleepStages)?wearable.sleepStages:{};
- const currentHeartRate=typeof sleepStageObject?.currentHeartRate==="number"?sleepStageObject.currentHeartRate:null;
  const sleepDisplay=wearable?.sleepMinutes!=null?Math.floor(wearable.sleepMinutes/60)+":"+String(wearable.sleepMinutes%60).padStart(2,"0"):sleep==null?null:String(sleep);
  const priority=useMemo(()=>d?.recommendations?.[0]||null,[d]);
  const scorePillars=pillarMeta.map(([letter,key,label])=>({letter,key,label,value:typeof pillars?.[key]==="number"&&Number.isFinite(pillars[key])?Number(pillars[key]):null}));
