@@ -53,7 +53,7 @@ export default function Athlete(){
      ["TRAININGSPLÄNE","/plans"],["ÜBUNGSBIBLIOTHEK","/library"],["LEISTUNGSTESTS","/tests"],["WOCHENBERICHT","/report"],
      ["LEISTUNGSVERLAUF","/performance-timeline"],["APPLE WATCH & WIDGET","/watch"],["DIFFERENT AI","/different-ai"],
      ["TERMINE & VIDEOANRUFE","/events"],["FREUNDE EINLADEN","/referral"],["WOCHENCHECK","/checkin"],
-     ["EINSTELLUNGEN & DATENSCHUTZ","/settings"],["KONTOSTATUS","/membership"],["PROFIL & GESUNDHEITSDATEN","/onboarding"]
+     ["EINSTELLUNGEN & DATENSCHUTZ","/settings"],["KONTOSTATUS","/membership"],["PROFIL & GESUNDHEITSDATEN","/profile"]
     ].map(([label,path])=><Pressable key={path} onPress={()=>router.push(path as any)} style={st.row}><Text style={st.rowText}><Copy text={label}/></Text><Text style={st.rowArrow}>→</Text></Pressable>)}
     <Pressable onPress={async()=>{await clearSession();router.replace("/")}} style={st.row}><Text style={st.rowText}><Copy text="ABMELDEN"/></Text><Text style={st.rowArrow}>→</Text></Pressable>
    </View>
