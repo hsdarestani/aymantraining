@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/athlete-experience-oct14
+      - main
     paths:
       - .github/workflows/appetize-ios-simulator.yml
   pull_request:
@@ -32,6 +33,10 @@ jobs:
         run: |
           npm ci --include=dev
           npm run typecheck
+          grep -Fq 'Math.max(insets.bottom,12)' 'app/(tabs)/_layout.tsx'
+          echo "App version: $(node -p 'require("./app.json").expo.version')"
+          echo "iOS build: $(node -p 'require("./app.json").expo.ios.buildNumber')"
+          echo "Source SHA: $(git rev-parse HEAD)"
       - name: Generate native simulator project
         env:
           FIREBASE_IOS_GOOGLE_SERVICE_INFO_B64: ${{ secrets.FIREBASE_IOS_GOOGLE_SERVICE_INFO_B64 }}
