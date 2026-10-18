@@ -25,7 +25,7 @@ export async function GET(){
  if(!opened)await prisma.analyticsEvent.create({data:{userId:user.id,name:"app_open",properties:{surface:"mobile_home"}}});
  const timelineStart=new Date(today.getTime()-dayMs);
  const timelineEnd=new Date(today.getTime()+2*dayMs);
- const [score,check,wearable,nextWorkout,recommendations,nutrition,radarFull,scoreDetails,advancedWearable,context,timelineWorkouts,lineSetting]=await Promise.all([
+ const [score,check,wearable,nextWorkout,recommendations,nutrition,radarFull,scoreDetails,advancedWearable,context,timelineWorkouts,lineSetting,heroPhoto]=await Promise.all([
   prisma.scoreSnapshot.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
   prisma.dailyCheck.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
   prisma.wearableDaily.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
@@ -41,7 +41,8 @@ export async function GET(){
    select:{id:true,title:true,scheduledAt:true,completedAt:true},
    orderBy:{scheduledAt:"asc"}
   }),
-  prisma.systemSetting.findUnique({where:{key:"different_lines"}})
+  prisma.systemSetting.findUnique({where:{key:"different_lines"}}),
+  prisma.mediaAsset.findFirst({where:{relatedUserId:user.id,kind:"PROGRESS_PHOTO"},orderBy:{createdAt:"desc"},select:{id:true}})
  ]);
  const radar=radarFull?recommendations:recommendations.length?[{severity:"locked",title:"Dein Tageszustand ist bereit",explanation:"",action:"PRO zeigt dir die Ursache und die klare Empfehlung für heute."}]:[];
  const lines=Array.isArray(lineSetting?.value)?lineSetting!.value as string[]:[];
@@ -60,6 +61,7 @@ export async function GET(){
    recovery:score.recovery,fuel:score.fuel,consistency:score.consistency
   }:null,
   differentLine:line,
+  heroPhotoId:heroPhoto?.id??null,
   dayStrip,
   cycle:cycleSummary(context?.cycleTrackingEnabled,context?.cycleStartDate,context?.cycleLengthDays),
   check,wearable:advancedWearable?wearable:wearable?{date:wearable.date,steps:wearable.steps,activeCalories:wearable.activeCalories,totalCalories:wearable.totalCalories,sleepMinutes:wearable.sleepMinutes}:null,nextWorkout,recommendations:radar,radarLocked:!radarFull,scoreDetailsLocked:!scoreDetails,

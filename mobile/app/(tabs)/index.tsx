@@ -1,18 +1,18 @@
 import {Copy,LocalizedValue} from "../../components/Locale";
 import {useCallback,useMemo,useState} from "react";
-import {ActivityIndicator,Platform,Pressable,RefreshControl,ScrollView,StyleSheet,Text,View} from "react-native";
-import Svg,{Circle} from "react-native-svg";
-import Animated,{FadeInDown,ZoomIn} from "react-native-reanimated";
+import {ActivityIndicator,Image,Platform,Pressable,RefreshControl,ScrollView,StyleSheet,Text,View} from "react-native";
+import {LinearGradient} from "expo-linear-gradient";
 import {router,useFocusEffect} from "expo-router";
 import {Card,Eyebrow,SectionTitle} from "../../components/Card";
 import Brand from "../../components/Brand";
-import {api} from "../../lib/api";
+import {API,api} from "../../lib/api";
+import {getSession} from "../../lib/session";
 import {registerPush} from "../../lib/push";
 import {syncHealth} from "../../lib/health";
 import {C,radius} from "../../theme";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {syncHomeWidget} from "../../lib/widget-sync";
-import AthleteTwin from "../../components/AthleteTwin";
+import ScoreRadar from "../../components/ScoreRadar";
 import RhythmHorizon from "../../components/RhythmHorizon";
 
 const pillarMeta=[
@@ -22,85 +22,90 @@ const pillarMeta=[
 
 function Bar({value,max,accent=C.volt}:{value:number;max:number;accent?:string}){const pct=Math.max(0,Math.min(100,max?value/max*100:0));return <View style={s.metricTrack}><View style={[s.metricFill,{width:`${pct}%`,backgroundColor:accent}]}/></View>}
 
-function ScoreSignature({score,level}:{score:number;level:string}){
- const r=67,circ=2*Math.PI*r,pct=Math.max(0,Math.min(100,score)),complete=pct>=100;
- const stroke=pct<55?C.red:C.volt;
- return <View style={s.signature}>
-  <Svg width={140} height={140} viewBox="0 0 170 170" style={s.signatureSvg}>
-   <Circle cx="85" cy="85" r={r} stroke="#252928" strokeWidth="8" fill="none"/>
-   <Circle cx="85" cy="85" r={r} stroke={stroke} strokeWidth="8" fill="none" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={circ*(1-pct/100)} transform="rotate(-90 85 85)"/>
-  </Svg>
-  <View style={s.signatureCenter}><Text style={s.signatureValue}>{pct}<Text style={[s.signaturePercent,{color:stroke}]}>%</Text></Text><Text style={[s.signatureLevel,{color:stroke}]}>{level}</Text></View>
-  {complete?<Animated.View entering={ZoomIn.duration(300)} style={s.explosion}>{Array.from({length:10},(_,i)=><View key={i} style={[s.spark,{transform:[{rotate:(i*36)+"deg"},{translateY:-88}]}]}/>)}</Animated.View>:null}
-  {complete?<Animated.Text entering={FadeInDown.duration(450)} style={s.truly}><Copy text="WIRKLICH ANDERS"/></Animated.Text>:null}
- </View>
-}
-
-function Pillars({values}:{values:any}){
- return <View style={s.pillars}>{pillarMeta.map(([letter,key,label])=>{const value=values?.[key];const height=Math.max(8,Math.round((value??0)*.58));const accent=value!=null&&value<55?C.red:C.volt;return <Pressable key={key} onPress={()=>router.push("/digital-twin")} style={s.pillar}><View style={s.pillarRail}><View style={[s.pillarFill,{height,backgroundColor:value==null?C.line:accent}]}/></View><Text style={s.pillarLetter}>{letter}</Text><Text numberOfLines={1} style={s.pillarValue}>{value==null?"—":Math.round(value)}</Text><Text numberOfLines={1} style={s.pillarLabel}><Copy text={label}/></Text></Pressable>})}</View>
-}
-
 export default function Home(){
  const [d,setD]=useState<any>(null),[gamification,setGamification]=useState<any>(null),[refreshing,setRefreshing]=useState(false),[syncing,setSyncing]=useState(false);
+ const [mediaToken,setMediaToken]=useState<string|null>(null);
  const load=useCallback(async()=>{
   const [dash,game]=await Promise.all([
    api<any>("/api/mobile/dashboard"),
    api<any>("/api/gamification").catch(()=>null)
   ]);
-  setD(dash);setGamification(game);syncHomeWidget(dash).catch(()=>{});registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});
+  setD(dash);setGamification(game);getSession().then(setMediaToken).catch(()=>{});syncHomeWidget(dash).catch(()=>{});registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});
  },[]);
  useFocusEffect(useCallback(()=>{load().catch(()=>{})},[load]));
  async function refresh(){setRefreshing(true);await load().catch(()=>{});setRefreshing(false)}
  async function health(){setSyncing(true);await syncHealth().then(load).catch(()=>{});setSyncing(false)}
  const score=d?.score,a=d?.activity||{},pillars=d?.pillarPreview||d?.score||{};
- const dayLabels=["GESTERN","HEUTE","MORGEN"];
  const line=String(d?.differentLine||"Heute zählt die nächste saubere Entscheidung.");
  const sleep=a.sleepHours;
  const wearable=d?.wearable||{};
- const sleepStageObject=wearable?.sleepStages&&typeof wearable.sleepStages==="object"&&!Array.isArray(wearable.sleepStages)?wearable.sleepStages:{};
- const currentHeartRate=typeof sleepStageObject?.currentHeartRate==="number"?sleepStageObject.currentHeartRate:null;
  const sleepDisplay=wearable?.sleepMinutes!=null?Math.floor(wearable.sleepMinutes/60)+":"+String(wearable.sleepMinutes%60).padStart(2,"0"):sleep==null?null:String(sleep);
  const priority=useMemo(()=>d?.recommendations?.[0]||null,[d]);
+ const scorePillars=pillarMeta.map(([letter,key,label])=>({letter,key,label,value:typeof pillars?.[key]==="number"&&Number.isFinite(pillars[key])?Number(pillars[key]):null}));
+ const nextFocus=[...scorePillars].filter(p=>p.value!=null).sort((a,b)=>(a.value??101)-(b.value??101))[0];
  if(!d)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
  return <SafeAreaView edges={["top"]} style={s.safe}><ScrollView style={s.safe} contentContainerStyle={s.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
   <View style={s.top}><Brand compact/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,(score?.total??0)<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}><Copy text="BD SCORE"/></Text><Text style={s.scorePillValue}>{score?.total??0}%</Text></Pressable></View>
 
-  <View style={s.hero}>
-   <View pointerEvents="none" style={s.heroTwin}><AthleteTwin compact/></View>
-   <Text style={s.eyebrow}><Copy text={"DEIN ATHLETEN DASHBOARD"}/></Text>
-   <Text style={s.heroName}>{(d.user.name||"ATHLET").toUpperCase()}</Text>
-   <Text style={s.morningLine}><Copy text={line}/></Text>
-   <Pressable onPress={()=>router.push("/focus")}><Text style={s.focusLink}><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Text></Pressable>
+  <View style={s.heroEditorial}>
+   {d.heroPhotoId&&mediaToken?
+    <Image source={{uri:API+"/api/media/"+d.heroPhotoId,headers:{Authorization:"Bearer "+mediaToken}}} resizeMode="cover" style={s.heroPhoto}/>:
+    <View style={s.heroEmpty}><View style={s.heroOrb}/><View style={s.heroOrbInside}/></View>}
+   <LinearGradient colors={["#080A0B33","#080A0B5C","#080A0BF9"]} locations={[0,.48,1]} style={s.heroShade}/>
+   <View style={s.heroCopy}>
+    <Text style={s.eyebrow}><Copy text="DEIN ATHLETEN DASHBOARD"/></Text>
+    <Text style={s.heroName}>{(d.user.name||"ATHLET").toUpperCase()}</Text>
+    <Text style={s.morningLine}><Copy text={line}/></Text>
+    <Pressable accessibilityRole="button" onPress={()=>router.push("/focus")}><Text style={s.focusLink}><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Text></Pressable>
+   </View>
+   <View style={s.heroIndex}><Text style={s.heroIndexNumber}>01</Text><Text style={s.heroIndexLabel}><Copy text="ATHLETENMODUS"/></Text></View>
   </View>
 
-  <View style={s.exploreStrip}>
-   <View style={s.exploreCopy}><Text style={s.exploreOverline}>01 / DEIN SYSTEM</Text><Text style={s.exploreTitle}><Copy text="BE DIFFERENT ENTDECKEN"/></Text><Text style={s.exploreHint}><Copy text="START ist dein Dashboard. Im ATHLET Tab findest du alle Module."/></Text></View>
-   <Pressable accessibilityRole="button" onPress={()=>router.push("/(tabs)/athlete")} style={s.exploreButton}><Text style={s.exploreButtonText}>↗</Text></Pressable>
-  </View>
-  <Pressable accessibilityRole="button" onPress={()=>router.push("/awake")} style={s.awakeShortcut}><Text style={s.awakeOverline}>BE AWAKE / MORGENROUTINE</Text><Text style={s.awakeAction}><Copy text="DEN TAG BEWUSST STARTEN"/>  ↗</Text></Pressable>
-
-  {priority?<Pressable onPress={()=>router.push("/lifestyle")} style={[s.priority,priority.severity==="critical"&&s.priorityCritical]}>
+    {priority?<Pressable onPress={()=>router.push("/lifestyle")} style={[s.priority,priority.severity==="critical"&&s.priorityCritical]}>
    <Text style={s.priorityKicker}><Copy text="HEUTE WICHTIG"/></Text><Text style={s.priorityTitle}><Copy text={priority.title}/></Text><Text style={s.priorityCopy}><Copy text={priority.action}/></Text>
   </Pressable>:null}
 
-  <Card style={s.scoreCard}>
-   <View style={s.scoreTop}><View style={s.scoreIdentity}><Eyebrow><Copy text="BE DIFFERENT SCORE"/></Eyebrow><Text style={s.scoreCaption}><Copy text="DEIN TAGESZIEL: 100%"/></Text><Text style={s.data}><Copy text={"DATEN"}/> {score?.completeness??0}%</Text></View><ScoreSignature score={score?.total??0} level={score?.level||"NORMAL"}/></View>
-   <Pillars values={pillars}/>
-   <Pressable onPress={()=>router.push("/digital-twin")}><Text style={s.scoreLink}><Copy text="ATHLETE DIGITAL TWIN ÖFFNEN →"/></Text></Pressable>
-  </Card>
-
-  <RhythmHorizon days={d.dayStrip||[]}/>
-
-  <View style={s.teaserRow}>
-   <Pressable style={s.teaser} onPress={()=>router.push("/lifestyle")}><Text style={s.teaserTag}><Copy text="BE RESTED"/></Text><Text style={s.teaserBig}>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</Text><Text style={s.teaserCopy}>{wearable?.restingHr!=null?<><Copy text="RUHEPULS"/> {Math.round(wearable.restingHr)} · </>:null}{currentHeartRate!=null?<><Copy text="PULS"/> {currentHeartRate}</>:<Copy text="Schlaf und Erholung"/>}</Text></Pressable>
-   <Pressable style={s.teaser} onPress={()=>router.push("/fuel")}><Text style={s.teaserTag}><Copy text="BE FUEL"/></Text><Text style={s.teaserBig}>{Math.round(a.proteinG||0)} g</Text><Text style={s.teaserCopy}><Copy text="Protein heute"/></Text></Pressable>
+  <View style={s.editorialScore}>
+   <View style={s.editorialIntro}>
+    <Text style={s.editorialEyebrow}><Copy text="BE DIFFERENT SCORE"/></Text>
+    <View style={s.editorialFigure}><Text style={s.editorialValue}>{score?.total??0}</Text><Text style={s.editorialPercent}>%</Text></View>
+    <Text style={s.editorialLevel}><Copy text={score?.level||"NORMAL"}/></Text>
+    <Text style={s.editorialTarget}><Copy text="DEIN TAGESZIEL: 100%"/></Text>
+    <Text style={s.editorialData}><Copy text="DATEN"/> {score?.completeness??0}%</Text>
+   </View>
+   <View style={s.radarPanel}>
+    <ScoreRadar pillars={scorePillars}/>
+    <View style={s.radarFocus}><Text style={s.radarFocusTag}><Copy text="NÄCHSTER FOKUS"/></Text><Text style={s.radarFocusName}><Copy text={nextFocus?.label||"NOCH KEINE DATEN"}/></Text><Text style={s.radarFocusValue}>{nextFocus?.value==null?"—":Math.round(nextFocus.value)+"%"}</Text></View>
+   </View>
+   <View style={s.pillarRows}>
+    {scorePillars.map(p=><Pressable key={p.key} accessibilityRole="button" onPress={()=>router.push("/digital-twin")} style={s.pillarRow}>
+     <Text style={[s.pillarRowLetter,p.value!=null&&p.value<60&&s.pillarRowAlert]}>{p.letter}</Text>
+     <Text style={s.pillarRowName}><Copy text={p.label}/></Text>
+     <Text style={s.pillarRowValue}>{p.value==null?"—":Math.round(p.value)}</Text>
+    </Pressable>)}
+   </View>
+   <Pressable accessibilityRole="button" onPress={()=>router.push("/digital-twin")} style={s.editorialOpen}><Text style={s.editorialOpenText}><Copy text="ATHLETE DIGITAL TWIN ÖFFNEN →"/></Text></Pressable>
   </View>
-  <View style={s.teaserRow}>
-   <Pressable style={s.teaser} onPress={()=>router.push("/focus")}><Text style={s.teaserTag}><Copy text="BE FOCUSED"/></Text><Text style={s.teaserBig}>02:00</Text><Text style={s.teaserCopy}><Copy text="Atmung und Tagescheck"/></Text></Pressable>
-   <Pressable style={[s.teaser,s.teaserRed]} onPress={()=>router.push("/community")}><Text style={s.teaserTag}><Copy text="DIFFERENT STREAK"/></Text><Text style={s.teaserBig}>{gamification?.streak??0}</Text><Text style={s.teaserCopy}><Copy text="Tage in Folge"/></Text></Pressable>
+
+    <RhythmHorizon days={d.dayStrip||[]}/>
+
+  <View style={s.performanceStream}>
+   <Pressable accessibilityRole="button" style={[s.streamRow,s.streamLead]} onPress={()=>router.push("/lifestyle")}>
+    <Text style={s.streamInitial}>R</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="BE RESTED"/></Text><Text style={s.streamValue}>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</Text><Text style={s.streamNote}><Copy text="Schlaf und Erholung"/></Text></View><Text style={s.streamArrow}>→</Text>
+   </Pressable>
+   <Pressable accessibilityRole="button" style={s.streamRow} onPress={()=>router.push("/fuel")}>
+    <Text style={s.streamInitial}>F</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="BE FUEL"/></Text><Text style={s.streamValue}>{Math.round(a.proteinG||0)} g</Text><Text style={s.streamNote}><Copy text="Protein heute"/></Text></View><Text style={s.streamArrow}>→</Text>
+   </Pressable>
+   <Pressable accessibilityRole="button" style={s.streamRow} onPress={()=>router.push("/focus")}>
+    <Text style={[s.streamInitial,s.streamAccent]}>M</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="BE FOCUSED"/></Text><Text style={s.streamValue}>02:00</Text><Text style={s.streamNote}><Copy text="Atmung und Tagescheck"/></Text></View><Text style={s.streamArrow}>→</Text>
+   </Pressable>
+   <Pressable accessibilityRole="button" style={s.streamRow} onPress={()=>router.push("/community")}>
+    <Text style={s.streamInitial}>C</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="HERAUSFORDERUNGEN"/></Text><Text style={s.streamValue}>{gamification?.streak??0} <Copy text="Tage"/></Text><Text style={s.streamNote}><Copy text="Serie und Rangliste"/></Text></View><Text style={s.streamArrow}>→</Text>
+   </Pressable>
+   <Pressable accessibilityRole="button" style={s.quickLine} onPress={()=>router.push("/awake")}><Text style={s.quickLabel}><Copy text="BE AWAKE"/></Text><Text style={s.quickText}><Copy text="Morgenroutine · Tagesstart"/></Text><Text style={s.quickArrow}>→</Text></Pressable>
   </View>
 
-  {d.cycle?<Pressable onPress={()=>router.push("/context")} style={s.cycle}><Text style={s.cycleTag}><Copy text="ZYKLUS KONTEXT"/></Text><Text style={s.cycleTitle}><Copy text="TAG"/> {d.cycle.day} · <Copy text={d.cycle.phase}/></Text><Text style={s.cycleCopy}><Copy text="Training und Recovery berücksichtigen deinen freiwillig hinterlegten Zykluskontext."/></Text></Pressable>:null}
+    {d.cycle?<Pressable onPress={()=>router.push("/context")} style={s.cycle}><Text style={s.cycleTag}><Copy text="ZYKLUS KONTEXT"/></Text><Text style={s.cycleTitle}><Copy text="TAG"/> {d.cycle.day} · <Copy text={d.cycle.phase}/></Text><Text style={s.cycleCopy}><Copy text="Training und Recovery berücksichtigen deinen freiwillig hinterlegten Zykluskontext."/></Text></Pressable>:null}
 
   <Pressable onPress={()=>router.push(d.nextWorkout?`/workout/${d.nextWorkout.id}`:"/(tabs)/training")}><View style={s.workout}><Text style={s.workoutKicker}><Copy text="HEUTIGES TRAINING"/></Text><Text style={s.workoutTitle}>{d.nextWorkout?.title?<>{d.nextWorkout.title}</>:<Copy text="REGENERATIONSTAG"/>}</Text><Text style={s.cardCopy}>{d.nextWorkout?.scheduledAt?<LocalizedValue value={new Date(d.nextWorkout.scheduledAt)}/>:<Copy text="Regeneration gehört zum Training."/>}</Text><Text style={s.arrow}><Copy text={d.nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></Text></View></Pressable>
 
@@ -115,6 +120,54 @@ export default function Home(){
  </ScrollView></SafeAreaView>;
 }
 const s=StyleSheet.create({
+
+ heroEditorial:{height:335,backgroundColor:"#0B1011",overflow:"hidden",position:"relative",justifyContent:"flex-end",marginHorizontal:-16,marginTop:-3},
+ heroPhoto:{position:"absolute",width:"100%",height:"100%",top:0,left:0},
+ heroEmpty:{position:"absolute",top:0,right:0,bottom:0,left:0,backgroundColor:"#0E1615"},
+ heroOrb:{position:"absolute",width:250,height:250,right:-70,top:5,borderRadius:125,borderWidth:1,borderColor:"#45615750",backgroundColor:"#19292636"},
+ heroOrbInside:{position:"absolute",width:120,height:120,right:0,top:80,borderRadius:60,borderWidth:1,borderColor:"#8EBA8340"},
+ heroShade:{position:"absolute",width:"100%",height:"100%",top:0,left:0},
+ heroCopy:{paddingHorizontal:20,paddingBottom:57,position:"relative"},
+ heroIndex:{position:"absolute",bottom:12,right:18,flexDirection:"row",alignItems:"center",gap:10},
+ heroIndexNumber:{fontFamily:"Archivo",fontSize:12,color:C.red},
+ heroIndexLabel:{fontFamily:"ManropeSemiBold",fontSize:9,color:C.ink,letterSpacing:1.5},
+ editorialScore:{backgroundColor:"#0B0E0F",paddingHorizontal:18,paddingTop:34,paddingBottom:16,borderTopWidth:1,borderColor:"#1D2829"},
+ editorialIntro:{alignItems:"flex-start"},
+ editorialEyebrow:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.7},
+ editorialFigure:{flexDirection:"row",alignItems:"flex-start",marginTop:9},
+ editorialValue:{color:C.ink,fontFamily:"Archivo",fontSize:73,lineHeight:84},
+ editorialPercent:{color:C.red,fontFamily:"Archivo",fontSize:23,marginTop:16},
+ editorialLevel:{alignSelf:"flex-start",borderWidth:1,borderColor:C.red,paddingHorizontal:9,paddingVertical:4,fontFamily:"ManropeSemiBold",fontSize:11,color:C.red,marginTop:1},
+ editorialTarget:{fontFamily:"ManropeSemiBold",color:C.ink,fontSize:13,marginTop:15},
+ editorialData:{fontFamily:"ManropeSemiBold",color:C.dim,fontSize:9,letterSpacing:1.1,marginTop:11},
+ radarPanel:{alignItems:"center",paddingTop:12,borderBottomWidth:1,borderBottomColor:C.line,paddingBottom:21},
+ radarFocus:{alignItems:"center",borderTopWidth:1,borderTopColor:C.red,paddingTop:9,minWidth:188,marginTop:-8},
+ radarFocusTag:{fontFamily:"ManropeSemiBold",fontSize:9,color:C.red,letterSpacing:1.1},
+ radarFocusName:{fontFamily:"Archivo",fontSize:17,color:C.ink,marginTop:7},
+ radarFocusValue:{fontFamily:"ManropeSemiBold",fontSize:12,color:C.ink,marginTop:4},
+ pillarRows:{flexDirection:"row",flexWrap:"wrap",marginTop:12},
+ pillarRow:{width:"50%",flexDirection:"row",alignItems:"center",gap:7,borderBottomWidth:1,borderBottomColor:C.line,minHeight:49,paddingRight:10},
+ pillarRowLetter:{fontFamily:"Archivo",fontSize:18,color:C.ink,minWidth:18},
+ pillarRowAlert:{color:C.red},
+ pillarRowName:{fontFamily:"ManropeSemiBold",fontSize:9,color:C.dim,flex:1},
+ pillarRowValue:{fontFamily:"Archivo",fontSize:14,color:C.ink},
+ editorialOpen:{paddingTop:19,paddingBottom:8},
+ editorialOpenText:{fontFamily:"ManropeSemiBold",fontSize:11,color:C.volt,letterSpacing:.4},
+ performanceStream:{backgroundColor:"#0A0E0F",borderTopWidth:1,borderTopColor:"#2E3837",marginTop:6},
+ streamRow:{flexDirection:"row",alignItems:"center",paddingVertical:16,paddingHorizontal:17,borderBottomWidth:1,borderBottomColor:"#26302E",gap:13,minHeight:99},
+ streamLead:{backgroundColor:"#111A18"},
+ streamInitial:{fontFamily:"Archivo",fontSize:24,color:C.ink,minWidth:26},
+ streamAccent:{color:C.red},
+ streamContent:{flex:1,gap:4},
+ streamTag:{fontFamily:"ManropeSemiBold",fontSize:10,color:C.dim,letterSpacing:1.4},
+ streamValue:{fontFamily:"Archivo",fontSize:25,color:C.ink},
+ streamNote:{fontFamily:"Manrope",fontSize:11,color:C.dim},
+ streamArrow:{fontFamily:"Archivo",fontSize:21,color:C.volt},
+ quickLine:{minHeight:60,flexDirection:"row",alignItems:"center",borderBottomWidth:1,borderBottomColor:C.line,paddingHorizontal:16,gap:10},
+ quickLabel:{fontFamily:"Archivo",fontSize:14,color:C.ink},
+ quickText:{fontFamily:"Manrope",fontSize:10,color:C.dim,flex:1},
+ quickArrow:{fontFamily:"Archivo",fontSize:21,color:C.volt},
+
  safe:{flex:1,backgroundColor:C.bg},content:{padding:16,paddingBottom:108,gap:12},center:{flex:1,backgroundColor:C.bg,alignItems:"center",justifyContent:"center"},
  top:{height:52,flexDirection:"row",justifyContent:"space-between",alignItems:"center"},scorePill:{minWidth:92,borderRadius:20,borderWidth:1,borderColor:"#D4FF0050",paddingVertical:6,paddingHorizontal:10,alignItems:"flex-end"},scorePillAlert:{borderColor:"#FF566A88",backgroundColor:"#FF566A0D"},scorePillLabel:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:8,letterSpacing:1.2},scorePillValue:{color:C.ink,fontFamily:"Archivo",fontSize:18},
  heroTwin:{position:"absolute",top:0,right:-12,opacity:.62},hero:{minHeight:242,justifyContent:"flex-end",paddingVertical:22,paddingHorizontal:2,overflow:"hidden"},athleteGhost:{position:"absolute",right:16,top:9,width:112,height:220,opacity:.16,alignItems:"center"},ghostHead:{width:38,height:38,borderRadius:19,borderWidth:2,borderColor:C.ink},ghostTorso:{width:72,height:95,borderTopLeftRadius:30,borderTopRightRadius:30,borderWidth:2,borderColor:C.ink,marginTop:5},ghostLegs:{width:54,height:66,borderLeftWidth:2,borderRightWidth:2,borderColor:C.ink,marginTop:3},eyebrow:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:2.2},heroName:{color:C.ink,fontFamily:"Archivo",fontSize:48,lineHeight:49,letterSpacing:-1.4,marginTop:8,maxWidth:"78%"},morningLine:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:15,lineHeight:22,maxWidth:300,marginTop:16},focusLink:{color:C.red,fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:1.15,marginTop:13},
