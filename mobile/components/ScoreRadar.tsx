@@ -20,7 +20,6 @@ export default function ScoreRadar({pillars}:{pillars:ReadonlyArray<Pillar>}){
   {pillars.map((p,i)=>{const [x,y]=xy(i,108);return <Line key={p.letter} x1={150} y1={150} x2={x} y2={y} stroke="#29322F" strokeWidth={1}/>})}
   {available?<Polygon points={coords(pillars,108)} fill="#FF3D591F" stroke="#FF526D" strokeWidth={1.5}/>:null}
   {pillars.map((p,i)=>{
-   const [lx,ly]=xy(i,130);
    const numeric=typeof p.value==="number"&&Number.isFinite(p.value);
    const [dx,dy]=xy(i,108*(numeric?clamp(p.value as number):0)/100);
    return <Circle key={p.letter} cx={dx} cy={dy} r={numeric?3.2:1} fill={numeric?"#FF536E":"#66706D"}/>;
