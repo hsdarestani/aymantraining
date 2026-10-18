@@ -10,5 +10,6 @@
   "android_track": "production",
   "auto_submit": true,
   "release_notes": "BE DIFFERENT 1.2.3: Überarbeitete START Ansicht mit persönlichem Athletenbild, neuem siebenstufigem Leistungsradar, optimierten Sportmodulen und verbesserter Navigation. Darstellung und Nutzerführung an die aktuelle Webversion angepasst.",
-  "source_branch": "main"
+  "source_branch": "main",
+  "request_revision": 2
 }
