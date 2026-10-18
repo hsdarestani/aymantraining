@@ -1,18 +1,18 @@
 import {Copy,LocalizedValue} from "../../components/Locale";
 import {useCallback,useMemo,useState} from "react";
-import {ActivityIndicator,Platform,Pressable,RefreshControl,ScrollView,StyleSheet,Text,View} from "react-native";
-import Svg,{Circle} from "react-native-svg";
-import Animated,{FadeInDown,ZoomIn} from "react-native-reanimated";
+import {ActivityIndicator,Image,Platform,Pressable,RefreshControl,ScrollView,StyleSheet,Text,View} from "react-native";
+import {LinearGradient} from "expo-linear-gradient";
 import {router,useFocusEffect} from "expo-router";
 import {Card,Eyebrow,SectionTitle} from "../../components/Card";
 import Brand from "../../components/Brand";
-import {api} from "../../lib/api";
+import {API,api} from "../../lib/api";
+import {getSession} from "../../lib/session";
 import {registerPush} from "../../lib/push";
 import {syncHealth} from "../../lib/health";
 import {C,radius} from "../../theme";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {syncHomeWidget} from "../../lib/widget-sync";
-import AthleteTwin from "../../components/AthleteTwin";
+import ScoreRadar from "../../components/ScoreRadar";
 import RhythmHorizon from "../../components/RhythmHorizon";
 
 const pillarMeta=[
@@ -22,32 +22,15 @@ const pillarMeta=[
 
 function Bar({value,max,accent=C.volt}:{value:number;max:number;accent?:string}){const pct=Math.max(0,Math.min(100,max?value/max*100:0));return <View style={s.metricTrack}><View style={[s.metricFill,{width:`${pct}%`,backgroundColor:accent}]}/></View>}
 
-function ScoreSignature({score,level}:{score:number;level:string}){
- const r=67,circ=2*Math.PI*r,pct=Math.max(0,Math.min(100,score)),complete=pct>=100;
- const stroke=pct<55?C.red:C.volt;
- return <View style={s.signature}>
-  <Svg width={140} height={140} viewBox="0 0 170 170" style={s.signatureSvg}>
-   <Circle cx="85" cy="85" r={r} stroke="#252928" strokeWidth="8" fill="none"/>
-   <Circle cx="85" cy="85" r={r} stroke={stroke} strokeWidth="8" fill="none" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={circ*(1-pct/100)} transform="rotate(-90 85 85)"/>
-  </Svg>
-  <View style={s.signatureCenter}><Text style={s.signatureValue}>{pct}<Text style={[s.signaturePercent,{color:stroke}]}>%</Text></Text><Text style={[s.signatureLevel,{color:stroke}]}>{level}</Text></View>
-  {complete?<Animated.View entering={ZoomIn.duration(300)} style={s.explosion}>{Array.from({length:10},(_,i)=><View key={i} style={[s.spark,{transform:[{rotate:(i*36)+"deg"},{translateY:-88}]}]}/>)}</Animated.View>:null}
-  {complete?<Animated.Text entering={FadeInDown.duration(450)} style={s.truly}><Copy text="WIRKLICH ANDERS"/></Animated.Text>:null}
- </View>
-}
-
-function Pillars({values}:{values:any}){
- return <View style={s.pillars}>{pillarMeta.map(([letter,key,label])=>{const value=values?.[key];const height=Math.max(8,Math.round((value??0)*.58));const accent=value!=null&&value<55?C.red:C.volt;return <Pressable key={key} onPress={()=>router.push("/digital-twin")} style={s.pillar}><View style={s.pillarRail}><View style={[s.pillarFill,{height,backgroundColor:value==null?C.line:accent}]}/></View><Text style={s.pillarLetter}>{letter}</Text><Text numberOfLines={1} style={s.pillarValue}>{value==null?"—":Math.round(value)}</Text><Text numberOfLines={1} style={s.pillarLabel}><Copy text={label}/></Text></Pressable>})}</View>
-}
-
 export default function Home(){
  const [d,setD]=useState<any>(null),[gamification,setGamification]=useState<any>(null),[refreshing,setRefreshing]=useState(false),[syncing,setSyncing]=useState(false);
+ const [mediaToken,setMediaToken]=useState<string|null>(null);
  const load=useCallback(async()=>{
   const [dash,game]=await Promise.all([
    api<any>("/api/mobile/dashboard"),
    api<any>("/api/gamification").catch(()=>null)
   ]);
-  setD(dash);setGamification(game);syncHomeWidget(dash).catch(()=>{});registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});
+  setD(dash);setGamification(game);getSession().then(setMediaToken).catch(()=>{});syncHomeWidget(dash).catch(()=>{});registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});
  },[]);
  useFocusEffect(useCallback(()=>{load().catch(()=>{})},[load]));
  async function refresh(){setRefreshing(true);await load().catch(()=>{});setRefreshing(false)}
@@ -61,25 +44,27 @@ export default function Home(){
  const currentHeartRate=typeof sleepStageObject?.currentHeartRate==="number"?sleepStageObject.currentHeartRate:null;
  const sleepDisplay=wearable?.sleepMinutes!=null?Math.floor(wearable.sleepMinutes/60)+":"+String(wearable.sleepMinutes%60).padStart(2,"0"):sleep==null?null:String(sleep);
  const priority=useMemo(()=>d?.recommendations?.[0]||null,[d]);
+ const scorePillars=pillarMeta.map(([letter,key,label])=>({letter,key,label,value:typeof pillars?.[key]==="number"&&Number.isFinite(pillars[key])?Number(pillars[key]):null}));
+ const nextFocus=[...scorePillars].filter(p=>p.value!=null).sort((a,b)=>(a.value??101)-(b.value??101))[0];
  if(!d)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
  return <SafeAreaView edges={["top"]} style={s.safe}><ScrollView style={s.safe} contentContainerStyle={s.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
   <View style={s.top}><Brand compact/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,(score?.total??0)<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}><Copy text="BD SCORE"/></Text><Text style={s.scorePillValue}>{score?.total??0}%</Text></Pressable></View>
 
-  <View style={s.hero}>
-   <View pointerEvents="none" style={s.heroTwin}><AthleteTwin compact/></View>
-   <Text style={s.eyebrow}><Copy text={"DEIN ATHLETEN DASHBOARD"}/></Text>
-   <Text style={s.heroName}>{(d.user.name||"ATHLET").toUpperCase()}</Text>
-   <Text style={s.morningLine}><Copy text={line}/></Text>
-   <Pressable onPress={()=>router.push("/focus")}><Text style={s.focusLink}><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Text></Pressable>
+  <View style={s.heroEditorial}>
+   {d.heroPhotoId&&mediaToken?
+    <Image source={{uri:API+"/api/media/"+d.heroPhotoId,headers:{Authorization:"Bearer "+mediaToken}}} resizeMode="cover" style={s.heroPhoto}/>:
+    <View style={s.heroEmpty}><View style={s.heroOrb}/><View style={s.heroOrbInside}/></View>}
+   <LinearGradient colors={["#080A0B33","#080A0B5C","#080A0BF9"]} locations={[0,.48,1]} style={s.heroShade}/>
+   <View style={s.heroCopy}>
+    <Text style={s.eyebrow}><Copy text="DEIN ATHLETEN DASHBOARD"/></Text>
+    <Text style={s.heroName}>{(d.user.name||"ATHLET").toUpperCase()}</Text>
+    <Text style={s.morningLine}><Copy text={line}/></Text>
+    <Pressable accessibilityRole="button" onPress={()=>router.push("/focus")}><Text style={s.focusLink}><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Text></Pressable>
+   </View>
+   <View style={s.heroIndex}><Text style={s.heroIndexNumber}>01</Text><Text style={s.heroIndexLabel}><Copy text="ATHLETENMODUS"/></Text></View>
   </View>
 
-  <View style={s.exploreStrip}>
-   <View style={s.exploreCopy}><Text style={s.exploreOverline}>01 / DEIN SYSTEM</Text><Text style={s.exploreTitle}><Copy text="BE DIFFERENT ENTDECKEN"/></Text><Text style={s.exploreHint}><Copy text="START ist dein Dashboard. Im ATHLET Tab findest du alle Module."/></Text></View>
-   <Pressable accessibilityRole="button" onPress={()=>router.push("/(tabs)/athlete")} style={s.exploreButton}><Text style={s.exploreButtonText}>↗</Text></Pressable>
-  </View>
-  <Pressable accessibilityRole="button" onPress={()=>router.push("/awake")} style={s.awakeShortcut}><Text style={s.awakeOverline}>BE AWAKE / MORGENROUTINE</Text><Text style={s.awakeAction}><Copy text="DEN TAG BEWUSST STARTEN"/>  ↗</Text></Pressable>
-
-  {priority?<Pressable onPress={()=>router.push("/lifestyle")} style={[s.priority,priority.severity==="critical"&&s.priorityCritical]}>
+    {priority?<Pressable onPress={()=>router.push("/lifestyle")} style={[s.priority,priority.severity==="critical"&&s.priorityCritical]}>
    <Text style={s.priorityKicker}><Copy text="HEUTE WICHTIG"/></Text><Text style={s.priorityTitle}><Copy text={priority.title}/></Text><Text style={s.priorityCopy}><Copy text={priority.action}/></Text>
   </Pressable>:null}
 
