@@ -29,7 +29,7 @@ const links=[
 export default function NativeChrome(){
   const segments=useSegments();
   const insets=useSafeAreaInsets();
-  const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):insets.bottom;
+  const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):Math.max(insets.bottom,12);
   const [open,setOpen]=useState(false);
   const first=String((segments as readonly string[])[0]||"");
   const inTabs=first==="(tabs)";
