@@ -68,24 +68,47 @@ export default function Home(){
    <Text style={s.priorityKicker}><Copy text="HEUTE WICHTIG"/></Text><Text style={s.priorityTitle}><Copy text={priority.title}/></Text><Text style={s.priorityCopy}><Copy text={priority.action}/></Text>
   </Pressable>:null}
 
-  <Card style={s.scoreCard}>
-   <View style={s.scoreTop}><View style={s.scoreIdentity}><Eyebrow><Copy text="BE DIFFERENT SCORE"/></Eyebrow><Text style={s.scoreCaption}><Copy text="DEIN TAGESZIEL: 100%"/></Text><Text style={s.data}><Copy text={"DATEN"}/> {score?.completeness??0}%</Text></View><ScoreSignature score={score?.total??0} level={score?.level||"NORMAL"}/></View>
-   <Pillars values={pillars}/>
-   <Pressable onPress={()=>router.push("/digital-twin")}><Text style={s.scoreLink}><Copy text="ATHLETE DIGITAL TWIN ÖFFNEN →"/></Text></Pressable>
-  </Card>
-
-  <RhythmHorizon days={d.dayStrip||[]}/>
-
-  <View style={s.teaserRow}>
-   <Pressable style={s.teaser} onPress={()=>router.push("/lifestyle")}><Text style={s.teaserTag}><Copy text="BE RESTED"/></Text><Text style={s.teaserBig}>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</Text><Text style={s.teaserCopy}>{wearable?.restingHr!=null?<><Copy text="RUHEPULS"/> {Math.round(wearable.restingHr)} · </>:null}{currentHeartRate!=null?<><Copy text="PULS"/> {currentHeartRate}</>:<Copy text="Schlaf und Erholung"/>}</Text></Pressable>
-   <Pressable style={s.teaser} onPress={()=>router.push("/fuel")}><Text style={s.teaserTag}><Copy text="BE FUEL"/></Text><Text style={s.teaserBig}>{Math.round(a.proteinG||0)} g</Text><Text style={s.teaserCopy}><Copy text="Protein heute"/></Text></Pressable>
+  <View style={s.editorialScore}>
+   <View style={s.editorialIntro}>
+    <Text style={s.editorialEyebrow}><Copy text="BE DIFFERENT SCORE"/></Text>
+    <View style={s.editorialFigure}><Text style={s.editorialValue}>{score?.total??0}</Text><Text style={s.editorialPercent}>%</Text></View>
+    <Text style={s.editorialLevel}><Copy text={score?.level||"NORMAL"}/></Text>
+    <Text style={s.editorialTarget}><Copy text="DEIN TAGESZIEL: 100%"/></Text>
+    <Text style={s.editorialData}><Copy text="DATEN"/> {score?.completeness??0}%</Text>
+   </View>
+   <View style={s.radarPanel}>
+    <ScoreRadar pillars={scorePillars}/>
+    <View style={s.radarFocus}><Text style={s.radarFocusTag}><Copy text="NÄCHSTER FOKUS"/></Text><Text style={s.radarFocusName}><Copy text={nextFocus?.label||"NOCH KEINE DATEN"}/></Text><Text style={s.radarFocusValue}>{nextFocus?.value==null?"—":Math.round(nextFocus.value)+"%"}</Text></View>
+   </View>
+   <View style={s.pillarRows}>
+    {scorePillars.map(p=><Pressable key={p.key} accessibilityRole="button" onPress={()=>router.push("/digital-twin")} style={s.pillarRow}>
+     <Text style={[s.pillarRowLetter,p.value!=null&&p.value<60&&s.pillarRowAlert]}>{p.letter}</Text>
+     <Text style={s.pillarRowName}><Copy text={p.label}/></Text>
+     <Text style={s.pillarRowValue}>{p.value==null?"—":Math.round(p.value)}</Text>
+    </Pressable>)}
+   </View>
+   <Pressable accessibilityRole="button" onPress={()=>router.push("/digital-twin")} style={s.editorialOpen}><Text style={s.editorialOpenText}><Copy text="ATHLETE DIGITAL TWIN ÖFFNEN →"/></Text></Pressable>
   </View>
-  <View style={s.teaserRow}>
-   <Pressable style={s.teaser} onPress={()=>router.push("/focus")}><Text style={s.teaserTag}><Copy text="BE FOCUSED"/></Text><Text style={s.teaserBig}>02:00</Text><Text style={s.teaserCopy}><Copy text="Atmung und Tagescheck"/></Text></Pressable>
-   <Pressable style={[s.teaser,s.teaserRed]} onPress={()=>router.push("/community")}><Text style={s.teaserTag}><Copy text="DIFFERENT STREAK"/></Text><Text style={s.teaserBig}>{gamification?.streak??0}</Text><Text style={s.teaserCopy}><Copy text="Tage in Folge"/></Text></Pressable>
+
+    <RhythmHorizon days={d.dayStrip||[]}/>
+
+  <View style={s.performanceStream}>
+   <Pressable accessibilityRole="button" style={[s.streamRow,s.streamLead]} onPress={()=>router.push("/lifestyle")}>
+    <Text style={s.streamInitial}>R</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="BE RESTED"/></Text><Text style={s.streamValue}>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</Text><Text style={s.streamNote}><Copy text="Schlaf und Erholung"/></Text></View><Text style={s.streamArrow}>→</Text>
+   </Pressable>
+   <Pressable accessibilityRole="button" style={s.streamRow} onPress={()=>router.push("/fuel")}>
+    <Text style={s.streamInitial}>F</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="BE FUEL"/></Text><Text style={s.streamValue}>{Math.round(a.proteinG||0)} g</Text><Text style={s.streamNote}><Copy text="Protein heute"/></Text></View><Text style={s.streamArrow}>→</Text>
+   </Pressable>
+   <Pressable accessibilityRole="button" style={s.streamRow} onPress={()=>router.push("/focus")}>
+    <Text style={[s.streamInitial,s.streamAccent]}>M</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="BE FOCUSED"/></Text><Text style={s.streamValue}>02:00</Text><Text style={s.streamNote}><Copy text="Atmung und Tagescheck"/></Text></View><Text style={s.streamArrow}>→</Text>
+   </Pressable>
+   <Pressable accessibilityRole="button" style={s.streamRow} onPress={()=>router.push("/community")}>
+    <Text style={s.streamInitial}>C</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="HERAUSFORDERUNGEN"/></Text><Text style={s.streamValue}>{gamification?.streak??0} <Copy text="Tage"/></Text><Text style={s.streamNote}><Copy text="Serie und Rangliste"/></Text></View><Text style={s.streamArrow}>→</Text>
+   </Pressable>
+   <Pressable accessibilityRole="button" style={s.quickLine} onPress={()=>router.push("/awake")}><Text style={s.quickLabel}><Copy text="BE AWAKE"/></Text><Text style={s.quickText}><Copy text="Morgenroutine · Tagesstart"/></Text><Text style={s.quickArrow}>→</Text></Pressable>
   </View>
 
-  {d.cycle?<Pressable onPress={()=>router.push("/context")} style={s.cycle}><Text style={s.cycleTag}><Copy text="ZYKLUS KONTEXT"/></Text><Text style={s.cycleTitle}><Copy text="TAG"/> {d.cycle.day} · <Copy text={d.cycle.phase}/></Text><Text style={s.cycleCopy}><Copy text="Training und Recovery berücksichtigen deinen freiwillig hinterlegten Zykluskontext."/></Text></Pressable>:null}
+    {d.cycle?<Pressable onPress={()=>router.push("/context")} style={s.cycle}><Text style={s.cycleTag}><Copy text="ZYKLUS KONTEXT"/></Text><Text style={s.cycleTitle}><Copy text="TAG"/> {d.cycle.day} · <Copy text={d.cycle.phase}/></Text><Text style={s.cycleCopy}><Copy text="Training und Recovery berücksichtigen deinen freiwillig hinterlegten Zykluskontext."/></Text></Pressable>:null}
 
   <Pressable onPress={()=>router.push(d.nextWorkout?`/workout/${d.nextWorkout.id}`:"/(tabs)/training")}><View style={s.workout}><Text style={s.workoutKicker}><Copy text="HEUTIGES TRAINING"/></Text><Text style={s.workoutTitle}>{d.nextWorkout?.title?<>{d.nextWorkout.title}</>:<Copy text="REGENERATIONSTAG"/>}</Text><Text style={s.cardCopy}>{d.nextWorkout?.scheduledAt?<LocalizedValue value={new Date(d.nextWorkout.scheduledAt)}/>:<Copy text="Regeneration gehört zum Training."/>}</Text><Text style={s.arrow}><Copy text={d.nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></Text></View></Pressable>
 
