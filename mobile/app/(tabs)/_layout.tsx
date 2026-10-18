@@ -6,10 +6,10 @@ const icon=(Icon:any)=>(props:any)=><Icon {...props} size={21} strokeWidth={2}/>
 export default function TabsLayout(){
  const locale=useLocale();
  return <Tabs screenOptions={{
-  headerShown:false,tabBarHideOnKeyboard:true,tabBarActiveTintColor:C.ink,tabBarInactiveTintColor:C.dim,
-  tabBarStyle:{position:"absolute",left:10,right:10,bottom:8,height:68,borderTopWidth:0,borderWidth:1,borderColor:C.line,borderRadius:22,backgroundColor:"#0F1214F7",paddingTop:7,paddingBottom:7},
+  headerShown:false,tabBarHideOnKeyboard:true,tabBarActiveTintColor:C.volt,tabBarInactiveTintColor:C.dim,
+  tabBarStyle:{position:"absolute",left:10,right:10,bottom:8,height:68,borderTopWidth:0,borderWidth:1,borderColor:C.line,borderRadius:22,backgroundColor:"#0F1412",paddingTop:7,paddingBottom:7},
   tabBarItemStyle:{borderRadius:16,marginHorizontal:1},
-  tabBarActiveBackgroundColor:"#2A1115",
+  tabBarActiveBackgroundColor:"#27331A",
   tabBarLabelStyle:{fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:.45}
  }}>
   <Tabs.Screen name="index" options={{title:locale==="en"?"HOME":"START",tabBarIcon:icon(House)}}/>
