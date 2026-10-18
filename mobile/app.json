@@ -3,7 +3,7 @@
     "name": "BE DIFFERENT",
     "slug": "be-different",
     "scheme": "bedifferent",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
@@ -19,7 +19,7 @@
       "icon": "./assets/favicon.png",
       "appleTeamId": "884MVA2MD5",
       "entitlements": {},
-      "buildNumber": "14"
+      "buildNumber": "15"
     },
     "android": {
       "package": "com.smarbiz.bedifferent",
@@ -42,7 +42,7 @@
         "foregroundImage": "./assets/favicon.png",
         "backgroundColor": "#D7FF00"
       },
-      "versionCode": 14,
+      "versionCode": 15,
       "blockedPermissions": [
         "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
         "android.permission.FOREGROUND_SERVICE"
