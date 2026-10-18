@@ -24,7 +24,7 @@ function Bar({value,max,accent=C.volt}:{value:number;max:number;accent?:string})
 
 export default function Home(){
  const insets=useSafeAreaInsets();
- const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):insets.bottom;
+ const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):Math.max(insets.bottom,12);
  const [d,setD]=useState<any>(null),[gamification,setGamification]=useState<any>(null),[refreshing,setRefreshing]=useState(false),[syncing,setSyncing]=useState(false);
  const [mediaToken,setMediaToken]=useState<string|null>(null);
  const [photoFailed,setPhotoFailed]=useState(false);
