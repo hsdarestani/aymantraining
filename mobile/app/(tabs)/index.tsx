@@ -1,4 +1,4 @@
-import {Copy,LocalizedValue} from "../../components/Locale";
+import {Copy,LocalizedValue,LanguagePicker} from "../../components/Locale";
 import {useCallback,useMemo,useState} from "react";
 import {ActivityIndicator,Image,Platform,Pressable,RefreshControl,ScrollView,StyleSheet,Text,View} from "react-native";
 import {LinearGradient} from "expo-linear-gradient";
@@ -25,12 +25,13 @@ function Bar({value,max,accent=C.volt}:{value:number;max:number;accent?:string})
 export default function Home(){
  const [d,setD]=useState<any>(null),[gamification,setGamification]=useState<any>(null),[refreshing,setRefreshing]=useState(false),[syncing,setSyncing]=useState(false);
  const [mediaToken,setMediaToken]=useState<string|null>(null);
+ const [photoFailed,setPhotoFailed]=useState(false);
  const load=useCallback(async()=>{
   const [dash,game]=await Promise.all([
    api<any>("/api/mobile/dashboard"),
    api<any>("/api/gamification").catch(()=>null)
   ]);
-  setD(dash);setGamification(game);getSession().then(setMediaToken).catch(()=>{});syncHomeWidget(dash).catch(()=>{});registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});
+  setPhotoFailed(false);setD(dash);setGamification(game);getSession().then(setMediaToken).catch(()=>{});syncHomeWidget(dash).catch(()=>{});registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});
  },[]);
  useFocusEffect(useCallback(()=>{load().catch(()=>{})},[load]));
  async function refresh(){setRefreshing(true);await load().catch(()=>{});setRefreshing(false)}
@@ -45,13 +46,18 @@ export default function Home(){
  const nextFocus=[...scorePillars].filter(p=>p.value!=null).sort((a,b)=>(a.value??101)-(b.value??101))[0];
  if(!d)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
  return <SafeAreaView edges={["top"]} style={s.safe}><ScrollView style={s.safe} contentContainerStyle={s.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
-  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,(score?.total??0)<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}><Copy text="BD SCORE"/></Text><Text style={s.scorePillValue}>{score?.total??0}%</Text></Pressable></View>
+  <View style={s.top}><Brand compact/><View style={s.topActions}><LanguagePicker inline/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,(score?.total??0)<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}><Copy text="BD SCORE"/></Text><Text style={s.scorePillValue}>{score?.total??0}%</Text></Pressable></View></View>
 
   <View style={s.heroEditorial}>
-   {d.heroPhotoId&&mediaToken?
-    <Image source={{uri:API+"/api/media/"+d.heroPhotoId,headers:{Authorization:"Bearer "+mediaToken}}} resizeMode="cover" style={s.heroPhoto}/>:
-    <View style={s.heroEmpty}><View style={s.heroOrb}/><View style={s.heroOrbInside}/></View>}
-   <LinearGradient colors={["#080A0B33","#080A0B5C","#080A0BF9"]} locations={[0,.48,1]} style={s.heroShade}/>
+   {d.heroPhotoId&&mediaToken&&!photoFailed?
+    <Image source={{uri:API+"/api/media/"+d.heroPhotoId,headers:{Authorization:"Bearer "+mediaToken}}} resizeMode="cover" style={s.heroPhoto} onError={()=>setPhotoFailed(true)}/>:
+    <View style={s.heroEmpty}>
+     <View style={s.heroArt}><Text style={s.heroArtText}>B<Text style={s.heroArtVolt}>D</Text></Text><View style={s.heroArtLine}/><Text style={s.heroArtSub}>DIE NÄCHSTE VERSION DEINER SELBST.</Text></View>
+     <Pressable accessibilityRole="button" onPress={()=>router.push("/progress-photos")} style={s.heroPhotoLink}>
+      <Text style={s.heroPhotoLinkText}><Copy text="PERSÖNLICHES BILD HINZUFÜGEN ↗"/></Text>
+     </Pressable>
+    </View>} 
+   <LinearGradient pointerEvents="none" colors={["#080A0B33","#080A0B5C","#080A0BF9"]} locations={[0,.48,1]} style={s.heroShade}/>
    <View style={s.heroCopy}>
     <Text style={s.eyebrow}><Copy text="DEIN ATHLETEN DASHBOARD"/></Text>
     <Text style={s.heroName}>{(d.user.name||"ATHLET").toUpperCase()}</Text>
@@ -123,7 +129,14 @@ const s=StyleSheet.create({
 
  heroEditorial:{height:335,backgroundColor:"#0B1011",overflow:"hidden",position:"relative",justifyContent:"flex-end",marginHorizontal:-16,marginTop:-3},
  heroPhoto:{position:"absolute",width:"100%",height:"100%",top:0,left:0},
- heroEmpty:{position:"absolute",top:0,right:0,bottom:0,left:0,backgroundColor:"#0E1615"},
+ heroEmpty:{position:"absolute",top:0,right:0,bottom:0,left:0,backgroundColor:"#0E1615",overflow:"hidden"},
+ heroArt:{position:"absolute",right:-7,top:27,alignItems:"flex-end",opacity:.55},
+ heroArtText:{fontFamily:"Archivo",fontSize:167,letterSpacing:-12,color:"#31443B",lineHeight:180},
+ heroArtVolt:{color:"#6A8B3D"},
+ heroArtLine:{width:190,height:2,backgroundColor:"#778D51",marginTop:-20},
+ heroArtSub:{fontFamily:"ManropeSemiBold",fontSize:7,color:"#B9D2A9",letterSpacing:1.2,marginTop:13,marginRight:18},
+ heroPhotoLink:{position:"absolute",right:16,top:16,zIndex:10,paddingHorizontal:11,paddingVertical:9,borderWidth:1,borderColor:"#78924977",backgroundColor:"#14201ADD",borderRadius:4},
+ heroPhotoLinkText:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:8,letterSpacing:.5},
  heroOrb:{position:"absolute",width:250,height:250,right:-70,top:5,borderRadius:125,borderWidth:1,borderColor:"#45615750",backgroundColor:"#19292636"},
  heroOrbInside:{position:"absolute",width:120,height:120,right:0,top:80,borderRadius:60,borderWidth:1,borderColor:"#8EBA8340"},
  heroShade:{position:"absolute",width:"100%",height:"100%",top:0,left:0},
@@ -169,7 +182,7 @@ const s=StyleSheet.create({
  quickArrow:{fontFamily:"Archivo",fontSize:21,color:C.volt},
 
  safe:{flex:1,backgroundColor:C.bg},content:{padding:16,paddingBottom:108,gap:12},center:{flex:1,backgroundColor:C.bg,alignItems:"center",justifyContent:"center"},
- top:{height:52,flexDirection:"row",justifyContent:"space-between",alignItems:"center"},scorePill:{minWidth:92,borderRadius:20,borderWidth:1,borderColor:"#D4FF0050",paddingVertical:6,paddingHorizontal:10,alignItems:"flex-end"},scorePillAlert:{borderColor:"#FF566A88",backgroundColor:"#FF566A0D"},scorePillLabel:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:8,letterSpacing:1.2},scorePillValue:{color:C.ink,fontFamily:"Archivo",fontSize:18},
+ top:{height:58,flexDirection:"row",justifyContent:"space-between",alignItems:"center"},topActions:{flexDirection:"row",alignItems:"center",gap:7},scorePill:{minWidth:92,borderRadius:20,borderWidth:1,borderColor:"#D4FF0050",paddingVertical:6,paddingHorizontal:10,alignItems:"flex-end"},scorePillAlert:{borderColor:"#FF566A88",backgroundColor:"#FF566A0D"},scorePillLabel:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:8,letterSpacing:1.2},scorePillValue:{color:C.ink,fontFamily:"Archivo",fontSize:18},
  heroTwin:{position:"absolute",top:0,right:-12,opacity:.62},hero:{minHeight:242,justifyContent:"flex-end",paddingVertical:22,paddingHorizontal:2,overflow:"hidden"},athleteGhost:{position:"absolute",right:16,top:9,width:112,height:220,opacity:.16,alignItems:"center"},ghostHead:{width:38,height:38,borderRadius:19,borderWidth:2,borderColor:C.ink},ghostTorso:{width:72,height:95,borderTopLeftRadius:30,borderTopRightRadius:30,borderWidth:2,borderColor:C.ink,marginTop:5},ghostLegs:{width:54,height:66,borderLeftWidth:2,borderRightWidth:2,borderColor:C.ink,marginTop:3},eyebrow:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:2.2},heroName:{color:C.ink,fontFamily:"Archivo",fontSize:48,lineHeight:49,letterSpacing:-1.4,marginTop:8,maxWidth:"78%"},morningLine:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:15,lineHeight:22,maxWidth:300,marginTop:16},focusLink:{color:C.red,fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:1.15,marginTop:13},
  priority:{borderLeftWidth:3,borderLeftColor:C.red,paddingHorizontal:16,paddingVertical:13,backgroundColor:"#2A1115"},priorityCritical:{backgroundColor:"#3A1017"},priorityKicker:{color:C.red,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.8},priorityTitle:{color:C.ink,fontFamily:"Archivo",fontSize:20,marginTop:4},priorityCopy:{color:C.dim,fontFamily:"Manrope",fontSize:12,lineHeight:18,marginTop:5},
  scoreCard:{padding:18},scoreTop:{flexDirection:"row",alignItems:"center",justifyContent:"space-between"},scoreIdentity:{flex:1,gap:8},scoreCaption:{fontFamily:"Archivo",fontSize:19,color:C.ink,maxWidth:145,lineHeight:22},data:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.4},signature:{width:140,height:148,alignItems:"center",justifyContent:"center"},signatureSvg:{position:"absolute",top:0},signatureCenter:{position:"absolute",top:37,width:140,alignItems:"center"},signatureValue:{fontVariant:["tabular-nums"],color:C.ink,fontFamily:"Archivo",fontSize:42,letterSpacing:-1},signaturePercent:{fontFamily:"Manrope",fontSize:18},signatureLevel:{fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:.4},explosion:{position:"absolute",top:75,left:69,width:2,height:2},spark:{position:"absolute",width:3,height:14,borderRadius:2,backgroundColor:C.volt},truly:{position:"absolute",bottom:0,color:C.volt,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.6},
