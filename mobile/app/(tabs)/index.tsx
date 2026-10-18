@@ -25,12 +25,13 @@ function Bar({value,max,accent=C.volt}:{value:number;max:number;accent?:string})
 export default function Home(){
  const [d,setD]=useState<any>(null),[gamification,setGamification]=useState<any>(null),[refreshing,setRefreshing]=useState(false),[syncing,setSyncing]=useState(false);
  const [mediaToken,setMediaToken]=useState<string|null>(null);
+ const [photoFailed,setPhotoFailed]=useState(false);
  const load=useCallback(async()=>{
   const [dash,game]=await Promise.all([
    api<any>("/api/mobile/dashboard"),
    api<any>("/api/gamification").catch(()=>null)
   ]);
-  setD(dash);setGamification(game);getSession().then(setMediaToken).catch(()=>{});syncHomeWidget(dash).catch(()=>{});registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});
+  setPhotoFailed(false);setD(dash);setGamification(game);getSession().then(setMediaToken).catch(()=>{});syncHomeWidget(dash).catch(()=>{});registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});
  },[]);
  useFocusEffect(useCallback(()=>{load().catch(()=>{})},[load]));
  async function refresh(){setRefreshing(true);await load().catch(()=>{});setRefreshing(false)}
@@ -48,9 +49,14 @@ export default function Home(){
   <View style={s.top}><Brand compact/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,(score?.total??0)<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}><Copy text="BD SCORE"/></Text><Text style={s.scorePillValue}>{score?.total??0}%</Text></Pressable></View>
 
   <View style={s.heroEditorial}>
-   {d.heroPhotoId&&mediaToken?
-    <Image source={{uri:API+"/api/media/"+d.heroPhotoId,headers:{Authorization:"Bearer "+mediaToken}}} resizeMode="cover" style={s.heroPhoto}/>:
-    <View style={s.heroEmpty}><View style={s.heroOrb}/><View style={s.heroOrbInside}/></View>}
+   {d.heroPhotoId&&mediaToken&&!photoFailed?
+    <Image source={{uri:API+"/api/media/"+d.heroPhotoId,headers:{Authorization:"Bearer "+mediaToken}}} resizeMode="cover" style={s.heroPhoto} onError={()=>setPhotoFailed(true)}/>:
+    <View style={s.heroEmpty}>
+     <View style={s.heroArt}><Text style={s.heroArtText}>B<Text style={s.heroArtVolt}>D</Text></Text><View style={s.heroArtLine}/><Text style={s.heroArtSub}>DIE NÄCHSTE VERSION DEINER SELBST.</Text></View>
+     <Pressable accessibilityRole="button" onPress={()=>router.push("/progress-photos")} style={s.heroPhotoLink}>
+      <Text style={s.heroPhotoLinkText}><Copy text="PERSÖNLICHES BILD HINZUFÜGEN ↗"/></Text>
+     </Pressable>
+    </View>} 
    <LinearGradient colors={["#080A0B33","#080A0B5C","#080A0BF9"]} locations={[0,.48,1]} style={s.heroShade}/>
    <View style={s.heroCopy}>
     <Text style={s.eyebrow}><Copy text="DEIN ATHLETEN DASHBOARD"/></Text>
@@ -123,7 +129,14 @@ const s=StyleSheet.create({
 
  heroEditorial:{height:335,backgroundColor:"#0B1011",overflow:"hidden",position:"relative",justifyContent:"flex-end",marginHorizontal:-16,marginTop:-3},
  heroPhoto:{position:"absolute",width:"100%",height:"100%",top:0,left:0},
- heroEmpty:{position:"absolute",top:0,right:0,bottom:0,left:0,backgroundColor:"#0E1615"},
+ heroEmpty:{position:"absolute",top:0,right:0,bottom:0,left:0,backgroundColor:"#0E1615",overflow:"hidden"},
+ heroArt:{position:"absolute",right:-7,top:27,alignItems:"flex-end",opacity:.55},
+ heroArtText:{fontFamily:"Archivo",fontSize:167,letterSpacing:-12,color:"#31443B",lineHeight:180},
+ heroArtVolt:{color:"#6A8B3D"},
+ heroArtLine:{width:190,height:2,backgroundColor:"#778D51",marginTop:-20},
+ heroArtSub:{fontFamily:"ManropeSemiBold",fontSize:7,color:"#B9D2A9",letterSpacing:1.2,marginTop:13,marginRight:18},
+ heroPhotoLink:{position:"absolute",right:16,top:16,zIndex:10,paddingHorizontal:11,paddingVertical:9,borderWidth:1,borderColor:"#78924977",backgroundColor:"#14201ADD",borderRadius:4},
+ heroPhotoLinkText:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:8,letterSpacing:.5},
  heroOrb:{position:"absolute",width:250,height:250,right:-70,top:5,borderRadius:125,borderWidth:1,borderColor:"#45615750",backgroundColor:"#19292636"},
  heroOrbInside:{position:"absolute",width:120,height:120,right:0,top:80,borderRadius:60,borderWidth:1,borderColor:"#8EBA8340"},
  heroShade:{position:"absolute",width:"100%",height:"100%",top:0,left:0},
