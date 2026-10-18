@@ -1,15 +1,14 @@
 {
   "enabled": true,
   "app_identifier": "com.smarbiz.bedifferent",
-  "version_name": "1.2.4",
-  "build_number": 16,
+  "version_name": "1.2.5",
+  "build_number": 17,
   "platforms": [
-    "ios",
     "android"
   ],
   "android_track": "production",
   "auto_submit": true,
-  "release_notes": "BE DIFFERENT 1.2.4: Verbesserte Anmeldung mit lesbarer Darstellung, zuverlässiger Profilnavigation und klarer Kontoverwaltung. Überarbeitete Athletenansicht mit Foto-Fallback, direktem Bildzugriff und neuer Sprachauswahl im Dashboard.",
+  "release_notes": "BE DIFFERENT 1.2.5: Korrigierte Android-Navigation. Die fünf Tabs bleiben auch auf Android 16 mit Gestensteuerung oder drei Navigationstasten vollständig sichtbar. Dunkle Systemleiste und optimierte Abstände für alle mobilen Ansichten.",
   "source_branch": "main",
   "request_revision": 1
 }
