@@ -9,6 +9,20 @@ import {api} from "./api";
 
 let tokenUnsubscribe:(()=>void)|null=null;
 let navigationInstalled=false;
+let pushNavigationReady=false;
+let pendingPushRoute:string|null=null;
+
+export function setPushNavigationReady(ready:boolean){
+  pushNavigationReady=ready;
+  if(!ready||!pendingPushRoute)return;
+  const route=pendingPushRoute;
+  pendingPushRoute=null;
+  try{router.push(route as any)}
+  catch(error){
+    pendingPushRoute=route;
+    console.warn("[push] deferred navigation",error);
+  }
+}
 
 function nativeRoute(route?:string){
   if(!route)return null;
@@ -26,7 +40,18 @@ function nativeRoute(route?:string){
 }
 function openMessage(message:any){
   const path=nativeRoute(String(message?.data?.route||""));
-  if(path)router.push(path as any);
+  if(!path)return;
+  if(!pushNavigationReady){
+    // Cold-start pushes can arrive during the launch animation,
+    // before Expo Router has mounted its root navigator.
+    pendingPushRoute=path;
+    return;
+  }
+  try{router.push(path as any)}
+  catch(error){
+    pendingPushRoute=path;
+    console.warn("[push] navigation postponed",error);
+  }
 }
 
 export async function registerPush(){
@@ -54,14 +79,37 @@ export async function registerPush(){
 
 export function installPushHandlers(){
   if(navigationInstalled)return()=>{};
-  navigationInstalled=true;
-  const messaging=getMessaging(getApp());
-  const unsubOpen=onNotificationOpenedApp(messaging,openMessage);
-  const unsubForeground=onMessage(messaging,async message=>{
-    const title=message.notification?.title||"BE DIFFERENT";
-    const body=message.notification?.body||"";
-    Alert.alert(title,body,[{text:"OK"},{text:"ÖFFNEN",onPress:()=>openMessage(message)}]);
-  });
-  getInitialNotification(messaging).then(message=>{if(message)setTimeout(()=>openMessage(message),300)}).catch(()=>undefined);
-  return()=>{unsubOpen();unsubForeground();navigationInstalled=false};
+  let messaging:ReturnType<typeof getMessaging>;
+  try{
+    messaging=getMessaging(getApp());
+  }catch(error){
+    // Push is optional and must never block launch if Firebase is unavailable.
+    console.warn("[push] Firebase not ready; skipping push listeners",error);
+    return()=>{};
+  }
+  let unsubOpen:()=>void=()=>{};
+  let unsubForeground:()=>void=()=>{};
+  try{
+    unsubOpen=onNotificationOpenedApp(messaging,openMessage);
+    unsubForeground=onMessage(messaging,message=>{
+      const title=message.notification?.title||"BE DIFFERENT";
+      const body=message.notification?.body||"";
+      Alert.alert(title,body,[{text:"OK"},{text:"ÖFFNEN",onPress:()=>openMessage(message)}]);
+    });
+    navigationInstalled=true;
+    void getInitialNotification(messaging)
+      .then(message=>{if(message)openMessage(message)})
+      .catch(error=>console.warn("[push] initial notification unavailable",error));
+  }catch(error){
+    console.warn("[push] listener initialization failed",error);
+    try{unsubOpen()}catch{}
+    try{unsubForeground()}catch{}
+    navigationInstalled=false;
+    return()=>{};
+  }
+  return()=>{
+    try{unsubOpen()}catch{}
+    try{unsubForeground()}catch{}
+    navigationInstalled=false;
+  };
 }
