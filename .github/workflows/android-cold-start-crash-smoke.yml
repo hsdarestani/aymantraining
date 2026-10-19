@@ -1,0 +1,86 @@
+name: BE DIFFERENT Android Cold Start Crash Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - mobile/lib/push.ts
+      - mobile/app/_layout.tsx
+      - mobile/components/LaunchIntro.tsx
+      - .github/workflows/android-cold-start-crash-smoke.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bedifferent-android-cold-start
+  cancel-in-progress: true
+
+jobs:
+  launch-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Setup KVM
+        run: |
+          if test -e /dev/kvm; then
+            sudo chmod 666 /dev/kvm
+          else
+            echo "KVM device unavailable, emulator runner will report if it cannot boot."
+          fi
+      - name: Install and prebuild
+        run: |
+          npm ci
+          CI=1 npx expo prebuild --platform android --clean --non-interactive
+          chmod +x android/gradlew
+          ./android/gradlew -p android --no-daemon :app:assembleDebug
+      - name: Repeated cold starts and Android crash capture
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          working-directory: mobile
+          script: |
+            set -euo pipefail
+            mkdir -p build/crash-smoke
+            adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+            package=com.smarbiz.bedifferent
+            for attempt in $(seq 1 10); do
+              adb shell am force-stop "$package"
+              adb logcat -c
+              adb shell monkey -p "$package" -c android.intent.category.LAUNCHER 1 > /dev/null
+              sleep 9
+              adb logcat -d -v time > "build/crash-smoke/launch-$attempt.log"
+              if grep -E -A 16 'FATAL EXCEPTION|Fatal signal|Force finishing activity.*com.smarbiz.bedifferent' "build/crash-smoke/launch-$attempt.log" > "build/crash-smoke/fatal-$attempt.txt"; then
+                echo "Android crash on launch $attempt"
+                cat "build/crash-smoke/fatal-$attempt.txt"
+                exit 1
+              fi
+              if ! adb shell pidof "$package" >/dev/null; then
+                echo "App process exited during cold start $attempt"
+                exit 1
+              fi
+              echo "Launch $attempt stable"
+            done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bedifferent-android-launch-logcat
+          path: mobile/build/crash-smoke
+          retention-days: 7
