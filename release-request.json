@@ -1,15 +1,15 @@
 {
   "enabled": true,
   "app_identifier": "com.smarbiz.bedifferent",
-  "version_name": "1.2.7",
-  "build_number": 18,
+  "version_name": "1.2.8",
+  "build_number": 19,
   "platforms": [
     "ios",
     "android"
   ],
   "android_track": "production",
   "auto_submit": true,
-  "release_notes": "BE DIFFERENT 1.2.7: Neuer animierter Startbildschirm mit fließendem Fortschrittsbalken, sanften Lichtreflexen und lebendigen Farbverläufen. Verbesserte Darstellung beim Appstart.",
+  "release_notes": "BE DIFFERENT 1.2.8: Verbesserte Stabilität beim Appstart und Seitenwechsel. Die Startanimation wurde für Android optimiert. Verbesserte Behandlung von Push-Benachrichtigungen.",
   "source_branch": "main",
-  "request_revision": 2
+  "request_revision": 3
 }
