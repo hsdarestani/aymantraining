@@ -2,6 +2,7 @@ import {useFonts} from "expo-font";
 import {LanguagePicker} from "../components/Locale";
 import {restoreLocale} from "../lib/i18n/locale";
 import {useEffect,useState} from "react";
+import {StyleSheet,View} from "react-native";
 import {Stack} from "expo-router";
 import {StatusBar} from "expo-status-bar";
 import {installPushHandlers,setPushNavigationReady} from "../lib/push";
@@ -22,6 +23,15 @@ export default function Layout(){
     return()=>{clearTimeout(timer);setPushNavigationReady(false)};
   },[ready]);
   if(!fontsLoaded&&!fontError)return <StatusBar style="light"/>;
-  if(!ready)return <><StatusBar style="light"/><LaunchIntro onDone={()=>setReady(true)}/></>;
-  return <><StatusBar style="light"/><Stack screenOptions={{headerShown:false,contentStyle:{backgroundColor:C.bg},animation:"fade_from_bottom",animationDuration:260}}/><NativeChrome/><LanguagePicker/></>;
+  // Keep the navigator mounted under the splash. Replacing the whole React
+  // tree as Fabric/Reanimated finishes an animation can produce stale
+  // viewState tags on Android (RetryableMountingLayerException).
+  return <>
+    <StatusBar style="light"/>
+    <Stack screenOptions={{headerShown:false,contentStyle:{backgroundColor:C.bg},animation:"fade_from_bottom",animationDuration:260}}/>
+    {ready?<><NativeChrome/><LanguagePicker/></>:null}
+    {!ready?<View pointerEvents="auto" style={[StyleSheet.absoluteFillObject,{zIndex:100}]}>
+      <LaunchIntro onDone={()=>setReady(true)}/>
+    </View>:null}
+  </>;
 }
