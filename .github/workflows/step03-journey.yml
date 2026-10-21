@@ -38,6 +38,8 @@ jobs:
       NODE_ENV: test
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -46,8 +48,22 @@ jobs:
       - run: npx prisma generate
       - name: Validate schema and TypeScript
         run: npm run check
-      - name: Additive schema on isolated PostgreSQL
+      - name: Recreate legacy schema with existing data
+        run: |
+          git show origin/main:prisma/schema.prisma > prisma/legacy-journey-schema.prisma
+          npx prisma db push --schema prisma/legacy-journey-schema.prisma
+          node scripts/test-journey-legacy.mjs seed
+      - name: Reject destructive DDL
+        run: |
+          npx prisma migrate diff --from-schema-datamodel prisma/legacy-journey-schema.prisma --to-schema-datamodel prisma/schema.prisma --script > /tmp/bedifferent-step03-migration.sql
+          if grep -Ei 'DROP (TABLE|COLUMN|TYPE)|ALTER TABLE .* DROP' /tmp/bedifferent-step03-migration.sql; then
+            echo "Destructive migration statements are not allowed" >&2
+            exit 1
+          fi
+      - name: Apply additive schema to existing rows
         run: npx prisma db push
+      - name: Verify existing records survive
+        run: node scripts/test-journey-legacy.mjs verify
       - name: Verify pathway lifecycle and legacy data
         run: node scripts/test-journey-step03.mjs
       - name: Existing feature contracts
