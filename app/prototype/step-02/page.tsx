@@ -69,6 +69,8 @@ export default function Step02Prototype(){
   const [cycleEnabled,setCycleEnabled] = useState(false);
   const [shareWithCoach,setShareWithCoach] = useState(false);
   const [cycleDay,setCycleDay] = useState(12);
+  const [periodStart,setPeriodStart] = useState("");
+  const [periodEnd,setPeriodEnd] = useState("");
   const [energy,setEnergy] = useState("mittel");
   const [symptom,setSymptom] = useState("keine");
   const [cycleAction,setCycleAction] = useState("Leichtere Einheit");
@@ -127,6 +129,8 @@ export default function Step02Prototype(){
     setCycleEnabled(false);
     setShareWithCoach(false);
     setCycleDay(12);
+    setPeriodStart("");
+    setPeriodEnd("");
     setEnergy("mittel");
     setSymptom("keine");
     setCycleAction("Leichtere Einheit");
@@ -291,7 +295,7 @@ export default function Step02Prototype(){
           <h1>Dein Körper.<br/><em>Deine Entscheidung.</em></h1><p className="bdp-lead">Diese Demo zeigt die Datenschutz- und Wahlmöglichkeiten. Es erfolgt keine medizinische Bewertung und es werden keine Zyklusdaten an einen Server gesendet.</p>
           <div className="bdp-panel"><div className="bdp-card-top"><Tag kind="optional">SPÄTERER AUSBAU · GESONDERT FREIZUGEBEN</Tag><b>{cycleEnabled?"DEMO EIN":"DEMO AUS"}</b></div>
             <label className="bdp-check"><input type="checkbox" checked={cycleEnabled} onChange={e=>{if(e.target.checked){setCycleEnabled(true)}else resetCycle()}}/><span>Ich möchte freiwillig Zyklusinformationen in diesem Prototyp eingeben. Die Angaben bleiben ausschließlich im lokalen, temporären Demo-Zustand.</span></label>
-            {cycleEnabled&&<><div className="bdp-calendar-header"><h3>Beispielkalender</h3><small>AKTIVER DEMOTAG: {cycleDay}</small></div><div className="bdp-calendar">{Array.from({length:28},(_,i)=><button key={i} className={cycleDay===i+1?"selected":""} onClick={()=>setCycleDay(i+1)}>{i+1}</button>)}</div>
+            {cycleEnabled&&<><div className="bdp-test-grid"><label>Beginn der Periode <input type="date" value={periodStart} onChange={e=>setPeriodStart(e.target.value)}/></label><label>Ende der Periode <input type="date" min={periodStart||undefined} value={periodEnd} onChange={e=>setPeriodEnd(e.target.value)}/></label></div><div className="bdp-calendar-header"><h3>Beispielkalender</h3><small>AKTIVER DEMOTAG: {cycleDay}</small></div><div className="bdp-calendar">{Array.from({length:28},(_,i)=><button key={i} className={cycleDay===i+1?"selected":""} onClick={()=>setCycleDay(i+1)}>{i+1}</button>)}</div>
               <div className="bdp-test-grid"><label>Energie <select value={energy} onChange={e=>setEnergy(e.target.value)}><option value="niedrig">Niedrig</option><option value="mittel">Mittel</option><option value="hoch">Hoch</option></select></label><label>Befinden <select value={symptom} onChange={e=>setSymptom(e.target.value)}><option value="keine">Keine Beschwerden angegeben</option><option value="krämpfe">Krämpfe</option><option value="müdigkeit">Müdigkeit</option><option value="andere">Anderes</option></select></label></div>
               <div className="bdp-field-label">WAS MÖCHTEST DU HEUTE MACHEN?</div><div className="bdp-choice-row">{["Geplantes Training","Leichtere Einheit","Erholung"].map(item=><button key={item} aria-pressed={cycleAction===item} className={"bdp-segment"+(cycleAction===item?" active":"")} onClick={()=>setCycleAction(item)}>{item}</button>)}</div>
               <div className="bdp-info">Deine Auswahl: <b>{cycleAction}</b>. Die App darf Training nicht automatisch allein wegen eines Kalendertages reduzieren. Schätzungen sind kein Verhütungsinstrument.</div>
