@@ -72,7 +72,7 @@ test("five levels and multi goal selectors are visible in enabled web onboarding
   await expect(page.locator(".journey-level.selected")).toHaveCount(0);
   await page.locator(".journey-level").last().click();
   await expect(page.locator(".journey-level.selected")).toContainText("TRULY DIFFERENT");
-  await expect(page.getByText(/schaltet noch keine Kapitel/)).toBeVisible();
+  await expect(page.getByText(/öffnet noch keine Kapitel/)).toBeVisible();
 });
 test("unknown combination persists without inventing or unlocking a path",async({request})=>{
   const response=await request.post(base+"/api/onboarding/complete",{data:{
