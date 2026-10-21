@@ -859,6 +859,7 @@ model JourneyPathwayVersion {
   notes       String?
   publishedAt DateTime?
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   pathway     JourneyPathway @relation(fields:[pathwayId],references:[id],onDelete:Restrict)
   levels      JourneyLevelDefinition[]
   assessments JourneyAssessment[]
