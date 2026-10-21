@@ -36,6 +36,7 @@ enum MediaKind {
 
 model User {
   reviewedPathwayTests JourneyTestAttempt[] @relation("PathwayTestReviewer")
+  journeyIntake JourneyIntake?
   pathwayEnrollments JourneyEnrollment[]
   id                  String           @id @default(cuid())
   email               String           @unique
@@ -1056,4 +1057,34 @@ model JourneyLevelAward {
 
   @@unique([enrollmentId,levelId])
   @@index([levelId])
+}
+
+
+// Initial self-assessment survives while the coach prepares a matching published
+// pathway. It is independent of confirmed level and never grants access.
+enum JourneyIntakeStatus {
+  PENDING_PATHWAY
+  PENDING_PLACEMENT
+  CONFIRMED
+}
+
+enum JourneyDashboard {
+  GENERAL
+  WOMEN
+}
+
+model JourneyIntake {
+  id                String @id @default(cuid())
+  userId            String @unique
+  selectedGoalSlugs String[]
+  selfLevel         JourneyLevel
+  status            JourneyIntakeStatus @default(PENDING_PATHWAY)
+  dashboard         JourneyDashboard @default(GENERAL)
+  matchedVersionId  String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User @relation(fields:[userId],references:[id],onDelete:Restrict)
+
+  @@index([status,createdAt])
+  @@index([matchedVersionId])
 }
