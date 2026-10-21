@@ -38,7 +38,7 @@ function RenderAssessment({value,onChange,onRemove,readOnly}:{value:Test;onChang
     <label>Wiederholung frühestens nach (Stunden)<input disabled={readOnly} type="number" min={0} max={8760} value={value.retestRules?.minHoursAfterFailure??0} onChange={e=>change(x=>{x.retestRules={...x.retestRules,minHoursAfterFailure:Number(e.target.value)}})}/></label>
     <label>Hinweis nach Nichtbestehen<input disabled={readOnly} value={value.retestRules?.guidanceDe??""} onChange={e=>change(x=>{x.retestRules={...x.retestRules,minHoursAfterFailure:x.retestRules?.minHoursAfterFailure??0,guidanceDe:e.target.value}})}/></label>
    </div>
-   <label className="journey-check"><input disabled={readOnly} type="checkbox" checked={value.approved} onChange={e=>change(x=>{x.approved=e.target.checked})}/> Kriterien von Coach fachlich geprüft und freigegeben</label>
+   <label className="journey-check"><input disabled={readOnly} type="checkbox" checked={value.approved} onChange={e=>change(x=>{x.approved=e.target.checked})}/> Kriterien durch Trainer fachlich geprüft und freigegeben</label>
   </div>;
  }
 
