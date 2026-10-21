@@ -28,7 +28,7 @@ Security assumptions: COACH and ADMIN roles share the curriculum catalog, but at
 * GET/POST /api/admin/journeys — list/create curated paths.
 * GET/PUT /api/admin/journeys/[versionId] — load/edit **DRAFT** only; requires revision timestamp, rejects stale edits.
 * POST /api/admin/journeys/[versionId]/publish — check curriculum, publish exactly once and register matching waiting intake requests.
-* POST /api/admin/journeys/[id]/clone — clone latest published version to a new draft without changing earlier enrollments.
+* POST /api/admin/journeys/clone with {pathwayId} — clone latest published version to a new draft without changing earlier enrollments.
 * /api/media and /api/media/[id] — coach-uploaded exercise media and chapter-aware access.
 
 All mutating API routes require same-origin requests and a logged-in coach/admin role. The database operations are transactional. Client-side UI checks are not relied upon for security.
