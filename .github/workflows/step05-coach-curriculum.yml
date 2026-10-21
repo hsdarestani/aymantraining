@@ -68,3 +68,27 @@ jobs:
         run: node scripts/test-journey-step03.mjs
       - name: Production build
         run: npm run build
+      - name: Install browser test runtime
+        run: npx playwright install --with-deps chromium
+      - name: Start isolated Next.js app
+        run: |
+          NODE_ENV=production npm start > /tmp/step05-web.log 2>&1 &
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:3000/admin/journeys >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/step05-web.log
+          exit 1
+      - name: Coach UI and authorization browser tests
+        run: npx playwright test tests/browser/step05-journey-editor.spec.mjs --workers=1
+      - name: Upload browser diagnostic artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: step05-coach-browser-qa
+          path: |
+            playwright-report
+            test-results
+      - name: Print server errors
+        if: failure()
+        run: cat /tmp/step05-web.log || true
