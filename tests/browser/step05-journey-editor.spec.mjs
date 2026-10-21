@@ -52,6 +52,14 @@ test("coach creates a combined journey, edits level chapter, saves and reloads w
  await page.getByRole("button",{name:"VERÖFFENTLICHEN"}).click();
  await expect(page.getByRole("alert")).toContainText("Mindestens ein Trainingskapitel");
 });
+test("new PRO video linked to a chapter is not publicly accessible",async({request})=>{
+ const record=await db.chapterMediaVariant.findFirst({
+  where:{role:"EXPLANATION_VIDEO"},orderBy:{id:"desc"},select:{mediaAssetId:true}
+ });
+ expect(record).not.toBeNull();
+ const response=await request.get(root+"/api/media/"+record.mediaAssetId);
+ expect(response.status()).toBe(401);
+});
 test("an athlete cannot use coach curriculum APIs",async({request})=>{
  const list=await request.get(root+"/api/admin/journeys");
  expect(list.status()).toBe(401);
