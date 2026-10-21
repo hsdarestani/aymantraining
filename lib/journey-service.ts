@@ -142,6 +142,16 @@ export async function submitJourneyAssessment(args:{
     }else{
       if(enrollment.state!=="PENDING"||assessment.chapterId)refuse("Einstufungstest gehört nicht zum offenen Einstieg.");
     }
+    const previouslyPassed=await tx.journeyTestAttempt.findFirst({
+      where:{enrollmentId:enrollment.id,assessmentId:assessment.id,verdict:"PASSED"},
+      select:{id:true}
+    });
+    if(previouslyPassed)refuse("Dieser Test wurde bereits bestanden.");
+    const pending=await tx.journeyTestAttempt.findFirst({
+      where:{enrollmentId:enrollment.id,assessmentId:assessment.id,verdict:"PENDING"},
+      select:{id:true}
+    });
+    if(pending)refuse("Dein vorheriger Test wird noch vom Trainer geprüft.");
     const rules=assessment.retestRules?journeyRetestSchema.parse(assessment.retestRules):null;
     if(rules&&rules.minHoursAfterFailure>0){
       const prior=await tx.journeyTestAttempt.findFirst({
@@ -152,7 +162,7 @@ export async function submitJourneyAssessment(args:{
     return tx.journeyTestAttempt.create({data:{
       enrollmentId:enrollment.id,assessmentId:assessment.id,idempotencyKey:args.idempotencyKey,results:parsed
     }});
-  });
+  },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable});
 }
 
 /** Only an assigned coach/admin can finalize an attempt and grant one next chapter. */
@@ -180,6 +190,9 @@ export async function reviewJourneyAttempt(args:{
       data:{verdict,feedback:{...score,coachFeedbackDe:args.coachFeedbackDe??""},
         reviewedById:args.reviewerId,reviewedAt:new Date()}});
     if(claim.count!==1)refuse("Testversuch wird bereits geprüft.");
+    const retest=attempt.assessment.retestRules?journeyRetestSchema.parse(attempt.assessment.retestRules):null;
+    const nextRetestAt=verdict==="FAILED"&&retest?.minHoursAfterFailure?
+      new Date(Date.now()+retest.minHoursAfterFailure*3600000).toISOString():null;
     let nextChapterId:string|null=null;
     let nextLevel:JourneyLevel|null=null;
     if(verdict==="PASSED"&&attempt.assessment.kind==="CHAPTER_FINAL"&&attempt.assessment.chapterId){
@@ -218,7 +231,8 @@ export async function reviewJourneyAttempt(args:{
         await tx.journeyEnrollment.update({where:{id:attempt.enrollmentId},data:{state:"FINISHED",endedAt:new Date()}});
       }
     }
-    return {verdict,score,nextChapterId,nextLevel,replayed:false};
+    return {verdict,score,nextChapterId,nextLevel,nextRetestAt,
+      guidanceDe:verdict==="FAILED"?(retest?.guidanceDe??"Wiederhole die Grundlagen und versuche es erneut."):"",replayed:false};
   });
 }
 

@@ -144,6 +144,10 @@ export default async function Dashboard(){
       <b><Copy text={nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></b>
     </Link>
 
+    {process.env.JOURNEY_TESTS_ENABLED==="true"&&<Link href="/journey/tests" className="bd-workout-card">
+      <span>DEIN TRAININGSWEG</span><h2>KAPITEL & AUFSTIEGSTESTS</h2>
+      <p>Dein bestätigter Trainingsstand, deine Prüfungen und die nächsten Schritte.</p><b>ANSEHEN →</b>
+    </Link>}
     <section className="bd-quick-lines">
       <Link href="/awake"><span><Copy text="BE AWAKE"/></span><strong><Copy text="Morgenroutine · Tagesstart"/></strong><b>→</b></Link>
       <Link href="/wearables"><span><Copy text="GADGETS"/></span><strong>Apple · Samsung · Xiaomi</strong><b>→</b></Link>

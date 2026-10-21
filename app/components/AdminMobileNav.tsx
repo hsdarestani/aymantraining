@@ -11,6 +11,7 @@ const links=[
   ["/admin/customers","Kunden"],
   ["/admin/plans","Trainingspläne"],
   ["/admin/journeys","Trainingswege"],
+  ["/admin/journey-tests","Aufstiegstests"],
   ["/admin/exercises","Übungen"],
   ["/admin/tests","Tests"],
   ["/admin/inbox","Nachrichten"],

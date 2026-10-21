@@ -1,0 +1,29 @@
+.journey-review-page{max-width:1250px;margin:auto;padding:28px clamp(14px,3vw,35px) 100px}
+.journey-review-page .admin-header{display:flex;justify-content:space-between;flex-wrap:wrap;gap:15px}
+.journey-review-page .admin-header h1{font-size:clamp(25px,4vw,43px);margin:8px 0}
+.journey-review-page .admin-header p{max-width:620px;color:#aabbb0;line-height:1.6}
+.j6-review-workspace{display:grid;gap:20px}
+.j6-review-workspace>.panel{padding:clamp(16px,2.5vw,27px)}
+.j6-review-title{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.j6-review-title h2{font-size:22px;margin:10px 0}
+.j6-review-title>span{color:#d4ff00}
+.j6-review-cards{display:grid;gap:14px;margin-top:17px}
+.j6-review-card,.j6-placement{background:#182320;border:1px solid #435747;border-radius:10px;padding:clamp(14px,2vw,23px)}
+.j6-review-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:13px}
+.j6-review-top h3{font-size:22px;margin:8px 0}
+.j6-review-top p,.j6-review-top small,.j6-review-workspace .muted{color:#a6b5aa;font-size:12px;line-height:1.6}
+.j6-review-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:18px 0}
+.j6-review-columns>div{min-width:0}
+.j6-review-columns h4{font-size:12px}
+.j6-review-columns pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;color:#e1ecd9;padding:14px;background:#0e1815;border:1px solid #324b3c;border-radius:9px}
+.j6-review-card label,.j6-placement label{display:block;font-size:12px;color:#c3d2c5}
+.j6-review-card textarea,.j6-placement select{display:block;width:100%;background:#0e1915;border:1px solid #526454;border-radius:7px;padding:12px;color:white;font:inherit;margin:9px 0 14px}
+.j6-review-card button{margin-top:10px}
+.j6-placement{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.j6-placement>div{flex:1;min-width:190px}
+.j6-placement strong,.j6-placement small{display:block}
+.j6-placement small{color:#acc1b0;font-size:11px;margin-top:8px}
+.j6-placement select{margin:8px 0 0}
+.j6-alert{padding:15px;color:#ffd6d7;border:1px solid #a9515f;border-radius:9px;background:#312024}
+.j6-success{padding:15px;color:#d4ffc8;border:1px solid #5d9156;border-radius:9px;background:#193321}
+@media(max-width:600px){.j6-review-columns{grid-template-columns:1fr}.j6-placement{align-items:stretch}.j6-placement label,.j6-placement button{width:100%}}

@@ -97,6 +97,12 @@ export default function Home(){
 
     <RhythmHorizon days={d.dayStrip||[]}/>
 
+  {process.env.EXPO_PUBLIC_JOURNEY_TESTS_ENABLED==="true"&&<Pressable accessibilityRole="button" onPress={()=>router.push("/journey-tests")} style={s.priority}>
+   <Text style={s.priorityKicker}>DEIN TRAININGSWEG</Text>
+   <Text style={s.priorityTitle}>KAPITEL & AUFSTIEGSTESTS →</Text>
+   <Text style={s.priorityCopy}>Sehe deine Freischaltungen, reiche Tests ein und lies Trainerfeedback.</Text>
+  </Pressable>}
+
   <View style={s.performanceStream}>
    <Pressable accessibilityRole="button" style={[s.streamRow,s.streamLead]} onPress={()=>router.push("/lifestyle")}>
     <Text style={s.streamInitial}>R</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="BE RESTED"/></Text><Text style={s.streamValue}>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</Text><Text style={s.streamNote}><Copy text="Schlaf und Erholung"/></Text></View><Text style={s.streamArrow}>→</Text>
