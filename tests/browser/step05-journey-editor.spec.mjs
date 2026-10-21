@@ -48,6 +48,7 @@ test("coach creates a combined journey, edits level chapter, saves and reloads w
   include:{versions:{include:{levels:{include:{chapters:{include:{assessments:true}}}}}}}});
  expect(saved.versions[0].state).toBe("DRAFT");
  expect(saved.versions[0].levels.find(x=>x.code==="READY").chapters).toHaveLength(1);
+ page.on("dialog",dialog=>dialog.accept());
  await page.getByRole("button",{name:"VERÖFFENTLICHEN"}).click();
  await expect(page.getByRole("alert")).toContainText("Mindestens ein Trainingskapitel");
 });
