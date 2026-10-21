@@ -60,10 +60,10 @@ test("FREE instructions and PRO coach video slot never bypass earned gates",asyn
 test("female dashboard is optional, cycle private and milestones skip on mobile",async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto(url);
-  await button(page,{name:"Weiblich"}).click();
+  await button(page,"Weiblich").click();
   await button(page,/FRAUENANSICHT VORSCHAUEN/).click();
   await expect(page.getByText("Ein persönlicher Frauenbereich")).toBeVisible();
-  await button(page,{name:"ALLGEMEINES DASHBOARD"}).click();
+  await button(page,"ALLGEMEINES DASHBOARD").click();
   await button(page,/OPTIONALES MODUL/).click();
   await expect(page.getByText("DEMO AUS")).toBeVisible();
   await page.locator(".bdp-check input").first().check();
