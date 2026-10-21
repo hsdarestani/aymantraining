@@ -83,7 +83,7 @@ export default function Home(){
    </View>
    <View style={s.radarPanel}>
     <ScoreRadar pillars={scorePillars}/>
-    <View style={s.radarFocus}><Text style={s.radarFocusTag}><Copy text="NÄCHSTER FOKUS"/></Text><Text style={s.radarFocusName}><Copy text={nextFocus?.label||"NOCH KEINE DATEN"}/></Text><Text style={s.radarFocusValue}>{nextFocus?.value==null?"—":Math.round(nextFocus.value)+"%"}</Text></View>
+    <View style={s.radarFocus}><Text style={s.radarFocusTag}><Copy text="NÄCHSTER FOKUS"/></Text><Text style={s.radarFocusName}><Copy text={nextFocus?.label||"NOCH KEINE DATEN"}/></Text><Text style={s.radarFocusValue}>{nextFocus?.value==null?"Keine Angabe":Math.round(nextFocus.value)+"%"}</Text></View>
    </View>
    <View style={s.pillarRows}>
     {scorePillars.map(p=><Pressable key={p.key} accessibilityRole="button" onPress={()=>router.push("/digital-twin")} style={s.pillarRow}>

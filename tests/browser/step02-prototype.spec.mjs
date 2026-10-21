@@ -1,0 +1,84 @@
+import {test,expect} from "@playwright/test";
+
+const url="/prototype/step-02";
+const button=(page,pattern)=>page.getByRole("button",{name:pattern});
+async function confirmReady(page){
+  await page.goto(url);
+  await button(page,/WEITER ZUR SELBSTEINSCHÄTZUNG/).click();
+  await button(page,/EINSTIEG PRÜFEN/).click();
+  await button(page,/DEMO-TEST BESTEHEN UND START BESTÄTIGEN/).click();
+  await expect(page.getByText("EINSTIEG UNBESTÄTIGT")).toHaveCount(0);
+}
+test("multiple goals and unconfirmed high level never open chapters",async({page})=>{
+  await page.goto(url);
+  const football=page.locator(".bdp-goal").filter({hasText:"Fußball"});
+  const fatLoss=page.locator(".bdp-goal").filter({hasText:"Fettabbau"});
+  await expect(football).toHaveAttribute("aria-pressed","true");
+  await fatLoss.click();
+  await expect(fatLoss).toHaveAttribute("aria-pressed","true");
+  await button(page,/WEITER ZUR SELBSTEINSCHÄTZUNG/).click();
+  await page.locator(".bdp-level-select").nth(4).click();
+  await button(page,/EINSTIEG PRÜFEN/).click();
+  await expect(page.getByText("KEIN LEVEL",{exact:true})).toBeVisible();
+  await page.locator(".bdp-nav-item").filter({hasText:"Mein Trainingsweg"}).click();
+  await expect(page.getByText("Dein Einstieg ist noch nicht bestätigt.")).toBeVisible();
+  await expect(page.locator(".bdp-track-actions")).toHaveCount(0);
+});
+test("chapter failure, retry, next chapter and earned READY to AWAKE",async({page})=>{
+  await confirmReady(page);
+  await button(page,/TRAININGSWEG ANSEHEN/).click();
+  await page.locator(".bdp-track-actions").getByRole("button",{name:/KAPITEL ÖFFNEN/}).click();
+  await button(page,/TRAININGSABSCHNITT ABSCHLIESSEN/).click();
+  await page.locator(".bdp-track-actions").getByRole("button",{name:/ABSCHLUSSTEST/}).click();
+  await button(page,/TEST PRÜFEN UND ERGEBNIS ANZEIGEN/).click();
+  await expect(page.getByText("NOCH NICHT BESTANDEN")).toBeVisible();
+  await expect(page.locator(".bdp-track-actions")).toHaveCount(0);
+  await button(page,/VERBESSERTE DEMO-WERTE EINSETZEN/).click();
+  await button(page,/TEST PRÜFEN UND ERGEBNIS ANZEIGEN/).click();
+  await expect(page.getByRole("dialog")).toContainText("Kapitel geschafft.");
+  await page.getByRole("dialog").getByRole("button",{name:/WEITER/}).click();
+  await expect(page.locator(".bdp-status-row")).toContainText("READY · KAPITEL 2");
+  await page.locator(".bdp-track-actions").getByRole("button",{name:/KAPITEL ÖFFNEN/}).click();
+  await button(page,/TRAININGSABSCHNITT ABSCHLIESSEN/).click();
+  await page.locator(".bdp-track-actions").getByRole("button",{name:/ABSCHLUSSTEST/}).click();
+  await button(page,/TEST PRÜFEN UND ERGEBNIS ANZEIGEN/).click();
+  await expect(page.getByRole("dialog")).toContainText("AWAKE");
+  await page.getByRole("dialog").getByRole("button",{name:/WEITER/}).click();
+  await expect(page.locator(".bdp-status-row")).toContainText("AWAKE · KAPITEL 1");
+});
+test("FREE instructions and PRO coach video slot never bypass earned gates",async({page})=>{
+  await page.goto(url);
+  await page.locator(".bdp-nav-item").filter({hasText:"Übung & FREE / PRO"}).click();
+  await expect(page.getByText("INHALT GESPERRT")).toBeVisible();
+  await confirmReady(page);
+  await page.locator(".bdp-nav-item").filter({hasText:"Übung & FREE / PRO"}).click();
+  await expect(page.getByText("SO FÜHRST DU DIE ÜBUNG AUS")).toBeVisible();
+  await expect(page.getByText("COACH-VIDEO IN PRO")).toBeVisible();
+  await page.locator(".bdp-tier-control").getByRole("button",{name:"PRO"}).click();
+  await expect(page.getByText("Video-Position im Prototyp. Echte Traineraufnahme ist noch nicht hinterlegt.")).toBeVisible();
+});
+test("female dashboard is optional, cycle private and milestones skip on mobile",async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(url);
+  await button(page,"Weiblich").click();
+  await button(page,/FRAUENANSICHT VORSCHAUEN/).click();
+  await expect(page.getByText("Ein persönlicher Frauenbereich")).toBeVisible();
+  await button(page,"ALLGEMEINES DASHBOARD").click();
+  await button(page,/OPTIONALES MODUL/).click();
+  await expect(page.getByText("DEMO AUS")).toBeVisible();
+  await page.locator(".bdp-check input").first().check();
+  await page.locator('input[type="date"]').first().fill("2026-10-01");
+  await page.locator('input[type="date"]').last().fill("2026-10-05");
+  await page.locator(".bdp-calendar button").nth(15).click();
+  await expect(page.getByText("AKTIVER DEMOTAG: 16")).toBeVisible();
+  await page.locator(".bdp-check input").last().check();
+  await button(page,/EINTRÄGE LÖSCHEN UND MODUL DEAKTIVIEREN/).click();
+  await expect(page.getByText("DEMO AUS")).toBeVisible();
+  await page.locator(".bdp-check input").first().check();
+  await expect(page.locator('input[type="date"]').first()).toHaveValue("");
+  await page.getByRole("combobox",{name:"Ansicht auswählen"}).selectOption("milestones");
+  await button(page,/ANIMATION ÖFFNEN/).nth(0).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByRole("dialog").getByRole("button",{name:/ÜBERSPRINGEN/}).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+});
