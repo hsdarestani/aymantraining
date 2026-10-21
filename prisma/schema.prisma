@@ -35,8 +35,8 @@ enum MediaKind {
 }
 
 model User {
-  reviewedPathwayTests PathwayTestAttempt[] @relation("PathwayTestReviewer")
-  pathwayEnrollments PathwayEnrollment[]
+  reviewedPathwayTests JourneyTestAttempt[] @relation("PathwayTestReviewer")
+  pathwayEnrollments JourneyEnrollment[]
   id                  String           @id @default(cuid())
   email               String           @unique
   passwordHash        String
@@ -120,7 +120,7 @@ model Goal {
 }
 
 model TrainingPlan {
-  chapterItems TrainingChapterItem[]
+  chapterItems JourneyChapterItem[]
   id          String             @id @default(cuid())
   name        String
   description String?
@@ -201,7 +201,7 @@ model WorkoutExercise {
 }
 
 model Exercise {
-  chapterItems TrainingChapterItem[]
+  chapterItems JourneyChapterItem[]
   id               String             @id
   nameDe           String
   nameEn           String?
