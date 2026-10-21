@@ -54,5 +54,12 @@ export async function GET(){
       user:{select:{name:true}}
     },orderBy:{startedAt:"asc"},take:100
   });
-  return NextResponse.json({ok:true,pending});
+  const approved=await prisma.journeyTestAttempt.findMany({
+    where:{enrollmentId:{in:pending.map(p=>p.id)},verdict:"PASSED",
+      assessment:{kind:"PLACEMENT",approvedAt:{not:null}}},
+    select:{id:true,enrollmentId:true},orderBy:{reviewedAt:"desc"}
+  });
+  return NextResponse.json({ok:true,pending:pending.map(p=>({
+    ...p,passedPlacementAttemptId:approved.find(a=>a.enrollmentId===p.id)?.id??null
+  }))});
 }
