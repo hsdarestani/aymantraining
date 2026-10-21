@@ -8,7 +8,8 @@ import {confirmJourneyPlacement} from "../../../../lib/journey-service";
 
 const approveSchema=z.object({
   enrollmentId:z.string().min(5).max(128),
-  confirmedLevel:z.enum(JOURNEY_LEVELS)
+  confirmedLevel:z.enum(JOURNEY_LEVELS),
+  passedPlacementAttemptId:z.string().min(5).optional()
 }).strict();
 
 // Only authorized coaches/admins, never athletes, can approve placement.
@@ -25,7 +26,8 @@ export async function POST(request:Request){
   try{
     const result=await confirmJourneyPlacement({
       enrollmentId:parsed.data.enrollmentId,level:parsed.data.confirmedLevel as JourneyLevel,
-      approvedById:user.id,reason:"COACH_APPROVAL"
+      approvedById:user.id,reason:parsed.data.passedPlacementAttemptId?"PLACEMENT_TEST":"COACH_APPROVAL",
+      passedPlacementAttemptId:parsed.data.passedPlacementAttemptId
     });
     return NextResponse.json({ok:true,...result});
   }catch{
