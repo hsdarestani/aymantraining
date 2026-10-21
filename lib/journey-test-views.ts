@@ -53,7 +53,7 @@ export async function listAthleteJourneyTests(userId:string){
     return {
       id:e.id,state:e.state,selfLevel:e.selfLevel,confirmedLevel:e.confirmedLevel,
       pathway:e.version.pathway.titleDe,version:e.version.version,
-      placement:e.state==="PENDING"?assessmentView(e.version.assessments[0]??null as never):null,
+      placement:e.state==="PENDING"&&e.version.assessments.length?assessmentView(e.version.assessments[0]):null,
       chapters:e.version.levels.flatMap(level=>level.chapters.map(ch=>{
         const earned=unlocked.has(ch.id);
         const mandatory=ch.items.filter(x=>x.mandatory);
