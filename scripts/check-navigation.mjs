@@ -2,7 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 
 const appRoot="app";
-const publicRoots=new Set(["admin","legal","login","register","forgot-password","reset-password","onboarding","pricing"]);
+// The public Step 02 prototype is a stateless design demo with no member data or writes.
+const publicRoots=new Set(["admin","legal","login","register","forgot-password","reset-password","onboarding","pricing","prototype"]);
 const pages=[];
 
 function walk(dir){
