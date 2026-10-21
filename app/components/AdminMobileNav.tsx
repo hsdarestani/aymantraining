@@ -10,6 +10,7 @@ const links=[
   ["/admin","Aufmerksamkeit"],
   ["/admin/customers","Kunden"],
   ["/admin/plans","Trainingspläne"],
+  ["/admin/journeys","Trainingswege"],
   ["/admin/exercises","Übungen"],
   ["/admin/tests","Tests"],
   ["/admin/inbox","Nachrichten"],
