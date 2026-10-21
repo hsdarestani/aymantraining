@@ -7,11 +7,11 @@ A coach/admin-only builder under **/admin/journeys**, linked in both desktop and
 * Creating a **curated** goal combination, never auto-assembling unrelated training programs.
 * All five ordered levels READY, AWAKE, DIFFERENT, BE DIFFERENT, TRULY DIFFERENT, each with descriptions and ordered chapters and durations.
 * Chapters containing optional/mandatory guidance, legacy exercise references or existing training plans.
-* Image media in FREE plus a written exercise explanation; 8–12 second PRO explanation clips, each linked to a coach or woman trainer media reference. Uploads use the existing secure-size-checked /api/media endpoint.
+* Image media in FREE plus a written exercise explanation; 8–12 second PRO explanation clips, each linked to a coach or woman trainer media reference. Uploads use the existing size/type-checked /api/media endpoint with scope=JOURNEY and a dedicated journey-media/ storage namespace. Files in this namespace require authorization even when the editor feature flag is disabled, preventing fail-open behavior on rollback.
 * Coach-entered placement and chapter-final test metrics and minimum/maximum thresholds, retry delay, German improvement tips and an explicit professional approval checkbox.
 * Draft saving with a revision conflict guard, publishing a complete version, and cloning a published version into a new editable draft. Previously published versions remain immutable in these API endpoints.
 * Matching exact goal combinations from waiting onboarding-intake requests after publication. Their status becomes PENDING_PLACEMENT; **no starting level or chapter is granted without placement approval**.
-* Protecting chapter-linked image/video GET requests based on earned chapter and FREE/PRO entitlement in /api/media/[id] when editor flag is enabled. Existing media files not referenced by a Journey are unaffected. This protects existing Journey links; pre-upload cache exposure and the entire legacy exercise media distribution must be reviewed in Step 8.
+* Protecting chapter-linked image/video GET requests based on earned chapter and FREE/PRO entitlement in /api/media/[id] when editor flag is enabled. Legacy unlinked exercise media remain unaffected. Reused legacy public assets cannot be attached to new Journey chapters: uploads must go through the isolated Journey media namespace. This protects existing Journey links; pre-upload cache exposure and the entire legacy exercise media distribution must be reviewed in Step 8.
 
 ## Rollout safety
 
