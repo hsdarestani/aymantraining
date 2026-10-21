@@ -142,6 +142,11 @@ export async function submitJourneyAssessment(args:{
     }else{
       if(enrollment.state!=="PENDING"||assessment.chapterId)refuse("Einstufungstest gehört nicht zum offenen Einstieg.");
     }
+    const previouslyPassed=await tx.journeyTestAttempt.findFirst({
+      where:{enrollmentId:enrollment.id,assessmentId:assessment.id,verdict:"PASSED"},
+      select:{id:true}
+    });
+    if(previouslyPassed)refuse("Dieser Test wurde bereits bestanden.");
     const pending=await tx.journeyTestAttempt.findFirst({
       where:{enrollmentId:enrollment.id,assessmentId:assessment.id,verdict:"PENDING"},
       select:{id:true}
