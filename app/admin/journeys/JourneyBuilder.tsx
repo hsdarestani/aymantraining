@@ -111,7 +111,7 @@ export default function JourneyBuilder(){
   if(dirty&&!window.confirm("Ungespeicherte Änderungen verwerfen?"))return;
   setBusy(true);setError("");setNotice("");
   try{
-   const result=await request("/api/admin/journeys/"+pathwayId+"/clone","POST",{});
+   const result=await request("/api/admin/journeys/clone","POST",{pathwayId});
    setDirty(false);await refresh();await load(result.id);
   }catch(e){setError(e instanceof Error?e.message:String(e));}finally{setBusy(false);}
  }
