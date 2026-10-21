@@ -26,11 +26,11 @@ export async function findCuratedJourney(goalSlugs:string[]){
   const selected=normalizeGoalSlugs(goalSlugs);
   const versions=await prisma.journeyPathwayVersion.findMany({
     where:{state:"PUBLISHED",pathway:{active:true}},
-    include:{pathway:{include:{goals:{include:{goal:true}}}}},
+    include:{pathway:true},
     orderBy:[{publishedAt:"desc"},{version:"desc"}]
   });
   return versions.find(v=>{
-    const candidate=v.pathway.goals.map(g=>g.goal.slug).sort();
+    const candidate=[...v.goalSlugs].sort();
     return candidate.length===selected.length&&candidate.every((g,i)=>g===selected[i]);
   })??null;
 }
@@ -38,7 +38,7 @@ export async function findCuratedJourney(goalSlugs:string[]){
 /** Self-estimate never grants a level or a chapter. */
 export async function enrollInJourney(userId:string,versionId:string,selfLevel:JourneyLevel){
   const version=await prisma.journeyPathwayVersion.findUnique({where:{id:versionId},include:{pathway:true}});
-  if(!version||version.state!=="PUBLISHED"||!version.pathway.active)refuse("Trainingsweg ist nicht veröffentlicht.");
+  if(!version||version.state!=="PUBLISHED"||!version.pathway.active||version.goalSlugs.length===0)refuse("Trainingsweg ist nicht veröffentlicht.");
   if(!JOURNEY_LEVELS.includes(selfLevel))refuse("Ungültiges Einstiegslevel.");
   return prisma.journeyEnrollment.upsert({
     where:{userId_versionId:{userId,versionId}},
@@ -227,6 +227,8 @@ export async function inspectJourneyMediaAccess(userId:string,variantId:string){
       include:{item:{include:{chapter:{include:{level:true}}}}}})
   ]);
   if(!user||!variant)return {allowed:false,reason:"NOT_FOUND"} as const;
+  if(variant.role==="EXPLANATION_VIDEO"&&variant.minTier==="FREE")
+    return {allowed:false,reason:"INVALID_MEDIA_POLICY"} as const;
   const versionId=variant.item.chapter.level.versionId;
   const enrollment=await prisma.journeyEnrollment.findFirst({
     where:{userId,versionId,state:{in:["ACTIVE","FINISHED"]}},
