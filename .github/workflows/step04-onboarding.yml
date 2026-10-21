@@ -1,0 +1,103 @@
+name: BE DIFFERENT Step 04 Onboarding Acceptance
+on:
+  push:
+    branches:
+      - feature/bedifferent-step04-onboarding
+  pull_request:
+    paths:
+      - "app/onboarding/**"
+      - "mobile/app/onboarding.tsx"
+      - "app/api/onboarding/**"
+      - "app/api/journey/onboarding/**"
+      - "lib/journey-onboarding.ts"
+      - "prisma/schema.prisma"
+      - "tests/browser/step04-onboarding.spec.mjs"
+      - ".github/workflows/step04-onboarding.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  onboarding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: bedifferent_test
+          POSTGRES_USER: bedifferent
+          POSTGRES_PASSWORD: bedifferent_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bedifferent -d bedifferent_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://bedifferent:bedifferent_test@127.0.0.1:5432/bedifferent_test?schema=public
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      APP_URL: http://127.0.0.1:3000
+      NODE_ENV: test
+      JOURNEY_ONBOARDING_ENABLED: "true"
+      NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED: "true"
+      EXPO_PUBLIC_JOURNEY_ONBOARDING_ENABLED: "true"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install web
+        run: npm ci
+      - name: Generate prisma
+        run: npx prisma generate
+      - name: Validate types and schema
+        run: npm run check
+      - name: Seed previous schema, then safely add intake
+        run: |
+          git show origin/main:prisma/schema.prisma > prisma/step04-previous.prisma
+          npx prisma db push --schema prisma/step04-previous.prisma
+          node scripts/test-journey-legacy.mjs seed
+          npx prisma migrate diff --from-schema-datamodel prisma/step04-previous.prisma --to-schema-datamodel prisma/schema.prisma --script > /tmp/step04-intake.sql
+          if grep -Ei 'DROP (TABLE|COLUMN|TYPE)|ALTER TABLE .* DROP' /tmp/step04-intake.sql; then
+            echo "Destructive schema change blocked" >&2
+            exit 1
+          fi
+          npx prisma db push
+          node scripts/test-journey-legacy.mjs verify
+      - name: Build web with new onboarding enabled
+        run: npm run build
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Start isolated web server
+        run: |
+          NODE_ENV=production npm start > /tmp/step04-server.log 2>&1 &
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:3000/onboarding >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/step04-server.log
+          exit 1
+      - name: Test browser onboarding and database writes
+        run: npx playwright test tests/browser/step04-onboarding.spec.mjs --workers=1
+      - name: Native typecheck for new flow
+        run: |
+          cd mobile
+          npm ci
+          npm run typecheck
+      - name: Export traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bedifferent-step04-qa
+          path: |
+            playwright-report
+            test-results
+      - name: On failure show server diagnostics
+        if: failure()
+        run: cat /tmp/step04-server.log || true

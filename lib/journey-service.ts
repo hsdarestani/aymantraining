@@ -78,6 +78,12 @@ export async function confirmJourneyPlacement(args:{
       enrollmentId:enrollment.id,chapterId:target.chapters[0].id,
       reason:args.reason as JourneyUnlockReason,attemptId:args.passedPlacementAttemptId??null,grantedById:args.approvedById
     }});
+    // Keep intake state consistent with the approval ledger when onboarding used Step 4.
+    // Legacy existing enrollments may have no JourneyIntake; updateMany is safe for them.
+    await tx.journeyIntake.updateMany({
+      where:{userId:enrollment.userId,matchedVersionId:enrollment.versionId},
+      data:{status:"CONFIRMED"}
+    });
     return {enrollmentId:enrollment.id,confirmedLevel:args.level,firstChapterId:target.chapters[0].id};
   });
 }
