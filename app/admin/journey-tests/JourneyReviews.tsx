@@ -20,10 +20,12 @@ export default function JourneyReviews(){
  const [busy,setBusy]=useState("");
  const [error,setError]=useState("");const [message,setMessage]=useState("");
  const load=useCallback(async()=>{
-  const [reviews,placement]=await Promise.all([
-   call("/api/admin/journey-tests"),call("/api/journey/placement")
-  ]);
-  setPending(reviews.attempts);setPlacements(placement.pending);
+  // The placement editor belongs to onboarding and can be disabled independently.
+  // Its unavailability must never hide coach review of submitted chapter exams.
+  const reviews=await call("/api/admin/journey-tests");
+  setPending(reviews.attempts);
+  const placement=await call("/api/journey/placement").catch(()=>({pending:[]}));
+  setPlacements(placement.pending);
  },[]);
  useEffect(()=>{load().catch(e=>setError(String(e.message)));},[load]);
  async function review(attempt:Pending){
