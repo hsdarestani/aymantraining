@@ -5,7 +5,7 @@ Scope: Step 03 architecture / database / progression domain. This is not an alre
 
 ## Models (additive to the original tables)
 
-* JourneyGoal, JourneyPathway, JourneyPathwayGoal: reusable goals and curated combinations. Unknown combinations do not generate invented programs.
+* JourneyGoal, JourneyPathway, JourneyPathwayGoal: reusable goals and curated combinations. Unknown combinations do not generate invented programs. Each published version stores an immutable goal-slug snapshot for exact matching even if the parent catalogue later changes.
 * JourneyPathwayVersion, JourneyLevelDefinition, JourneyChapter, JourneyChapterItem: versioned curriculum, ordered five levels and chapters, reusable links to legacy training plans and exercises.
 * ChapterMediaVariant: coach/trainer media slots with minimum FREE or PRO tier; download endpoints are not yet protected by this model alone.
 * JourneyAssessment: placement and chapter-final tests with coach-approved typed criteria and optional retest rules.
@@ -23,7 +23,7 @@ Existing User, Goal, Workout, ScoreSnapshot, Badge, TrainingPlan, PerformanceTes
 4. An assessment requires a confirmed active enrollment, a previously granted chapter unlock, and all mandatory content completed.
 5. PASS can unlock only the next ordered chapter; it awards the next level only on crossing a level boundary. FAIL leaves current access intact and records missing or failed metrics.
 6. Duplicate idempotency keys cannot create independent attempts or reuse a key for different measurements.
-7. Media access requires both an earned chapter and sufficient subscription tier. This helper is not yet wired into the existing public media streaming routes: Step 8 must cover those endpoints.
+7. Media access requires both an earned chapter and sufficient subscription tier. A coach explanation video erroneously marked FREE is rejected as invalid policy. This helper is not yet wired into the existing public media streaming routes: Step 8 must cover those endpoints.
 8. Published versions should be frozen through all future write APIs and copied into a new draft for changes affecting existing learners.
 
 ## Migration verification
