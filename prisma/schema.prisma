@@ -853,6 +853,7 @@ model JourneyPathwayVersion {
   id          String @id @default(cuid())
   pathwayId   String
   version     Int
+  goalSlugs   String[] @default([]) // Frozen selection for this version, not mutable pathway links
   state       PathwayVersionState @default(DRAFT)
   notes       String?
   publishedAt DateTime?
