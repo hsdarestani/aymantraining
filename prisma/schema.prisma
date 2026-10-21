@@ -35,6 +35,8 @@ enum MediaKind {
 }
 
 model User {
+  reviewedPathwayTests JourneyTestAttempt[] @relation("PathwayTestReviewer")
+  pathwayEnrollments JourneyEnrollment[]
   id                  String           @id @default(cuid())
   email               String           @unique
   passwordHash        String
@@ -118,6 +120,7 @@ model Goal {
 }
 
 model TrainingPlan {
+  chapterItems JourneyChapterItem[]
   id          String             @id @default(cuid())
   name        String
   description String?
@@ -198,6 +201,7 @@ model WorkoutExercise {
 }
 
 model Exercise {
+  chapterItems JourneyChapterItem[]
   id               String             @id
   nameDe           String
   nameEn           String?
@@ -413,6 +417,7 @@ model VideoFeedback {
 }
 
 model MediaAsset {
+  chapterMediaVariants ChapterMediaVariant[]
   id            String    @id @default(cuid())
   ownerId       String
   relatedUserId String?
@@ -759,4 +764,296 @@ model AiHandoff {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@index([userId, status])
   @@index([coachId, status])
+}
+
+
+// BE DIFFERENT development journey v2.
+// Additive to legacy Goal, TrainingPlan, PerformanceTest, ScoreSnapshot and Badge.
+// No automatic migration from score-derived NORMAL/other levels into earned levels.
+enum JourneyLevel {
+  READY
+  AWAKE
+  DIFFERENT
+  BE_DIFFERENT
+  TRULY_DIFFERENT
+}
+
+enum PathwayVersionState {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PathwayEnrollmentState {
+  PENDING
+  ACTIVE
+  PAUSED
+  FINISHED
+}
+
+enum JourneyAssessmentKind {
+  PLACEMENT
+  CHAPTER_FINAL
+}
+
+enum JourneyVerdict {
+  PENDING
+  PASSED
+  FAILED
+}
+
+enum JourneyUnlockReason {
+  PLACEMENT_TEST
+  COACH_APPROVAL
+  PASSED_CHAPTER_TEST
+  LEGACY_REVIEW
+}
+
+enum ChapterItemKind {
+  EXERCISE
+  TRAINING_PLAN
+  GUIDANCE
+}
+
+// A reusable goal catalog. The existing per-user Goal table remains untouched.
+model JourneyGoal {
+  id          String @id @default(cuid())
+  slug        String @unique
+  titleDe     String
+  description String?
+  active      Boolean @default(true)
+  createdAt   DateTime @default(now())
+  pathways    JourneyPathwayGoal[]
+}
+
+model JourneyPathway {
+  id          String @id @default(cuid())
+  slug        String @unique
+  titleDe     String
+  description String?
+  active      Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  goals       JourneyPathwayGoal[]
+  versions    JourneyPathwayVersion[]
+}
+
+model JourneyPathwayGoal {
+  pathwayId String
+  goalId    String
+  pathway   JourneyPathway @relation(fields:[pathwayId],references:[id],onDelete:Cascade)
+  goal      JourneyGoal @relation(fields:[goalId],references:[id],onDelete:Restrict)
+
+  @@id([pathwayId,goalId])
+  @@index([goalId])
+}
+
+// Published versions must be immutable; edit by cloning a new DRAFT version.
+model JourneyPathwayVersion {
+  id          String @id @default(cuid())
+  pathwayId   String
+  version     Int
+  goalSlugs   String[] @default([]) // Frozen selection for this version, not mutable pathway links
+  state       PathwayVersionState @default(DRAFT)
+  notes       String?
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  pathway     JourneyPathway @relation(fields:[pathwayId],references:[id],onDelete:Restrict)
+  levels      JourneyLevelDefinition[]
+  assessments JourneyAssessment[]
+  enrollments JourneyEnrollment[]
+
+  @@unique([pathwayId,version])
+  @@index([state,publishedAt])
+}
+
+model JourneyLevelDefinition {
+  id          String @id @default(cuid())
+  versionId   String
+  code        JourneyLevel
+  labelDe     String
+  description String?
+  position    Int
+  version     JourneyPathwayVersion @relation(fields:[versionId],references:[id],onDelete:Restrict)
+  chapters    JourneyChapter[]
+  awards      JourneyLevelAward[]
+
+  @@unique([versionId,code])
+  @@unique([versionId,position])
+}
+
+model JourneyChapter {
+  id                 String @id @default(cuid())
+  levelId            String
+  position           Int
+  titleDe            String
+  description        String?
+  plannedDurationDays Int?
+  level              JourneyLevelDefinition @relation(fields:[levelId],references:[id],onDelete:Restrict)
+  items              JourneyChapterItem[]
+  assessments        JourneyAssessment[]
+  unlocks            JourneyChapterUnlock[]
+  completions        JourneyChapterCompletion[]
+
+  @@unique([levelId,position])
+}
+
+model JourneyChapterItem {
+  id             String @id @default(cuid())
+  chapterId      String
+  position       Int
+  kind           ChapterItemKind
+  titleDe        String?
+  description    String?
+  exerciseId     String?
+  trainingPlanId String?
+  mandatory      Boolean @default(true)
+  chapter        JourneyChapter @relation(fields:[chapterId],references:[id],onDelete:Restrict)
+  exercise       Exercise? @relation(fields:[exerciseId],references:[id],onDelete:Restrict)
+  trainingPlan   TrainingPlan? @relation(fields:[trainingPlanId],references:[id],onDelete:Restrict)
+  media          ChapterMediaVariant[]
+  completions    JourneyActivityCompletion[]
+
+  @@unique([chapterId,position])
+  @@index([exerciseId])
+  @@index([trainingPlanId])
+}
+
+// Media references do not imply public access. Streaming must check both tier
+// AND earned chapter access in Step 8 before serving the bytes.
+model ChapterMediaVariant {
+  id          String @id @default(cuid())
+  itemId      String
+  mediaAssetId String
+  role        String // START_IMAGE, MIDDLE_IMAGE, END_IMAGE, EXPLANATION_VIDEO
+  presenter   String @default("COACH") // COACH, TRAINER, etc.
+  minTier     SubscriptionTier @default(FREE)
+  durationSec Int?
+  item        JourneyChapterItem @relation(fields:[itemId],references:[id],onDelete:Restrict)
+  media       MediaAsset @relation(fields:[mediaAssetId],references:[id],onDelete:Restrict)
+
+  @@unique([itemId,role,presenter])
+  @@index([mediaAssetId])
+}
+
+// Every placement/chapter test belongs to one frozen curriculum version.
+// Criteria are authored by the coach and must be explicitly approved.
+model JourneyAssessment {
+  id          String @id @default(cuid())
+  versionId   String
+  chapterId   String?
+  kind        JourneyAssessmentKind
+  titleDe     String
+  criteria    Json
+  retestRules Json?
+  approvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  version     JourneyPathwayVersion @relation(fields:[versionId],references:[id],onDelete:Restrict)
+  chapter     JourneyChapter? @relation(fields:[chapterId],references:[id],onDelete:Restrict)
+  attempts    JourneyTestAttempt[]
+
+  @@index([versionId,kind])
+  @@index([chapterId,kind])
+}
+
+model JourneyEnrollment {
+  id              String @id @default(cuid())
+  userId          String
+  versionId       String
+  state           PathwayEnrollmentState @default(PENDING)
+  selfLevel       JourneyLevel?
+  confirmedLevel  JourneyLevel?
+  confirmedAt     DateTime?
+  startedAt       DateTime @default(now())
+  endedAt         DateTime?
+  user            User @relation(fields:[userId],references:[id],onDelete:Restrict)
+  version         JourneyPathwayVersion @relation(fields:[versionId],references:[id],onDelete:Restrict)
+  attempts        JourneyTestAttempt[]
+  unlocks         JourneyChapterUnlock[]
+  completions     JourneyChapterCompletion[]
+  activities      JourneyActivityCompletion[]
+  awards          JourneyLevelAward[]
+
+  @@unique([userId,versionId])
+  @@index([userId,state])
+}
+
+model JourneyActivityCompletion {
+  id            String @id @default(cuid())
+  enrollmentId  String
+  itemId        String
+  completedAt   DateTime @default(now())
+  enrollment    JourneyEnrollment @relation(fields:[enrollmentId],references:[id],onDelete:Restrict)
+  item          JourneyChapterItem @relation(fields:[itemId],references:[id],onDelete:Restrict)
+
+  @@unique([enrollmentId,itemId])
+  @@index([itemId])
+}
+
+model JourneyTestAttempt {
+  id              String @id @default(cuid())
+  enrollmentId    String
+  assessmentId    String
+  idempotencyKey  String
+  results         Json
+  verdict         JourneyVerdict @default(PENDING)
+  feedback        Json?
+  reviewedById    String?
+  reviewedAt      DateTime?
+  submittedAt     DateTime @default(now())
+  enrollment      JourneyEnrollment @relation(fields:[enrollmentId],references:[id],onDelete:Restrict)
+  assessment      JourneyAssessment @relation(fields:[assessmentId],references:[id],onDelete:Restrict)
+  reviewedBy      User? @relation("PathwayTestReviewer",fields:[reviewedById],references:[id],onDelete:SetNull)
+  unlocks         JourneyChapterUnlock[]
+  completions     JourneyChapterCompletion[]
+  levelAwards     JourneyLevelAward[]
+
+  @@unique([enrollmentId,idempotencyKey])
+  @@index([assessmentId,submittedAt])
+  @@index([enrollmentId,verdict])
+}
+
+model JourneyChapterUnlock {
+  id            String @id @default(cuid())
+  enrollmentId  String
+  chapterId     String
+  reason        JourneyUnlockReason
+  attemptId     String?
+  grantedById   String?
+  createdAt     DateTime @default(now())
+  enrollment    JourneyEnrollment @relation(fields:[enrollmentId],references:[id],onDelete:Restrict)
+  chapter       JourneyChapter @relation(fields:[chapterId],references:[id],onDelete:Restrict)
+  attempt       JourneyTestAttempt? @relation(fields:[attemptId],references:[id],onDelete:Restrict)
+
+  @@unique([enrollmentId,chapterId])
+  @@index([chapterId])
+}
+
+model JourneyChapterCompletion {
+  id            String @id @default(cuid())
+  enrollmentId  String
+  chapterId     String
+  attemptId     String
+  completedAt   DateTime @default(now())
+  enrollment    JourneyEnrollment @relation(fields:[enrollmentId],references:[id],onDelete:Restrict)
+  chapter       JourneyChapter @relation(fields:[chapterId],references:[id],onDelete:Restrict)
+  attempt       JourneyTestAttempt @relation(fields:[attemptId],references:[id],onDelete:Restrict)
+
+  @@unique([enrollmentId,chapterId])
+  @@index([attemptId])
+}
+
+model JourneyLevelAward {
+  id            String @id @default(cuid())
+  enrollmentId  String
+  levelId       String
+  reason        JourneyUnlockReason
+  attemptId     String?
+  awardedAt     DateTime @default(now())
+  enrollment    JourneyEnrollment @relation(fields:[enrollmentId],references:[id],onDelete:Restrict)
+  level         JourneyLevelDefinition @relation(fields:[levelId],references:[id],onDelete:Restrict)
+  attempt       JourneyTestAttempt? @relation(fields:[attemptId],references:[id],onDelete:Restrict)
+
+  @@unique([enrollmentId,levelId])
+  @@index([levelId])
 }
