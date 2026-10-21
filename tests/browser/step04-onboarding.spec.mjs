@@ -57,6 +57,7 @@ test("five levels and multi goal selectors are visible in enabled web onboarding
   await page.locator(".goals").getByRole("button",{name:/Muskelaufbau/}).click();
   await expect(page.locator(".goals button.selected")).toHaveCount(3);
   await page.getByRole("button",{name:/WEITER/}).click();
+  await page.locator('input[type="date"]').fill("2001-02-10");
   await page.locator(".segmented-field").getByRole("button",{name:"Weiblich"}).click();
   await expect(page.getByText("OPTIONALE STARTANSICHT")).toBeVisible();
   await page.getByRole("checkbox",{name:/Frauen-Dashboard als Startansicht/}).check();
