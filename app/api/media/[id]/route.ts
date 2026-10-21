@@ -13,14 +13,17 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
   // Preserve legacy public exercise files while the new system is disabled.
   // Once a media asset is attached to a Journey item, never serve it publicly,
   // including while the version is still in draft.
+  const isolatedJourneyAsset=asset.storageKey.startsWith("journey-media/");
+  // A rollback of the Journey feature must not accidentally make newly filmed PRO clips public.
+  if(isolatedJourneyAsset&&process.env.JOURNEY_EDITOR_ENABLED!=="true")return errorJson("Medium derzeit nicht freigeschaltet.",403);
   const journeyVariants=exerciseAsset&&process.env.JOURNEY_EDITOR_ENABLED==="true"?
     await prisma.chapterMediaVariant.findMany({where:{mediaAssetId:asset.id},select:{id:true},take:100}):[];
-  const journeyProtected=journeyVariants.length>0;
+  const journeyProtected=isolatedJourneyAsset||journeyVariants.length>0;
   const publicExercise=exerciseAsset&&!journeyProtected;
   if(journeyProtected){
     const user=await requireApiUser();
     if(!user)return errorJson("Nicht angemeldet.",401);
-    let allowed=user.role==="ADMIN"||user.role==="COACH";
+    let allowed=user.role==="ADMIN"||(user.role==="COACH"&&(journeyVariants.length>0||asset.ownerId===user.id));
     if(!allowed){
       for(const variant of journeyVariants){
         if((await inspectJourneyMediaAccess(user.id,variant.id)).allowed){allowed=true;break;}
