@@ -65,3 +65,27 @@ jobs:
           cd mobile
           npm ci
           npm run typecheck
+      - name: Browser dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Start the isolated production build
+        run: |
+          NODE_ENV=production npm start > /tmp/step06-server.log 2>&1 &
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:3000/journey/tests >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/step06-server.log
+          exit 1
+      - name: Athlete and coach end-to-end
+        run: npx playwright test tests/browser/step06-journey.spec.mjs --workers=1
+      - name: Preserve browser artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: step06-journey-browser
+          path: |
+            playwright-report
+            test-results
+      - name: Diagnostics on failure
+        if: failure()
+        run: cat /tmp/step06-server.log || true
