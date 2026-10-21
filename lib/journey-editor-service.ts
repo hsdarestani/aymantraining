@@ -8,7 +8,7 @@ import {JOURNEY_LEVELS} from "./journey-contract";
 import {JOURNEY_ONBOARDING_GOALS} from "./journey-onboarding";
 
 type Tx=Prisma.TransactionClient;
-const unchanged=(code:string):never=>{throw new Error(code);};
+function unchanged(code:string):never{throw new Error(code);}
 const same=(a:string[],b:string[])=>a.length===b.length&&a.every((x,i)=>x===b[i]);
 
 async function requireCoach(actorId:string){
@@ -184,7 +184,7 @@ async function writeDraftGraph(tx:Tx,versionId:string,draft:Omit<CurriculumDraft
 export async function getCoachJourneyVersion(actorId:string,versionId:string){
  await requireCoach(actorId);
  const row=await loadVersion(prisma,versionId);
- if(!row)unchanged("NOT_FOUND");
+ if(!row)throw new Error("NOT_FOUND");
  const [exercises,plans]=await Promise.all([
   prisma.exercise.findMany({where:{active:true},select:{id:true,nameDe:true,category:true},
    orderBy:{nameDe:"asc"},take:500}),
@@ -200,7 +200,7 @@ export async function saveCoachJourneyDraft(actorId:string,versionId:string,inpu
   const version=await tx.journeyPathwayVersion.findUnique({
    where:{id:versionId},select:{id:true,state:true,updatedAt:true}
   });
-  if(!version)unchanged("NOT_FOUND");
+  if(!version)throw new Error("NOT_FOUND");
   if(version.state!=="DRAFT")unchanged("PUBLISHED_IMMUTABLE");
   if(version.updatedAt.toISOString()!==draft.revision)unchanged("REVISION_CONFLICT");
   if(await tx.journeyEnrollment.count({where:{versionId}}))unchanged("ENROLLED_IMMUTABLE");
@@ -228,7 +228,8 @@ export async function cloneCoachJourneyVersion(actorId:string,pathwayId:string){
   if(!versions.length)unchanged("NOT_FOUND");
   if(versions.some(v=>v.state==="DRAFT"))unchanged("DRAFT_ALREADY_EXISTS");
   const source=await loadVersion(tx,versions[0].id);
-  if(!source||source.state!=="PUBLISHED")unchanged("NOT_PUBLISHED");
+  if(!source)throw new Error("NOT_PUBLISHED");
+  if(source.state!=="PUBLISHED")unchanged("NOT_PUBLISHED");
   const data=snapshot(source);
   const parsed=curriculumDraftSchema.parse({
    revision:data.revision,notes:data.notes,
@@ -246,7 +247,7 @@ export async function publishCoachJourneyVersion(actorId:string,versionId:string
  await requireCoach(actorId);
  return prisma.$transaction(async tx=>{
   const row=await loadVersion(tx,versionId);
-  if(!row)unchanged("NOT_FOUND");
+  if(!row)throw new Error("NOT_FOUND");
   if(row.state!=="DRAFT")unchanged("PUBLISHED_IMMUTABLE");
   const raw=snapshot(row);
   const parsed=curriculumDraftSchema.parse({
