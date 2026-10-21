@@ -21,6 +21,27 @@ async function request(path:string,method="GET",body?:unknown){
  if(!result.ok)throw Error(data.error||"Vorgang fehlgeschlagen.");
  return data;
 }
+function RenderAssessment({value,onChange,onRemove,readOnly}:{value:Test;onChange:(next:Test)=>void;onRemove:()=>void;readOnly:boolean}){
+  const change=(fn:(v:Test)=>void)=>{const next=structuredClone(value);fn(next);onChange(next);};
+  return <div className="journey-test">
+   <div className="journey-card-heading"><strong>Abschlusstest / Einstufungstest</strong>{!readOnly&&<button type="button" onClick={onRemove}>Entfernen</button>}</div>
+   <label>Testname<input disabled={readOnly} value={value.titleDe} onChange={e=>change(x=>{x.titleDe=e.target.value})}/></label>
+   <div className="journey-metric-head"><strong>Bestehenskriterien</strong>{!readOnly&&<button type="button" onClick={()=>change(x=>{x.criteria.metrics.push({key:"",unit:"reps",min:1})})}>+ Kriterium</button>}</div>
+   {value.criteria.metrics.map((m,i)=><div className="journey-metric" key={i}>
+    <label>Messgröße<input disabled={readOnly} value={m.key} placeholder="z. B. pushups" onChange={e=>change(x=>{x.criteria.metrics[i].key=e.target.value})}/></label>
+    <label>Einheit<input disabled={readOnly} value={m.unit} placeholder="reps" onChange={e=>change(x=>{x.criteria.metrics[i].unit=e.target.value})}/></label>
+    <label>Mindestens<input disabled={readOnly} type="number" value={m.min??""} onChange={e=>change(x=>{if(e.target.value==="")delete x.criteria.metrics[i].min;else x.criteria.metrics[i].min=Number(e.target.value)})}/></label>
+    <label>Höchstens<input disabled={readOnly} type="number" value={m.max??""} onChange={e=>change(x=>{if(e.target.value==="")delete x.criteria.metrics[i].max;else x.criteria.metrics[i].max=Number(e.target.value)})}/></label>
+    {!readOnly&&<button type="button" onClick={()=>change(x=>{x.criteria.metrics.splice(i,1)})}>×</button>}
+   </div>)}
+   <div className="journey-form-row">
+    <label>Wiederholung frühestens nach (Stunden)<input disabled={readOnly} type="number" min={0} max={8760} value={value.retestRules?.minHoursAfterFailure??0} onChange={e=>change(x=>{x.retestRules={...x.retestRules,minHoursAfterFailure:Number(e.target.value)}})}/></label>
+    <label>Hinweis nach Nichtbestehen<input disabled={readOnly} value={value.retestRules?.guidanceDe??""} onChange={e=>change(x=>{x.retestRules={...x.retestRules,minHoursAfterFailure:x.retestRules?.minHoursAfterFailure??0,guidanceDe:e.target.value}})}/></label>
+   </div>
+   <label className="journey-check"><input disabled={readOnly} type="checkbox" checked={value.approved} onChange={e=>change(x=>{x.approved=e.target.checked})}/> Kriterien von Coach fachlich geprüft und freigegeben</label>
+  </div>;
+ }
+
 export default function JourneyBuilder(){
  const [paths,setPaths]=useState<Path[]>([]);
  const [waiting,setWaiting]=useState(0);
@@ -111,26 +132,6 @@ export default function JourneyBuilder(){
    setNotice("Medium hochgeladen. Noch Entwurf speichern.");
   }catch(e){setError(e instanceof Error?e.message:String(e));}finally{setUploading("");}
  }
- function RenderAssessment({value,onChange,onRemove}:{value:Test;onChange:(next:Test)=>void;onRemove:()=>void}){
-  const change=(fn:(v:Test)=>void)=>{const next=structuredClone(value);fn(next);onChange(next);};
-  return <div className="journey-test">
-   <div className="journey-card-heading"><strong>Abschlusstest / Einstufungstest</strong>{!readOnly&&<button type="button" onClick={onRemove}>Entfernen</button>}</div>
-   <label>Testname<input disabled={readOnly} value={value.titleDe} onChange={e=>change(x=>{x.titleDe=e.target.value})}/></label>
-   <div className="journey-metric-head"><strong>Bestehenskriterien</strong>{!readOnly&&<button type="button" onClick={()=>change(x=>{x.criteria.metrics.push({key:"",unit:"reps",min:1})})}>+ Kriterium</button>}</div>
-   {value.criteria.metrics.map((m,i)=><div className="journey-metric" key={i}>
-    <label>Messgröße<input disabled={readOnly} value={m.key} placeholder="z. B. pushups" onChange={e=>change(x=>{x.criteria.metrics[i].key=e.target.value})}/></label>
-    <label>Einheit<input disabled={readOnly} value={m.unit} placeholder="reps" onChange={e=>change(x=>{x.criteria.metrics[i].unit=e.target.value})}/></label>
-    <label>Mindestens<input disabled={readOnly} type="number" value={m.min??""} onChange={e=>change(x=>{if(e.target.value==="")delete x.criteria.metrics[i].min;else x.criteria.metrics[i].min=Number(e.target.value)})}/></label>
-    <label>Höchstens<input disabled={readOnly} type="number" value={m.max??""} onChange={e=>change(x=>{if(e.target.value==="")delete x.criteria.metrics[i].max;else x.criteria.metrics[i].max=Number(e.target.value)})}/></label>
-    {!readOnly&&<button type="button" onClick={()=>change(x=>{x.criteria.metrics.splice(i,1)})}>×</button>}
-   </div>)}
-   <div className="journey-form-row">
-    <label>Wiederholung frühestens nach (Stunden)<input disabled={readOnly} type="number" min={0} max={8760} value={value.retestRules?.minHoursAfterFailure??0} onChange={e=>change(x=>{x.retestRules={...x.retestRules,minHoursAfterFailure:Number(e.target.value)}})}/></label>
-    <label>Hinweis nach Nichtbestehen<input disabled={readOnly} value={value.retestRules?.guidanceDe??""} onChange={e=>change(x=>{x.retestRules={...x.retestRules,minHoursAfterFailure:x.retestRules?.minHoursAfterFailure??0,guidanceDe:e.target.value}})}/></label>
-   </div>
-   <label className="journey-check"><input disabled={readOnly} type="checkbox" checked={value.approved} onChange={e=>change(x=>{x.approved=e.target.checked})}/> Kriterien von Coach fachlich geprüft und freigegeben</label>
-  </div>;
- }
  return <div className="journey-workspace">
   <section className="panel journey-side">
    <div className="journey-headline"><h2>Trainingswege</h2><span>{paths.length} Wege</span></div>
@@ -155,7 +156,7 @@ export default function JourneyBuilder(){
     </div>
     <div className="panel journey-meta"><label>Versionsnotiz<textarea rows={2} disabled={readOnly} value={draft.notes} onChange={e=>edit(x=>{x.notes=e.target.value})}/></label>
     <div className="journey-card-heading"><h3>Einstufungstest</h3>{!draft.placement&&!readOnly&&<button type="button" onClick={()=>edit(d=>{d.placement=newTest()})}>+ Test anlegen</button>}</div>
-    {draft.placement?<RenderAssessment value={draft.placement} onChange={next=>edit(d=>{d.placement=next})} onRemove={()=>edit(d=>{d.placement=null})}/>:<p className="muted">Noch kein Einstufungstest. Der Coach kann den Einstieg später alternativ persönlich bestätigen.</p>}
+    {draft.placement?<RenderAssessment readOnly={readOnly} value={draft.placement} onChange={next=>edit(d=>{d.placement=next})} onRemove={()=>edit(d=>{d.placement=null})}/>:<p className="muted">Noch kein Einstufungstest. Der Coach kann den Einstieg später alternativ persönlich bestätigen.</p>}
     </div>
     {draft.levels.map((l,li)=><details key={l.code} className="panel journey-level" open={li===0}>
      <summary><strong>{li+1}. {l.code.replaceAll("_"," ")}</strong><span>{l.chapters.length} Kapitel</span></summary>
@@ -185,7 +186,7 @@ export default function JourneyBuilder(){
        </div>}
       </div>)}
       <div className="journey-card-heading"><h4>Kapitelabschluss</h4>{!ch.test&&!readOnly&&<button type="button" onClick={()=>chapterEdit(li,ci,c=>{c.test=newTest()})}>+ Abschlusstest</button>}</div>
-      {ch.test&&<RenderAssessment value={ch.test} onChange={next=>chapterEdit(li,ci,c=>{c.test=next})} onRemove={()=>chapterEdit(li,ci,c=>{c.test=null})}/>}
+      {ch.test&&<RenderAssessment readOnly={readOnly} value={ch.test} onChange={next=>chapterEdit(li,ci,c=>{c.test=next})} onRemove={()=>chapterEdit(li,ci,c=>{c.test=null})}/>}
      </section>)}
      {!readOnly&&<button className="journey-outline" type="button" onClick={()=>edit(d=>{d.levels[li].chapters.push(newChapter())})}>+ KAPITEL HINZUFÜGEN</button>}
     </details>)}
