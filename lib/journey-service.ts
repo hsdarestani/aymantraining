@@ -157,7 +157,7 @@ export async function submitJourneyAssessment(args:{
     return tx.journeyTestAttempt.create({data:{
       enrollmentId:enrollment.id,assessmentId:assessment.id,idempotencyKey:args.idempotencyKey,results:parsed
     }});
-  });
+  },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable});
 }
 
 /** Only an assigned coach/admin can finalize an attempt and grant one next chapter. */
