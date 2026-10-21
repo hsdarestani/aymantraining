@@ -50,7 +50,7 @@ test("coach creates a combined journey, edits level chapter, saves and reloads w
  expect(saved.versions[0].levels.find(x=>x.code==="READY").chapters).toHaveLength(1);
  page.on("dialog",dialog=>dialog.accept());
  await page.getByRole("button",{name:"VERÖFFENTLICHEN"}).click();
- await expect(page.getByRole("alert")).toContainText("Mindestens ein Trainingskapitel");
+ await expect(page.locator(".journey-alert")).toContainText("Mindestens ein Trainingskapitel");
 });
 test("new PRO video linked to a chapter is not publicly accessible",async({request})=>{
  const record=await db.chapterMediaVariant.findFirst({
