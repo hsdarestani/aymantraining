@@ -55,6 +55,7 @@ jobs:
           git show origin/main:prisma/schema.prisma > prisma/step05-previous.prisma
           npx prisma db push --schema prisma/step05-previous.prisma
           node scripts/test-journey-legacy.mjs seed
+          node scripts/test-journey-step05-migration.mjs seed
           npx prisma migrate diff --from-schema-datamodel prisma/step05-previous.prisma --to-schema-datamodel prisma/schema.prisma --script > /tmp/step05-schema.sql
           if grep -Ei 'DROP (TABLE|COLUMN|TYPE)|ALTER TABLE .* DROP' /tmp/step05-schema.sql; then
             echo "Destructive DDL forbidden" >&2
@@ -62,6 +63,7 @@ jobs:
           fi
           npx prisma db push
           node scripts/test-journey-legacy.mjs verify
+          node scripts/test-journey-step05-migration.mjs verify
       - name: Database lifecycle and publishing protection
         run: node scripts/test-journey-step05.mjs
       - name: Existing journey integrity
