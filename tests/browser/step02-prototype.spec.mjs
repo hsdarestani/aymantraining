@@ -67,11 +67,15 @@ test("female dashboard is optional, cycle private and milestones skip on mobile"
   await button(page,/OPTIONALES MODUL/).click();
   await expect(page.getByText("DEMO AUS")).toBeVisible();
   await page.locator(".bdp-check input").first().check();
+  await page.locator('input[type="date"]').first().fill("2026-10-01");
+  await page.locator('input[type="date"]').last().fill("2026-10-05");
   await page.locator(".bdp-calendar button").nth(15).click();
   await expect(page.getByText("AKTIVER DEMOTAG: 16")).toBeVisible();
   await page.locator(".bdp-check input").last().check();
   await button(page,/EINTRÄGE LÖSCHEN UND MODUL DEAKTIVIEREN/).click();
   await expect(page.getByText("DEMO AUS")).toBeVisible();
+  await page.locator(".bdp-check input").first().check();
+  await expect(page.locator('input[type="date"]').first()).toHaveValue("");
   await page.getByRole("combobox",{name:"Ansicht auswählen"}).selectOption("milestones");
   await button(page,/ANIMATION ÖFFNEN/).nth(0).click();
   await expect(page.getByRole("dialog")).toBeVisible();
