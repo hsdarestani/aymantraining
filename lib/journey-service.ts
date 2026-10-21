@@ -158,7 +158,7 @@ export async function reviewJourneyAttempt(args:{
       include:{
         assessment:true,
         enrollment:{include:{
-          version:{include:{levels:{include:{chapters:{orderBy:{position:"asc"}}}},orderBy:{position:"asc"}}}
+          version:{include:{levels:{orderBy:{position:"asc"},include:{chapters:{orderBy:{position:"asc"}}}}}}
         }}
       }});
     if(!attempt)refuse("Testversuch nicht gefunden.");
@@ -204,8 +204,8 @@ export async function reviewJourneyAttempt(args:{
             data:{confirmedLevel:nextLevel}});
         }
         await tx.journeyChapterUnlock.upsert({
-          where:{enrollmentId_chapterId:{enrollmentId:attempt.enrollmentId,chapterId:nextChapterId}},
-          update:{},create:{enrollmentId:attempt.enrollmentId,chapterId:nextChapterId,
+          where:{enrollmentId_chapterId:{enrollmentId:attempt.enrollmentId,chapterId:next.chapterId}},
+          update:{},create:{enrollmentId:attempt.enrollmentId,chapterId:next.chapterId,
             reason:"PASSED_CHAPTER_TEST",attemptId:attempt.id,grantedById:args.reviewerId}
         });
       }else{
