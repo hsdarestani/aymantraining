@@ -1,3 +1,4 @@
+import {inspectJourneyMediaAccess} from "../../../../lib/journey-service";
 import {canCoachAccess} from "../../../../lib/coach-access";
 import {prisma} from "../../../../lib/db";
 import {errorJson,requireApiUser} from "../../../../lib/http";
@@ -8,8 +9,28 @@ export async function GET(request:Request,{params}:{params:Promise<{id:string}>}
   const asset=await prisma.mediaAsset.findUnique({where:{id}});
   if(!asset)return errorJson("Datei nicht gefunden.",404);
 
-  const publicExercise=["EXERCISE_IMAGE","EXERCISE_VIDEO"].includes(asset.kind);
-  if(!publicExercise){
+  const exerciseAsset=["EXERCISE_IMAGE","EXERCISE_VIDEO"].includes(asset.kind);
+  // Preserve legacy public exercise files while the new system is disabled.
+  // Once a media asset is attached to a Journey item, never serve it publicly,
+  // including while the version is still in draft.
+  const isolatedJourneyAsset=asset.storageKey.startsWith("journey-media/");
+  // A rollback of the Journey feature must not accidentally make newly filmed PRO clips public.
+  if(isolatedJourneyAsset&&process.env.JOURNEY_EDITOR_ENABLED!=="true")return errorJson("Medium derzeit nicht freigeschaltet.",403);
+  const journeyVariants=exerciseAsset&&process.env.JOURNEY_EDITOR_ENABLED==="true"?
+    await prisma.chapterMediaVariant.findMany({where:{mediaAssetId:asset.id},select:{id:true},take:100}):[];
+  const journeyProtected=isolatedJourneyAsset||journeyVariants.length>0;
+  const publicExercise=exerciseAsset&&!journeyProtected;
+  if(journeyProtected){
+    const user=await requireApiUser();
+    if(!user)return errorJson("Nicht angemeldet.",401);
+    let allowed=user.role==="ADMIN"||(user.role==="COACH"&&(journeyVariants.length>0||asset.ownerId===user.id));
+    if(!allowed){
+      for(const variant of journeyVariants){
+        if((await inspectJourneyMediaAccess(user.id,variant.id)).allowed){allowed=true;break;}
+      }
+    }
+    if(!allowed)return errorJson("Dieses Kapitel oder PRO Medium ist nicht freigeschaltet.",403);
+  }else if(!publicExercise){
     const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
     let allowed=asset.ownerId===user.id||asset.relatedUserId===user.id||user.role==="ADMIN"||(user.role==="COACH"&&await canCoachAccess(user,asset.relatedUserId||asset.ownerId));
     if(!allowed&&asset.kind==="VOICE_MESSAGE"){

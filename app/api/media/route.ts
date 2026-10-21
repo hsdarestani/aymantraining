@@ -30,7 +30,10 @@ export async function POST(request:Request){
   const form=await request.formData();const file=form.get("file");
   const kind=String(form.get("kind")||"") as keyof typeof allowed;
   const relatedUserId=form.get("relatedUserId")?String(form.get("relatedUserId")):user.id;
+  const journeyUpload=form.get("scope")==="JOURNEY";
   if(!(file instanceof File)||!allowed[kind])return errorJson("Datei oder Typ ungültig.",422);
+  if(journeyUpload&&(process.env.JOURNEY_EDITOR_ENABLED!=="true"||!["COACH","ADMIN"].includes(user.role)||!["EXERCISE_IMAGE","EXERCISE_VIDEO"].includes(kind)||relatedUserId!==user.id))
+    return errorJson("Coach Journey Medien sind noch nicht freigegeben.",403);
   if((kind==="EXERCISE_IMAGE"||kind==="EXERCISE_VIDEO")&&!["COACH","ADMIN"].includes(user.role))return errorJson("Keine Berechtigung.",403);
   if(user.role==="ATHLETE"&&(kind==="VOICE_MESSAGE"||kind==="TECHNIQUE_VIDEO")&&!await hasFeature(user.subscriptionTier,"coach_chat"))return errorJson("Coach Media ist PRO.",403);
   if(user.role==="ATHLETE"&&kind==="TECHNIQUE_VIDEO"){
@@ -53,7 +56,7 @@ export async function POST(request:Request){
     const consent=await prisma.consentRecord.findFirst({where:{userId:relatedUserId,type:"media_processing"},orderBy:{grantedAt:"desc"}});
     if(!consent?.granted)return errorJson("Bitte bestätige zuerst die Verarbeitung privater Fotos/Videos.",403);
   }
-  const key=`media/${new Date().getUTCFullYear()}/${crypto.randomUUID()}`;
+  const key=`${journeyUpload?"journey-media":"media"}/${new Date().getUTCFullYear()}/${crypto.randomUUID()}`;
   const sensitive=!["EXERCISE_IMAGE","EXERCISE_VIDEO"].includes(kind);
   await putPrivateObject(key,Buffer.from(await file.arrayBuffer()),file.type,sensitive);
   const asset=await prisma.mediaAsset.create({data:{ownerId:user.id,relatedUserId,kind,storageKey:key,originalName:file.name.slice(0,240),mimeType:file.type,sizeBytes:file.size}});
