@@ -2,6 +2,9 @@ import {test,expect} from "@playwright/test";
 import {PrismaClient} from "@prisma/client";
 import {createHash} from "node:crypto";
 
+// The production regression suite runs with Journey flags disabled by design.
+// The dedicated Step 04 workflow enables both flags and executes this full suite.
+test.skip(process.env.JOURNEY_ONBOARDING_ENABLED!=="true"||process.env.NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED!=="true","Step 04 onboarding is not enabled in the current deployment.");
 const db=new PrismaClient();
 const dateStamp=Date.now().toString(36);
 const base="http://127.0.0.1:3000";
