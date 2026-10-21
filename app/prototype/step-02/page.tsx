@@ -5,7 +5,7 @@ import "./prototype.css";
 
 type Screen = "goals" | "assessment" | "placement" | "home" | "path" | "exercise" | "exam" | "coach" | "women" | "cycle" | "milestones" | "scope";
 type Level = "READY" | "AWAKE" | "DIFFERENT" | "BE DIFFERENT" | "TRULY DIFFERENT";
-type Moment = "recovery" | "thirty" | "level" | null;
+type Moment = "recovery" | "thirty" | "chapter" | "level" | null;
 type Sex = "female" | "male" | "diverse";
 
 const levels: {name: Level; short: string; description: string}[] = [
@@ -73,6 +73,7 @@ export default function Step02Prototype(){
   const [symptom,setSymptom] = useState("keine");
   const [cycleAction,setCycleAction] = useState("Leichtere Einheit");
   const [moment,setMoment] = useState<Moment>(null);
+  const [levelReveal,setLevelReveal] = useState<{from:Level;to:Level}>({from:"READY",to:"AWAKE"});
   const [quietMotion,setQuietMotion] = useState(false);
   const [soundOn,setSoundOn] = useState(false);
   const [recoveryDone,setRecoveryDone] = useState(false);
@@ -106,15 +107,16 @@ export default function Step02Prototype(){
       setLessonDone(false);
       if(chapterIndex===1){
         if(levelIndex<levels.length-1){
+          setLevelReveal({from:currentLevel,to:levels[levelIndex+1].name});
           setLevelIndex(levelIndex+1);
           setChapterIndex(0);
           setMoment("level");
         }else{
-          setMoment("level");
+          setMoment("chapter");
         }
       }else{
         setChapterIndex(1);
-        setMoment("level");
+        setMoment("chapter");
       }
       setScreen("path");
     }else{
@@ -305,7 +307,7 @@ export default function Step02Prototype(){
           <div className="bdp-milestone-grid">
             <button onClick={()=>setMoment("recovery")}><Tag kind="existing">KLEINER MOMENT</Tag><strong>✓</strong><h3>Regeneration geschafft</h3><p>Deine geplante Erholung zählt. Eine ruhige Bestätigung ohne Unterbrechung.</p><span>BEISPIEL ÖFFNEN ↗</span></button>
             <button onClick={()=>setMoment("thirty")}><Tag kind="new">GROSSER MOMENT</Tag><strong>30</strong><h3>30 Tage drangeblieben</h3><p>Sportliche Inszenierung mit freigestelltem Coach-Clip-Platzhalter.</p><span>ANIMATION ÖFFNEN ↗</span></button>
-            <button onClick={()=>setMoment("level")}><Tag kind="new">LEVELAUFSTIEG</Tag><strong>02</strong><h3>READY → AWAKE</h3><p>Das neue Level wird nach einem bestandenen Test gefeiert, nie nur wegen eines Streaks.</p><span>ANIMATION ÖFFNEN ↗</span></button>
+            <button onClick={()=>setLevelReveal({from:"READY",to:"AWAKE"});setMoment("level")}}><Tag kind="new">LEVELAUFSTIEG</Tag><strong>02</strong><h3>READY → AWAKE</h3><p>Das neue Level wird nach einem bestandenen Test gefeiert, nie nur wegen eines Streaks.</p><span>ANIMATION ÖFFNEN ↗</span></button>
           </div>
           <div className="bdp-panel"><h3>Kontrolle für Nutzer</h3><div className="bdp-toggles"><label className="bdp-check"><input type="checkbox" checked={quietMotion} onChange={e=>setQuietMotion(e.target.checked)}/>Ruhige Ansicht ohne große Bewegung</label><label className="bdp-check"><input type="checkbox" checked={soundOn} onChange={e=>setSoundOn(e.target.checked)}/>Ton in der zukünftigen Coach-Aufnahme erlauben</label></div><p className="bdp-fine">Es sind noch keine Audiodateien vorhanden. Die Toneinstellung beeinflusst daher nur die Demo-Beschriftung und spielt keinen Ton ab.</p></div>
         </div>}
@@ -327,7 +329,7 @@ export default function Step02Prototype(){
     {moment&&<div className={"bdp-overlay"+(quietMotion?" bdp-still":"")} role="dialog" aria-modal="true" aria-labelledby="bdp-celebration-title">
       <div className={"bdp-celebration bdp-celebration-"+moment}>
         <div className="bdp-celebration-top"><span>BE DIFFERENT / DEIN MOMENT</span><button onClick={()=>setMoment(null)}>ÜBERSPRINGEN ✕</button></div>
-        {moment==="recovery"?<><div className="bdp-celebration-symbol">✓</div><h2 id="bdp-celebration-title">Erholung zählt.</h2><p>Du bist drangeblieben. Regeneration ist Teil deines Weges.</p></>:moment==="thirty"?<><div className="bdp-celebration-number">30</div><div className="bdp-coach-cutout"><b>COACH-CLIP</b><span>Freigestellte Originalaufnahme wird benötigt</span></div><h2 id="bdp-celebration-title">30 Tage. Richtig stark!</h2><p>Dein Einsatz verdient diesen Moment. Wir gehen gemeinsam weiter.</p></>:<><div className="bdp-celebration-old">READY</div><div className="bdp-celebration-arrow">↓</div><div className="bdp-celebration-new">AWAKE</div><h2 id="bdp-celebration-title">Dein nächster Schritt ist frei.</h2><p>Demo eines bestandenen Kapiteltests. Auszeichnungen ersetzen nie die Prüfbedingungen.</p></>}
+        {moment==="recovery"?<><div className="bdp-celebration-symbol">✓</div><h2 id="bdp-celebration-title">Erholung zählt.</h2><p>Du bist drangeblieben. Regeneration ist Teil deines Weges.</p></>:moment==="chapter"?<><div className="bdp-celebration-symbol">✓</div><h2 id="bdp-celebration-title">Kapitel geschafft.</h2><p>Dein Test wurde in der Demo bestanden. Das nächste Kapitel ist frei, ohne dass sich dein Level automatisch ändern muss.</p></>:moment==="thirty"?<><div className="bdp-celebration-number">30</div><div className="bdp-coach-cutout"><b>COACH-CLIP</b><span>Freigestellte Originalaufnahme wird benötigt</span></div><h2 id="bdp-celebration-title">30 Tage. Richtig stark!</h2><p>Dein Einsatz verdient diesen Moment. Wir gehen gemeinsam weiter.</p></>:<><div className="bdp-celebration-old">{levelReveal.from}</div><div className="bdp-celebration-arrow">↓</div><div className="bdp-celebration-new">{levelReveal.to}</div><h2 id="bdp-celebration-title">Dein nächster Schritt ist frei.</h2><p>Demo eines bestandenen Kapiteltests. Auszeichnungen ersetzen nie die Prüfbedingungen.</p></>}
         <div className="bdp-celebration-controls"><span>{quietMotion?"REDUZIERTE BEWEGUNG":"ANIMATION"} · {soundOn?"TON GEWÜNSCHT, DATEI FEHLT":"STUMM"}</span><button onClick={()=>setMoment(null)}>WEITER →</button></div>
       </div>
     </div>}
