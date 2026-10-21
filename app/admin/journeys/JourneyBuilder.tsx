@@ -121,7 +121,7 @@ export default function JourneyBuilder(){
   setUploading(key);setError("");
   try{
    const form=new FormData();
-   form.set("file",file);form.set("kind",role==="EXPLANATION_VIDEO"?"EXERCISE_VIDEO":"EXERCISE_IMAGE");
+   form.set("file",file);form.set("kind",role==="EXPLANATION_VIDEO"?"EXERCISE_VIDEO":"EXERCISE_IMAGE");form.set("scope","JOURNEY");
    const r=await fetch("/api/media",{method:"POST",body:form});
    const body=await r.json();
    if(!r.ok)throw Error(body.error||"Hochladen fehlgeschlagen.");
