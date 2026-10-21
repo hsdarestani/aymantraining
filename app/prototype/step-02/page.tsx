@@ -132,7 +132,7 @@ export default function Step02Prototype(){
     setCycleAction("Leichtere Einheit");
   }
   const chapterNumber = chapterIndex+1;
-  const goalMatch = chosen.includes("Fußball")&&chosen.includes("Athletik")&&chosen.includes("Muskelaufbau");
+  const goalMatch = chosen.length===3&&chosen.includes("Fußball")&&chosen.includes("Athletik")&&chosen.includes("Muskelaufbau");
 
   return <main className={"bdp-root bdp-theme-"+accent}>
     <div className="bdp-ambient" aria-hidden="true"/>
@@ -240,7 +240,7 @@ export default function Step02Prototype(){
             <div className="bdp-card-top"><Tag kind="existing">ÜBUNGSKARTE · NEU ARRANGIERT</Tag><strong>{currentLevel} · {chapterNumber}/2</strong></div>
             <h2>Bulgarian Split Squat</h2><p className="bdp-subline">Kraft · Beine · Technikfokus</p>
             <div className="bdp-frames">{["START","MITTE","ENDE"].map((label,i)=><div className="bdp-exercise-frame" key={label}><div aria-hidden="true" className={"bdp-athlete-shape bdp-pose-"+i}><span/><i/><b/></div><small>{label}</small></div>)}</div>
-            <p className="bdp-fine">Schematische Platzhalter, keine Originalaufnahmen. Die echten Bilder werden durch den Coach hochgeladen.</p>
+            <p className="bdp-fine">{sex==="female"&&womenView?"Schematische Trainerinnen-Platzhalter in FREE und PRO.":"Schematische Trainer-Platzhalter in FREE und PRO."} Echte Aufnahmen müssen vor Veröffentlichung hochgeladen werden.</p>
             <div className="bdp-instructions"><h3>SO FÜHRST DU DIE ÜBUNG AUS</h3><p>Vorderes Knie bleibt kontrolliert über dem Fuß. Oberkörper leicht nach vorn neigen. Langsam absenken, stabil wieder aufrichten.</p>{coachReplied&&<div className="bdp-personal-tip"><b>NEUER HINWEIS VON DEINEM COACH</b><p>Halte das Becken gerade und kontrolliere die Knieachse. Dieser Hinweis stammt aus dem simulierten Technikfeedback.</p></div>}</div>
             {tier==="PRO"?<div className="bdp-video-preview"><Tag kind="new">PRO · 8–12 SEKUNDEN</Tag><div className="bdp-play">▶</div><strong>{sex==="female"&&womenView?"ERKLÄRVIDEO DER TRAINERIN":"DEIN COACH ZEIGT DIE TECHNIK"}</strong><p>Video-Position im Prototyp. Echte Traineraufnahme ist noch nicht hinterlegt.</p></div>:<div className="bdp-video-locked"><span>▶</span><div><b>COACH-VIDEO IN PRO</b><p>Mit FREE bleiben die Bilder und sämtliche Anleitungen für das freigeschaltete Kapitel nutzbar.</p></div></div>}
             <div className="bdp-actions"><Action onClick={()=>{setLessonDone(true);navigate("path")}}>TRAININGSABSCHNITT ABSCHLIESSEN</Action><Action secondary onClick={()=>navigate("coach")}>TECHNIKFEEDBACK ANSEHEN</Action></div>
@@ -271,7 +271,7 @@ export default function Step02Prototype(){
             </div>
             <div className="bdp-actions">{!submittedVideo?<Action onClick={()=>setSubmittedVideo(true)}>TECHNIKVIDEO SIMULIEREN</Action>:!coachReplied?<Action onClick={()=>setCoachReplied(true)}>COACH-ANTWORT SIMULIEREN</Action>:<Action onClick={()=>navigate("exercise")}>HINWEIS IN ÜBUNG ANSEHEN</Action>}</div>
           </div>
-          <div className="bdp-panel bdp-signature"><Tag kind="optional">SIGNATURE-IDEЕ · ZUSATZAUFWAND</Tag><h3>Vom Coach geführtes Workout</h3><p>Eine optional aufgenommene Stimme führt durch Aufwärmen, Sätze und Pausen. Das ist ein separates Konzept, noch kein aktivierter Player oder echter Sprachclip.</p></div>
+          <div className="bdp-panel bdp-signature"><Tag kind="optional">SIGNATURE-IDEE · ZUSATZAUFWAND</Tag><h3>Vom Coach geführtes Workout</h3><p>Eine optional aufgenommene Stimme führt durch Aufwärmen, Sätze und Pausen. Das ist ein separates Konzept, noch kein aktivierter Player oder echter Sprachclip.</p></div>
         </div>}
 
         {screen==="women"&&<div className="bdp-screen">
