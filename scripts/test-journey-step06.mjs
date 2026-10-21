@@ -37,7 +37,7 @@ try{
  const final1=await db.journeyAssessment.create({data:{versionId:ver.id,chapterId:ch1.id,kind:"CHAPTER_FINAL",titleDe:"READY Test 1",criteria:criterion,
   retestRules:{minHoursAfterFailure:48,guidanceDe:"Arbeite an deiner Rumpfstabilität."},approvedAt:new Date()}});
  const final2=await db.journeyAssessment.create({data:{versionId:ver.id,chapterId:ch2.id,kind:"CHAPTER_FINAL",titleDe:"READY Test 2",criteria:criterion,approvedAt:new Date()}});
- const placement=await db.journeyAssessment.create({data:{versionId:ver.id,kind:"PLACEMENT",titleDe:"Einstufung READY",criteria:criterion,approvedAt:new Date()}});
+ const placement=await db.journeyAssessment.create({data:{versionId:ver.id,kind:"PLACEMENT",titleDe:"Einstufung READY",criteria:criterion,retestRules:{minHoursAfterFailure:48,guidanceDe:"Arbeite an deiner Rumpfstabilität."},approvedAt:new Date()}});
  const enrollment=await db.journeyEnrollment.create({data:{userId:athlete.id,versionId:ver.id,state:"PENDING",selfLevel:"TRULY_DIFFERENT"}});
  await test("self-estimation has zero chapter access and placement is private",async()=>{
   const list=await views.listAthleteJourneyTests(athlete.id);
