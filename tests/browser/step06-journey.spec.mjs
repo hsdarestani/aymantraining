@@ -46,6 +46,10 @@ test("athlete submits a test, assigned coach reviews, next chapter unlocks in li
  await coachCtx.addCookies([{name:"bd_session",value:tokens.coach,url:base,httpOnly:true,sameSite:"Lax"}]);
  const trainer=await coachCtx.newPage();
  await trainer.goto(base+"/admin/journey-tests");
+ const coachApi=await trainer.evaluate(async()=>{
+  const r=await fetch("/api/admin/journey-tests");return {status:r.status,body:await r.text()};
+ });
+ console.log("STEP6_COACH_DIAGNOSTIC",trainer.url(),coachApi,(await trainer.locator("body").innerText()).slice(0,1400));
  await expect(trainer.getByText("Kapiteltest Grundlagen")).toBeVisible();
  await trainer.getByRole("textbox",{name:"Persönliche Rückmeldung"}).fill("Saubere Technik, nächste Übung beginnen.");
  await trainer.getByRole("button",{name:"ERGEBNIS FACHLICH PRÜFEN"}).click();
