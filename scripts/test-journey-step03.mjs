@@ -63,7 +63,7 @@ try{
   const pathway=await db.journeyPathway.create({data:{slug:uuid("football_athletics_strength"),titleDe:"Fußball + Athletik + Muskelaufbau"}});
   for(const goal of goals)await db.journeyPathwayGoal.create({data:{pathwayId:pathway.id,goalId:goal.id}});
   const version=await db.journeyPathwayVersion.create({
-    data:{pathwayId:pathway.id,version:1,state:"PUBLISHED",publishedAt:new Date()}});
+    data:{pathwayId:pathway.id,version:1,state:"PUBLISHED",goalSlugs:goals.map(g=>g.slug).sort(),publishedAt:new Date()}});
   const ready=await db.journeyLevelDefinition.create({data:{versionId:version.id,code:"READY",labelDe:"READY",position:1}});
   const awake=await db.journeyLevelDefinition.create({data:{versionId:version.id,code:"AWAKE",labelDe:"AWAKE",position:2}});
   const c1=await db.journeyChapter.create({data:{levelId:ready.id,position:1,titleDe:"Grundlagen"}});
@@ -76,6 +76,7 @@ try{
   const mediaVideo=await db.mediaAsset.create({data:{ownerId:admin.id,kind:"EXERCISE_VIDEO",storageKey:uuid("journey_video"),originalName:"coach.mp4",mimeType:"video/mp4",sizeBytes:1024}});
   const image=await db.chapterMediaVariant.create({data:{itemId:item1.id,mediaAssetId:mediaImage.id,role:"START_IMAGE",minTier:"FREE"}});
   const video=await db.chapterMediaVariant.create({data:{itemId:item1.id,mediaAssetId:mediaVideo.id,role:"EXPLANATION_VIDEO",minTier:"PRO",durationSec:10}});
+  const invalidVideo=await db.chapterMediaVariant.create({data:{itemId:item1.id,mediaAssetId:mediaVideo.id,role:"EXPLANATION_VIDEO",presenter:"TRAINER",minTier:"FREE",durationSec:10}});
   const criteria={schemaVersion:1,metrics:[{key:"pushups",unit:"reps",min:20}]};
   const assessment1=await db.journeyAssessment.create({data:{versionId:version.id,chapterId:c1.id,kind:"CHAPTER_FINAL",titleDe:"Kapitelprüfung 1",criteria,approvedAt:new Date()}});
   const assessment2=await db.journeyAssessment.create({data:{versionId:version.id,chapterId:c2.id,kind:"CHAPTER_FINAL",titleDe:"Kapitelprüfung 2",criteria,approvedAt:new Date()}});
@@ -103,6 +104,7 @@ try{
     assert.equal(await db.journeyChapterUnlock.count({where:{enrollmentId:enrollment.id}}),1);
     assert.equal((await service.inspectJourneyMediaAccess(athlete.id,image.id)).allowed,true);
     assert.equal((await service.inspectJourneyMediaAccess(athlete.id,video.id)).reason,"SUBSCRIPTION_REQUIRED");
+    assert.equal((await service.inspectJourneyMediaAccess(athlete.id,invalidVideo.id)).reason,"INVALID_MEDIA_POLICY");
     await rejects(()=>service.confirmJourneyPlacement({enrollmentId:enrollment.id,level:"TRULY_DIFFERENT",approvedById:admin.id,reason:"COACH_APPROVAL"}),"bereits");
   });
   await check("future chapter activity cannot be completed early",async()=>{
