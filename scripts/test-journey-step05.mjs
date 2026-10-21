@@ -32,8 +32,8 @@ try{
  const oldScore=await db.scoreSnapshot.create({data:{userId:athlete.id,date:new Date("2026-10-18T00:00:00Z"),total:39}});
  const existingPlan=await db.trainingPlan.create({data:{name:"Old active plan "+stamp,isTemplate:true,active:true}});
  const exercise=await db.exercise.create({data:{id:"step05_"+stamp,nameDe:"Übung "+stamp,category:"QA",active:true}});
- const mediaImage=await db.mediaAsset.create({data:{ownerId:coach.id,relatedUserId:coach.id,kind:"EXERCISE_IMAGE",storageKey:"step05-img-"+stamp,originalName:"coach.webp",mimeType:"image/webp",sizeBytes:250}});
- const mediaVideo=await db.mediaAsset.create({data:{ownerId:coach.id,relatedUserId:coach.id,kind:"EXERCISE_VIDEO",storageKey:"step05-vid-"+stamp,originalName:"coach.mp4",mimeType:"video/mp4",sizeBytes:2500}});
+ const mediaImage=await db.mediaAsset.create({data:{ownerId:coach.id,relatedUserId:coach.id,kind:"EXERCISE_IMAGE",storageKey:"journey-media/2026/step05-img-"+stamp,originalName:"coach.webp",mimeType:"image/webp",sizeBytes:250}});
+ const mediaVideo=await db.mediaAsset.create({data:{ownerId:coach.id,relatedUserId:coach.id,kind:"EXERCISE_VIDEO",storageKey:"journey-media/2026/step05-vid-"+stamp,originalName:"coach.mp4",mimeType:"video/mp4",sizeBytes:2500}});
  const goals=["football","athleticism","muscle_building"];
  const request=await db.journeyIntake.create({data:{userId:athlete.id,selectedGoalSlugs:[...goals].sort(),
   selfLevel:"TRULY_DIFFERENT",status:"PENDING_PATHWAY"}});
