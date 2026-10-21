@@ -102,12 +102,13 @@ async function validateMedia(tx:Tx,actorId:string,draft:CurriculumDraft){
  const ids=[...new Set(refs.map(x=>x.mediaAssetId))];
  if(!ids.length)return;
  const assets=await tx.mediaAsset.findMany({where:{id:{in:ids}},
-  select:{id:true,kind:true,relatedUserId:true,ownerId:true}});
+  select:{id:true,kind:true,relatedUserId:true,ownerId:true,storageKey:true}});
  if(assets.length!==ids.length)unchanged("INVALID_MEDIA");
  const actor=await tx.user.findUnique({where:{id:actorId},select:{role:true}});
  for(const ref of refs){
   const asset=assets.find(x=>x.id===ref.mediaAssetId)!;
   const isVideo=ref.role==="EXPLANATION_VIDEO";
+  if(!asset.storageKey.startsWith("journey-media/"))unchanged("PRIVATE_MEDIA");
   if(asset.kind!==(isVideo?"EXERCISE_VIDEO":"EXERCISE_IMAGE"))
    unchanged("INVALID_MEDIA_KIND");
   // These items are approved exercise reference assets, never athlete progress files.
