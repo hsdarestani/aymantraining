@@ -7,7 +7,7 @@ const dateStamp=Date.now().toString(36);
 const base="http://127.0.0.1:3000";
 const passwordHash="isolated-test-only";
 const tokens={};
-let userWithoutPath,userWithPath,legacyUser,pathway;
+let userWithoutPath,userWithPath,legacyUser,pathway,admin,readyLevel,readyChapter;
 const approvedPayload={
   goal:"Fußball",goals:["Fußball","Athletik","Muskelaufbau"],selfLevel:"TRULY_DIFFERENT",
   dashboard:"GENERAL",birthDate:"2001-02-10",sex:"male",heightCm:179,weightKg:77,
@@ -28,7 +28,8 @@ test.beforeAll(async()=>{
   userWithoutPath=await db.user.create({data:{email:"step4-unknown-"+dateStamp+"@example.invalid",passwordHash}});
   userWithPath=await db.user.create({data:{email:"step4-curated-"+dateStamp+"@example.invalid",passwordHash}});
   legacyUser=await db.user.create({data:{email:"step4-legacy-"+dateStamp+"@example.invalid",passwordHash}});
-  await sessionFor(userWithoutPath,"unmatched");await sessionFor(userWithPath,"matched");await sessionFor(legacyUser,"legacy");
+  admin=await db.user.create({data:{email:"step4-admin-"+dateStamp+"@example.invalid",passwordHash,role:"ADMIN"}});
+  await sessionFor(userWithoutPath,"unmatched");await sessionFor(userWithPath,"matched");await sessionFor(legacyUser,"legacy");await sessionFor(admin,"admin");
   pathway=await db.journeyPathway.create({data:{slug:"step4-curated-"+dateStamp,titleDe:"Fußball plus Athletik und Muskelaufbau"}});
   await db.journeyPathwayVersion.create({data:{
     pathwayId:pathway.id,version:1,state:"PUBLISHED",
@@ -36,11 +37,16 @@ test.beforeAll(async()=>{
   }});
 });
 test.afterAll(async()=>{
-  await db.authSession.deleteMany({where:{userId:{in:[userWithoutPath?.id,userWithPath?.id,legacyUser?.id].filter(Boolean)}}});
-  await db.journeyEnrollment.deleteMany({where:{userId:{in:[userWithoutPath?.id,userWithPath?.id,legacyUser?.id].filter(Boolean)}}});
-  await db.journeyIntake.deleteMany({where:{userId:{in:[userWithoutPath?.id,userWithPath?.id,legacyUser?.id].filter(Boolean)}}});
-  await db.goal.deleteMany({where:{userId:{in:[userWithoutPath?.id,userWithPath?.id,legacyUser?.id].filter(Boolean)}}});
-  await db.user.deleteMany({where:{id:{in:[userWithoutPath?.id,userWithPath?.id,legacyUser?.id].filter(Boolean)}}});
+  const ids=[userWithoutPath?.id,userWithPath?.id,legacyUser?.id,admin?.id].filter(Boolean);
+  await db.journeyChapterUnlock.deleteMany({where:{enrollment:{userId:{in:ids}}}});
+  await db.journeyLevelAward.deleteMany({where:{enrollment:{userId:{in:ids}}}});
+  await db.authSession.deleteMany({where:{userId:{in:ids}}});
+  await db.journeyEnrollment.deleteMany({where:{userId:{in:ids}}});
+  await db.journeyIntake.deleteMany({where:{userId:{in:ids}}});
+  await db.goal.deleteMany({where:{userId:{in:ids}}});
+  await db.user.deleteMany({where:{id:{in:ids}}});
+  await db.journeyChapter.deleteMany({where:{level:{version:{pathwayId:pathway?.id}}}});
+  await db.journeyLevelDefinition.deleteMany({where:{version:{pathwayId:pathway?.id}}});
   await db.journeyPathwayVersion.deleteMany({where:{pathwayId:pathway?.id}});
   await db.journeyPathway.deleteMany({where:{id:pathway?.id}});
   await db.$disconnect();
@@ -116,4 +122,31 @@ test("legacy single goal registration stays compatible without journey intake",a
   expect(await db.journeyIntake.count({where:{userId:legacyUser.id}})).toBe(0);
   const active=await db.goal.findMany({where:{userId:legacyUser.id,active:true}});
   expect(active).toHaveLength(1);
+});
+
+test("coach-only placement grants first READY chapter and updates waiting status",async({request})=>{
+  const enrolled=await db.journeyEnrollment.findFirst({where:{userId:userWithPath.id}});
+  const forbidden=await request.post(base+"/api/journey/placement",{
+    data:{enrollmentId:enrolled.id,confirmedLevel:"READY"},headers:auth("legacy")
+  });
+  expect(forbidden.status()).toBe(403);
+  const v=await db.journeyPathwayVersion.findFirst({where:{pathwayId:pathway.id}});
+  readyLevel=await db.journeyLevelDefinition.create({data:{
+    versionId:v.id,code:"READY",labelDe:"READY",position:1
+  }});
+  readyChapter=await db.journeyChapter.create({data:{levelId:readyLevel.id,titleDe:"Basis",position:1}});
+  const approved=await request.post(base+"/api/journey/placement",{
+    data:{enrollmentId:enrolled.id,confirmedLevel:"READY"},headers:auth("admin")
+  });
+  expect(approved.status()).toBe(200);
+  expect((await approved.json()).firstChapterId).toBe(readyChapter.id);
+  expect((await db.journeyEnrollment.findUnique({where:{id:enrolled.id}})).confirmedLevel).toBe("READY");
+  expect((await db.journeyIntake.findUnique({where:{userId:userWithPath.id}})).status).toBe("CONFIRMED");
+  expect(await db.journeyChapterUnlock.count({where:{enrollmentId:enrolled.id}})).toBe(1);
+  const status=await request.get(base+"/api/journey/onboarding",{headers:auth("matched")});
+  expect((await status.json()).journey.confirmedLevel).toBe("READY");
+  const repeat=await request.post(base+"/api/journey/placement",{
+    data:{enrollmentId:enrolled.id,confirmedLevel:"READY"},headers:auth("admin")
+  });
+  expect(repeat.status()).toBe(409);
 });
