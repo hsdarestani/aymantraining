@@ -21,7 +21,7 @@ function assessmentView(a:{
   const pending=attempts.some(x=>x.verdict==="PENDING");
   return {id:a.id,kind:a.kind,titleDe:a.titleDe,metrics:parsed.data.metrics,
     guidanceDe:guidance,attempts,nextRetestAt,
-    canSubmit:!pending&&(!nextRetestAt||new Date(nextRetestAt).getTime()<=Date.now())};
+    canSubmit:!pending&&!attempts.some(x=>x.verdict==="PASSED")&&(!nextRetestAt||new Date(nextRetestAt).getTime()<=Date.now())};
 }
 
 export async function listAthleteJourneyTests(userId:string){
