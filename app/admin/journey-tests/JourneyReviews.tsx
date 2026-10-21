@@ -3,7 +3,7 @@ import {useCallback,useEffect,useState} from "react";
 type Pending={id:string;enrollmentId:string;assessmentId:string;titleDe:string;kind:"PLACEMENT"|"CHAPTER_FINAL";
  submittedAt:string;results:unknown;criteria:unknown;athlete:{name:string;email:string};
  pathway:string;selfLevel:string|null};
-type Placement={id:string;userId:string;selfLevel:string|null;
+type Placement={id:string;userId:string;selfLevel:string|null;passedPlacementAttemptId:string|null;
  user:{name:string|null};version:{pathway:{titleDe:string};levels:{code:string}[]}};
 async function call(path:string,method="GET",body?:unknown){
  const r=await fetch(path,{method,headers:body?{"content-type":"application/json"}:undefined,
@@ -47,7 +47,8 @@ export default function JourneyReviews(){
   if(!window.confirm("Einstiegslevel "+chosen.replaceAll("_"," ")+" für "+(p.user.name||"Athlet")+" bestätigen?"))return;
   setError("");setMessage("");setBusy(p.id);
   try{
-   const result=await call("/api/journey/placement","POST",{enrollmentId:p.id,confirmedLevel:chosen});
+   const result=await call("/api/journey/placement","POST",{enrollmentId:p.id,confirmedLevel:chosen,
+    ...(p.passedPlacementAttemptId?{passedPlacementAttemptId:p.passedPlacementAttemptId}:{})});
    setMessage("Einstieg freigegeben. Erstes Kapitel: "+result.firstChapterId);
    await load();
   }catch(e){setError(e instanceof Error?e.message:"Einstufung nicht möglich.");}
