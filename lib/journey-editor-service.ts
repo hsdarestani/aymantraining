@@ -8,7 +8,7 @@ import {JOURNEY_LEVELS} from "./journey-contract";
 import {JOURNEY_ONBOARDING_GOALS} from "./journey-onboarding";
 
 type Tx=Prisma.TransactionClient;
-const unchanged=(code:string)=>{throw new Error(code);};
+const unchanged=(code:string):never=>{throw new Error(code);};
 const same=(a:string[],b:string[])=>a.length===b.length&&a.every((x,i)=>x===b[i]);
 
 async function requireCoach(actorId:string){
