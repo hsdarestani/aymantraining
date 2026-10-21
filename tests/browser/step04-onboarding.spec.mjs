@@ -46,7 +46,10 @@ test.afterAll(async()=>{
   await db.$disconnect();
 });
 test("five levels and multi goal selectors are visible in enabled web onboarding",async({page})=>{
+  // Onboarding is an authenticated page; the API requests below use Bearer instead.
+  await page.context().addCookies([{name:"bd_session",value:tokens["unmatched"],url:base,httpOnly:true,sameSite:"Lax"}]);
   await page.goto(base+"/onboarding");
+  await expect(page).toHaveURL(/\/onboarding$/);
   await page.getByRole("checkbox").nth(0).check();
   await page.getByRole("checkbox").nth(1).check();
   await page.getByRole("button",{name:/WEITER/}).click();
