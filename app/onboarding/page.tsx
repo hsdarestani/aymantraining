@@ -3,6 +3,16 @@ import {Copy} from "../components/Locale";
 
 
 import {useMemo,useState} from "react";
+import "./journey.css";
+
+const journeyEnabled=process.env.NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED==="true";
+const levelCards=[
+  {code:"READY",label:"READY",description:"Du startest gerade oder steigst wieder ein. Du möchtest Grundlagen aufbauen und Schritt für Schritt in eine Trainingsroutine finden."},
+  {code:"AWAKE",label:"AWAKE",description:"Du hast erste Trainingserfahrung und kennst grundlegende Übungen. Du möchtest regelmäßiger und strukturierter trainieren."},
+  {code:"DIFFERENT",label:"DIFFERENT",description:"Du trainierst bereits regelmäßig und beherrschst die Grundlagen. Jetzt möchtest du gezielt an deinen ausgewählten Zielen arbeiten."},
+  {code:"BE_DIFFERENT",label:"BE DIFFERENT",description:"Du trainierst fortgeschritten und strukturiert. Du suchst anspruchsvollere Inhalte und möchtest deine Leistung gezielt weiterentwickeln."},
+  {code:"TRULY_DIFFERENT",label:"TRULY DIFFERENT",description:"Du verfügst über umfangreiche Trainingserfahrung und ein hohes Niveau in deinem gewählten Trainingsweg. Du möchtest anspruchsvolle Herausforderungen meistern und deine Leistung weiter verfeinern."}
+] as const;
 
 const goals=["Muskelaufbau","Fettabbau","Athletik","Fußball","Calisthenics","Gesundheit"];
 
@@ -32,6 +42,12 @@ function Stepper({label,value,onChange,min,max,step=1,unit}:{label:string;value:
 export default function Onboarding(){
   const [step,setStep]=useState(1);
   const [goal,setGoal]=useState("Athletik");
+  const [selectedGoals,setSelectedGoals]=useState<string[]>(["Athletik"]);
+  const [selfLevel,setSelfLevel]=useState<(typeof levelCards)[number]["code"]|null>(null);
+  const [womenDashboard,setWomenDashboard]=useState(false);
+  const healthStep=journeyEnabled?5:4;
+  const testStep=journeyEnabled?6:5;
+  const finalStep=journeyEnabled?7:6;
   const [health,setHealth]=useState(false);
   const [privacy,setPrivacy]=useState(false);
   const [terms,setTerms]=useState(false);
@@ -55,6 +71,8 @@ export default function Onboarding(){
       setError("Bitte bestätige Datenschutz und Nutzungsbedingungen.");
       return false;
     }
+    if(current===2&&journeyEnabled&&selectedGoals.length===0){setError("Wähle mindestens ein Trainingsziel.");return false;}
+    if(current===4&&journeyEnabled&&!selfLevel){setError("Bitte schätze dein Einstiegslevel ein.");return false;}
     if(current===3){
       if(!birthDate){setError("Bitte wähle dein Geburtsdatum.");return false;}
       if(age==null){setError("Geburtsdatum ist ungültig.");return false;}
@@ -67,7 +85,7 @@ export default function Onboarding(){
 
   function next(){
     if(!validate(step))return;
-    setStep(Math.min(6,step+1));
+    setStep(Math.min(finalStep,step+1));
     window.scrollTo({top:0,behavior:"smooth"});
   }
 
@@ -82,7 +100,9 @@ export default function Onboarding(){
     setBusy(true);setError("");
     try{
       const r=await fetch("/api/onboarding/complete",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({
-        goal,birthDate,sex,heightCm:height,weightKg:weight,trainingExperience,availabilityPerWeek,healthConsent:health,privacyConsent:privacy,termsConsent:terms,
+        goal:journeyEnabled?selectedGoals[0]:goal,
+        ...(journeyEnabled?{goals:selectedGoals,selfLevel,dashboard:womenDashboard&&sex==="female"?"WOMEN":"GENERAL"}:{}),
+        birthDate,sex,heightCm:height,weightKg:weight,trainingExperience,availabilityPerWeek,healthConsent:health,privacyConsent:privacy,termsConsent:terms,
         pushups,plankSeconds:plank,run5kMinutes:run??undefined
       })});
       const j=await r.json().catch(()=>({}));
@@ -96,8 +116,8 @@ export default function Onboarding(){
   return <main className="onboard-shell">
     <div className="onboard-brand">BE <span>DIFFERENT</span></div>
     <section className="onboard-card">
-      <div className="steps">{[1,2,3,4,5,6].map(n=><i key={n} className={n<step?"done":n===step?"active":""}/>)}</div>
-      <span className="eyebrow"><Copy text={"SCHRITT"}/>{String(step).padStart(2,"0")} / 06</span>
+      <div className="steps">{Array.from({length:finalStep},(_,i)=>i+1).map(n=><i key={n} className={n<step?"done":n===step?"active":""}/>)}</div>
+      <span className="eyebrow"><Copy text={"SCHRITT"}/>{String(step).padStart(2,"0")} / {String(finalStep).padStart(2,"0")}</span>
 
       {step===1&&<>
         <h1><Copy text={"Normal ist langweilig."}/></h1>
@@ -108,7 +128,9 @@ export default function Onboarding(){
 
       {step===2&&<>
         <h1><Copy text={"Was willst du verändern?"}/></h1>
-        <div className="goals">{goals.map(x=><button type="button" key={x} className={goal===x?"selected":""} onClick={()=>setGoal(x)}><span>{x}</span><b>{goal===x?"✓":"→"}</b></button>)}</div>
+        <p>{journeyEnabled?"Du kannst mehrere Ziele kombinieren. Dein Coach stellt daraus einen zusammenhängenden Trainingsweg zusammen.":"Wähle deinen Trainingsfokus."}</p>
+        <div className="goals">{goals.map(x=>{const selected=journeyEnabled?selectedGoals.includes(x):goal===x;return <button type="button" aria-pressed={selected} key={x} className={selected?"selected":""} onClick={()=>journeyEnabled?setSelectedGoals(old=>old.includes(x)?old.filter(g=>g!==x):[...old,x]):setGoal(x)}><span>{x}</span><b>{selected?"✓":"+"}</b></button>})}</div>
+        {journeyEnabled&&<p className="journey-note">DEIN WEG: {selectedGoals.length?selectedGoals.join(" + "):"Bitte Ziele auswählen"}<br/>Wenn diese Kombination noch nicht hinterlegt ist, bleibt deine Anfrage zur Zuordnung gespeichert. Es wird kein Trainingsplan erfunden.</p>}
       </>}
 
       {step===3&&<>
@@ -121,15 +143,23 @@ export default function Onboarding(){
         </div>
         <div className="segmented-field">
           <label><Copy text={"Geschlecht"}/></label>
-          <div>{[["male","Männlich"],["female","Weiblich"],["diverse","Divers"],["prefer_not_to_say","Keine Angabe"]].map(([value,label])=><button type="button" key={value} className={sex===value?"selected":""} onClick={()=>setSex(value)}>{label}</button>)}</div>
+          <div>{[["male","Männlich"],["female","Weiblich"],["diverse","Divers"],["prefer_not_to_say","Keine Angabe"]].map(([value,label])=><button type="button" key={value} className={sex===value?"selected":""} onClick={()=>{setSex(value);if(value!=="female")setWomenDashboard(false)}}>{label}</button>)}</div>
         </div>
+        {journeyEnabled&&sex==="female"&&<div className="journey-dashboard-choice"><strong>OPTIONALE STARTANSICHT</strong><p>Du kannst das Frauen-Dashboard oder die allgemeine Ansicht wählen. Alle Sportarten bleiben offen.</p><label><input type="checkbox" checked={womenDashboard} onChange={e=>setWomenDashboard(e.target.checked)}/> Frauen-Dashboard als Startansicht vormerken</label></div>}
         <div className="stepper-grid">
           <Stepper label="Größe" value={height} onChange={v=>{setHeight(v);setError("")}} min={120} max={230} unit=" cm"/>
           <Stepper label="Gewicht" value={weight} onChange={v=>{setWeight(v);setError("")}} min={35} max={250} step={0.5} unit=" kg"/>
         </div>
       </>}
 
-      {step===4&&<>
+      {journeyEnabled&&step===4&&<>
+        <h1>Wo stehst du?</h1><p>Schätze dich passend zu deiner Zielkombination ein. Ein höheres Level wird erst nach einem Einstufungstest oder einer Bestätigung durch den Coach freigeschaltet.</p>
+        <div className="journey-selected">DEIN WEG: {selectedGoals.join(" + ")}</div>
+        <div className="journey-levels">{levelCards.map(level=><button type="button" aria-pressed={selfLevel===level.code} className={selfLevel===level.code?"journey-level selected":"journey-level"} key={level.code} onClick={()=>setSelfLevel(level.code)}><strong>{level.label}</strong><span>{level.description}</span><b>{selfLevel===level.code?"✓":"○"}</b></button>)}</div>
+        <p className="journey-note">Deine Selbsteinschätzung öffnet noch keine Kapitel. Der genaue Einstufungstest und die Kriterien werden vom Coach festgelegt.</p>
+      </>}
+
+      {step===healthStep&&<>
         <h1><Copy text={"Gesundheitsdaten verbinden."}/></h1>
         <p><Copy text={"Gesundheitsdaten werden nur nach ausdrücklicher Einwilligung verarbeitet und nicht für Werbung verwendet."}/></p>
         <button type="button" className={health?"health-choice selected":"health-choice"} onClick={()=>setHealth(!health)}>
@@ -139,7 +169,7 @@ export default function Onboarding(){
         <p className="optional-note"><Copy text={"Optional. Du kannst das später jederzeit in Einstellungen verbinden."}/></p>
       </>}
 
-      {step===5&&<>
+      {step===testStep&&<>
         <h1><Copy text={"Kurzer Starttest."}/></h1>
         <p><Copy text={"Kein Tippen nötig. Passe die Werte einfach mit + und − an."}/></p>
         <div className="stepper-stack">
@@ -153,9 +183,10 @@ export default function Onboarding(){
         </div>
       </>}
 
-      {step===6&&<>
+      {step===finalStep&&<>
         <div className="first-score"><span className="eyebrow"><Copy text={"BEREIT"}/></span><strong>100%</strong><b><Copy text={"EINRICHTUNG"}/></b></div>
         <h1><Copy text={"Jetzt beginnt die Entwicklung."}/></h1>
+        {journeyEnabled&&<div className="journey-note"><strong>Deine Selbsteinschätzung: {selfLevel?.replaceAll("_"," ")}</strong><p>Dein tatsächliches Einstiegslevel wird erst durch den Coach oder einen freigegebenen Einstufungstest bestätigt. Falls deine Zielkombination noch nicht fertig ist, bleibt sie für die Zuordnung vorgemerkt. PRO überspringt keine Tests.</p></div>}
         <p><Copy text={"Der erste echte Leistungswert wird aus deinen gespeicherten Daten berechnet. Fehlende Werte werden nicht erfunden."}/></p>
       </>}
 
@@ -163,7 +194,7 @@ export default function Onboarding(){
 
       <div className="onboard-actions sticky-actions">
         {step>1?<button type="button" className="back-button" onClick={back}><Copy text={"ZURÜCK"}/></button>:<span/>}
-        {step<6?<button type="button" className="primary" onClick={next}><Copy text={"WEITER →"}/></button>:<button type="button" className="primary" onClick={finish} disabled={busy}><Copy text={busy?"SPEICHERN…":"EINRICHTUNG ABSCHLIESSEN →"}/></button>}
+        {step<finalStep?<button type="button" className="primary" onClick={next}><Copy text={"WEITER →"}/></button>:<button type="button" className="primary" onClick={finish} disabled={busy}><Copy text={busy?"SPEICHERN…":"EINRICHTUNG ABSCHLIESSEN →"}/></button>}
       </div>
     </section>
   </main>;
