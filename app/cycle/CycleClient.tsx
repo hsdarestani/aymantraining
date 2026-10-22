@@ -40,7 +40,7 @@ export default function CycleClient(){
  const entryMap=new Map(d?.entries.map(x=>[x.date,x])??[]);
  const currentMonth=(diff:number)=>{const [y,m]=month.split("-").map(Number),d=new Date(Date.UTC(y,m-1+diff,1));setMonth(iso(d).slice(0,7))};
  if(!d)return <p role="status">{error||"Lade deinen privaten Bereich …"}</p>;
- if(!d.available)return <p>Der private Zyklusbereich ist noch nicht freigeschaltet. Deine Trainingsdaten bleiben unverändert.</p>;
+ if(!d.available)return <p>Der vertrauliche Zyklusbereich ist noch nicht freigeschaltet. Deine Trainingsdaten bleiben unverändert.</p>;
  return <div className="cy-stack">
   {error&&<p role="alert" className="cy-error">{error}</p>}{notice&&<p role="status" className="cy-ok">{notice}</p>}
   {!d.enabled?<section className="panel cy-consent"><h2>Nur wenn du es möchtest.</h2>
