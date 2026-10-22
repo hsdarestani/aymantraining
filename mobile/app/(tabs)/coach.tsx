@@ -88,6 +88,7 @@ export default function Coach(){
     try{
       const up=await upload("TECHNIQUE_VIDEO",{uri:a.uri,name:a.fileName||"technikvideo.mp4",type:a.mimeType||"video/mp4"});
       await api("/api/messages",{method:"POST",body:JSON.stringify({kind:"VIDEO",mediaId:up.asset.id,text:"Technikvideo zur Analyse"})});
+      if(process.env.EXPO_PUBLIC_STEP09_ENABLED!=="false")await api("/api/step09/technique",{method:"POST",body:JSON.stringify({mediaId:up.asset.id})}).catch(()=>undefined);
       setStatus("VIDEO GESENDET");await load();
     }catch(e:any){setStatus(e.message||"Upload fehlgeschlagen")}
   }
