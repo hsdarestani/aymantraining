@@ -25,9 +25,7 @@ export async function getStep09Today(userId:string){
  ]);
  const first=todays.find(w=>!w.completedAt)??todays[0]??null;
  const next=first&&!first.completedAt?first:upcoming;
- const nextReview=reviews.find(r=>r.status==="REVIEWED"&&(
-  r.targetWorkoutId? r.targetWorkoutId===next?.id : Boolean(next&&r.submittedAt<(next.scheduledAt||new Date()))
- ))??null;
+ const nextReview=next?await getCoachCueForWorkout(userId,next.id,next.scheduledAt):null;
  const energy=check?.energy??null,soreness=check?.soreness??null;
  // Display measurements rather than manufacturing a physiological readiness score.
  return {
@@ -41,9 +39,9 @@ export async function getStep09Today(userId:string){
     note:!check?"Heute noch kein Befinden eingetragen. Es wird keine Trainingsbereitschaft geschätzt.":"Deine Angaben sind Beobachtungen, keine automatische Trainingsfreigabe."},
   coach:{hasPersonalCoach:Boolean(await prisma.coachAssignment.count({where:{athleteId:userId,active:true}})),
     canSendVideos:user?await hasFeature(user.subscriptionTier,"coach_chat"):false,
-    nextSessionCueDe:nextReview?.nextSessionCueDe??null,
-    feedbackDe:nextReview?.feedbackDe??null,
-    appliedToWorkoutId:nextReview?.targetWorkoutId??null,
+    nextSessionCueDe:nextReview?.text??null,
+    feedbackDe:nextReview?.coachFeedbackDe??null,
+    appliedToWorkoutId:nextReview?.assignedToWorkout?next?.id??null:null,
     submissions:reviews.map(r=>({...r}))},
   journey:enrollment?{titleDe:enrollment.version.pathway.titleDe,level:enrollment.confirmedLevel,
    nextEarnedChapter:enrollment.unlocks[0]?.chapter.titleDe??null}:null
@@ -98,10 +96,22 @@ export async function reviewTechnique(args:{actor:{id:string;role:string};review
 }
 
 export async function getCoachCueForWorkout(userId:string,workoutId:string,scheduledAt:Date|null){
- const candidate=await prisma.coachTechniqueReview.findFirst({where:{
-  athleteId:userId,status:"REVIEWED",nextSessionCueDe:{not:null},
-  OR:[{targetWorkoutId:workoutId},{targetWorkoutId:null,submittedAt:{lte:scheduledAt??new Date()}}]
- },orderBy:{reviewedAt:"desc"},select:{nextSessionCueDe:true,targetWorkoutId:true,feedbackDe:true}});
- return candidate?{text:candidate.nextSessionCueDe,coachFeedbackDe:candidate.feedbackDe,
-  assignedToWorkout:candidate.targetWorkoutId===workoutId}:null;
+ const explicit=await prisma.coachTechniqueReview.findFirst({where:{
+  athleteId:userId,status:"REVIEWED",targetWorkoutId:workoutId,nextSessionCueDe:{not:null}
+ },orderBy:{reviewedAt:"desc"},select:{nextSessionCueDe:true,feedbackDe:true}});
+ if(explicit)return {text:explicit.nextSessionCueDe,coachFeedbackDe:explicit.feedbackDe,assignedToWorkout:true};
+ // Untargeted advice applies to exactly ONE earliest following workout, never every future one.
+ const unassigned=await prisma.coachTechniqueReview.findMany({where:{
+  athleteId:userId,status:"REVIEWED",targetWorkoutId:null,nextSessionCueDe:{not:null}
+ },orderBy:{reviewedAt:"desc"},take:20,select:{nextSessionCueDe:true,feedbackDe:true,reviewedAt:true}});
+ for(const advice of unassigned){
+  if(!advice.reviewedAt)continue;
+  const first=await prisma.workout.findFirst({where:{
+   userId,scheduledAt:{gte:advice.reviewedAt},completedAt:null
+  },select:{id:true},orderBy:{scheduledAt:"asc"}});
+  if(first?.id===workoutId&&(!scheduledAt||scheduledAt>=advice.reviewedAt)){
+   return {text:advice.nextSessionCueDe,coachFeedbackDe:advice.feedbackDe,assignedToWorkout:false};
+  }
+ }
+ return null;
 }
