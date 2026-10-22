@@ -8,7 +8,7 @@ Implemented October 22, 2026 on the existing codebase without schema migration.
 - **TAGESPLAN** measures completed versus scheduled workouts for the athlete's local calendar day. Zero scheduled means **Kein Training eingetragen**, not an inferred recovery prescription or 100% completion.
 - **LEVEL** comes only from an ACTIVE or FINISHED published Journey enrollment with confirmedLevel, never score tiers, inferred readiness or a purchase. No automatic demotion.
 - **Privacy**: the mobile dashboard returns this profile only to the authenticated user; queries scope userId. The new summary does not include detailed PRO-only score pillars or other users' data.
-- **Compatibility**: legacy scoreView keeps its old field for old binary clients. New native/web screens never show that calculated score label. Existing scores, badges, workout history, Journey approvals and coaching records are unchanged.
+- **Compatibility**: legacy scoreView preserves the old `level` response key for old binary clients, but the value is now only the coach-confirmed stage or null. New native/web screens do not derive a level from score thresholds. Existing scores, badges, workout history, Journey approvals and coaching records are unchanged.
 - **Date correctness**: workouts use the user's timezone (DST aware); @db.Date rows use a date key rather than accidental UTC/local shifts. Sleep shows last night or today only.
 - **Rollout**: GitHub changes and CI tests are not production deployment. Shared Esthetic VPS deployment must use the separate audited systemd path and safety checks, never the obsolete Docker workflow. Do not change database schema or host services.
 
