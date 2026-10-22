@@ -1,92 +1,103 @@
 "use client";
-import {useCallback,useEffect,useMemo,useState} from "react";
+import {useCallback,useEffect,useState} from "react";
 import Link from "next/link";
-type Entry={date:string;flow:string|null;symptoms:string[];energy:number|null;mood:number|null;discomfort:number|null;planChoice:string};
-type Forecast={day:number;estimatedNextStarts:string[];approximate:true};
-type Data={available:boolean;enabled:boolean;shareWithCoach:boolean;remindersEnabled:boolean;lastPeriodStart:string|null;
- cycleLengthDays:number|null;forecast:Forecast|null;entries:Entry[];reminder:{text:string}|null};
-const flows=[["","Keine Angabe"],["NONE","Keine Blutung"],["LIGHT","Leicht"],["MEDIUM","Mittel"],["HEAVY","Stark"]] as const;
-const symptoms=[["CRAMPS","Krämpfe"],["HEADACHE","Kopfschmerzen"],["FATIGUE","Müdigkeit"],["BLOATING","Blähungen"],["BACK_PAIN","Rückenschmerzen"],["OTHER","Sonstige"]] as const;
-const choices=[["AS_PLANNED","Wie geplant"],["EASIER","Leichter trainieren"],["REST","Ruhe wünschen"]] as const;
-const pad=(n:number)=>String(n).padStart(2,"0");
-function iso(d:Date){return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate())}
-function initialEntry(date:string):Entry{return {date,flow:null,symptoms:[],energy:null,mood:null,discomfort:null,planChoice:"AS_PLANNED"}}
-async function json(url:string,method="GET",body?:object){
- const r=await fetch(url,{method,headers:body?{"content-type":"application/json"}:undefined,
-  credentials:"same-origin",cache:"no-store",body:body?JSON.stringify(body):undefined});
- const data=await r.json().catch(()=>({error:"Verbindung fehlgeschlagen"}));
- if(!r.ok)throw Error(data.error||"Die Änderung wurde nicht gespeichert.");return data;
+import {Copy} from "../components/Locale";
+type Entry={date:string;flow:string|null;symptoms:string[];energy:number|null;mood:number|null;discomfort:number|null;planChoice:"AS_PLANNED"|"EASIER"|"REST"};
+type Data={available:boolean;enabled:boolean;shareWithCoach:boolean;remindersEnabled:boolean;lastPeriodStart:string|null;cycleLengthDays:number|null;consentedAt:string|null;
+ forecast:null|{day:number;estimatedNextStarts:string[];approximate:boolean;notForContraception:boolean};entries:Entry[];reminder:null|{text:string}};
+const flows=[["NONE","Keine Blutung"],["LIGHT","Leicht"],["MEDIUM","Mittel"],["HEAVY","Stark"]] as const;
+const symptoms=[["CRAMPS","Krämpfe"],["HEADACHE","Kopfschmerzen"],["FATIGUE","Müdigkeit"],["BLOATING","Blähungen"],["BACK_PAIN","Rückenschmerzen"],["OTHER","Sonstiges"]] as const;
+const choices=[["AS_PLANNED","Wie geplant"],["EASIER","Leichtere Einheit wünschen"],["REST","Ruhe wünschen"]] as const;
+function localDate(){const n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0")}
+const initial=():Entry=>({date:localDate(),flow:null,symptoms:[],energy:null,mood:null,discomfort:null,planChoice:"AS_PLANNED"});
+async function send(path:string,method:string,body:unknown){
+ const response=await fetch(path,{method,headers:{"content-type":"application/json"},body:JSON.stringify(body),credentials:"same-origin",cache:"no-store"});
+ const data=await response.json().catch(()=>({error:"Verbindungsfehler."}));
+ if(!response.ok)throw new Error(data.error||"Speichern nicht möglich.");
+ return data;
 }
 export default function CycleClient(){
- const [d,setD]=useState<Data|null>(null),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false);
- const [ack,setAck]=useState(false),[shareAck,setShareAck]=useState(false),[deleteAck,setDeleteAck]=useState(false);
- const [selectedDate,setSelectedDate]=useState(iso(new Date())),[entry,setEntry]=useState<Entry>(initialEntry(iso(new Date())));
- const [month,setMonth]=useState(iso(new Date()).slice(0,7));
- const [last,setLast]=useState(""),[length,setLength]=useState("28");
- const load=useCallback(async()=>{const v=await json("/api/cycle");setD(v);setLast(v.lastPeriodStart??"");setLength(String(v.cycleLengthDays??28));},[]);
- useEffect(()=>{load().catch(e=>setError(e.message))},[load]);
- async function action(url:string,method:string,body:object){
+ const [data,setData]=useState<Data|null>(null),[entry,setEntry]=useState<Entry>(initial);
+ const [consent,setConsent]=useState(false),[coachConsent,setCoachConsent]=useState(false);
+ const [period,setPeriod]=useState(""),[length,setLength]=useState("28");
+ const [busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState(""),[loading,setLoading]=useState(true);
+ const load=useCallback(async()=>{
+  const response=await fetch("/api/cycle",{cache:"no-store",credentials:"same-origin"});
+  if(!response.ok)throw new Error("Private Daten konnten nicht geladen werden.");
+  const result=await response.json() as Data;setData(result);
+  setPeriod(result.lastPeriodStart||"");setLength(String(result.cycleLengthDays??28));
+ },[]);
+ useEffect(()=>{load().catch(e=>setError(e.message)).finally(()=>setLoading(false))},[load]);
+ async function action(path:string,method:string,body:unknown,message:string){
   setBusy(true);setError("");setNotice("");
-  try{await json(url,method,body);await load();setNotice("Gespeichert.");}
-  catch(e){setError(e instanceof Error?e.message:"Speichern fehlgeschlagen");}
-  finally{setBusy(false);}
+  try{await send(path,method,body);await load();setNotice(message)}
+  catch(e){setError(e instanceof Error?e.message:"Fehler beim Speichern.")}
+  finally{setBusy(false)}
  }
- function pick(day:string){setSelectedDate(day);setEntry(d?.entries.find(e=>e.date===day)??initialEntry(day))}
- const dates=useMemo(()=>{
-  const [y,m]=month.split("-").map(Number),start=new Date(Date.UTC(y,m-1,1));
-  const offset=(start.getUTCDay()+6)%7;
-  return Array.from({length:42},(_,i)=>iso(new Date(Date.UTC(y,m-1,1-offset+i))));
- },[month]);
- const entryMap=new Map(d?.entries.map(x=>[x.date,x])??[]);
- const currentMonth=(diff:number)=>{const [y,m]=month.split("-").map(Number),d=new Date(Date.UTC(y,m-1+diff,1));setMonth(iso(d).slice(0,7))};
- if(!d)return <p role="status">{error||"Lade deinen privaten Bereich …"}</p>;
- if(!d.available)return <p>Der vertrauliche Zyklusbereich ist noch nicht freigeschaltet. Deine Trainingsdaten bleiben unverändert.</p>;
- return <div className="cy-stack">
-  {error&&<p role="alert" className="cy-error">{error}</p>}{notice&&<p role="status" className="cy-ok">{notice}</p>}
-  {!d.enabled?<section className="panel cy-consent"><h2>Nur wenn du es möchtest.</h2>
-   <p>Hier kannst du Angaben zu Blutung, Beschwerden, Energie und Stimmung privat dokumentieren. Diese Daten sind besonders sensibel. Ohne deine Zustimmung speichern wir keine solchen Einträge. Die Freigabe an deinen Trainer ist separat und standardmäßig aus.</p>
-   <label><input type="checkbox" checked={ack} onChange={e=>setAck(e.target.checked)}/> Ich willige ausdrücklich in die Verarbeitung meiner Zyklusaufzeichnungen für meinen privaten Kalender ein. Ich kann jederzeit alles löschen.</label>
-   <button type="button" className="primary compact" disabled={!ack||busy} onClick={()=>action("/api/cycle/preferences","POST",{action:"ENABLE",acknowledgeSensitiveData:true})}>PRIVATEN KALENDER AKTIVIEREN</button>
-  </section>:<>
-   <section className="panel cy-settings">
-    <h2>Deine Kontrolle</h2>
-    <p>Du kannst jederzeit aufhören, alles löschen oder entscheiden, ob Trainingssignale an deinen zuständigen Trainer weitergegeben werden. Blutung und Symptome werden dabei nicht geteilt.</p>
-    <div className="cy-fields"><label>Letzter Beginn (optional)<input type="date" value={last} onChange={e=>setLast(e.target.value)}/></label>
-    <label>Ungefährer Abstand in Tagen<input type="number" min={20} max={45} value={length} onChange={e=>setLength(e.target.value)}/></label></div>
-    <button type="button" className="secondary" disabled={busy||!Number.isInteger(Number(length))||Number(length)<20||Number(length)>45} onClick={()=>action("/api/cycle/preferences","POST",{action:"UPDATE",lastPeriodStart:last||null,cycleLengthDays:Number(length),remindersEnabled:d.remindersEnabled})}>SCHÄTZWERTE SPEICHERN</button>
-    <label><input type="checkbox" checked={d.remindersEnabled} disabled={busy} onChange={e=>action("/api/cycle/preferences","POST",{action:"UPDATE",remindersEnabled:e.target.checked})}/> Private Hinweise nur in diesem Bereich anzeigen</label>
-    <div className="cy-share"><label><input type="checkbox" checked={d.shareWithCoach} disabled={busy}
-     onChange={e=>{if(e.target.checked){setShareAck(true)}else{setShareAck(false);void action("/api/cycle/preferences","POST",{action:"SHARE",shareWithCoach:false})}}}/>
-      Trainingsbezogene Angaben freiwillig mit meinem Trainer teilen</label>
-     {shareAck&&!d.shareWithCoach&&<div role="group"><p>Nur die letzten 14 Tage: Energiewert, Belastungsempfinden und gewünschte Trainingsanpassung. Keine Blutung, Symptome oder Vorhersagen.</p>
-      <button type="button" className="secondary" disabled={busy} onClick={()=>{setShareAck(false);void action("/api/cycle/preferences","POST",{action:"SHARE",shareWithCoach:true,confirmShare:true})}}>FREIGABE AUSDRÜCKLICH BESTÄTIGEN</button>
-      <button type="button" className="secondary" onClick={()=>setShareAck(false)}>ABBRECHEN</button></div>}
-     <p>{d.shareWithCoach?"Trainerfreigabe ist aktiv. Du kannst sie jederzeit ausschalten.":"Keine Freigabe an Trainer."}</p></div>
-   </section>
-   <section className="panel cy-calendar" aria-label="Privater Zykluskalender">
-    <header><button type="button" onClick={()=>currentMonth(-1)} aria-label="Vorheriger Monat">‹</button><h2>{month}</h2><button type="button" onClick={()=>currentMonth(1)} aria-label="Nächster Monat">›</button></header>
-    <div className="cy-days">{["MO","DI","MI","DO","FR","SA","SO"].map(x=><b key={x}>{x}</b>)}
-      {dates.map(x=><button type="button" key={x} className={(x===selectedDate?"cy-selected ":"")+(entryMap.has(x)?"cy-recorded ":"")+(d.forecast?.estimatedNextStarts.includes(x)?"cy-estimate ":"")}
-       onClick={()=>pick(x)} aria-pressed={x===selectedDate} aria-label={x}>{Number(x.slice(8))}</button>)}</div>
-    <p className="cy-note">Umrandet = deine Aufzeichnung. Gepunktet = grobe Schätzung des nächsten Beginns, keine sichere Vorhersage. Nicht zur Verhütung oder Schwangerschaftsplanung verwenden.</p>
-    {d.forecast&&<p>Ungefährer Zyklustag {d.forecast.day}. Nächster geschätzter Beginn: {d.forecast.estimatedNextStarts[0]}. Bei unregelmäßigem Zyklus kann die Schätzung unzutreffend sein.</p>}
-    {d.reminder&&<p role="status">{d.reminder.text}</p>}
-   </section>
-   <section className="panel cy-entry"><h2>Dein Tag · {selectedDate}</h2>
-    <div className="cy-fields"><label>Blutung<select value={entry.flow??""} onChange={e=>setEntry({...entry,flow:e.target.value||null})}>{flows.map(([v,label])=><option key={v} value={v}>{label}</option>)}</select></label>
-     {([["energy","Energie (1 bis 10)"],["mood","Stimmung (1 bis 10)"],["discomfort","Beschwerden (0 bis 10)"]] as const).map(([key,title])=><label key={key}>{title}<input type="number" min={key==="discomfort"?0:1} max={10} value={entry[key]??""} onChange={e=>setEntry({...entry,[key]:e.target.value===""?null:Number(e.target.value)})}/></label>)}</div>
-    <fieldset><legend>Beschwerden (freiwillig)</legend><div className="cy-symptoms">{symptoms.map(([code,label])=><label key={code}><input type="checkbox" checked={entry.symptoms.includes(code)} onChange={e=>setEntry({...entry,symptoms:e.target.checked?[...entry.symptoms,code]:entry.symptoms.filter(x=>x!==code)})}/>{label}</label>)}</div></fieldset>
-    <label>Wunsch für dein Training<select value={entry.planChoice} onChange={e=>setEntry({...entry,planChoice:e.target.value})}>{choices.map(([code,label])=><option key={code} value={code}>{label}</option>)}</select></label>
-    <p className="cy-note">Deine Auswahl ändert keine gebuchte Einheit. Bei Bedarf kannst du deinen Trainingsplan ansehen und eine Anpassung mit dem Trainer besprechen.</p>
-    <div className="cy-actions"><button className="primary compact" type="button" disabled={busy} onClick={()=>action("/api/cycle/entries","PUT",entry)}>TAG SPEICHERN</button>
-     {entryMap.has(selectedDate)&&<button type="button" className="secondary" disabled={busy} onClick={()=>{if(confirm("Eintrag endgültig löschen?"))void action("/api/cycle/entries","DELETE",{date:selectedDate})}}>EINTRAG LÖSCHEN</button>}
-     <Link href="/training">TRAININGSPLAN ANSEHEN</Link></div>
-   </section>
-   <section className="panel cy-delete"><h2>Alle Zyklusdaten entfernen</h2>
-    <label><input type="checkbox" checked={deleteAck} onChange={e=>setDeleteAck(e.target.checked)}/> Ich möchte die Funktion ausschalten und alle Einträge, Einstellungen und Freigaben löschen.</label>
-    <button type="button" className="danger-button" disabled={!deleteAck||busy} onClick={()=>{if(confirm("Zyklusdaten und Freigabe endgültig löschen?"))void action("/api/cycle/preferences","POST",{action:"DISABLE",confirmDeletion:true})}}>ALLE ZYKLUSDATEN LÖSCHEN</button>
-    <p className="cy-note">Für eine persönliche Kopie kannst du vor dem Löschen den Datenexport in den <Link href="/settings">Einstellungen</Link> nutzen.</p>
-   </section>
+ function selectDate(date:string){setEntry({...initial(),...(data?.entries.find(e=>e.date===date)||{}),date});setNotice("")}
+ if(loading)return <p role="status">Privater Bereich wird geladen …</p>;
+ return <section className="cycle-stack">
+  <header className="cycle-intro"><span>FREIWILLIG · PRIVAT</span><h1>DEIN ZYKLUS. DEINE DATEN.</h1>
+   <p>Ein persönliches Tagebuch für dein Befinden und flexible Trainingswünsche. Nur du entscheidest, ob du etwas einträgst oder mit deinem Trainer teilst.</p>
+   <p>Schätzungen sind ungenau und weder zur Verhütung noch zur Feststellung einer Schwangerschaft geeignet. Es gibt keine automatische Änderung deines Trainings oder deiner Stufe.</p></header>
+  {error&&<p role="alert" className="cycle-error">{error}</p>}{notice&&<p role="status" className="cycle-success">{notice}</p>}
+  {!data?.available?<article className="cycle-panel"><h2>Diese Funktion ist noch nicht freigeschaltet.</h2><p>Dein Training funktioniert unverändert weiter.</p></article>:
+   !data.enabled?<article className="cycle-panel"><h2>Nur mit deiner Einwilligung.</h2>
+     <p>Du kannst freiwillig Daten zu Blutung, Beschwerden, Energie und Stimmung speichern. Sie bleiben privat und erscheinen nicht in deiner Leistungsbewertung. Dein Trainer erhält keinen Zugriff ohne eine weitere ausdrückliche Freigabe.</p>
+     <p>Du kannst einzelne Tage entfernen oder das gesamte Tagebuch und alle Einstellungen jederzeit unwiderruflich löschen. Es werden keine Erinnerungen mit intimen Details per Push verschickt.</p>
+     <label className="cycle-check"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>Ich stimme der Verarbeitung meiner sensiblen Zyklusangaben für mein privates Tagebuch ausdrücklich zu.</label>
+     <button disabled={!consent||busy} className="cycle-primary" onClick={()=>action("/api/cycle/preferences","POST",{action:"ENABLE",acknowledgeSensitiveData:true},"Privates Tagebuch aktiviert.")}>TAGEBUCH AKTIVIEREN</button>
+    </article>:
+  <>
+   <div className="cycle-grid">
+    <article className="cycle-panel"><span className="cycle-kicker">KALENDER · UNGEFÄHRE ANGABEN</span><h2>Dein Verlauf</h2>
+      {data.forecast?<><p>Beobachteter Start: {data.lastPeriodStart}. Geschätzter Zyklustag: {data.forecast.day}.</p>
+       <p>Nächster geschätzter Beginn: <strong>{data.forecast.estimatedNextStarts[0]}</strong>. Individuelle Abweichungen sind normal.</p></>:<p>Du hast noch keinen ausreichend aktuellen Zyklusbeginn eingetragen. Es wird nichts erfunden.</p>}
+      <div className="cycle-fields"><label>Letzter tatsächlicher Beginn<input type="date" value={period} onChange={e=>setPeriod(e.target.value)}/></label>
+      <label>Übliche Zykluslänge (20–45 Tage)<input type="number" min="20" max="45" value={length} onChange={e=>setLength(e.target.value)}/></label></div>
+      <button className="cycle-secondary" disabled={busy||!length||Number(length)<20||Number(length)>45}
+       onClick={()=>action("/api/cycle/preferences","POST",{action:"UPDATE",lastPeriodStart:period||null,cycleLengthDays:Number(length)},"Kalender gespeichert.")}>KALENDER SPEICHERN</button>
+      <p>Keine Fruchtbarkeits-, Eisprung- oder Verhütungsprognose.</p>
+      {data.reminder&&<p className="cycle-hint">{data.reminder.text}</p>}
+    </article>
+    <article className="cycle-panel"><span className="cycle-kicker">DEIN TAGESCHECK</span><h2>Wie geht es dir?</h2>
+      <div className="cycle-fields"><label>Datum<input type="date" value={entry.date} onChange={e=>selectDate(e.target.value)}/></label>
+      <label>Blutung<select value={entry.flow||""} onChange={e=>setEntry({...entry,flow:e.target.value||null})}>
+       <option value="">Keine Angabe</option>{flows.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label></div>
+      <fieldset><legend>Beschwerden · optional</legend><div className="cycle-symptoms">{symptoms.map(([id,label])=><label key={id}>
+       <input type="checkbox" checked={entry.symptoms.includes(id)} onChange={e=>setEntry({...entry,symptoms:e.target.checked?[...entry.symptoms,id]:entry.symptoms.filter(x=>x!==id)})}/>{label}</label>)}</div></fieldset>
+      <div className="cycle-fields">{(["energy","mood","discomfort"] as const).map(k=><label key={k}>{k==="energy"?"Energie":k==="mood"?"Stimmung":"Beschwerden (0–10)"}
+       <select value={entry[k]??""} onChange={e=>setEntry({...entry,[k]:e.target.value===""?null:Number(e.target.value)})}>
+        <option value="">Keine Angabe</option>{Array.from({length:k==="discomfort"?11:10},(_,i)=>k==="discomfort"?i:i+1).map(n=><option key={n} value={n}>{n}</option>)}</select></label>)}</div>
+      <fieldset><legend>Dein Wunsch für das Training</legend><div className="cycle-choices">{choices.map(([id,label])=><label key={id}><input type="radio" checked={entry.planChoice===id} onChange={()=>setEntry({...entry,planChoice:id})}/>{label}</label>)}</div></fieldset>
+      <p>Dein Wunsch verändert den Trainingsplan nicht automatisch. Du kannst dich jederzeit selbst für Ruhe entscheiden.</p>
+      <button className="cycle-primary" disabled={busy} onClick={()=>action("/api/cycle/entries","PUT",entry,"Eintrag privat gespeichert.")}>TAG SPEICHERN</button>
+      {data.entries.some(e=>e.date===entry.date)&&<button className="cycle-danger" disabled={busy} onClick={()=>{
+       if(window.confirm("Eintrag dieses Tages endgültig löschen?"))void action("/api/cycle/entries","DELETE",{date:entry.date},"Tagesdaten gelöscht.");
+      }}>DIESEN TAG LÖSCHEN</button>}
+    </article>
+   </div>
+   <article className="cycle-panel"><span className="cycle-kicker">VERLAUF</span><h2>Deine Einträge</h2>
+    {data.entries.length===0?<p>Noch keine Tage gespeichert.</p>:<div className="cycle-history">
+     {data.entries.slice(0,35).map(e=><button key={e.date} className={entry.date===e.date?"cycle-day selected":"cycle-day"} onClick={()=>selectDate(e.date)}>
+       <strong>{e.date}</strong><small>{e.planChoice==="REST"?"Ruhe gewünscht":e.planChoice==="EASIER"?"Leichter gewünscht":"Wie geplant"} · {e.energy==null?"keine Energieangabe":"Energie "+e.energy}</small>
+      </button>)}</div>}
+   </article>
+   <article className="cycle-panel"><span className="cycle-kicker">DATENSCHUTZ & KONTROLLE</span><h2>Du entscheidest.</h2>
+    <label className="cycle-check"><input type="checkbox" checked={data.remindersEnabled} disabled={busy}
+     onChange={e=>action("/api/cycle/preferences","POST",{action:"UPDATE",remindersEnabled:e.target.checked},"Hinweiseinstellung gespeichert.")}/>
+      Private Hinweise im Tagebuch anzeigen</label>
+    <p>Diese Hinweise erscheinen nur beim Öffnen dieses privaten Bereichs; keine Zyklusdetails in Push-Mitteilungen.</p>
+    <label className="cycle-check"><input type="checkbox" checked={data.shareWithCoach} disabled={busy}
+      onChange={e=>{if(!e.target.checked){void action("/api/cycle/preferences","POST",{action:"SHARE",shareWithCoach:false},"Trainerfreigabe widerrufen.");return}setCoachConsent(true)}}/>
+      Nur Trainingssignale der letzten 14 Tage meinem zugewiesenen Trainer freigeben</label>
+    {coachConsent&&!data.shareWithCoach&&<div className="cycle-share-confirm"><p>Der Trainer sieht auf ausdrücklichen Wunsch nur Trainingswunsch, Energie und Belastungsangabe der letzten 14 Tage – keine Blutungsstärke, einzelnen Symptome oder Prognosen.</p>
+      <button disabled={busy} className="cycle-primary" onClick={async()=>{await action("/api/cycle/preferences","POST",{action:"SHARE",shareWithCoach:true,confirmShare:true},"Trainerfreigabe erteilt.");setCoachConsent(false)}}>FREIGABE AUSDRÜCKLICH BESTÄTIGEN</button>
+      <button className="cycle-secondary" onClick={()=>setCoachConsent(false)}>ABBRECHEN</button></div>}
+    <p><Link href="/api/privacy/export">DEINE DATEN EXPORTIEREN →</Link></p>
+    <button className="cycle-danger" disabled={busy} onClick={()=>{if(window.confirm("Das private Zyklustagebuch, alle Tage und Freigaben unwiderruflich löschen?"))void action("/api/cycle/preferences","POST",{action:"DISABLE",confirmDeletion:true},"Alle Zyklusdaten gelöscht und Einwilligung widerrufen.");}}>ALLE DATEN LÖSCHEN & ZUSTIMMUNG WIDERRUFEN</button>
+   </article>
   </>}
- </div>;
+  <p className="cycle-back"><Link href="/dashboard">ZURÜCK ZUR STARTSEITE →</Link></p>
+ </section>;
 }
