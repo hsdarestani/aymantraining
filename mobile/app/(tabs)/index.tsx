@@ -74,21 +74,21 @@ export default function Home(){
   </View>
 
     {womenMode&&<View style={s.womenPanel}>
-     <Text style={s.womenEyebrow}>DEINE ANSICHT · DEINE ENTSCHEIDUNG</Text>
-     <Text style={s.womenHeading}>STARK IN DEINEM TEMPO.</Text>
-     <Text style={s.womenCopy}>Deine Ziele und deine echten Fortschritte. Alle Sportarten bleiben verfügbar.</Text>
-     <View style={s.womenCard}><Text style={s.womenEyebrow}>TRAINING HEUTE</Text>
+     <Text style={s.womenEyebrow}><Copy text="DEINE ANSICHT · DEINE ENTSCHEIDUNG"/></Text>
+     <Text style={s.womenHeading}><Copy text="STARK IN DEINEM TEMPO."/></Text>
+     <Text style={s.womenCopy}><Copy text="Deine Ziele und deine echten Fortschritte. Alle Sportarten bleiben verfügbar."/></Text>
+     <View style={s.womenCard}><Text style={s.womenEyebrow}><Copy text="TRAINING HEUTE"/></Text>
       <Text style={s.womenFact}>{plan?.scheduled?plan.completed+" von "+plan.scheduled+" Einheiten":"Kein Training eingetragen"}</Text>
-      <Pressable accessibilityRole="button" onPress={()=>router.push("/(tabs)/training")}><Text style={s.womenAction}>TRAINING ANSEHEN →</Text></Pressable>
+      <Pressable accessibilityRole="button" onPress={()=>router.push("/(tabs)/training")}><Text style={s.womenAction}><Copy text="TRAINING ANSEHEN →"/></Text></Pressable>
      </View>
-     <View style={s.womenCard}><Text style={s.womenEyebrow}>DEIN BEFINDEN</Text>
+     <View style={s.womenCard}><Text style={s.womenEyebrow}><Copy text="DEIN BEFINDEN"/></Text>
       <Text style={s.womenFact}>Energie: {profile?.today?.energy??"Keine Angabe"}</Text>
       <Text style={s.womenCopy}>Schlaf: {profile?.today?.sleepHours==null?"Keine Angabe":profile.today.sleepHours+" h"}</Text>
-      <Pressable accessibilityRole="button" onPress={()=>router.push("/lifestyle")}><Text style={s.womenAction}>TAGESCHECK ÖFFNEN →</Text></Pressable>
+      <Pressable accessibilityRole="button" onPress={()=>router.push("/lifestyle")}><Text style={s.womenAction}><Copy text="TAGESCHECK ÖFFNEN →"/></Text></Pressable>
      </View>
      {womenGoals.length>0&&<Text style={s.womenCopy}>DEINE ZIELE: {womenGoals.map(g=>goalLabel[g]||g).join(" · ")}</Text>}
      <Text style={s.womenCopy}>Bestätigte Stufe: {profile?.journey?.confirmedLevel?.replaceAll("_"," ")??"Noch keine Einstufung"}</Text>
-     <Pressable accessibilityRole="button" onPress={()=>router.push("/settings")}><Text style={s.womenAction}>ANSICHT ANPASSEN →</Text></Pressable>
+     <Pressable accessibilityRole="button" onPress={()=>router.push("/settings")}><Text style={s.womenAction}><Copy text="ANSICHT ANPASSEN →"/></Text></Pressable>
     </View>}
 
     {priority?<Pressable onPress={()=>router.push("/lifestyle")} style={[s.priority,priority.severity==="critical"&&s.priorityCritical]}>
