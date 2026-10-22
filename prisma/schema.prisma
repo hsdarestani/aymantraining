@@ -36,6 +36,8 @@ enum MediaKind {
 
 model User {
   reviewedPathwayTests JourneyTestAttempt[] @relation("PathwayTestReviewer")
+  cyclePreferences CyclePrivacy?
+  cycleJournal CycleJournalEntry[]
   journeyIntake JourneyIntake?
   dashboardPreference AthleteDashboardPreference?
   pathwayEnrollments JourneyEnrollment[]
@@ -1102,4 +1104,36 @@ model JourneyIntake {
 
   @@index([status,createdAt])
   @@index([matchedVersionId])
+}
+
+
+// Private and optional. Not connected to Journey score, levels or coach filters.
+model CyclePrivacy {
+ userId            String @id
+ enabled           Boolean @default(false)
+ consentVersion    String?
+ consentedAt       DateTime?
+ shareWithCoach    Boolean @default(false)
+ remindersEnabled  Boolean @default(false)
+ lastPeriodStart   DateTime? @db.Date
+ cycleLengthDays   Int?
+ updatedAt         DateTime @updatedAt
+ user              User @relation(fields:[userId],references:[id],onDelete:Cascade)
+}
+
+model CycleJournalEntry {
+ id           String @id @default(cuid())
+ userId       String
+ date         DateTime @db.Date
+ flow         String? // NONE/LIGHT/MEDIUM/HEAVY only, validated in private owner endpoint
+ symptoms     String[] @default([])
+ energy       Int?
+ mood         Int?
+ discomfort   Int?
+ planChoice   String @default("AS_PLANNED") // EASIER/REST are requests, not coach-approved edits
+ createdAt    DateTime @default(now())
+ updatedAt    DateTime @updatedAt
+ user         User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ @@unique([userId,date])
+ @@index([userId,date])
 }
