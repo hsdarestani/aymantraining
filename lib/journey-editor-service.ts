@@ -267,7 +267,7 @@ async function freezeCurriculumReferences(tx:Tx,versionId:string){
    }))
   }:null;
   await tx.journeyChapterItem.update({where:{id:i.id},data:{
-   publishedSnapshot:{schemaVersion:1,exercise,trainingPlan} as Prisma.InputJsonValue
+   publishedSnapshot:{schemaVersion:1,exercise,trainingPlan:plan} as Prisma.InputJsonValue
   }});
  }
 }
