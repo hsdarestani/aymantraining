@@ -97,7 +97,8 @@ export default function Home(){
 
     <RhythmHorizon days={d.dayStrip||[]}/>
 
-  {process.env.EXPO_PUBLIC_JOURNEY_TESTS_ENABLED==="true"&&<Pressable accessibilityRole="button" onPress={()=>router.push("/journey-tests")} style={s.priority}>
+  {process.env.EXPO_PUBLIC_JOURNEY_OVERVIEW_ENABLED==="true"&&<Pressable accessibilityRole="button" onPress={()=>router.push("/journey")} style={s.priority}><Text style={s.priorityKicker}>DEIN TRAININGSWEG</Text><Text style={s.priorityTitle}>LEVEL & KAPITEL →</Text><Text style={s.priorityCopy}>Entdecke deinen bestätigten Fortschritt und den nächsten Schritt.</Text></Pressable>}
+    {process.env.EXPO_PUBLIC_JOURNEY_TESTS_ENABLED==="true"&&<Pressable accessibilityRole="button" onPress={()=>router.push("/journey-tests")} style={s.priority}>
    <Text style={s.priorityKicker}>DEIN TRAININGSWEG</Text>
    <Text style={s.priorityTitle}>KAPITEL & AUFSTIEGSTESTS →</Text>
    <Text style={s.priorityCopy}>Sehe deine Freischaltungen, reiche Tests ein und lies Trainerfeedback.</Text>
