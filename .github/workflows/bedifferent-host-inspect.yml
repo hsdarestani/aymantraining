@@ -50,4 +50,16 @@ jobs:
             echo "BD_LOCAL_READINESS:"
             curl -fsS --connect-timeout 5 --max-time 10 http://127.0.0.1:3100/api/ready || true
             echo
+            echo "BD_JOURNEY_ROLLOUT_FLAGS:"
+            if [ -f /opt/bedifferent/.env.production ]; then
+              for key in JOURNEY_EDITOR_ENABLED JOURNEY_TESTS_ENABLED JOURNEY_OVERVIEW_ENABLED; do
+                if grep -q "^$key=true$" /opt/bedifferent/.env.production; then
+                  echo "$key=enabled"
+                elif grep -q "^$key=" /opt/bedifferent/.env.production; then
+                  echo "$key=disabled"
+                else
+                  echo "$key=not_set"
+                fi
+              done
+            fi
             echo "BD_HOST_INSPECTION_END"
