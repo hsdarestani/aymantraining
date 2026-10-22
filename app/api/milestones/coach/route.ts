@@ -17,7 +17,16 @@ export async function GET(request:Request){
  if(!["COACH","ADMIN"].includes(user.role))return errorJson("Nur für Trainer.",403);
  if(!milestonesEnabled())return NextResponse.json({ok:true,enabled:false},{headers:milestoneHeaders});
  const id=new URL(request.url).searchParams.get("athleteId");
- if(!id)return errorJson("Athlet fehlt.",422);
+ if(!id){
+  const now=new Date();
+  const list=user.role==="ADMIN"?
+   await prisma.user.findMany({where:{role:"ATHLETE"},select:{id:true,name:true},take:60,orderBy:{createdAt:"desc"}}):
+   (await prisma.coachAssignment.findMany({where:{coachId:user.id,active:true,startsAt:{lte:now},
+      OR:[{endsAt:null},{endsAt:{gt:now}}]},include:{athlete:{select:{id:true,name:true}}},
+      take:60})).map(a=>a.athlete);
+  return NextResponse.json({ok:true,enabled:true,athletes:list},{headers:milestoneHeaders});
+ }
+
  if(!await canManageMilestoneAthlete(user,id))return errorJson("Keine Berechtigung.",403);
  const [athlete,rules,rest]=await Promise.all([
   prisma.user.findUnique({where:{id},select:{id:true,name:true,timezone:true}}),
