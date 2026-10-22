@@ -1,4 +1,4 @@
-import {PrismaClient} from "@prisma/client";
+import {PrismaClient,Prisma} from "@prisma/client";
 const db=new PrismaClient();
 try{
   const versions=await db.journeyPathwayVersion.findMany({
@@ -7,7 +7,7 @@ try{
   let filled=0;
   for(const version of versions){
     const items=await db.journeyChapterItem.findMany({
-      where:{chapter:{level:{versionId:version.id}},publishedSnapshot:{equals:null}},
+      where:{chapter:{level:{versionId:version.id}},publishedSnapshot:{equals:Prisma.DbNull}},
       include:{exercise:true,trainingPlan:{include:{items:{include:{exercise:true},orderBy:[{dayIndex:"asc"},{orderIndex:"asc"}]}}}}
     });
     for(const item of items){
@@ -25,7 +25,7 @@ try{
         }))
       }:null;
       const updated=await db.journeyChapterItem.updateMany({
-        where:{id:item.id,publishedSnapshot:{equals:null}},
+        where:{id:item.id,publishedSnapshot:{equals:Prisma.DbNull}},
         data:{publishedSnapshot:{schemaVersion:1,exercise,trainingPlan}}
       });
       filled+=updated.count;
