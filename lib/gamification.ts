@@ -1,6 +1,8 @@
 import {prisma} from "./db";
 import {dateOnly} from "./http";
 import {getDailyProfile} from "./daily-profile-service";
+import {getVerifiedEngagement,getMilestoneSnapshot} from "./milestone-service";
+import {milestonesEnabled} from "./milestone-contract";
 
 const dayMs=86400000;
 const keyOf=(d:Date)=>dateOnly(d).toISOString().slice(0,10);
@@ -11,7 +13,7 @@ async function unlock(userId:string,key:string,name:string){
 
 export async function gamificationSnapshot(userId:string){
   const now=new Date(),since=new Date(Date.now()-120*dayMs);
-  const [workouts,checks,wearables,tests,dailyProfile,earnedAwards,badges,entries,appOpens]=await Promise.all([
+  const [workouts,checks,wearables,tests,dailyProfile,earnedAwards,badges,entries,verified]=await Promise.all([
     prisma.workout.findMany({where:{userId,completedAt:{gte:since}},select:{completedAt:true,sets:true}}),
     prisma.dailyCheck.findMany({where:{userId,date:{gte:since}},select:{date:true,energy:true,mood:true,stress:true,soreness:true,sleepHours:true}}),
     prisma.wearableDaily.findMany({where:{userId,date:{gte:new Date(Date.now()-14*dayMs)}},select:{date:true,sleepMinutes:true}}),
@@ -22,20 +24,13 @@ export async function gamificationSnapshot(userId:string){
       :Promise.resolve([]),
     prisma.badge.findMany({where:{userId},orderBy:{unlockedAt:"desc"}}),
     prisma.challengeEntry.findMany({where:{userId}}),
-    prisma.analyticsEvent.findMany({where:{userId,name:"app_open",createdAt:{gte:since}},select:{createdAt:true}})
+    getVerifiedEngagement(userId,now)
   ]);
 
-  const active=new Set<string>();
-  workouts.forEach(w=>w.completedAt&&active.add(keyOf(w.completedAt)));
-  checks.forEach(c=>active.add(keyOf(c.date)));
-  appOpens.forEach(e=>active.add(keyOf(e.createdAt)));
+  // One real, timezone-correct eligible day; app opens and empty checks never qualify.
+  const streak=verified.streak;
 
-  let cursor=dateOnly(now);
-  if(!active.has(keyOf(cursor)))cursor=new Date(cursor.getTime()-dayMs);
-  let streak=0;
-  while(active.has(keyOf(cursor))){streak++;cursor=new Date(cursor.getTime()-dayMs)}
-
-  const completed=workouts.length;
+  const completed=verified.workoutCount;
   const sleepValues=[
     ...wearables.map(w=>w.sleepMinutes==null?null:w.sleepMinutes/60),
     ...checks.map(c=>c.sleepHours)
@@ -76,8 +71,11 @@ export async function gamificationSnapshot(userId:string){
     await prisma.challengeEntry.update({where:{id:entry.id},data:{progress,completedAt:progress>=100?(entry.completedAt??new Date()):null}});
   }
 
+  const milestone=milestonesEnabled()?await getMilestoneSnapshot(userId,now):null;
   return {
     streak,
+    milestones:milestone?{enabled:true,streak:milestone.streak,best:milestone.best,
+      todayStatus:milestone.todayStatus,awards:milestone.awards,next:milestone.next}:null,
     completedWorkouts:completed,
     level:latestLevel,
     badges:await prisma.badge.findMany({where:{userId},orderBy:{unlockedAt:"desc"}}),
