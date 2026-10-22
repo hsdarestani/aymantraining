@@ -74,6 +74,14 @@ export default function Home(){
    <Text style={s.priorityKicker}><Copy text="HEUTE WICHTIG"/></Text><Text style={s.priorityTitle}><Copy text={priority.title}/></Text><Text style={s.priorityCopy}><Copy text={priority.action}/></Text>
   </Pressable>:null}
 
+  {profile&&<View style={s.dailyProof}>
+   <Text style={s.dailyProofEyebrow}>HEUTE · {profile.date}</Text>
+   <Text style={s.dailyProofTitle}>{plan?.status==="NOT_SCHEDULED"?"Kein Training eingetragen":plan?.status==="DONE"?"Alle Einheiten erledigt":plan?.status==="PARTIAL"?"Training teilweise erledigt":"Training steht an"}</Text>
+   <Text style={s.dailyProofText}>{plan?.scheduled?plan.completed+" von "+plan.scheduled+" geplanten Einheiten erledigt":"Das bedeutet nicht automatisch einen Erholungstag."}</Text>
+   <Text style={s.dailyProofText}>ENERGIE: {profile.today.energy??"Keine Angabe"} · SCHLAF: {profile.today.sleepHours==null?"Keine Angabe":profile.today.sleepHours+" h"}</Text>
+   <Text style={s.dailyProofText}>BESTÄTIGTES LEVEL: {profile.journey.confirmedLevel??"Noch nicht bestätigt"}</Text>
+   <Pressable accessibilityRole="button" onPress={()=>router.push("/(tabs)/training")}><Text style={s.dailyProofLink}>TRAININGSPLAN ANSEHEN →</Text></Pressable>
+  </View>}
   <View style={s.editorialScore}>
    <View style={s.editorialIntro}>
     <Text style={s.editorialEyebrow}><Copy text="BE DIFFERENT SCORE"/></Text>
@@ -137,6 +145,7 @@ export default function Home(){
  </ScrollView></SafeAreaView>;
 }
 const s=StyleSheet.create({
+ dailyProof:{backgroundColor:"#142019",padding:18,borderTopColor:C.volt,borderTopWidth:2,marginTop:6,gap:9},dailyProofEyebrow:{fontFamily:"ManropeSemiBold",fontSize:10,color:C.volt,letterSpacing:1},dailyProofTitle:{fontFamily:"Archivo",fontSize:21,color:C.ink},dailyProofText:{fontFamily:"Manrope",fontSize:12,color:C.ink,lineHeight:20},dailyProofLink:{color:C.volt,fontSize:11,fontFamily:"ManropeSemiBold",marginTop:6},
 
  heroEditorial:{height:335,backgroundColor:"#0B1011",overflow:"hidden",position:"relative",justifyContent:"flex-end",marginHorizontal:-16,marginTop:-3},
  heroPhoto:{position:"absolute",width:"100%",height:"100%",top:0,left:0},
