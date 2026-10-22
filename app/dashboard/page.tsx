@@ -145,6 +145,7 @@ export default async function Dashboard(){
     </Link>
 
     {process.env.JOURNEY_OVERVIEW_ENABLED==="true"&&<Link href="/journey" className="bd-workout-card"><span>DEIN WEG</span><h2>LEVEL & KAPITEL</h2><p>Dein bestätigter Fortschritt und dein nächster Trainingsschritt.</p><b>ANSEHEN →</b></Link>}
+    {process.env.JOURNEY_DAILY_ENABLED==="true"&&<Link href="/journey/today" className="bd-workout-card"><span>DEIN TAG</span><h2>TRAINING · ERHOLUNG · TRAINER</h2><p>Was heute wirklich ansteht und welches persönliche Feedback vorliegt.</p><b>HEUTE ANSEHEN →</b></Link>}
     {process.env.JOURNEY_TESTS_ENABLED==="true"&&<Link href="/journey/tests" className="bd-workout-card">
       <span>DEIN TRAININGSWEG</span><h2>KAPITEL & AUFSTIEGSTESTS</h2>
       <p>Dein bestätigter Trainingsstand, deine Prüfungen und die nächsten Schritte.</p><b>ANSEHEN →</b>

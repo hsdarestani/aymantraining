@@ -1,0 +1,90 @@
+name: BE DIFFERENT Step 09 Daily Coach QA
+on:
+  push:
+    branches:
+      - feature/step09-daily-coach-sharedhost-20261022
+  pull_request:
+    paths:
+      - "lib/journey-daily.ts"
+      - "app/api/journey/daily/**"
+      - "app/api/journey/videos/**"
+      - "app/api/admin/journey-videos/**"
+      - "app/journey/today/**"
+      - "app/admin/journey-videos/**"
+      - "mobile/app/journey-today.tsx"
+      - "tests/browser/step09-daily-coach.spec.mjs"
+      - ".github/workflows/step09-daily-coach.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: bedifferent_test
+          POSTGRES_USER: bedifferent
+          POSTGRES_PASSWORD: test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U bedifferent -d bedifferent_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://bedifferent:test@127.0.0.1:5432/bedifferent_test?schema=public
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      NODE_ENV: test
+      JOURNEY_DAILY_ENABLED: "true"
+      JOURNEY_OVERVIEW_ENABLED: "true"
+      JOURNEY_TESTS_ENABLED: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - name: Types and isolated release script syntax
+        run: |
+          npm run check
+          bash -n scripts/activate-journey-esthetic-sharedhost.sh
+      - name: Isolated DB
+        run: npx prisma db push
+      - name: Existing pathway promotion and gating regression
+        run: node scripts/test-journey-step03.mjs
+      - name: Next production build
+        run: npm run build
+      - name: Native TypeScript
+        run: |
+          cd mobile
+          npm ci
+          npm run typecheck
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+      - name: Start web in isolated QA
+        run: |
+          NODE_ENV=production npm start > /tmp/step09-next.log 2>&1 &
+          for i in $(seq 1 50); do
+            if curl -fsS http://127.0.0.1:3000/journey/today >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/step09-next.log
+          exit 1
+      - name: Browser coach, privacy and next-workout review
+        run: npx playwright test tests/browser/step09-daily-coach.spec.mjs --workers=1
+      - name: Browser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: step09-browser
+          path: |
+            test-results
+            playwright-report
+      - name: Web logs on failure
+        if: failure()
+        run: cat /tmp/step09-next.log || true
