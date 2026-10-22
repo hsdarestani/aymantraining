@@ -54,6 +54,7 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
       - run: node scripts/test-step12-cycle.mjs
+      - run: node scripts/check-visible-copy.mjs
       - run: npm run check
       - run: npx prisma db push
       - run: npm run build
