@@ -1,4 +1,5 @@
 import {NextResponse} from "next/server";
+import {Prisma} from "@prisma/client";
 import {prisma} from "../../../../lib/db";
 import {isSameOrigin,errorJson,requireApiUser} from "../../../../lib/http";
 import {cycleFeatureEnabled,dateFromKey,preferenceSchema} from "../../../../lib/cycle-contract";
@@ -19,7 +20,7 @@ export async function POST(request:Request){
    await tx.athleteContext.updateMany({where:{userId:user.id},
     data:{cycleTrackingEnabled:false,cycleStartDate:null,cycleLengthDays:28}});
    await tx.recommendation.deleteMany({where:{userId:user.id,sourceRule:"cycle_context"}});
-  });
+  },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable});
   return NextResponse.json({ok:true,...await privateCycle(user.id)},{headers:cyclePrivateHeaders});
  }
  if(data.action==="ENABLE"){
