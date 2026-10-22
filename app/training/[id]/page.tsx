@@ -5,6 +5,7 @@ import {notFound} from "next/navigation";
 import {requireUser} from "../../../lib/auth";
 import {prisma} from "../../../lib/db";
 import WorkoutSession from "./WorkoutSession";
+import {getCoachCueForWorkout} from "../../../lib/step09-coaching";
 export const dynamic="force-dynamic";
 
 export default async function WorkoutPage({params}:{params:Promise<{id:string}>}){
@@ -14,5 +15,6 @@ export default async function WorkoutPage({params}:{params:Promise<{id:string}>}
   const exerciseIds=workout.exercises.map(x=>x.exerciseId);
   const prior=await prisma.setLog.findMany({where:{exerciseId:{in:exerciseIds},workout:{userId:user.id,id:{not:id},completedAt:{not:null}}},orderBy:{completedAt:"desc"},take:500});
   const seen=new Set<string>();const previous=prior.filter(s=>{const key=`${s.exerciseId}:${s.setNumber}`;if(seen.has(key))return false;seen.add(key);return true;});
-  return <main className="sub-shell workout-page"><header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/training"><Copy text={"← TRAINING"}/></Link></nav></header><section className="page-hero compact-hero"><div><span className="eyebrow"><Copy text={"TRAININGSMODUS"}/></span><h1><Copy text={workout.title}/></h1><p><Copy text={"Letzte Werte werden vorausgefüllt. Satzdaten bleiben bei Netzverlust lokal in der lokalen Warteschlange und werden bei der nächsten Internetverbindung synchronisiert."}/></p></div><div className="hero-stat"><span><Copy text={"ÜBUNGEN"}/></span><strong>{workout.exercises.length}</strong><small><Copy text={workout.startedAt?"LÄUFT":"BEREIT"}/></small></div></section><WorkoutSession workoutId={workout.id} exercises={workout.exercises} existing={workout.sets} previous={previous}/></main>;
+  const coachCue=process.env.STEP09_ENABLED==="true"?await getCoachCueForWorkout(user.id,workout.id,workout.scheduledAt):null;
+  return <main className="sub-shell workout-page"><header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/training"><Copy text={"← TRAINING"}/></Link></nav></header><section className="page-hero compact-hero"><div><span className="eyebrow"><Copy text={"TRAININGSMODUS"}/></span><h1><Copy text={workout.title}/></h1><p><Copy text={"Letzte Werte werden vorausgefüllt. Satzdaten bleiben bei Netzverlust lokal in der lokalen Warteschlange und werden bei der nächsten Internetverbindung synchronisiert."}/></p></div><div className="hero-stat"><span><Copy text={"ÜBUNGEN"}/></span><strong>{workout.exercises.length}</strong><small><Copy text={workout.startedAt?"LÄUFT":"BEREIT"}/></small></div></section>{coachCue?.text&&<article className="panel" style={{margin:"16px 24px",padding:20,border:"1px solid #7c985c"}}><span className="eyebrow">DEIN TRAINER FÜR DIESE EINHEIT</span><p>{coachCue.text}</p></article>}<WorkoutSession workoutId={workout.id} exercises={workout.exercises} existing={workout.sets} previous={previous}/></main>;
 }
