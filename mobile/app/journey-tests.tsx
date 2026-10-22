@@ -78,7 +78,7 @@ export default function JourneyTests(){
  return <SafeAreaView style={s.safe} edges={["top"]}><ScrollView contentContainerStyle={s.content}>
   <Pressable onPress={()=>router.back()}><Text style={s.back}>← ZURÜCK</Text></Pressable>
   <Text style={s.eyebrow}>BE DIFFERENT · TRAININGSWEG</Text><Text style={s.title}>DEIN NÄCHSTER SCHRITT.</Text>
-  <Text style={s.hint}>Dein Level wird durch Prüfungen und den Trainer bestätigt, nicht durch deinen Score oder ein PRO Abo.</Text>
+  <Text style={s.hint}>Deine Leistungsstufe wird durch Prüfungen und den Trainer bestätigt, nicht durch deine Punkte oder ein PRO Abo.</Text>
   {!enabled?<View style={s.card}><Text style={s.hint}>Der neue Trainingsweg wird vorbereitet. Dein bisheriges Training bleibt unverändert.</Text></View>:
    loading?<ActivityIndicator color={C.volt}/>:
    <>{!!err&&<Text style={s.err}>{err}</Text>}
