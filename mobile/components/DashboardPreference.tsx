@@ -30,24 +30,24 @@ export default function DashboardPreference(){
  if(!value?.enabled)return null;
  return <View style={s.card}>
   <Text style={s.kicker}><Copy text="DEINE TRAININGSANSICHT"/></Text>
-  <Text style={s.title}>DU ENTSCHEIDEST.</Text>
-  <Text style={s.copy}>Freiwillig und jederzeit wechselbar. Alle Sportarten bleiben zugänglich.</Text>
+  <Text style={s.title}><Copy text="DU ENTSCHEIDEST."/></Text>
+  <Text style={s.copy}><Copy text="Freiwillig und jederzeit wechselbar. Alle Sportarten bleiben zugänglich."/></Text>
   <View style={s.row}>
    <Pressable accessibilityRole="button" accessibilityState={{selected:value.mode==="GENERAL",disabled:busy}} disabled={busy}
     onPress={()=>save("GENERAL",value.presenterPreference)} style={[s.choice,value.mode==="GENERAL"&&s.selected]}>
-    <Text style={s.choiceText}>ALLGEMEIN</Text>
+    <Text style={s.choiceText}><Copy text="ALLGEMEIN"/></Text>
    </Pressable>
    <Pressable accessibilityRole="button" accessibilityState={{selected:value.mode==="WOMEN",disabled:busy}} disabled={busy}
     onPress={()=>save("WOMEN",value.presenterPreference)} style={[s.choice,value.mode==="WOMEN"&&s.selected]}>
-    <Text style={s.choiceText}>FRAUENANSICHT</Text>
+    <Text style={s.choiceText}><Copy text="FRAUENANSICHT"/></Text>
    </Pressable>
   </View>
   {value.mode==="WOMEN"&&<View style={s.toggle}>
-   <Text style={s.copy}>TRAINERINNEN BEVORZUGEN</Text>
+   <Text style={s.copy}><Copy text="TRAINERINNEN BEVORZUGEN"/></Text>
    <Switch accessibilityLabel="Aufnahmen mit Trainerinnen bevorzugen" value={value.presenterPreference==="TRAINERIN"}
     disabled={busy} onValueChange={next=>save("WOMEN",next?"TRAINERIN":"ANY")} trackColor={{true:C.volt}}/>
   </View>}
-  <Text style={s.copy}>Nur verfügbare freigegebene Aufnahmen. Keine Zyklusdaten erforderlich.</Text>
+  <Text style={s.copy}><Copy text="Nur verfügbare freigegebene Aufnahmen. Keine Zyklusdaten erforderlich."/></Text>
   {status?<Text accessibilityRole="text" style={s.status}>{status}</Text>:null}
  </View>;
 }
