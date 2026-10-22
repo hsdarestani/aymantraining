@@ -5,11 +5,13 @@ on:
     paths:
       - "mobile/**"
       - "release-request.json"
+      - "scripts/test-step15-release-request.mjs"
       - ".github/workflows/step15-native-candidates.yml"
   pull_request:
     paths:
       - "mobile/**"
       - "release-request.json"
+      - "scripts/test-step15-release-request.mjs"
       - ".github/workflows/step15-native-candidates.yml"
   workflow_dispatch:
 permissions:
