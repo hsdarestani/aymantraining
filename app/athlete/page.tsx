@@ -4,7 +4,7 @@ import Link from "next/link";
 import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";
 import {hasFeature} from "../../lib/entitlements";
-import {levelForScore} from "../../lib/scoring";
+import {getDailyProfile} from "../../lib/daily-profile-service";
 import DigitalTwinHero from "../components/DigitalTwinHero";
 export const dynamic="force-dynamic";
 
@@ -16,6 +16,7 @@ function gridPoints(scale:number,n=7){const cx=150,cy=150,r=112*scale;return Arr
 
 export default async function AthletePage(){
   const user=await requireUser();
+  const dailyProfile=await getDailyProfile(user.id);
   const [score,oldest,details,digital,badges]=await Promise.all([
     prisma.scoreSnapshot.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
     prisma.scoreSnapshot.findFirst({where:{userId:user.id,date:{gte:new Date(Date.now()-90*86400000)}},orderBy:{date:"asc"}}),
@@ -32,7 +33,7 @@ export default async function AthletePage(){
 
   return <main className="sub-shell">
     <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard"><Copy text={"BEGINN"}/></Link><Link href="/training">TRAINING</Link><Link href="/progress"><Copy text={"FORTSCHRITT"}/></Link><Link href="/coach"><Copy text={"TRAINER"}/></Link><Link className="active" href="/athlete"><Copy text={"ATHLET"}/></Link></nav></header>
-    <section className="page-hero"><div><span className="eyebrow"><Copy text={"ATHLETENANSICHT · DEIN BEREICH"}/></span><h1><Copy text={"Von Training zu Identität."}/></h1><p><Copy text={"Deine Entwicklung über alle Säulen. Prognosen werden als Trend und nie als Garantie dargestellt."}/></p></div><div className="hero-stat"><span><Copy text={"STUFE"}/></span><strong>{score?.total??0}%</strong><small>{levelForScore(score?.total??0)}</small></div></section>
+    <section className="page-hero"><div><span className="eyebrow"><Copy text={"ATHLETENANSICHT · DEIN BEREICH"}/></span><h1><Copy text={"Von Training zu Identität."}/></h1><p><Copy text={"Deine Entwicklung über alle Säulen. Prognosen werden als Trend und nie als Garantie dargestellt."}/></p></div><div className="hero-stat"><span><Copy text={"BD SCORE"}/></span><strong>{dailyProfile.profile.value==null?"—":dailyProfile.profile.value+"%"}</strong><small>BESTÄTIGTES LEVEL: {dailyProfile.journey.confirmedLevel??"OFFEN"}</small></div></section>
 
     <section className="athlete-grid">
       <article className={digital?"panel twin-panel":"panel twin-panel twin-preview"}>

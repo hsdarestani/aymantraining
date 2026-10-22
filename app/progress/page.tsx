@@ -8,12 +8,14 @@ import Link from "next/link";
 import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";
 import {hasFeature} from "../../lib/entitlements";
+import {getDailyProfile} from "../../lib/daily-profile-service";
 import ProgressClient from "./ProgressClient";
 import BeforeAfter from "./BeforeAfter";
 export const dynamic="force-dynamic";
 
 export default async function ProgressPage(){
   const user=await requireUser();
+  const dailyProfile=await getDailyProfile(user.id);
   const [scores,metrics,tests,photos,details,timeline]=await Promise.all([
     prisma.scoreSnapshot.findMany({where:{userId:user.id},orderBy:{date:"desc"},take:30}),
     prisma.bodyMetric.findMany({where:{userId:user.id},orderBy:{date:"desc"},take:30}),
@@ -42,11 +44,11 @@ export default async function ProgressPage(){
       </div>
       <div className="bd-progress-score">
         <span><Copy text="AKTUELLER LEISTUNGSWERT"/></span>
-        <div><strong>{current?.total??"—"}</strong><small>{current?" / 100":""}</small></div>
-        <p><Copy text={details?`${scores.length} MESSPUNKTE`:"GESAMTWERT"}/></p>
+        <div><strong>{dailyProfile.profile.value??"—"}</strong><small>{current?" / 100":""}</small></div>
+        <p>MESSSTAND {dailyProfile.profile.recordedDate??"FEHLT"} · DATENABDECKUNG {dailyProfile.profile.completeness}%</p>
       </div>
     </section>
-    <section className="bd-progress-record">
+    <section className="bd-progress-record"><p>Der BD Score beschreibt dein langfristiges Leistungsprofil, nicht den heutigen Trainingsstand oder dein Level.</p><p>HEUTE: {dailyProfile.plan.scheduled?dailyProfile.plan.completed+" / "+dailyProfile.plan.scheduled+" Einheiten":"Keine Einheit geplant"} · LEVEL: {dailyProfile.journey.confirmedLevel??"Noch nicht bestätigt"}</p>
       <header className="bd-progress-record-head"><div><span className="bd-section-serial">01 / <Copy text="DEIN VERLAUF"/></span><h2><Copy text="NICHT GESCHÄTZT. GEMESSEN."/></h2></div>
         {details&&change!==null&&<div className="bd-progress-delta"><span><Copy text="VERÄNDERUNG"/></span><strong>{change>0?"+":""}{change}</strong></div>}
       </header>
