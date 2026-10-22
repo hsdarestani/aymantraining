@@ -15,7 +15,7 @@ RUN npx prisma generate
 RUN npm run build
 
 FROM builder AS migrator
-CMD ["sh", "-c", "node scripts/preflight-subscriptions.mjs && npx prisma db push"]
+CMD ["sh", "-c", "node scripts/preflight-subscriptions.mjs && npx prisma db push && node scripts/backfill-published-journey-snapshots.mjs"]
 
 FROM node:22-alpine AS runner
 WORKDIR /app
