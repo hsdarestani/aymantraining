@@ -36,6 +36,8 @@ enum MediaKind {
 
 model User {
   reviewedPathwayTests JourneyTestAttempt[] @relation("PathwayTestReviewer")
+  athleteTechniqueReviews CoachTechniqueReview[] @relation("TechniqueAthlete")
+  coachTechniqueReviews CoachTechniqueReview[] @relation("TechniqueReviewer")
   journeyIntake JourneyIntake?
   pathwayEnrollments JourneyEnrollment[]
   id                  String           @id @default(cuid())
@@ -181,6 +183,8 @@ model Workout {
   trainingPlan   TrainingPlan?     @relation(fields: [trainingPlanId], references: [id])
   sets           SetLog[]
   exercises      WorkoutExercise[]
+  sourceTechniqueReviews CoachTechniqueReview[] @relation("TechniqueSourceWorkout")
+  targetTechniqueReviews CoachTechniqueReview[] @relation("TechniqueTargetWorkout")
 
   @@index([userId, scheduledAt])
 }
@@ -419,6 +423,7 @@ model VideoFeedback {
 
 model MediaAsset {
   chapterMediaVariants ChapterMediaVariant[]
+  submittedTechniqueReviews CoachTechniqueReview[]
   id            String    @id @default(cuid())
   ownerId       String
   relatedUserId String?
@@ -1089,4 +1094,31 @@ model JourneyIntake {
 
   @@index([status,createdAt])
   @@index([matchedVersionId])
+}
+
+enum TechniqueReviewStatus {
+  PENDING
+  REVIEWED
+}
+model CoachTechniqueReview {
+  id                 String @id @default(cuid())
+  athleteId          String
+  reviewerId         String?
+  mediaId            String
+  sourceWorkoutId    String?
+  targetWorkoutId    String?
+  status             TechniqueReviewStatus @default(PENDING)
+  athleteNoteDe      String? @db.VarChar(1000)
+  feedbackDe         String? @db.VarChar(2000)
+  nextSessionCueDe   String? @db.VarChar(800)
+  submittedAt        DateTime @default(now())
+  reviewedAt         DateTime?
+  athlete            User @relation("TechniqueAthlete",fields:[athleteId],references:[id],onDelete:Restrict)
+  reviewer           User? @relation("TechniqueReviewer",fields:[reviewerId],references:[id],onDelete:Restrict)
+  media              MediaAsset @relation(fields:[mediaId],references:[id],onDelete:Restrict)
+  sourceWorkout      Workout? @relation("TechniqueSourceWorkout",fields:[sourceWorkoutId],references:[id],onDelete:Restrict)
+  targetWorkout      Workout? @relation("TechniqueTargetWorkout",fields:[targetWorkoutId],references:[id],onDelete:Restrict)
+  @@index([athleteId,submittedAt])
+  @@index([status,submittedAt])
+  @@index([targetWorkoutId,status])
 }
