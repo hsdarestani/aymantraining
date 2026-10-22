@@ -27,11 +27,12 @@ export async function getDashboardPreference(userId:string):Promise<DashboardPre
 /** Prioritize licensed/approved presenter variants if available.
  * Never create a synthetic trainer or discard another authorized variant.
  */
-export function sortPresenterVariants<T extends {presenter:string}>(
+export function sortPresenterVariants<T extends {presenter:string;available?:boolean}>(
  variants:T[],preference:PresenterPreference
 ):T[]{
  if(preference!=="TRAINERIN")return variants;
  return variants.map((item,index)=>({item,index})).sort((a,b)=>
+   Number(b.item.available!==false)-Number(a.item.available!==false)||
    Number(b.item.presenter==="TRAINER")-Number(a.item.presenter==="TRAINER")||a.index-b.index
  ).map(x=>x.item);
 }
