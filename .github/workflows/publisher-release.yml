@@ -51,6 +51,7 @@ jobs:
             "BE DIFFERENT Step 14 Accessible Celebrations QA"
             "BE DIFFERENT Step 15 Release Acceptance"
             "Native App Check"
+            "BE DIFFERENT Step 15 Native Store Candidates"
           )
           for attempt in $(seq 1 120); do
             response="$(curl -fsS --connect-timeout 8 --max-time 20 \
