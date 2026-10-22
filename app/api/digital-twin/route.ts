@@ -25,10 +25,10 @@ export async function GET(){
  const projected=Math.max(0,Math.min(100,Math.round(current.total+daily*futureDays)));
  const targetScore=context?.targetScore??Math.max(current.total,projected);
  const pillars={
-  strength:current.strength??0,endurance:current.endurance??0,athleticism:current.athleticism??0,
-  mobility:current.mobility??0,recovery:current.recovery??0,fuel:current.fuel??0,consistency:current.consistency??0
+  strength:current.strength??null,endurance:current.endurance??null,athleticism:current.athleticism??null,
+  mobility:current.mobility??null,recovery:current.recovery??null,fuel:current.fuel??null,consistency:current.consistency??null
  };
- const targetPillars=Object.fromEntries(Object.entries(pillars).map(([k,v])=>[k,Math.min(100,Math.max(Number(v),Math.round(Number(v)+(targetScore-current.total)*0.8)))]));
+ const targetPillars=Object.fromEntries(Object.entries(pillars).map(([k,v])=>[k,v==null?null:Math.min(100,Math.max(Number(v),Math.round(Number(v)+(targetScore-current.total)*0.8)))]));
  return NextResponse.json({
   ok:true,
   current:{total:current.total,level:profile.journey.confirmedLevel,pillars,completeness:current.completeness,recordedDate:current.date},
