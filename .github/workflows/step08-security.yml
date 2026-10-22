@@ -5,6 +5,7 @@ on:
     paths:
       - 'prisma/**'
       - 'mobile/**'
+      - 'release-request.json'
       - 'lib/journey-*'
       - 'lib/legacy-media-access.ts'
       - 'app/api/media/**'
