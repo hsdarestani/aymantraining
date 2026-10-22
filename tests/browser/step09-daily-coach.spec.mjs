@@ -38,6 +38,7 @@ test("daily dashboard uses real athlete schedule with no invented session",async
 });
 test("only athlete owner can submit video and only assigned coach can review it",async({browser})=>{
  const athleteBrowser=await asUser(browser,"athlete");
+ await athleteBrowser.page.goto(host+"/journey/today");
  const out=await athleteBrowser.page.evaluate(async mediaId=>{
   const r=await fetch("/api/journey/videos",{method:"POST",headers:{"content-type":"application/json"},
    body:JSON.stringify({mediaId,message:"Bitte Technik der Kniebeuge kontrollieren"})});
@@ -50,6 +51,7 @@ test("only athlete owner can submit video and only assigned coach can review it"
  },video.id);
  expect(repeat).toBe(409);
  const otherCoach=await asUser(browser,"other");
+ await otherCoach.page.goto(host+"/admin/journey-videos");
  const otherQueue=await otherCoach.page.evaluate(async()=>{const r=await fetch("/api/admin/journey-videos");return await r.json()});
  expect(otherQueue.videos).toHaveLength(0);
  const denied=await otherCoach.page.evaluate(async id=>{
@@ -79,6 +81,7 @@ test("only athlete owner can submit video and only assigned coach can review it"
 });
 test("FREE athlete and stranger cannot submit another person's private video",async({browser})=>{
  const {context,page}=await asUser(browser,"free");
+ await page.goto(host+"/journey/today");
  const code=await page.evaluate(async mediaId=>{const r=await fetch("/api/journey/videos",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({mediaId})});return r.status},video.id);
  expect(code).toBe(403);await context.close();
 });
