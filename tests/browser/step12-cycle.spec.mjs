@@ -62,6 +62,9 @@ test("coach access is disabled until separate grant; minimized after consent; re
  expect(JSON.stringify(shared.body)).not.toContain("LIGHT");
  expect(JSON.stringify(shared.body)).not.toContain("forecast");
  expect((await coachRead(o.page)).status).toBe(403);
+ await db.coachAssignment.updateMany({where:{athleteId:athlete.id,coachId:coach.id},data:{endsAt:new Date(Date.now()-3600000)}});
+ expect((await coachRead(c.page)).status).toBe(403);
+ await db.coachAssignment.updateMany({where:{athleteId:athlete.id,coachId:coach.id},data:{endsAt:null}});
  expect((await send(a.page,"/api/cycle/preferences",{action:"SHARE",shareWithCoach:false})).status).toBe(200);
  expect((await coachRead(c.page)).status).toBe(403);
  await a.ctx.close();await c.ctx.close();await o.ctx.close();

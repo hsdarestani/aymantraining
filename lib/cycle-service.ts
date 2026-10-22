@@ -31,6 +31,14 @@ export async function privateCycle(userId:string,options:{includeEntries?:boolea
 /** Only an explicitly shared, limited, coach-facing training summary. */
 export async function getCoachCycleSignals(actor:{id:string;role:string},athleteId:string){
  if(!cycleFeatureEnabled()||!["COACH","ADMIN"].includes(actor.role)||!await canCoachAccess(actor,athleteId))return null;
+ if(actor.role==="COACH"){
+  const now=new Date();
+  const active=await prisma.coachAssignment.findFirst({where:{
+   coachId:actor.id,athleteId,active:true,startsAt:{lte:now},
+   OR:[{endsAt:null},{endsAt:{gt:now}}]
+  },select:{id:true}});
+  if(!active)return null; // Expired or future assignments never grant sensitive access.
+ }
  const privacy=await prisma.cyclePrivacy.findUnique({where:{userId:athleteId},
   select:{enabled:true,shareWithCoach:true}});
  if(!privacy?.enabled||!privacy.shareWithCoach)return null;

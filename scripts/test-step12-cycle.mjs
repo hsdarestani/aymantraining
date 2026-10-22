@@ -35,7 +35,7 @@ for(const [file,disallowed] of [["lib/recommendations.ts","cycleStartDate"],["ap
 const schema=readFileSync("prisma/schema.prisma","utf8");
 assert(schema.includes("privacy      CyclePrivacy @relation(fields:[userId],references:[userId],onDelete:Cascade)"),"Cascade must prevent orphan health data after revoke");
 const coach=readFileSync("app/api/cycle/coach/[athleteId]/route.ts","utf8")+readFileSync("lib/cycle-service.ts","utf8");
-for(const term of ["shareWithCoach","canCoachAccess","select:{date:true,planChoice:true,energy:true,discomfort:true}"]){
+for(const term of ["shareWithCoach","canCoachAccess","endsAt:{gt:now}","select:{date:true,planChoice:true,energy:true,discomfort:true}"]){
  assert(coach.includes(term),"Coach permission/field minimization must be explicit: "+term);
 }
 console.log("Step12 owner privacy, consent, calendar and no-score-impact checks passed.");
