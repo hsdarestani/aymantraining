@@ -33,19 +33,19 @@ export default function DashboardPreference(){
  return <section className="panel" aria-label="Deine Trainingsansicht" style={{padding:22,display:"grid",gap:13}}>
   <span className="eyebrow"><Copy text="DEINE TRAININGSANSICHT"/></span>
   <h2><Copy text="Du entscheidest, was du siehst."/></h2>
-  <p className="muted">Die Frauenansicht ist freiwillig. Beide Ansichten enthalten dieselben Sportarten, Trainingswege und Zugriffsrechte.</p>
+  <p className="muted"><Copy text="Die Frauenansicht ist freiwillig. Beide Ansichten enthalten dieselben Sportarten, Trainingswege und Zugriffsrechte."/></p>
   <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
    <button type="button" aria-pressed={value.mode==="GENERAL"} className={value.mode==="GENERAL"?"primary compact":"secondary"}
-    disabled={busy} onClick={()=>update("GENERAL",value.presenterPreference)}>ALLGEMEINE ANSICHT</button>
+    disabled={busy} onClick={()=>update("GENERAL",value.presenterPreference)}><Copy text="ALLGEMEINE ANSICHT"/></button>
    <button type="button" aria-pressed={value.mode==="WOMEN"} className={value.mode==="WOMEN"?"primary compact":"secondary"}
-    disabled={busy} onClick={()=>update("WOMEN",value.presenterPreference)}>FRAUENANSICHT</button>
+    disabled={busy} onClick={()=>update("WOMEN",value.presenterPreference)}><Copy text="FRAUENANSICHT"/></button>
   </div>
   {value.mode==="WOMEN"&&<label style={{display:"flex",gap:10,alignItems:"center"}}>
     <input type="checkbox" checked={value.presenterPreference==="TRAINERIN"} disabled={busy}
       onChange={e=>update("WOMEN",e.target.checked?"TRAINERIN":"ANY")}/>
-    <span>Aufnahmen mit Trainerinnen bevorzugen, sofern vorhanden</span>
+    <span><Copy text="Aufnahmen mit Trainerinnen bevorzugen, sofern vorhanden"/></span>
   </label>}
-  <p className="muted">Das ändert weder deine Einstufung noch Trainingspläne. Zyklusdaten werden hier nicht erhoben.</p>
+  <p className="muted"><Copy text="Das ändert weder deine Einstufung noch Trainingspläne. Zyklusdaten werden hier nicht erhoben."/></p>
   {saved&&<p role="status" style={{color:"#d4ff00"}}>{saved}</p>}
   {error&&<p role="alert" style={{color:"#ffb6b6"}}>{error}</p>}
  </section>;
