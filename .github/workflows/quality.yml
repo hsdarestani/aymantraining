@@ -52,6 +52,8 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
       - name: Visible copy policy
         run: node scripts/check-visible-copy.mjs
+      - name: No score-based level awards
+        run: node scripts/test-step10-level-isolation.mjs
       - name: Media range regression
         run: node scripts/test-media-ranges.mjs
       - name: Native offline queue regression
