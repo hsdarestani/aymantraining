@@ -43,7 +43,7 @@ export default function Cycle(){
   <View style={s.header}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.link}><Copy text="ZURÜCK"/></Text></Pressable></View>
   <Text style={s.kicker}>FREIWILLIG · PRIVAT</Text><Text style={s.heading}>DEIN ZYKLUS.{"\n"}DEINE DATEN.</Text>
   <Text style={s.copy}>Deine Aufzeichnungen bleiben privat. Du bestimmst selbst, was du speicherst. Kein Einfluss auf Trainingsstufe oder Leistungswert.</Text>
-  <Text style={s.copy}>Schätzungen sind keine Verhütungs- oder Schwangerschaftsberatung und können stark abweichen.</Text>
+  <Text style={s.copy}>Schätzungen sind weder für Verhütung noch für Schwangerschaftsberatung geeignet und können stark abweichen.</Text>
   {!!status&&<Text accessibilityRole="alert" style={s.status}>{status}</Text>}
   {!d?.available?<View style={s.card}><Text style={s.copy}>Diese Funktion ist noch nicht freigeschaltet. Dein Training bleibt unverändert.</Text></View>:
    !d.enabled?<View style={s.card}><Text style={s.title}>DEINE FREIWILLIGE ENTSCHEIDUNG</Text>
