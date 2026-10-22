@@ -7,6 +7,11 @@ export async function GET(){
   await prisma.$queryRaw`SELECT 1`;
   return NextResponse.json({
    ok:true,service:"bedifferent",database:"ready",
+   stepFeatures:{
+    womenDashboard:process.env.WOMEN_DASHBOARD_ENABLED==="true",
+    cycleJournal:process.env.CYCLE_JOURNAL_ENABLED==="true",
+    milestones:process.env.MILESTONES_ENABLED==="true"
+   },
    journey:{
     onboarding:process.env.JOURNEY_ONBOARDING_ENABLED==="true",
     editor:process.env.JOURNEY_EDITOR_ENABLED==="true",
