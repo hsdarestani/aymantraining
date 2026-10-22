@@ -144,6 +144,7 @@ export default async function Dashboard(){
       <b><Copy text={nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></b>
     </Link>
 
+    {process.env.JOURNEY_OVERVIEW_ENABLED==="true"&&<Link href="/journey" className="bd-workout-card"><span>DEIN WEG</span><h2>LEVEL & KAPITEL</h2><p>Dein bestätigter Fortschritt und dein nächster Trainingsschritt.</p><b>ANSEHEN →</b></Link>}
     {process.env.JOURNEY_TESTS_ENABLED==="true"&&<Link href="/journey/tests" className="bd-workout-card">
       <span>DEIN TRAININGSWEG</span><h2>KAPITEL & AUFSTIEGSTESTS</h2>
       <p>Dein bestätigter Trainingsstand, deine Prüfungen und die nächsten Schritte.</p><b>ANSEHEN →</b>
