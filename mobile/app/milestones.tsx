@@ -2,6 +2,7 @@ import {useCallback,useState} from "react";
 import {ActivityIndicator,Pressable,StyleSheet,Text,View} from "react-native";
 import {router,useFocusEffect} from "expo-router";
 import Screen from "../components/Screen";
+import MilestoneCelebration from "../components/MilestoneCelebration";
 import {api} from "../lib/api";
 import {C} from "../theme";
 type Milestone={id:string;title:string;message:string;visualIntensity:string;achievedAt:string};
@@ -10,7 +11,7 @@ export default function Milestones(){
  const [data,setData]=useState<any>(null),[status,setStatus]=useState("");
  useFocusEffect(useCallback(()=>{api("/api/milestones").then(setData).catch(e=>setStatus(e.message||"Nicht verfügbar"))},[]));
  if(!data)return <Screen><View style={s.loading}><ActivityIndicator color={C.volt}/><Text style={s.copy}>{status||"Fortschritt wird geladen ..."}</Text></View></Screen>;
- return <Screen><View style={s.hero}><Text style={s.kicker}>DEIN ECHTER FORTSCHRITT</Text>
+ return <Screen><MilestoneCelebration/><View style={s.hero}><Text style={s.kicker}>DEIN ECHTER FORTSCHRITT</Text>
    <Text style={s.title}>JEDER TAG.{"\n"}EIN SCHRITT.</Text>
    <Text style={s.copy}>Nur Training, echte Tageschecks und zuvor geplante Erholung zählen. Das reine Öffnen der Anwendung zählt nicht.</Text>
   </View>

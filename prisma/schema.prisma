@@ -41,6 +41,7 @@ model User {
   coachedMilestoneRules MilestoneRule[] @relation("MilestoneRuleCoach")
   athleteMilestoneRules MilestoneRule[] @relation("MilestoneRuleAthlete")
   milestoneAwards MilestoneAward[]
+  celebrationPreference CelebrationPreference?
   cyclePreferences CyclePrivacy?
   journeyIntake JourneyIntake?
   dashboardPreference AthleteDashboardPreference?
@@ -1193,4 +1194,15 @@ model MilestoneAward {
  user            User @relation(fields:[userId],references:[id],onDelete:Cascade)
  @@unique([userId,key])
  @@index([userId,createdAt])
+}
+
+
+// Private, owner-controlled celebration accessibility preferences.
+// Does not change award eligibility, achievements, BD Score, or training.
+model CelebrationPreference {
+ userId        String @id
+ enabled       Boolean @default(true)
+ reduceMotion  Boolean @default(false)
+ updatedAt     DateTime @updatedAt
+ user          User @relation(fields:[userId],references:[id],onDelete:Cascade)
 }

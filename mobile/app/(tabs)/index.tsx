@@ -13,6 +13,7 @@ import {C,radius} from "../../theme";
 import {SafeAreaView,useSafeAreaInsets} from "react-native-safe-area-context";
 import {syncHomeWidget} from "../../lib/widget-sync";
 import ScoreRadar from "../../components/ScoreRadar";
+import MilestoneCelebration from "../../components/MilestoneCelebration";
 import RhythmHorizon from "../../components/RhythmHorizon";
 
 const pillarMeta=[
@@ -51,7 +52,7 @@ export default function Home(){
  const scorePillars=pillarMeta.map(([letter,key,label])=>({letter,key,label,value:typeof pillars?.[key]==="number"&&Number.isFinite(pillars[key])?Number(pillars[key]):null}));
  const nextFocus=[...scorePillars].filter(p=>p.value!=null).sort((a,b)=>(a.value??101)-(b.value??101))[0];
  if(!d)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
- return <SafeAreaView edges={["top"]} style={s.safe}><ScrollView style={s.safe} contentContainerStyle={[s.content,{paddingBottom:126+bottomClearance}]} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
+ return <SafeAreaView edges={["top"]} style={s.safe}><MilestoneCelebration/><ScrollView style={s.safe} contentContainerStyle={[s.content,{paddingBottom:126+bottomClearance}]} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
   <View style={s.top}><Brand compact/><View style={s.topActions}><LanguagePicker inline/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,recordedValue!=null&&recordedValue<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}><Copy text="BD SCORE"/></Text><Text style={s.scorePillValue}>{recordedValue==null?"?":recordedValue+"%"}</Text></Pressable></View></View>
 
   <View style={s.heroEditorial}>

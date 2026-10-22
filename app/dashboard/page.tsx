@@ -8,6 +8,7 @@ import DigitalTwinHero from "../components/DigitalTwinHero";
 import ScoreRadar from "../components/ScoreRadar";
 import RhythmHorizon from "../components/RhythmHorizon";
 import WomenDashboard from "../components/WomenDashboard";
+import CelebrationOverlay from "../components/CelebrationOverlay";
 import {getDashboardPreference} from "../../lib/women-dashboard";
 import {privateCycle} from "../../lib/cycle-service";
 import "../women-dashboard.css";
@@ -69,6 +70,7 @@ export default async function Dashboard(){
   const priority=recs[0];
 
   return <main className="bd-web-home bd-editorial-home">
+    {process.env.CELEBRATIONS_ENABLED==="true"&&<CelebrationOverlay/>}
     <header className="bd-home-top">
       <Link href="/dashboard" className="bd-home-wordmark">BE DIFFERENT</Link>
       <Link href="/athlete" className={"bd-score-chip "+signal(total)}><span><Copy text="BD SCORE"/></span><strong>{total==null?"?":total+"%"}</strong></Link>

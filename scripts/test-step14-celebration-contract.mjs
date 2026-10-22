@@ -1,0 +1,36 @@
+import {readFileSync} from "node:fs";
+import {createRequire} from "node:module";
+import {strict as assert} from "node:assert";
+import vm from "node:vm";
+import ts from "typescript";
+const require=createRequire(import.meta.url);
+const code=ts.transpileModule(readFileSync("lib/celebration-contract.ts","utf8"),{
+ compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}
+}).outputText;
+const mod={exports:{}};
+vm.runInNewContext("(function(require,module,exports){"+code+"\n})",{})(require,mod,mod.exports);
+const {visualPolicy,intensity,celebrationPreferencesSchema,eventSchema,cutoffForPresentation}=mod.exports;
+assert.equal(intensity("VERY_BIG"),"SMALL");
+assert.equal(visualPolicy("FULL",false,false).particles,10);
+assert.equal(visualPolicy("MEDIUM",false,false).particles,5);
+assert.equal(visualPolicy("SMALL",false,false).particles,0);
+assert.equal(visualPolicy("FULL",true,false).animated,false);
+assert.equal(visualPolicy("FULL",false,true).durationMs,0);
+assert.equal(visualPolicy("FULL",false,true).particles,0);
+assert.equal(eventSchema.safeParse({action:"ACKNOWLEDGE",awardId:"a"}).success,true);
+assert.equal(eventSchema.safeParse({action:"ACKNOWLEDGE",awardId:"a",userId:"another"}).success,false);
+assert.equal(eventSchema.safeParse({action:"SET_PREFERENCES",enabled:false,reduceMotion:true}).success,true);
+assert.equal(celebrationPreferencesSchema.safeParse({enabled:true,reduceMotion:false}).success,true);
+const now=new Date("2026-10-22T12:00:00Z");
+assert.equal(cutoffForPresentation(now).toISOString(),"2026-10-08T12:00:00.000Z");
+const service=readFileSync("lib/celebration-service.ts","utf8");
+assert(service.includes("getMilestoneSnapshot"),"Celebration must use independent verified milestone policy");
+assert(!/cycleJournalEntry|cyclePrivacy|scoreSnapshot/.test(service),"No cycle or BD score derived celebrations");
+const web=readFileSync("app/celebrations.css","utf8");
+assert(web.includes("prefers-reduced-motion:reduce"),"Honor operating system reduced motion");
+assert(web.includes(".bd-celebration-still"),"Honor manual reduce motion override");
+const native=readFileSync("mobile/components/MilestoneCelebration.tsx","utf8");
+assert(native.includes("AccessibilityInfo.isReduceMotionEnabled"),"Honor native reduced motion");
+assert(native.includes("onRequestClose"),"Allow accessible dismiss");
+assert(native.includes('action:"ACKNOWLEDGE"'),"Require exact award acknowledgement");
+console.log("Step14 verified award source, strict owner input, three intensities and both reduced-motion modes.");
