@@ -12,6 +12,7 @@ on:
       - "app/coach/milestones/**"
       - "mobile/app/milestones.tsx"
       - "scripts/test-step13-streak.mjs"
+      - "tests/browser/step13-milestones.spec.mjs"
       - ".github/workflows/step13-streak-milestones.yml"
   workflow_dispatch:
 permissions:
@@ -53,3 +54,16 @@ jobs:
       - run: npx prisma db push
       - run: npm run build
       - run: cd mobile && npm ci && npm run typecheck
+      - run: npx playwright install --with-deps chromium
+      - name: Start isolated web
+        run: |
+          NODE_ENV=production npm start > /tmp/step13-next.log 2>&1 &
+          for i in $(seq 1 50); do
+            if curl -fsS http://127.0.0.1:3000/api/ready >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/step13-next.log
+          exit 1
+      - run: npx playwright test tests/browser/step13-milestones.spec.mjs --workers=1
+      - if: failure()
+        run: cat /tmp/step13-next.log || true
