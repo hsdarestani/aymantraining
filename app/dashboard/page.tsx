@@ -21,7 +21,7 @@ export default async function Dashboard(){
   const user=await requireUser();
   const dailyProfile=await getDailyProfile(user.id);
   const dashboardPreference=await getDashboardPreference(user.id);
-  const cycleOverview=await privateCycle(user.id);
+  const cycleOverview=await privateCycle(user.id,{includeEntries:false});
   const womenGoals=dashboardPreference.mode==="WOMEN"?await prisma.goal.findMany({where:{userId:user.id,active:true},select:{type:true},take:12}):[];
   const today=dateOnly();
   const timelineStart=new Date(today.getTime()-dayMs);

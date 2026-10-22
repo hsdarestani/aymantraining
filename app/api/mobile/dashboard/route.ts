@@ -14,7 +14,7 @@ export async function GET(){
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
  const dailyProfile=await getDailyProfile(user.id);
  const dashboardPreference=await getDashboardPreference(user.id);
- const cycleOverview=await privateCycle(user.id);
+ const cycleOverview=await privateCycle(user.id,{includeEntries:false});
  const womenGoals=dashboardPreference.mode==="WOMEN"?await prisma.goal.findMany({where:{userId:user.id,active:true},select:{type:true},take:12}):[];
  const today=new Date(dailyProfile.date+"T00:00:00.000Z");
  const tomorrow=new Date(today.getTime()+dayMs);
