@@ -7,6 +7,8 @@ on:
       - 'lib/journey-*'
       - 'lib/legacy-media-access.ts'
       - 'app/api/media/**'
+      - 'app/api/exercises/**'
+      - 'app/api/plans/templates/**'
       - 'app/api/admin/exercises/**'
       - 'Dockerfile'
       - 'docker-compose.yml'
@@ -69,6 +71,12 @@ jobs:
       - run: npx prisma generate
       - name: Schema and TypeScript validation
         run: npm run check
+      - name: Validate safe production rollout script
+        run: |
+          bash -n scripts/activate-journey-production.sh
+          node --check scripts/backfill-published-journey-snapshots.mjs
+          ! grep -q 'reset --hard' scripts/activate-journey-production.sh
+          ! grep -q 'systemctl restart nginx' scripts/activate-journey-production.sh
       - name: Reject destructive production migrations and demo re-seeding
         run: |
           ! grep -Eq -- '--accept-data-loss|scripts/seed.mjs|apply-hstest-preview' Dockerfile
