@@ -27,13 +27,15 @@ export default function Home(){
  const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):Math.max(insets.bottom,12);
  const [d,setD]=useState<any>(null),[gamification,setGamification]=useState<any>(null),[refreshing,setRefreshing]=useState(false),[syncing,setSyncing]=useState(false);
  const [mediaToken,setMediaToken]=useState<string|null>(null);
+ const [todayCoach,setTodayCoach]=useState<any>(null);
  const [photoFailed,setPhotoFailed]=useState(false);
  const load=useCallback(async()=>{
   const [dash,game]=await Promise.all([
    api<any>("/api/mobile/dashboard"),
    api<any>("/api/gamification").catch(()=>null)
   ]);
-  setPhotoFailed(false);setD(dash);setGamification(game);getSession().then(setMediaToken).catch(()=>{});syncHomeWidget(dash).catch(()=>{});registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});
+  setPhotoFailed(false);setD(dash);
+  if(process.env.EXPO_PUBLIC_STEP09_ENABLED==="true")api<any>("/api/step09/today").then(setTodayCoach).catch(()=>setTodayCoach(null));setGamification(game);getSession().then(setMediaToken).catch(()=>{});syncHomeWidget(dash).catch(()=>{});registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});
  },[]);
  useFocusEffect(useCallback(()=>{load().catch(()=>{})},[load]));
  async function refresh(){setRefreshing(true);await load().catch(()=>{});setRefreshing(false)}
@@ -104,6 +106,16 @@ export default function Home(){
    <Text style={s.priorityCopy}>Sehe deine Freischaltungen, reiche Tests ein und lies Trainerfeedback.</Text>
   </Pressable>}
 
+  {process.env.EXPO_PUBLIC_STEP09_ENABLED==="true"&&todayCoach&&<View style={{borderColor:"#567451",borderWidth:1,borderRadius:15,padding:16,backgroundColor:"#14221b",gap:9}}>
+   <Text style={{color:C.volt,fontSize:10,fontWeight:"900"}}>HEUTE · DEIN TRAINER</Text>
+   <Text style={{color:C.ink,fontSize:21,fontFamily:"Archivo"}}>{todayCoach.plan.label}</Text>
+   <Text style={{color:C.dim,fontSize:12,lineHeight:18}}>{todayCoach.plan.explanation}</Text>
+   <Text style={{color:C.dim,fontSize:12}}>{todayCoach.readiness.hasCheckin?`Energie ${todayCoach.readiness.energy??"–"} · Muskelgefühl ${todayCoach.readiness.soreness??"–"}`:"Noch kein Befinden eingetragen"}</Text>
+   {todayCoach.coach.nextSessionCueDe&&<Text style={{color:C.ink,fontSize:13}}>TRAINER: {todayCoach.coach.nextSessionCueDe}</Text>}
+   {todayCoach.nextWorkout&&<Pressable onPress={()=>router.push({pathname:"/workout/[id]",params:{id:todayCoach.nextWorkout.id}})}><Text style={{color:C.volt,fontWeight:"800"}}>NÄCHSTE EINHEIT: {todayCoach.nextWorkout.title} →</Text></Pressable>}
+   <Pressable onPress={()=>router.push("/checkin")}><Text style={{color:C.volt,fontSize:11}}>TAGESCHECK ÖFFNEN →</Text></Pressable>
+   {todayCoach.coach.canSendVideos&&<Pressable onPress={()=>router.push("/technique-video")}><Text style={{color:C.volt,fontSize:11}}>TECHNIKVIDEO AN TRAINER →</Text></Pressable>}
+  </View>}
   <View style={s.performanceStream}>
    <Pressable accessibilityRole="button" style={[s.streamRow,s.streamLead]} onPress={()=>router.push("/lifestyle")}>
     <Text style={s.streamInitial}>R</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="BE RESTED"/></Text><Text style={s.streamValue}>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</Text><Text style={s.streamNote}><Copy text="Schlaf und Erholung"/></Text></View><Text style={s.streamArrow}>→</Text>
