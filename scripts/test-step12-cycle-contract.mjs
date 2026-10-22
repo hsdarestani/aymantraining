@@ -1,5 +1,7 @@
 import {strict as assert} from "node:assert";
 import fs from "node:fs";
+import {createRequire} from "node:module";
+const require=createRequire(import.meta.url);
 import vm from "node:vm";
 import ts from "typescript";
 const source=fs.readFileSync("lib/cycle-contract.ts","utf8");
