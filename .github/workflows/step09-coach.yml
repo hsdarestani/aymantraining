@@ -62,3 +62,27 @@ jobs:
           cd mobile
           npm ci
           npm run typecheck
+      - name: Browser runtime
+        run: npx playwright install --with-deps chromium
+      - name: Start test server
+        run: |
+          NODE_ENV=production npm start > /tmp/step09-next.log 2>&1 &
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:3000/api/ready >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/step09-next.log
+          exit 1
+      - name: Athlete and coach live browser review
+        run: npx playwright test tests/browser/step09-coach.spec.mjs --workers=1
+      - name: Preserve browser diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: step09-coach-browser
+          path: |
+            playwright-report
+            test-results
+      - name: Logs on failure
+        if: failure()
+        run: cat /tmp/step09-next.log || true
