@@ -56,9 +56,9 @@ export default function MilestoneCelebration(){
  }
  const strength=award?.intensity==="FULL"?10:award?.intensity==="MEDIUM"?5:0;
  return <Modal visible={Boolean(award)} transparent animationType="none" onRequestClose={()=>void acknowledge()}
-  statusBarTranslucent accessibilityViewIsModal>
+  statusBarTranslucent>
   <View style={s.shade}>
-   <View style={s.dialog} accessible accessibilityLabel={award?.title||"Erfolg"}>
+   <View style={s.dialog} accessibilityViewIsModal accessible accessibilityLabel={award?.title||"Erfolg"}>
     <View style={s.visual} accessible={false} importantForAccessibility="no-hide-descendants">
      <View style={[s.ring,award?.intensity==="FULL"&&s.ringFull]}/>
      <Animated.Text style={[s.star,{opacity:value,transform:[{
