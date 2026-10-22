@@ -11,9 +11,14 @@ export async function GET(){
    select:{athleteId:true}})).map(x=>x.athleteId)}}:{})
  },orderBy:{createdAt:"asc"},take:100});
  const athleteIds=[...new Set(rows.map(x=>x.athleteId))];
- const users=await prisma.user.findMany({where:{id:{in:athleteIds}},select:{id:true,name:true}});
+ const [users,workouts]=await Promise.all([
+  prisma.user.findMany({where:{id:{in:athleteIds}},select:{id:true,name:true}}),
+  prisma.workout.findMany({where:{userId:{in:athleteIds},scheduledAt:{gt:new Date()},completedAt:null},
+   orderBy:{scheduledAt:"asc"},take:150,select:{id:true,userId:true,title:true,scheduledAt:true}})
+ ]);
  return NextResponse.json({ok:true,videos:rows.map(x=>({
    id:x.id,athleteId:x.athleteId,athlete:users.find(u=>u.id===x.athleteId)?.name??"Athlet",
-   mediaId:x.mediaId,createdAt:x.createdAt,annotations:x.annotations
+   mediaId:x.mediaId,createdAt:x.createdAt,annotations:x.annotations,
+   upcoming:workouts.filter(w=>w.userId===x.athleteId).slice(0,8).map(w=>({id:w.id,title:w.title,scheduledAt:w.scheduledAt}))
   }))},{headers:{"cache-control":"private, no-store"}});
 }
