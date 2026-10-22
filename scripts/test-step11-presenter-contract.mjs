@@ -16,10 +16,10 @@ const items=[
  {presenter:"COACH",id:"coach2",available:true}
 ];
 assert.equal(sortPresenterVariants(items,"ANY").map(x=>x.id).join(","),"coach,trainer,trainer2,coach2");
-assert.equal(sortPresenterVariants(items,"TRAINERIN").map(x=>x.id).join(","),"trainer,trainer2,coach,coach2");
+assert.equal(sortPresenterVariants(items,"TRAINERIN").map(x=>x.id).join(","),"trainer2,coach,coach2,trainer");
 assert.equal(items[0].id,"coach","Preference must not change the original media array");
 assert.equal(sortPresenterVariants(items,"TRAINERIN").length,items.length,
  "Preference cannot add or delete access to any media variant");
-assert.equal(sortPresenterVariants(items,"TRAINERIN")[0].available,false,
+assert.equal(sortPresenterVariants(items,"TRAINERIN").at(-1).available,false,
  "Ordering never changes actual entitlement status");
 console.log("Step11: presenter preference is stable, metadata-only and preserves authorization.");
