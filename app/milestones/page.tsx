@@ -10,7 +10,7 @@ export default async function Milestones(){
  return <main className="sub-shell bd-milestones">
   <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard">STARTSEITE</Link><Link href="/progress">FORTSCHRITT</Link></nav></header>
   <section className="milestone-hero"><span>DEIN ECHTER FORTSCHRITT</span><h1>JEDER TAG.<br/>EIN SCHRITT.</h1>
-   <p>Erfolge entstehen durch dokumentiertes Training, echte Tageschecks und im Voraus geplante Erholung. Ein App-Aufruf allein zählt nicht.</p></section>
+   <p>Erfolge entstehen durch dokumentiertes Training, echte Tageschecks und im Voraus geplante Erholung. Das reine Öffnen der Anwendung zählt nicht.</p></section>
   {!data?<article className="milestone-card"><h2>Dein Fortschrittsbereich wird vorbereitet.</h2><p>Deine bisherigen Trainingsdaten bleiben unverändert.</p></article>:<>
    <section className="milestone-grid">
     <article className="milestone-card milestone-highlight"><small>DEINE AKTUELLE SERIE</small><strong>{data.streak}<span> TAGE</span></strong>

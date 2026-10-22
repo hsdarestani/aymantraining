@@ -32,13 +32,13 @@ export default function MilestoneCoachClient(){
    {athletes.map(a=><option key={a.id} value={a.id}>{a.name||a.id}</option>)}</select></label>
   {msg&&<p role="status">{msg}</p>}
   <fieldset style={{padding:18,display:"grid",gap:10}}><legend>MEILENSTEIN FESTLEGEN</legend>
-   <label>Schlüssel (coach_...)<input value={key} onChange={e=>setKey(e.target.value)} maxLength={40}/></label>
+   <label>Regelschlüssel (Präfix: coach_)<input value={key} onChange={e=>setKey(e.target.value)} maxLength={40}/></label>
    <label>Titel<input value={title} onChange={e=>setTitle(e.target.value)} maxLength={70}/></label>
    <label>Persönliche Botschaft<textarea value={message} onChange={e=>setMessage(e.target.value)} maxLength={250} rows={3}/></label>
    <label>Kriterium<select value={metric} onChange={e=>setMetric(e.target.value)}>
     <option value="STREAK_DAYS">Nachgewiesene Tage in Folge</option>
     <option value="WORKOUT_COUNT">Abgeschlossene Einheiten</option>
-    <option value="EARNED_LEVELS">Verdiente Level nach Trainertest</option></select></label>
+    <option value="EARNED_LEVELS">Bestätigte Stufen nach Trainertest</option></select></label>
    <label>Schwelle<input type="number" min={1} max={1000} value={threshold} onChange={e=>setThreshold(e.target.value)}/></label>
    <label>Intensität der späteren Erfolgsdarstellung<select value={intensity} onChange={e=>setIntensity(e.target.value)}>
     <option value="SMALL">Klein</option><option value="MEDIUM">Mittel</option><option value="FULL">Groß</option></select></label>

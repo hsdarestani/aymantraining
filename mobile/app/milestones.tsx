@@ -12,7 +12,7 @@ export default function Milestones(){
  if(!data)return <Screen><View style={s.loading}><ActivityIndicator color={C.volt}/><Text style={s.copy}>{status||"Fortschritt wird geladen ..."}</Text></View></Screen>;
  return <Screen><View style={s.hero}><Text style={s.kicker}>DEIN ECHTER FORTSCHRITT</Text>
    <Text style={s.title}>JEDER TAG.{"\n"}EIN SCHRITT.</Text>
-   <Text style={s.copy}>Nur Training, echte Tageschecks und zuvor geplante Erholung zählen. Ein App-Aufruf allein zählt nicht.</Text>
+   <Text style={s.copy}>Nur Training, echte Tageschecks und zuvor geplante Erholung zählen. Das reine Öffnen der Anwendung zählt nicht.</Text>
   </View>
   {!data.enabled?<Text style={s.copy}>Deine Meilensteine werden vorbereitet. Deine Daten bleiben erhalten.</Text>:<>
    <View style={s.grid}><View style={s.stat}><Text style={s.kicker}>AKTUELLE SERIE</Text><Text style={s.number}>{data.streak}</Text><Text style={s.copy}>TAGE</Text></View>
