@@ -11,7 +11,7 @@ type Workout={id:string;title:string;scheduledAt:string};
 type Daily={date:string;dayState:string;actual:{scheduledToday:number;completedToday:number;workout:Workout|null;nextWorkout:Workout|null;energy:number|null;soreness:number|null;sleepMinutes:number|null};recovery:{note:string};coach:{assigned:boolean;openVideos:number;brief:{title:string;body:string|null}|null;adjustments:{title:string;action:string;date:string}[];feedback:{id:string;coachNote:string;nextSession:{focus?:string;advice?:string}|null}[]}};
 function when(date:string){return new Date(date).toLocaleString("de-DE")}
 export default function Today(){
- const enabled=process.env.EXPO_PUBLIC_JOURNEY_DAILY_ENABLED==="true";
+ const enabled=process.env.EXPO_PUBLIC_JOURNEY_DAILY_ENABLED!=="false";
  const [data,setData]=useState<Daily|null>(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState(""),[question,setQuestion]=useState("");
  const load=useCallback(async()=>{
   if(!enabled){setLoading(false);return;}
