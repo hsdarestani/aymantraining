@@ -35,7 +35,7 @@ export default function Home(){
    api<any>("/api/gamification").catch(()=>null)
   ]);
   setPhotoFailed(false);setD(dash);
-  if(process.env.EXPO_PUBLIC_STEP09_ENABLED==="true")api<any>("/api/step09/today").then(setTodayCoach).catch(()=>setTodayCoach(null));setGamification(game);getSession().then(setMediaToken).catch(()=>{});syncHomeWidget(dash).catch(()=>{});registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});
+  if(process.env.EXPO_PUBLIC_STEP09_ENABLED!=="false")api<any>("/api/step09/today").then(setTodayCoach).catch(()=>setTodayCoach(null));setGamification(game);getSession().then(setMediaToken).catch(()=>{});syncHomeWidget(dash).catch(()=>{});registerPush().catch(()=>{});api("/api/subscription/sync",{method:"POST",body:"{}"}).catch(()=>{});
  },[]);
  useFocusEffect(useCallback(()=>{load().catch(()=>{})},[load]));
  async function refresh(){setRefreshing(true);await load().catch(()=>{});setRefreshing(false)}
@@ -106,7 +106,7 @@ export default function Home(){
    <Text style={s.priorityCopy}>Sehe deine Freischaltungen, reiche Tests ein und lies Trainerfeedback.</Text>
   </Pressable>}
 
-  {process.env.EXPO_PUBLIC_STEP09_ENABLED==="true"&&todayCoach&&<View style={{borderColor:"#567451",borderWidth:1,borderRadius:15,padding:16,backgroundColor:"#14221b",gap:9}}>
+  {process.env.EXPO_PUBLIC_STEP09_ENABLED!=="false"&&todayCoach&&<View style={{borderColor:"#567451",borderWidth:1,borderRadius:15,padding:16,backgroundColor:"#14221b",gap:9}}>
    <Text style={{color:C.volt,fontSize:10,fontWeight:"900"}}>HEUTE · DEIN TRAINER</Text>
    <Text style={{color:C.ink,fontSize:21,fontFamily:"Archivo"}}>{todayCoach.plan.label}</Text>
    <Text style={{color:C.dim,fontSize:12,lineHeight:18}}>{todayCoach.plan.explanation}</Text>
