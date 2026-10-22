@@ -173,6 +173,6 @@ export async function getOwnedJourneyChapter(userId:string,enrollmentId:string,c
     };
    })
   };
-  }))
+  })
  };
 }
