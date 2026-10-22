@@ -66,3 +66,27 @@ jobs:
           npm run typecheck
       - name: Production build
         run: npm run build
+      - name: Install browser runtime
+        run: npx playwright install --with-deps chromium
+      - name: Start isolated web preview
+        run: |
+          NODE_ENV=production npm start > /tmp/step07-next.log 2>&1 &
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:3000/journey >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/step07-next.log
+          exit 1
+      - name: Test athlete journey, locked chapter and legacy opt-in in browser
+        run: npx playwright test tests/browser/step07-journey.spec.mjs --workers=1
+      - name: Preserve browser traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: step07-journey-browser
+          path: |
+            playwright-report
+            test-results
+      - name: Show web errors
+        if: failure()
+        run: cat /tmp/step07-next.log || true
