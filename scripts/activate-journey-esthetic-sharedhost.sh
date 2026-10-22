@@ -69,9 +69,9 @@ runuser -u bedifferenttemp -- env DATABASE_URL="$DATABASE_URL" "$REL/bin/node" \
  "$REL/scripts/backfill-published-journey-snapshots.mjs"
 phase=flags
 # Ensure all new additive models from steps 11–13 exist before enabling routes.
-new_tables="$(runuser -u postgres -- psql -d bedifferent_temp -tAc "SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('AthleteDashboardPreference','CyclePrivacy','CycleJournalEntry','PlannedRecoveryDay','MilestoneRule','MilestoneAward')")"
-test "$new_tables" = 6
-for key in JOURNEY_ONBOARDING_ENABLED JOURNEY_EDITOR_ENABLED JOURNEY_TESTS_ENABLED JOURNEY_OVERVIEW_ENABLED JOURNEY_DAILY_ENABLED NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED WOMEN_DASHBOARD_ENABLED CYCLE_JOURNAL_ENABLED MILESTONES_ENABLED; do
+new_tables="$(runuser -u postgres -- psql -d bedifferent_temp -tAc "SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('AthleteDashboardPreference','CyclePrivacy','CycleJournalEntry','PlannedRecoveryDay','MilestoneRule','MilestoneAward','CelebrationPreference')")"
+test "$new_tables" = 7
+for key in JOURNEY_ONBOARDING_ENABLED JOURNEY_EDITOR_ENABLED JOURNEY_TESTS_ENABLED JOURNEY_OVERVIEW_ENABLED JOURNEY_DAILY_ENABLED NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED WOMEN_DASHBOARD_ENABLED CYCLE_JOURNAL_ENABLED MILESTONES_ENABLED CELEBRATIONS_ENABLED; do
   sed -i "/^$key=/d" "$ENVFILE"
   printf '%s=true\n' "$key" >> "$ENVFILE"
 done
@@ -92,12 +92,13 @@ for attempt in $(seq 1 35); do
     grep -q '"onboarding":true' "$BACKUP/ready.json" &&
     grep -q '"womenDashboard":true' "$BACKUP/ready.json" &&
     grep -q '"cycleJournal":true' "$BACKUP/ready.json" &&
-    grep -q '"milestones":true' "$BACKUP/ready.json"; then ready=1; break; fi
+    grep -q '"milestones":true' "$BACKUP/ready.json" &&
+     grep -q '"celebrations":true' "$BACKUP/ready.json"; then ready=1; break; fi
  fi
  sleep 2
 done
 test "$ready" -eq 1
-for route in /api/journey/overview /api/journey/tests /api/journey/daily /api/admin/journeys /api/admin/journey-videos /api/dashboard-preference /api/cycle /api/milestones /api/milestones/coach; do
+for route in /api/journey/overview /api/journey/tests /api/journey/daily /api/admin/journeys /api/admin/journey-videos /api/dashboard-preference /api/cycle /api/milestones /api/milestones/coach /api/celebrations; do
  code="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:3100$route")"
  test "$code" = 401 || test "$code" = 403
 done
