@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# The production service is /opt/bedifferent-temp on the Esthetic VPS, not /opt/bedifferent.
+echo "DEPRECATED: do not use the old Docker release path. Use the isolated Esthetic-host workflow." >&2
+exit 1
 ROOT=/opt/bedifferent
 test -d "$ROOT/.git" && test -f "$ROOT/.env.production" && test -f "$ROOT/docker-compose.yml" || { echo "BLOCKED: unverified BE DIFFERENT installation" >&2; exit 1; }
 docker inspect bedifferent-db --format '{{.State.Running}}' | grep -qx true || { echo "BLOCKED: database offline" >&2; exit 1; }

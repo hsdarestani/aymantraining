@@ -12,6 +12,7 @@ export async function GET(){
     editor:process.env.JOURNEY_EDITOR_ENABLED==="true",
     tests:process.env.JOURNEY_TESTS_ENABLED==="true",
     overview:process.env.JOURNEY_OVERVIEW_ENABLED==="true",
+    todayCoach:process.env.STEP09_ENABLED==="true",
     webOnboarding:process.env.NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED==="true",
     webOverview:process.env.NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED==="true"
    }

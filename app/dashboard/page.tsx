@@ -4,6 +4,7 @@ import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";
 import {levelForScore} from "../../lib/scoring";
 import {dateOnly} from "../../lib/http";
+import TodayCoachPanel from "./TodayCoachPanel";
 import DigitalTwinHero from "../components/DigitalTwinHero";
 import ScoreRadar from "../components/ScoreRadar";
 import RhythmHorizon from "../components/RhythmHorizon";
@@ -144,6 +145,7 @@ export default async function Dashboard(){
       <b><Copy text={nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></b>
     </Link>
 
+    {process.env.STEP09_ENABLED==="true"&&user.role==="ATHLETE"&&<TodayCoachPanel userId={user.id}/>}
     {process.env.JOURNEY_OVERVIEW_ENABLED==="true"&&<Link href="/journey" className="bd-workout-card"><span>DEIN WEG</span><h2>LEVEL & KAPITEL</h2><p>Dein bestätigter Fortschritt und dein nächster Trainingsschritt.</p><b>ANSEHEN →</b></Link>}
     {process.env.JOURNEY_TESTS_ENABLED==="true"&&<Link href="/journey/tests" className="bd-workout-card">
       <span>DEIN TRAININGSWEG</span><h2>KAPITEL & AUFSTIEGSTESTS</h2>
