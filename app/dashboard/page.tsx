@@ -9,6 +9,7 @@ import ScoreRadar from "../components/ScoreRadar";
 import RhythmHorizon from "../components/RhythmHorizon";
 import WomenDashboard from "../components/WomenDashboard";
 import {getDashboardPreference} from "../../lib/women-dashboard";
+import {privateCycle} from "../../lib/cycle-service";
 import "../women-dashboard.css";
 export const dynamic="force-dynamic";
 
@@ -20,6 +21,7 @@ export default async function Dashboard(){
   const user=await requireUser();
   const dailyProfile=await getDailyProfile(user.id);
   const dashboardPreference=await getDashboardPreference(user.id);
+  const cycleOverview=await privateCycle(user.id);
   const womenGoals=dashboardPreference.mode==="WOMEN"?await prisma.goal.findMany({where:{userId:user.id,active:true},select:{type:true},take:12}):[];
   const today=dateOnly();
   const timelineStart=new Date(today.getTime()-dayMs);
@@ -29,7 +31,7 @@ export default async function Dashboard(){
     prisma.dailyCheck.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
     prisma.wearableDaily.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
     prisma.workout.findFirst({where:{userId:user.id,completedAt:null,scheduledAt:{gte:new Date(Date.now()-12*60*60*1000)}},orderBy:{scheduledAt:"asc"}}),
-    prisma.recommendation.findMany({where:{userId:user.id,date:today},orderBy:{createdAt:"desc"},take:3}),
+    prisma.recommendation.findMany({where:{userId:user.id,date:today,sourceRule:{not:"cycle_context"}},orderBy:{createdAt:"desc"},take:3}),
     prisma.nutritionDaily.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
     prisma.athleteContext.findUnique({where:{userId:user.id}}),
     prisma.workout.findMany({where:{userId:user.id,scheduledAt:{gte:timelineStart,lt:timelineEnd}},select:{id:true,title:true,scheduledAt:true,completedAt:true},orderBy:{scheduledAt:"asc"}}),
@@ -63,15 +65,7 @@ export default async function Dashboard(){
   const sleepStageObject=wearable?.sleepStages&&typeof wearable.sleepStages==="object"&&!Array.isArray(wearable.sleepStages)?wearable.sleepStages as Record<string,unknown>:null;
   const currentHeartRate=typeof sleepStageObject?.currentHeartRate==="number"?sleepStageObject.currentHeartRate:null;
   const protein=nutrition?.proteinG??check?.proteinG??null;
-  const cycle=(()=>{
-    if(!context?.cycleTrackingEnabled||!context.cycleStartDate)return null;
-    const length=Math.max(20,Math.min(45,context.cycleLengthDays||28));
-    const days=Math.max(0,Math.floor((today.getTime()-dateOnly(context.cycleStartDate).getTime())/dayMs));
-    const day=days%length+1;
-    const ovulation=Math.max(10,Math.round(length-14));
-    const phase=day<=5?"MENSTRUATION":day<ovulation-1?"FOLLIKELPHASE":day<=ovulation+1?"OVULATIONSFENSTER":"LUTEALPHASE";
-    return {day,phase};
-  })();
+  const cycle=cycleOverview.enabled?cycleOverview.forecast:null;
   const priority=recs[0];
 
   return <main className="bd-web-home bd-editorial-home">
@@ -154,7 +148,7 @@ export default async function Dashboard(){
       </Link>
     </section>
 
-    {cycle&&<Link href="/context" className="bd-cycle-card bd-cycle-line"><span><Copy text="ZYKLUS KONTEXT"/></span><strong><Copy text="TAG"/> {cycle.day} · <Copy text={cycle.phase}/></strong><p><Copy text="Training und Recovery berücksichtigen deinen freiwilligen Zykluskontext."/></p></Link>}
+    {cycleOverview.enabled&&<Link href="/cycle" className="bd-cycle-card bd-cycle-line"><span>PRIVATER ZYKLUSKALENDER</span><strong>{cycle?"TAG "+cycle.day+" · NUR SCHÄTZUNG":"DEINE AUFZEICHNUNGEN"}</strong><p>Nur du entscheidest, welche Daten du speicherst und mit deinem Trainer teilst.</p></Link>}
 
     <Link href={nextWorkout?"/training/"+nextWorkout.id:"/training"} className="bd-workout-card bd-workout-editorial">
       <div className="bd-workout-index"><Copy text="NÄCHSTE EINHEIT"/></div>

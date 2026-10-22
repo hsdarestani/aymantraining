@@ -169,29 +169,10 @@ export async function evaluateRecommendations(userId:string){
     action:"Heute Übungen ohne Geräte und kurze Einheiten priorisieren.",
     sourceRule:"travel_mode"
   });
-  if(athleteContext?.cycleTrackingEnabled&&athleteContext.cycleStartDate){
-    const length=Math.max(20,athleteContext.cycleLengthDays||28);
-    const days=Math.max(0,Math.floor((dateOnly(context.now).getTime()-dateOnly(athleteContext.cycleStartDate).getTime())/86400000));
-    const cycleDay=days%length+1;
-    const ovulation=Math.max(10,Math.round(length-14));
-    const phase=cycleDay<=5?"Menstruation":cycleDay<ovulation-1?"Follikelphase":cycleDay<=ovulation+1?"Ovulationsfenster":"Lutealphase";
-    const action=cycleDay<=5
-      ?"Befinden, Krämpfe, Energie und Recovery heute stärker gewichten. Intensität nur anpassen, wenn deine aktuellen Signale dafür sprechen."
-      :cycleDay<ovulation-1
-        ?"Normal nach Plan trainieren, solange Readiness und Befinden passen. Der Zyklus allein senkt die Belastung nicht automatisch."
-        :cycleDay<=ovulation+1
-          ?"Normal nach Plan trainieren und aktuelle Readiness priorisieren. Technik, Schlaf und subjektives Befinden bleiben entscheidend."
-          :"Recovery, Schlaf, Flüssigkeit und subjektives Befinden bewusst beobachten. Belastung nur bei tatsächlichen Warnsignalen reduzieren.";
-    out.push({
-      severity:"info",title:`Cycle Context · ${phase}`,
-      explanation:`Du hast Zyklustag ${cycleDay} freiwillig als Trainingskontext hinterlegt.`,
-      action:`${action} Keine medizinische Bewertung.`,
-      sourceRule:"cycle_context"
-    });
-  }
-
+  // No global coach recommendation or level progression may read sensitive cycle fields.
   const today=dateOnly(context.now);
   await prisma.recommendation.deleteMany({where:{userId,date:today,coachStatus:"PENDING"}});
+  await prisma.recommendation.deleteMany({where:{userId,sourceRule:"cycle_context"}});
   for(const rec of out)await prisma.recommendation.create({data:{userId,date:today,...rec}});
   return out;
 }

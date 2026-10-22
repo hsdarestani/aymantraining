@@ -151,7 +151,7 @@ export default function Home(){
    <Pressable accessibilityRole="button" style={s.quickLine} onPress={()=>router.push("/awake")}><Text style={s.quickLabel}><Copy text="BE AWAKE"/></Text><Text style={s.quickText}><Copy text="Morgenroutine · Tagesstart"/></Text><Text style={s.quickArrow}>→</Text></Pressable>
   </View>
 
-    {d.cycle?<Pressable onPress={()=>router.push("/context")} style={s.cycle}><Text style={s.cycleTag}><Copy text="ZYKLUS KONTEXT"/></Text><Text style={s.cycleTitle}><Copy text="TAG"/> {d.cycle.day} · <Copy text={d.cycle.phase}/></Text><Text style={s.cycleCopy}><Copy text="Training und Recovery berücksichtigen deinen freiwillig hinterlegten Zykluskontext."/></Text></Pressable>:null}
+    {d.cycleJournalEnabled?<Pressable accessibilityRole="button" onPress={()=>router.push("/cycle")} style={s.cycle}><Text style={s.cycleTag}>PRIVATER ZYKLUSKALENDER</Text><Text style={s.cycleTitle}>{d.cycle?"TAG "+d.cycle.day+" · NUR SCHÄTZUNG":"DEINE AUFZEICHNUNGEN"}</Text><Text style={s.cycleCopy}>Du entscheidest, welche Daten gespeichert und geteilt werden.</Text></Pressable>:null}
 
   <Pressable onPress={()=>router.push(d.nextWorkout?`/workout/${d.nextWorkout.id}`:"/(tabs)/training")}><View style={s.workout}><Text style={s.workoutKicker}><Copy text="HEUTIGES TRAINING"/></Text><Text style={s.workoutTitle}>{d.nextWorkout?.title?<>{d.nextWorkout.title}</>:<Copy text="KEIN TRAINING EINGETRAGEN"/>}</Text><Text style={s.cardCopy}>{d.nextWorkout?.scheduledAt?<LocalizedValue value={new Date(d.nextWorkout.scheduledAt)}/>:<Copy text="Noch kein Erholungstag bestätigt."/>}</Text><Text style={s.arrow}><Copy text={d.nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></Text></View></Pressable>
 
