@@ -1,5 +1,6 @@
 import {Prisma} from "@prisma/client";
 import {prisma} from "./db";
+import {getDashboardPreference,sortPresenterVariants} from "./women-dashboard";
 import {JOURNEY_LEVEL_DESCRIPTIONS,JOURNEY_ONBOARDING_GOALS} from "./journey-onboarding";
 import {canOpenJourneyMedia,normalizeGoalSlugs} from "./journey-contract";
 
@@ -139,6 +140,7 @@ export async function getOwnedJourneyChapter(userId:string,enrollmentId:string,c
  ]);
  const done=new Set(activities.map(a=>a.itemId));
  const tier=enrollment.user.subscriptionTier;
+ const dashboardPreference=await getDashboardPreference(userId);
  return {
   id:chapter.id,enrollmentId,level:chapter.level.code,
   titleDe:chapter.titleDe,description:chapter.description||"",
@@ -159,7 +161,7 @@ export async function getOwnedJourneyChapter(userId:string,enrollmentId:string,c
    mandatory:i.mandatory,done:done.has(i.id),
    exercise:exercise??null,
    trainingPlan:trainingPlan??null,
-   media:i.media.map(m=>{
+   media:sortPresenterVariants(i.media.map(m=>{
     const isVideo=m.role==="EXPLANATION_VIDEO";
     const eligible=canOpenJourneyMedia({earnedChapter:true,tier,minTier:m.minTier})&&
      (!isVideo||m.minTier!=="FREE");
@@ -171,7 +173,7 @@ export async function getOwnedJourneyChapter(userId:string,enrollmentId:string,c
      // Never return media ids or storage paths for locked entitlement.
      available:deliver,url:deliver?"/api/media/"+encodeURIComponent(m.media.id):null
     };
-   })
+   }),dashboardPreference.mode==="WOMEN"?dashboardPreference.presenterPreference:"ANY")
   };
   })
  };
