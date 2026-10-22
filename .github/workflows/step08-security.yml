@@ -4,6 +4,7 @@ on:
     branches: [main, feature/bedifferent-step08-security-rollout]
     paths:
       - 'prisma/**'
+      - 'mobile/**'
       - 'lib/journey-*'
       - 'lib/legacy-media-access.ts'
       - 'app/api/media/**'
