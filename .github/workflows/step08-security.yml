@@ -1,7 +1,20 @@
 name: BE DIFFERENT Step 08 Security and Activation Gate
 on:
   push:
-    branches: [feature/bedifferent-step08-security-rollout]
+    branches: [main, feature/bedifferent-step08-security-rollout]
+    paths:
+      - 'prisma/**'
+      - 'lib/journey-*'
+      - 'lib/legacy-media-access.ts'
+      - 'app/api/media/**'
+      - 'app/api/admin/exercises/**'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - 'scripts/test-journey-step08.mjs'
+      - 'scripts/backfill-published-journey-snapshots.mjs'
+      - 'scripts/activate-journey-production.sh'
+      - '.github/workflows/step08-security.yml'
+      - '.github/workflows/journey-production-activation.yml'
   pull_request:
     paths:
       - "prisma/schema.prisma"
