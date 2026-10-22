@@ -72,7 +72,7 @@ export default async function Dashboard(){
   return <main className="bd-web-home bd-editorial-home">
     <header className="bd-home-top">
       <Link href="/dashboard" className="bd-home-wordmark">BE DIFFERENT</Link>
-      <Link href="/athlete" className={"bd-score-chip "+signal(total)}><span><Copy text="BD SCORE"/></span><strong>{total==null?"—":total+"%"}</strong></Link>
+      <Link href="/athlete" className={"bd-score-chip "+signal(total)}><span><Copy text="BD SCORE"/></span><strong>{total==null?"?":total+"%"}</strong></Link>
     </header>
 
     <section className={"bd-home-hero bd-hero-editorial "+(heroPhoto?"has-photo":"")}>
@@ -95,14 +95,14 @@ export default async function Dashboard(){
       <h2>{day.status==="NOT_SCHEDULED"?"Kein Training eingetragen":day.status==="DONE"?"Alle geplanten Einheiten erledigt":day.status==="PARTIAL"?"Training teilweise erledigt":"Training geplant"}</h2>
       <p>{day.scheduled?day.completed+" von "+day.scheduled+" Einheiten abgeschlossen":"Ohne Trainingsplan ist dies nicht automatisch ein Erholungstag."}</p>
       <p>ENERGIE: {dailyProfile.today.energy??"Keine Angabe"} · SCHLAF: {dailyProfile.today.sleepHours==null?"Keine Angabe":dailyProfile.today.sleepHours+" h"}</p>
-      <p>BESTÄTIGTES LEVEL: {dailyProfile.journey.confirmedLevel??"Noch nicht bestätigt"}</p>
+      <p>BESTÄTIGTE STUFE: {dailyProfile.journey.confirmedLevel??"Noch nicht bestätigt"}</p>
       <Link href={process.env.JOURNEY_DAILY_ENABLED==="true"?"/journey/today":"/training"}>DEINEN PLAN ANSEHEN →</Link>
     </section>
     <section className="bd-score-editorial">
       <div className="bd-score-intro">
         <span className="eyebrow"><Copy text="BE DIFFERENT SCORE"/></span>
         <div className="bd-score-number"><strong>{total??"—"}</strong><i>{total==null?"":"%"}</i></div>
-        <span className={"bd-score-state "+signal(total)}>LEISTUNGSPROFIL · KEIN LEVEL</span>
+        <span className={"bd-score-state "+signal(total)}>LEISTUNGSPROFIL · KEINE STUFE</span>
         <p>MESSSTAND: {dailyProfile.profile.recordedDate??"KEIN MESSWERT"} · {dailyProfile.profile.freshness==="OLD"?"ÄLTERER MESSWERT":"DATENBASIS"}</p>
         <small>DATENABDECKUNG {dailyProfile.profile.completeness}% · UNABHÄNGIG VOM HEUTIGEN TRAINING</small>
       </div>
