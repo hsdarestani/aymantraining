@@ -18,7 +18,8 @@ export default function Progress(){
    .then(([dash,body,tests])=>setD({dash,body:body.items,tests:tests.items})).catch(()=>{});
  },[]));
  const score=d.dash?.score,body=d.body?.[0],locked=d.dash?.scoreDetailsLocked;
- const total=score?.total;
+ const profile=d.dash?.dailyProfile;
+ const total=profile?.profile?.value??null;
  const action=(label:string,route:string)=><Pressable accessibilityRole="button" onPress={()=>router.push(route as any)} style={s.action}><Text style={s.actionText}><Copy text={label}/></Text><Text style={s.actionArrow}>↗</Text></Pressable>;
  return <Screen>
   <View style={s.hero}>
@@ -35,7 +36,7 @@ export default function Progress(){
     <Text style={s.scoreFoot}><Copy text="DIGITALEN ATHLETEN ÖFFNEN"/>  ↗</Text>
   </Pressable>
 
-  <View style={s.records}>
+  <View style={s.records}><Text style={s.serial}>LEISTUNGSWERT: LANGFRISTIGES PROFIL</Text><Text style={s.muted}>MESSSTAND: {profile?.profile.recordedDate??"Keine Angabe"} · DATENABDECKUNG: {profile?.profile.completeness??0}%</Text><Text style={s.muted}>HEUTE: {profile?.plan?.scheduled?profile.plan.completed+" / "+profile.plan.scheduled+" geplante Einheiten":"Keine Einheit geplant"} · BESTÄTIGTE STUFE: {profile?.journey?.confirmedLevel??"Noch nicht bestätigt"}</Text>
    <View style={s.section}><Text style={s.serial}>02 / <Copy text="KÖRPERDATEN"/></Text><Text style={s.sectionTitle}><Copy text="FAKTEN STATT GEFÜHL."/></Text></View>
    <View style={s.facts}>
      <View style={s.fact}><Text style={s.factName}><Copy text="GEWICHT"/></Text><Text style={s.factNumber}>{body?.weightKg??"?"}<Text style={s.factUnit}>{body?.weightKg==null?"":" KG"}</Text></Text></View>

@@ -2,6 +2,7 @@ import {NextResponse} from "next/server";
 import {prisma} from "../../../../lib/db";
 import {errorJson,requireApiUser,dateOnly} from "../../../../lib/http";
 import {scoreView} from "../../../../lib/score-view";
+import {getDailyProfile} from "../../../../lib/daily-profile-service";
 import {hasFeature} from "../../../../lib/entitlements";
 
 const dayMs=86400000;
@@ -19,7 +20,8 @@ function cycleSummary(enabled:boolean|undefined,start:Date|null|undefined,length
 
 export async function GET(){
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
- const today=dateOnly();
+ const dailyProfile=await getDailyProfile(user.id);
+ const today=new Date(dailyProfile.date+"T00:00:00.000Z");
  const tomorrow=new Date(today.getTime()+dayMs);
  const opened=await prisma.analyticsEvent.findFirst({where:{userId:user.id,name:"app_open",createdAt:{gte:today,lt:tomorrow}},select:{id:true}});
  if(!opened)await prisma.analyticsEvent.create({data:{userId:user.id,name:"app_open",properties:{surface:"mobile_home"}}});
@@ -55,8 +57,9 @@ export async function GET(){
  return NextResponse.json({
   ok:true,
   user:{id:user.id,name:user.name,tier:user.subscriptionTier,onboardingCompleted:user.onboardingCompleted,locale:user.locale},
-  score:scoreView(score,scoreDetails),
-  pillarPreview:score?{
+  score:scoreView(score,scoreDetails,dailyProfile.journey.confirmedLevel),
+  dailyProfile,
+  pillarPreview:scoreDetails&&score?{
    strength:score.strength,endurance:score.endurance,athleticism:score.athleticism,mobility:score.mobility,
    recovery:score.recovery,fuel:score.fuel,consistency:score.consistency
   }:null,
@@ -66,14 +69,14 @@ export async function GET(){
   cycle:cycleSummary(context?.cycleTrackingEnabled,context?.cycleStartDate,context?.cycleLengthDays),
   check,wearable:advancedWearable?wearable:wearable?{date:wearable.date,steps:wearable.steps,activeCalories:wearable.activeCalories,totalCalories:wearable.totalCalories,sleepMinutes:wearable.sleepMinutes}:null,nextWorkout,recommendations:radar,radarLocked:!radarFull,scoreDetailsLocked:!scoreDetails,
   activity:{
-   steps:wearable?.steps??check?.steps??0,
+   steps:wearable?.date?.toISOString().slice(0,10)===dailyProfile.date?wearable.steps??check?.steps??null:check?.steps??null,
    stepTarget:context?.stepTarget??10000,
-   activeCalories:wearable?.activeCalories??0,
-   waterMl:nutrition?.waterMl??check?.waterMl??0,
+   activeCalories:wearable?.date?.toISOString().slice(0,10)===dailyProfile.date?wearable.activeCalories??null:null,
+   waterMl:nutrition?.waterMl??check?.waterMl??null,
    waterTargetMl:context?.waterTargetMl??2500,
-   proteinG:nutrition?.proteinG??check?.proteinG??0,
+   proteinG:nutrition?.proteinG??check?.proteinG??null,
    proteinTargetG:context?.proteinTargetG??130,
-   sleepHours:wearable?.sleepMinutes!=null?Math.round(wearable.sleepMinutes/6)/10:(check?.sleepHours??null)
+   sleepHours:dailyProfile.today.sleepHours
   }
- });
+ },{headers:{"cache-control":"private, no-store"}});
 }

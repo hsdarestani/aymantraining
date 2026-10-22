@@ -1,0 +1,38 @@
+name: BE DIFFERENT Step 10 Score and Daily Profile QA
+on:
+  push:
+    branches:
+      - feature/step10-truthful-score-and-daily-progress-20261022
+  pull_request:
+    paths:
+      - "lib/daily-profile*"
+      - "app/api/mobile/dashboard/**"
+      - "app/dashboard/**"
+      - "app/progress/**"
+      - "app/athlete/**"
+      - "mobile/app/(tabs)/index.tsx"
+      - "mobile/app/(tabs)/progress.tsx"
+      - "scripts/test-step10-daily-profile.mjs"
+      - ".github/workflows/step10-score-profile.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: node scripts/test-step10-daily-profile.mjs
+      - run: node scripts/check-visible-copy.mjs
+      - run: npm run check
+      - run: npm run build
+      - run: cd mobile && npm ci && npm run typecheck

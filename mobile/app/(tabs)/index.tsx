@@ -39,16 +39,17 @@ export default function Home(){
  async function refresh(){setRefreshing(true);await load().catch(()=>{});setRefreshing(false)}
  async function health(){setSyncing(true);await syncHealth().then(load).catch(()=>{});setSyncing(false)}
  const score=d?.score,a=d?.activity||{},pillars=d?.pillarPreview||d?.score||{};
+ const profile=d?.dailyProfile,recordedValue=profile?.profile?.value??null,plan=profile?.plan;
  const line=String(d?.differentLine||"Heute zählt die nächste saubere Entscheidung.");
- const sleep=a.sleepHours;
+ const sleep=profile?.today?.sleepHours??null;
  const wearable=d?.wearable||{};
- const sleepDisplay=wearable?.sleepMinutes!=null?Math.floor(wearable.sleepMinutes/60)+":"+String(wearable.sleepMinutes%60).padStart(2,"0"):sleep==null?null:String(sleep);
+ const sleepDisplay=sleep==null?null:String(sleep);
  const priority=useMemo(()=>d?.recommendations?.[0]||null,[d]);
  const scorePillars=pillarMeta.map(([letter,key,label])=>({letter,key,label,value:typeof pillars?.[key]==="number"&&Number.isFinite(pillars[key])?Number(pillars[key]):null}));
  const nextFocus=[...scorePillars].filter(p=>p.value!=null).sort((a,b)=>(a.value??101)-(b.value??101))[0];
  if(!d)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
  return <SafeAreaView edges={["top"]} style={s.safe}><ScrollView style={s.safe} contentContainerStyle={[s.content,{paddingBottom:126+bottomClearance}]} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
-  <View style={s.top}><Brand compact/><View style={s.topActions}><LanguagePicker inline/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,(score?.total??0)<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}><Copy text="BD SCORE"/></Text><Text style={s.scorePillValue}>{score?.total??0}%</Text></Pressable></View></View>
+  <View style={s.top}><Brand compact/><View style={s.topActions}><LanguagePicker inline/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,recordedValue!=null&&recordedValue<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}><Copy text="BD SCORE"/></Text><Text style={s.scorePillValue}>{recordedValue==null?"?":recordedValue+"%"}</Text></Pressable></View></View>
 
   <View style={s.heroEditorial}>
    {d.heroPhotoId&&mediaToken&&!photoFailed?
@@ -73,13 +74,21 @@ export default function Home(){
    <Text style={s.priorityKicker}><Copy text="HEUTE WICHTIG"/></Text><Text style={s.priorityTitle}><Copy text={priority.title}/></Text><Text style={s.priorityCopy}><Copy text={priority.action}/></Text>
   </Pressable>:null}
 
+  {profile&&<View style={s.dailyProof}>
+   <Text style={s.dailyProofEyebrow}>HEUTE · {profile.date}</Text>
+   <Text style={s.dailyProofTitle}>{plan?.status==="NOT_SCHEDULED"?"Kein Training eingetragen":plan?.status==="DONE"?"Alle Einheiten erledigt":plan?.status==="PARTIAL"?"Training teilweise erledigt":"Training steht an"}</Text>
+   <Text style={s.dailyProofText}>{plan?.scheduled?plan.completed+" von "+plan.scheduled+" geplanten Einheiten erledigt":"Das bedeutet nicht automatisch einen Erholungstag."}</Text>
+   <Text style={s.dailyProofText}>ENERGIE: {profile.today.energy??"Keine Angabe"} · SCHLAF: {profile.today.sleepHours==null?"Keine Angabe":profile.today.sleepHours+" h"}</Text>
+   <Text style={s.dailyProofText}>BESTÄTIGTE STUFE: {profile.journey.confirmedLevel??"Noch nicht bestätigt"}</Text>
+   <Pressable accessibilityRole="button" onPress={()=>router.push("/(tabs)/training")}><Text style={s.dailyProofLink}>TRAININGSPLAN ANSEHEN →</Text></Pressable>
+  </View>}
   <View style={s.editorialScore}>
    <View style={s.editorialIntro}>
     <Text style={s.editorialEyebrow}><Copy text="BE DIFFERENT SCORE"/></Text>
-    <View style={s.editorialFigure}><Text style={s.editorialValue}>{score?.total??0}</Text><Text style={s.editorialPercent}>%</Text></View>
-    <Text style={s.editorialLevel}><Copy text={score?.level||"NORMAL"}/></Text>
-    <Text style={s.editorialTarget}><Copy text="DEIN TAGESZIEL: 100%"/></Text>
-    <Text style={s.editorialData}><Copy text="DATEN"/> {score?.completeness??0}%</Text>
+    <View style={s.editorialFigure}><Text style={s.editorialValue}>{recordedValue??"—"}</Text><Text style={s.editorialPercent}>%</Text></View>
+    <Text style={s.editorialLevel}>LEISTUNGSPROFIL · KEINE STUFE</Text>
+    <Text style={s.editorialTarget}>MESSSTAND: {profile?.profile.recordedDate??"Keine Angabe"}</Text>
+    <Text style={s.editorialData}>DATENABDECKUNG {profile?.profile.completeness??0}%</Text>
    </View>
    <View style={s.radarPanel}>
     <ScoreRadar pillars={scorePillars}/>
@@ -110,7 +119,7 @@ export default function Home(){
     <Text style={s.streamInitial}>R</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="BE RESTED"/></Text><Text style={s.streamValue}>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</Text><Text style={s.streamNote}><Copy text="Schlaf und Erholung"/></Text></View><Text style={s.streamArrow}>→</Text>
    </Pressable>
    <Pressable accessibilityRole="button" style={s.streamRow} onPress={()=>router.push("/fuel")}>
-    <Text style={s.streamInitial}>F</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="BE FUEL"/></Text><Text style={s.streamValue}>{Math.round(a.proteinG||0)} g</Text><Text style={s.streamNote}><Copy text="Protein heute"/></Text></View><Text style={s.streamArrow}>→</Text>
+    <Text style={s.streamInitial}>F</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="BE FUEL"/></Text><Text style={s.streamValue}>{a.proteinG==null?"Keine Angabe":Math.round(a.proteinG)+" g"}</Text><Text style={s.streamNote}><Copy text="Protein heute"/></Text></View><Text style={s.streamArrow}>→</Text>
    </Pressable>
    <Pressable accessibilityRole="button" style={s.streamRow} onPress={()=>router.push("/focus")}>
     <Text style={[s.streamInitial,s.streamAccent]}>M</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="BE FOCUSED"/></Text><Text style={s.streamValue}>02:00</Text><Text style={s.streamNote}><Copy text="Atmung und Tagescheck"/></Text></View><Text style={s.streamArrow}>→</Text>
@@ -123,12 +132,12 @@ export default function Home(){
 
     {d.cycle?<Pressable onPress={()=>router.push("/context")} style={s.cycle}><Text style={s.cycleTag}><Copy text="ZYKLUS KONTEXT"/></Text><Text style={s.cycleTitle}><Copy text="TAG"/> {d.cycle.day} · <Copy text={d.cycle.phase}/></Text><Text style={s.cycleCopy}><Copy text="Training und Recovery berücksichtigen deinen freiwillig hinterlegten Zykluskontext."/></Text></Pressable>:null}
 
-  <Pressable onPress={()=>router.push(d.nextWorkout?`/workout/${d.nextWorkout.id}`:"/(tabs)/training")}><View style={s.workout}><Text style={s.workoutKicker}><Copy text="HEUTIGES TRAINING"/></Text><Text style={s.workoutTitle}>{d.nextWorkout?.title?<>{d.nextWorkout.title}</>:<Copy text="REGENERATIONSTAG"/>}</Text><Text style={s.cardCopy}>{d.nextWorkout?.scheduledAt?<LocalizedValue value={new Date(d.nextWorkout.scheduledAt)}/>:<Copy text="Regeneration gehört zum Training."/>}</Text><Text style={s.arrow}><Copy text={d.nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></Text></View></Pressable>
+  <Pressable onPress={()=>router.push(d.nextWorkout?`/workout/${d.nextWorkout.id}`:"/(tabs)/training")}><View style={s.workout}><Text style={s.workoutKicker}><Copy text="HEUTIGES TRAINING"/></Text><Text style={s.workoutTitle}>{d.nextWorkout?.title?<>{d.nextWorkout.title}</>:<Copy text="KEIN TRAINING EINGETRAGEN"/>}</Text><Text style={s.cardCopy}>{d.nextWorkout?.scheduledAt?<LocalizedValue value={new Date(d.nextWorkout.scheduledAt)}/>:<Copy text="Noch kein Erholungstag bestätigt."/>}</Text><Text style={s.arrow}><Copy text={d.nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></Text></View></Pressable>
 
   <Card><Eyebrow><Copy text="HEUTE"/></Eyebrow><SectionTitle><Copy text="Aktivität und Versorgung"/></SectionTitle>
-   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}><Copy text="SCHRITTE"/></Text><Text style={s.metricValue}><LocalizedValue value={Number(a.steps||0)} format="toLocaleString"/> / <LocalizedValue value={Number(a.stepTarget||10000)} format="toLocaleString"/></Text></View><Bar value={a.steps||0} max={a.stepTarget||10000}/></View>
-   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}><Copy text="WASSER"/></Text><Text style={s.metricValue}>{a.waterMl||0} / {a.waterTargetMl||2500} ml</Text></View><Bar value={a.waterMl||0} max={a.waterTargetMl||2500}/></View>
-   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}><Copy text="PROTEIN"/></Text><Text style={s.metricValue}>{Math.round(a.proteinG||0)} / {a.proteinTargetG||130} g</Text></View><Bar value={a.proteinG||0} max={a.proteinTargetG||130}/></View>
+   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}><Copy text="SCHRITTE"/></Text><Text style={s.metricValue}>{a.steps==null?<Copy text="Keine Angabe"/>:<LocalizedValue value={Number(a.steps)} format="toLocaleString"/>} / <LocalizedValue value={Number(a.stepTarget||10000)} format="toLocaleString"/></Text></View><Bar value={a.steps||0} max={a.stepTarget||10000}/></View>
+   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}><Copy text="WASSER"/></Text><Text style={s.metricValue}>{a.waterMl??"Keine Angabe"} / {a.waterTargetMl||2500} ml</Text></View><Bar value={a.waterMl||0} max={a.waterTargetMl||2500}/></View>
+   <View style={s.metric}><View style={s.metricHead}><Text style={s.metricName}><Copy text="PROTEIN"/></Text><Text style={s.metricValue}>{a.proteinG==null?"Keine Angabe":Math.round(a.proteinG)} / {a.proteinTargetG||130} g</Text></View><Bar value={a.proteinG||0} max={a.proteinTargetG||130}/></View>
   </Card>
 
   <Pressable style={({pressed})=>[s.sync,pressed&&{opacity:.75}]} onPress={health}><Text style={s.syncText}><Copy text={syncing?"GESUNDHEITSDATEN WERDEN SYNCHRONISIERT…":Platform.OS==="ios"?"APPLE HEALTH DATEN SYNCHRONISIEREN":"GADGET DATEN SYNCHRONISIEREN"}/></Text></Pressable>
@@ -136,6 +145,7 @@ export default function Home(){
  </ScrollView></SafeAreaView>;
 }
 const s=StyleSheet.create({
+ dailyProof:{backgroundColor:"#142019",padding:18,borderTopColor:C.volt,borderTopWidth:2,marginTop:6,gap:9},dailyProofEyebrow:{fontFamily:"ManropeSemiBold",fontSize:10,color:C.volt,letterSpacing:1},dailyProofTitle:{fontFamily:"Archivo",fontSize:21,color:C.ink},dailyProofText:{fontFamily:"Manrope",fontSize:12,color:C.ink,lineHeight:20},dailyProofLink:{color:C.volt,fontSize:11,fontFamily:"ManropeSemiBold",marginTop:6},
 
  heroEditorial:{height:335,backgroundColor:"#0B1011",overflow:"hidden",position:"relative",justifyContent:"flex-end",marginHorizontal:-16,marginTop:-3},
  heroPhoto:{position:"absolute",width:"100%",height:"100%",top:0,left:0},

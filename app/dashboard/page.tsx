@@ -2,7 +2,7 @@ import {Copy,LocalizedValue} from "../components/Locale";
 import Link from "next/link";
 import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";
-import {levelForScore} from "../../lib/scoring";
+import {getDailyProfile} from "../../lib/daily-profile-service";
 import {dateOnly} from "../../lib/http";
 import DigitalTwinHero from "../components/DigitalTwinHero";
 import ScoreRadar from "../components/ScoreRadar";
@@ -15,6 +15,7 @@ function sameDay(a:Date,b:Date){return dateOnly(a).getTime()===dateOnly(b).getTi
 
 export default async function Dashboard(){
   const user=await requireUser();
+  const dailyProfile=await getDailyProfile(user.id);
   const today=dateOnly();
   const timelineStart=new Date(today.getTime()-dayMs);
   const timelineEnd=new Date(today.getTime()+2*dayMs);
@@ -31,7 +32,8 @@ export default async function Dashboard(){
     prisma.mediaAsset.findFirst({where:{relatedUserId:user.id,kind:"PROGRESS_PHOTO"},orderBy:{createdAt:"desc"}})
   ]);
 
-  const total=score?.total??0;
+  const total=dailyProfile.profile.value;
+  const day=dailyProfile.plan;
   const pillars=[
     {letter:"S",key:"strength",label:"KRAFT",value:score?.strength},
     {letter:"E",key:"endurance",label:"AUSDAUER",value:score?.endurance},
@@ -42,7 +44,7 @@ export default async function Dashboard(){
     {letter:"C",key:"consistency",label:"KONSTANZ",value:score?.consistency}
   ];
   const present=pillars.filter(p=>p.value!=null);
-  const focus=[...present].sort((a,b)=>(a.value??101)-(b.value??101))[0]??pillars[0];
+  const focus=[...present].sort((a,b)=>(a.value??101)-(b.value??101))[0]??null;
   const lines=Array.isArray(lineSetting?.value)?lineSetting.value as string[]:[];
   const dailyLine=String(lines[Math.floor(Date.now()/dayMs)%Math.max(1,lines.length)]||"Heute zählt die nächste saubere Entscheidung.");
   const dayStrip=[-1,0,1].map(offset=>{
@@ -51,11 +53,11 @@ export default async function Dashboard(){
     return {offset,date,workouts};
   });
   const dayNames=["GESTERN","HEUTE","MORGEN"];
-  const sleepHours=wearable?.sleepMinutes!=null?Math.round(wearable.sleepMinutes/6)/10:check?.sleepHours;
-  const sleepDisplay=wearable?.sleepMinutes!=null?Math.floor(wearable.sleepMinutes/60)+":"+String(wearable.sleepMinutes%60).padStart(2,"0"):sleepHours==null?null:String(sleepHours);
+  const sleepHours=dailyProfile.today.sleepHours;
+  const sleepDisplay=sleepHours==null?null:String(sleepHours);
   const sleepStageObject=wearable?.sleepStages&&typeof wearable.sleepStages==="object"&&!Array.isArray(wearable.sleepStages)?wearable.sleepStages as Record<string,unknown>:null;
   const currentHeartRate=typeof sleepStageObject?.currentHeartRate==="number"?sleepStageObject.currentHeartRate:null;
-  const protein=Math.round(nutrition?.proteinG??check?.proteinG??0);
+  const protein=nutrition?.proteinG??check?.proteinG??null;
   const cycle=(()=>{
     if(!context?.cycleTrackingEnabled||!context.cycleStartDate)return null;
     const length=Math.max(20,Math.min(45,context.cycleLengthDays||28));
@@ -70,7 +72,7 @@ export default async function Dashboard(){
   return <main className="bd-web-home bd-editorial-home">
     <header className="bd-home-top">
       <Link href="/dashboard" className="bd-home-wordmark">BE DIFFERENT</Link>
-      <Link href="/athlete" className={"bd-score-chip "+signal(total)}><span><Copy text="BD SCORE"/></span><strong>{total}%</strong></Link>
+      <Link href="/athlete" className={"bd-score-chip "+signal(total)}><span><Copy text="BD SCORE"/></span><strong>{total==null?"?":total+"%"}</strong></Link>
     </header>
 
     <section className={"bd-home-hero bd-hero-editorial "+(heroPhoto?"has-photo":"")}>
@@ -88,17 +90,25 @@ export default async function Dashboard(){
       <span><Copy text="HEUTE WICHTIG"/></span><strong><Copy text={priority.title}/></strong><p><Copy text={priority.action}/></p><b>→</b>
     </Link>}
 
+    <section className="bd-workout-card" aria-label="Dein Tag und dein bestätigter Stand">
+      <span>HEUTE · {dailyProfile.date}</span>
+      <h2>{day.status==="NOT_SCHEDULED"?"Kein Training eingetragen":day.status==="DONE"?"Alle geplanten Einheiten erledigt":day.status==="PARTIAL"?"Training teilweise erledigt":"Training geplant"}</h2>
+      <p>{day.scheduled?day.completed+" von "+day.scheduled+" Einheiten abgeschlossen":"Ohne Trainingsplan ist dies nicht automatisch ein Erholungstag."}</p>
+      <p>ENERGIE: {dailyProfile.today.energy??"Keine Angabe"} · SCHLAF: {dailyProfile.today.sleepHours==null?"Keine Angabe":dailyProfile.today.sleepHours+" h"}</p>
+      <p>BESTÄTIGTE STUFE: {dailyProfile.journey.confirmedLevel??"Noch nicht bestätigt"}</p>
+      <Link href={process.env.JOURNEY_DAILY_ENABLED==="true"?"/journey/today":"/training"}>DEINEN PLAN ANSEHEN →</Link>
+    </section>
     <section className="bd-score-editorial">
       <div className="bd-score-intro">
         <span className="eyebrow"><Copy text="BE DIFFERENT SCORE"/></span>
-        <div className="bd-score-number"><strong>{total}</strong><i>%</i></div>
-        <span className={"bd-score-state "+signal(total)}><Copy text={levelForScore(total)}/></span>
-        <p><Copy text="DEIN TAGESZIEL: 100%"/></p>
-        <small><Copy text="DATEN"/> {score?.completeness??0}%</small>
+        <div className="bd-score-number"><strong>{total??"—"}</strong><i>{total==null?"":"%"}</i></div>
+        <span className={"bd-score-state "+signal(total)}>LEISTUNGSPROFIL · KEINE STUFE</span>
+        <p>MESSSTAND: {dailyProfile.profile.recordedDate??"KEIN MESSWERT"} · {dailyProfile.profile.freshness==="OLD"?"ÄLTERER MESSWERT":"DATENBASIS"}</p>
+        <small>DATENABDECKUNG {dailyProfile.profile.completeness}% · UNABHÄNGIG VOM HEUTIGEN TRAINING</small>
       </div>
       <div className="bd-radar-stage">
         <ScoreRadar pillars={pillars}/>
-        <div className="bd-radar-caption"><span><Copy text="NÄCHSTER FOKUS"/></span><strong><Copy text={focus.label}/></strong><b>{focus.value==null?<Copy text="Keine Angabe"/>:Math.round(focus.value)+"%"}</b></div>
+        <div className="bd-radar-caption"><span><Copy text="NÄCHSTER FOKUS"/></span><strong><Copy text={focus?.label??"NOCH KEINE DATEN"}/></strong><b>{focus?.value==null?<Copy text="Keine Angabe"/>:Math.round(focus.value)+"%"}</b></div>
       </div>
       <div className="bd-pillar-list">
         {pillars.map(p=><Link href="/athlete" key={p.key} className={"bd-pillar-row "+signal(p.value)}>
@@ -125,7 +135,7 @@ export default async function Dashboard(){
         <span className="bd-stream-index">R</span><div><small><Copy text="BE RESTED"/></small><strong>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</strong><p>{wearable?.restingHr!=null?<><Copy text="RUHEPULS"/> {Math.round(wearable.restingHr)} · </>:null}{currentHeartRate!=null?<><Copy text="PULS"/> {currentHeartRate}</>:<Copy text="Schlaf und Erholung"/>}</p></div><b>→</b>
       </Link>
       <Link href="/fuel" className="bd-stream-row">
-        <span className="bd-stream-index">F</span><div><small><Copy text="BE FUEL"/></small><strong>{protein} g</strong><p><Copy text="Protein heute"/></p></div><b>→</b>
+        <span className="bd-stream-index">F</span><div><small><Copy text="BE FUEL"/></small><strong>{protein==null?"Keine Angabe":Math.round(protein)+" g"}</strong><p><Copy text="Protein heute"/></p></div><b>→</b>
       </Link>
       <Link href="/focus" className="bd-stream-row accent">
         <span className="bd-stream-index">M</span><div><small><Copy text="BE FOCUSED"/></small><strong>02:00</strong><p><Copy text="Atmung und Tagescheck"/></p></div><b>→</b>
@@ -139,8 +149,8 @@ export default async function Dashboard(){
 
     <Link href={nextWorkout?"/training/"+nextWorkout.id:"/training"} className="bd-workout-card bd-workout-editorial">
       <div className="bd-workout-index"><Copy text="NÄCHSTE EINHEIT"/></div>
-      <span><Copy text="HEUTIGES TRAINING"/></span><h2>{nextWorkout?.title||<Copy text="REGENERATIONSTAG"/>}</h2>
-      <p>{nextWorkout?.scheduledAt?<LocalizedValue value={nextWorkout.scheduledAt}/>:<Copy text="Regeneration gehört zum Training."/>}</p>
+      <span><Copy text="HEUTIGES TRAINING"/></span><h2>{nextWorkout?.title||<Copy text="KEIN TRAINING EINGETRAGEN"/>}</h2>
+      <p>{nextWorkout?.scheduledAt?<LocalizedValue value={nextWorkout.scheduledAt}/>:<Copy text="Ohne Planung ist kein Erholungstag bestätigt."/>}</p>
       <b><Copy text={nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></b>
     </Link>
 
