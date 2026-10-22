@@ -147,12 +147,18 @@ export async function getOwnedJourneyChapter(userId:string,enrollmentId:string,c
   mandatoryTotal:chapter.items.filter(i=>i.mandatory).length,
   mandatoryDone:chapter.items.filter(i=>i.mandatory&&done.has(i.id)).length,
   test:chapter.assessments[0]?{id:chapter.assessments[0].id,titleDe:chapter.assessments[0].titleDe}:null,
-  items:chapter.items.map(i=>({
+  items:chapter.items.map(i=>{
+   // Never read mutable Exercise/TrainingPlan data for an already published Journey.
+   const snap=i.publishedSnapshot&&typeof i.publishedSnapshot==="object"&&!Array.isArray(i.publishedSnapshot)?
+     i.publishedSnapshot as Record<string,unknown>:null;
+   const frozen=snap?.schemaVersion===1?snap:null;
+   const exercise=frozen?.exercise&&typeof frozen.exercise==="object"?frozen.exercise:null;
+   const trainingPlan=frozen?.trainingPlan&&typeof frozen.trainingPlan==="object"?frozen.trainingPlan:null;
+   return {
    id:i.id,kind:i.kind,titleDe:i.titleDe||"",description:i.description||"",
    mandatory:i.mandatory,done:done.has(i.id),
-   exercise:i.exercise?{nameDe:i.exercise.nameDe,category:i.exercise.category,
-    equipment:i.exercise.equipment,coachTips:[i.exercise.coachCue1,i.exercise.coachCue2,i.exercise.coachCue3].filter(Boolean)}:null,
-   trainingPlan:i.trainingPlan?{name:i.trainingPlan.name,description:i.trainingPlan.description}:null,
+   exercise:exercise??null,
+   trainingPlan:trainingPlan??null,
    media:i.media.map(m=>{
     const isVideo=m.role==="EXPLANATION_VIDEO";
     const eligible=canOpenJourneyMedia({earnedChapter:true,tier,minTier:m.minTier})&&
@@ -166,6 +172,7 @@ export async function getOwnedJourneyChapter(userId:string,enrollmentId:string,c
      available:deliver,url:deliver?"/api/media/"+encodeURIComponent(m.media.id):null
     };
    })
+  };
   }))
  };
 }
