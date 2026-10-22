@@ -19,7 +19,7 @@ export default function Context(){
  const [status,setStatus]=useState("");
  useEffect(()=>{api<any>("/api/athlete-context").then(x=>{const a=x.item||{};const remaining=a.travelModeUntil?Math.max(0,Math.ceil((new Date(a.travelModeUntil).getTime()-Date.now())/86400000)):0;setV((old:any)=>({...old,nextMatchAt:dateText(a.nextMatchAt),travelDays:remaining,targetScore:a.targetScore==null?"":String(a.targetScore),targetDate:dateText(a.targetDate),bedtimeTarget:a.bedtimeTarget||"22:30",stepTarget:String(a.stepTarget??10000),waterTargetMl:String(a.waterTargetMl??2500),proteinTargetG:String(a.proteinTargetG??130),preferredMorningHour:String(a.preferredMorningHour??8)}))}).catch(()=>{})},[]);
  async function save(){
-  const nextMatchAt=v.nextMatchAt?parseDate(v.nextMatchAt,18):null,targetDate=v.targetDate?parseDate(v.targetDate):null,
+  const nextMatchAt=v.nextMatchAt?parseDate(v.nextMatchAt,18):null,targetDate=v.targetDate?parseDate(v.targetDate):null;
   if((v.nextMatchAt&&!nextMatchAt)||(v.targetDate&&!targetDate)){setStatus("Bitte Datum als TT.MM.JJJJ eingeben.");return}
   const travelModeUntil=Number(v.travelDays)>0?new Date(Date.now()+Number(v.travelDays)*86400000).toISOString():null;
   setStatus("SPEICHERE");
