@@ -62,6 +62,13 @@ for attempt in $(seq 1 35); do
   sleep 2
 done
 test -s "$backup/readiness.json"
+# Confirm BOTH runtime flags and Next.js build-time flags were actually enabled.
+for feature in onboarding editor tests overview webOnboarding webOverview; do
+  if ! grep -q "\"$feature\":true" "$backup/readiness.json"; then
+    echo "BLOCKED: production feature $feature is not active" >&2
+    false
+  fi
+done
 for route in /api/journey/overview /api/journey/tests /api/admin/journeys /api/admin/journey-tests; do
   status="$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:3100$route")"
   [[ "$status" == "401" || "$status" == "403" ]] || { echo "BLOCKED: unauthenticated $route returned $status" >&2; false; }
