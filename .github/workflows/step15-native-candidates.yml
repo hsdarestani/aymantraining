@@ -48,31 +48,28 @@ jobs:
           chmod +x gradlew
           ./gradlew --no-daemon :app:assembleDebug
           test -s app/build/outputs/apk/debug/app-debug.apk
+      - name: Check Android smoke script syntax
+        run: bash -n scripts/ci/step15-android-cold-start.sh
+      - name: Enable hardware acceleration for Android emulator
+        run: |
+          if test -e /dev/kvm; then
+            sudo chmod a+rw /dev/kvm
+          else
+            echo "::warning::KVM unavailable, emulator must boot in software."
+          fi
       - name: Android emulator cold start 10 times, check fatal crashes
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
           arch: x86_64
           profile: pixel_6
-          disable-animations: true
+          ram-size: 2048M
+          emulator-boot-timeout: 900
+          disable-animations: false
           working-directory: mobile
-          script: |
-            set -eu
-            mkdir -p build/step15
-            adb install -r android/app/build/outputs/apk/debug/app-debug.apk
-            for attempt in $(seq 1 10); do
-              adb shell am force-stop com.smarbiz.bedifferent
-              adb logcat -c
-              adb shell monkey -p com.smarbiz.bedifferent -c android.intent.category.LAUNCHER 1 >/dev/null
-              sleep 6
-              adb logcat -d -v time > "build/step15/cold-start-$attempt.log"
-              if grep -E -A 16 "FATAL EXCEPTION|Fatal signal|Force finishing activity.*com.smarbiz.bedifferent" "build/step15/cold-start-$attempt.log" > "build/step15/fatal-$attempt.txt"; then
-                cat "build/step15/fatal-$attempt.txt"
-                exit 1
-              fi
-              adb shell pidof com.smarbiz.bedifferent >/dev/null || { echo "App exited after start $attempt"; exit 1; }
-              echo "Verified cold start $attempt"
-            done
+          # This action splits a multiline script into separate sh -c calls.
+          # Keep a single command and run the checked bash file.
+          script: bash scripts/ci/step15-android-cold-start.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
