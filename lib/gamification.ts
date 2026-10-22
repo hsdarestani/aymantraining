@@ -1,6 +1,6 @@
 import {prisma} from "./db";
 import {dateOnly} from "./http";
-import {levelForScore} from "./scoring";
+import {getDailyProfile} from "./daily-profile-service";
 
 const dayMs=86400000;
 const keyOf=(d:Date)=>dateOnly(d).toISOString().slice(0,10);
@@ -11,12 +11,15 @@ async function unlock(userId:string,key:string,name:string){
 
 export async function gamificationSnapshot(userId:string){
   const now=new Date(),since=new Date(Date.now()-120*dayMs);
-  const [workouts,checks,wearables,tests,score,badges,entries,appOpens]=await Promise.all([
+  const [workouts,checks,wearables,tests,dailyProfile,earnedAwards,badges,entries,appOpens]=await Promise.all([
     prisma.workout.findMany({where:{userId,completedAt:{gte:since}},select:{completedAt:true,sets:true}}),
     prisma.dailyCheck.findMany({where:{userId,date:{gte:since}},select:{date:true,energy:true,mood:true,stress:true,soreness:true,sleepHours:true}}),
     prisma.wearableDaily.findMany({where:{userId,date:{gte:new Date(Date.now()-14*dayMs)}},select:{date:true,sleepMinutes:true}}),
     prisma.performanceTest.findMany({where:{userId,completedAt:{not:null}},include:{results:true}}),
-    prisma.scoreSnapshot.findFirst({where:{userId},orderBy:{date:"desc"}}),
+    getDailyProfile(userId),
+    process.env.JOURNEY_OVERVIEW_ENABLED==="true"
+      ?prisma.journeyLevelAward.findMany({where:{enrollment:{userId,state:{in:["ACTIVE","FINISHED"]}}},select:{level:{select:{code:true}}}})
+      :Promise.resolve([]),
     prisma.badge.findMany({where:{userId},orderBy:{unlockedAt:"desc"}}),
     prisma.challengeEntry.findMany({where:{userId}}),
     prisma.analyticsEvent.findMany({where:{userId,name:"app_open",createdAt:{gte:since}},select:{createdAt:true}})
@@ -39,7 +42,9 @@ export async function gamificationSnapshot(userId:string){
   ].filter((v):v is number=>v!=null);
   const avgSleep=sleepValues.length?sleepValues.reduce((a,b)=>a+b,0)/sleepValues.length:0;
   const sprint=tests.some(t=>t.results.some(r=>/30m_sprint|sprint/i.test(r.metric)));
-  const latestLevel=levelForScore(score?.total??0);
+  // Old BD Score thresholds are not earned training levels.
+  const latestLevel=dailyProfile.journey.confirmedLevel;
+  const awarded=new Set(earnedAwards.map(a=>a.level.code));
 
   const awards:Array<[string,string,boolean]>=[
     ["first_workout","FIRST STEP",completed>=1],
@@ -49,10 +54,10 @@ export async function gamificationSnapshot(userId:string){
     ["different_30","30 DAYS DIFFERENT",streak>=30],
     ["iron_sleep","IRON SLEEP",sleepValues.length>=5&&avgSleep>=7.5],
     ["sprint_king","SPRINT KING",sprint],
-    ["level_awake","AWAKE",["AWAKE","DIFFERENT","BE DIFFERENT","TRULY DIFFERENT"].includes(latestLevel)],
-    ["level_different","DIFFERENT",["DIFFERENT","BE DIFFERENT","TRULY DIFFERENT"].includes(latestLevel)],
-    ["level_be_different","BE DIFFERENT",["BE DIFFERENT","TRULY DIFFERENT"].includes(latestLevel)],
-    ["level_truly","TRULY DIFFERENT",latestLevel==="TRULY DIFFERENT"]
+    ["level_awake","AWAKE",(awarded.has("AWAKE")||awarded.has("DIFFERENT")||awarded.has("BE_DIFFERENT")||awarded.has("TRULY_DIFFERENT"))],
+    ["level_different","DIFFERENT",(awarded.has("DIFFERENT")||awarded.has("BE_DIFFERENT")||awarded.has("TRULY_DIFFERENT"))],
+    ["level_be_different","BE DIFFERENT",(awarded.has("BE_DIFFERENT")||awarded.has("TRULY_DIFFERENT"))],
+    ["level_truly","TRULY DIFFERENT",awarded.has("TRULY_DIFFERENT")]
   ];
   for(const [key,name,yes] of awards)if(yes)await unlock(userId,key,name);
 
