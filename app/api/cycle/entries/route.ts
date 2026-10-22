@@ -1,4 +1,5 @@
 import {NextResponse} from "next/server";
+import {Prisma} from "@prisma/client";
 import {prisma} from "../../../../lib/db";
 import {isSameOrigin,errorJson,requireApiUser} from "../../../../lib/http";
 import {cycleFeatureEnabled,entrySchema,dateFromKey,validDateKey} from "../../../../lib/cycle-contract";
@@ -23,7 +24,11 @@ export async function PUT(request:Request){
   if(!consent?.enabled)throw Error("CYCLE_CONSENT_REQUIRED");
   return tx.cycleJournalEntry.upsert({where:{userId_date:{userId:user.id,date}},
    update:fields,create:{userId:user.id,date,...fields}});
- }).catch(e=>{if(e instanceof Error&&e.message==="CYCLE_CONSENT_REQUIRED")return null;throw e});
+ },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable}).catch(e=>{
+  if(e instanceof Error&&e.message==="CYCLE_CONSENT_REQUIRED")return null;
+  if(e instanceof Prisma.PrismaClientKnownRequestError&&["P2003","P2025","P2034"].includes(e.code))return null;
+  throw e;
+ });
  if(!saved)return errorJson("Zustimmung erforderlich.",409);
  return NextResponse.json({ok:true,entry:{...saved,date:day}},{headers:cyclePrivateHeaders});
 }
