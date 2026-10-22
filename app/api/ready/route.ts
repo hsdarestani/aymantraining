@@ -1,3 +1,22 @@
-import { NextResponse } from "next/server";
-import { prisma } from "../../../lib/db";
-export async function GET(){try{await prisma.$queryRaw`SELECT 1`;return NextResponse.json({ok:true,service:"bedifferent",database:"ready"});}catch{return NextResponse.json({ok:false,service:"bedifferent",database:"unavailable"},{status:503});}}
+import {NextResponse} from "next/server";
+import {prisma} from "../../../lib/db";
+
+// Public, non-sensitive feature readiness for automated, fail-closed rollouts.
+export async function GET(){
+ try{
+  await prisma.$queryRaw`SELECT 1`;
+  return NextResponse.json({
+   ok:true,service:"bedifferent",database:"ready",
+   journey:{
+    onboarding:process.env.JOURNEY_ONBOARDING_ENABLED==="true",
+    editor:process.env.JOURNEY_EDITOR_ENABLED==="true",
+    tests:process.env.JOURNEY_TESTS_ENABLED==="true",
+    overview:process.env.JOURNEY_OVERVIEW_ENABLED==="true",
+    webOnboarding:process.env.NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED==="true",
+    webOverview:process.env.NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED==="true"
+   }
+  });
+ }catch{
+  return NextResponse.json({ok:false,service:"bedifferent",database:"unavailable"},{status:503});
+ }
+}

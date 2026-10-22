@@ -5,13 +5,17 @@ RUN npm ci
 
 FROM node:22-alpine AS builder
 WORKDIR /app
+ARG NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED=false
+ARG NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED=false
+ENV NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED=$NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED
+ENV NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED=$NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
 RUN npm run build
 
 FROM builder AS migrator
-CMD ["sh", "-c", "node scripts/preflight-subscriptions.mjs && npx prisma db push --accept-data-loss && node scripts/seed.mjs && node scripts/apply-hstest-preview.mjs"]
+CMD ["sh", "-c", "node scripts/preflight-subscriptions.mjs && npx prisma db push && node scripts/backfill-published-journey-snapshots.mjs"]
 
 FROM node:22-alpine AS runner
 WORKDIR /app

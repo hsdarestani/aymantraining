@@ -910,6 +910,7 @@ model JourneyChapterItem {
   exerciseId     String?
   trainingPlanId String?
   mandatory      Boolean @default(true)
+  publishedSnapshot Json? // Immutable reference data captured on publishing
   chapter        JourneyChapter @relation(fields:[chapterId],references:[id],onDelete:Restrict)
   exercise       Exercise? @relation(fields:[exerciseId],references:[id],onDelete:Restrict)
   trainingPlan   TrainingPlan? @relation(fields:[trainingPlanId],references:[id],onDelete:Restrict)

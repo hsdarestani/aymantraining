@@ -15,7 +15,7 @@ export async function GET(){
   for(const workout of workouts){
     for(const item of workout.exercises){
       const ex=item.exercise;
-      for(const value of [ex.imageStart,ex.imageMiddle,ex.imageEnd,ex.videoUrl]){
+      for(const value of [ex.imageStart,ex.imageMiddle,ex.imageEnd,...(user.subscriptionTier==="FREE"?[]:[ex.videoUrl])]){
         if(value)urls.add(value);
       }
     }

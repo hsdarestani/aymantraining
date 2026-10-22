@@ -34,6 +34,9 @@ services:
       context: .
       dockerfile: Dockerfile
       target: runner
+      args:
+        NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED: ${NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED:-false}
+        NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED: ${NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED:-false}
     container_name: bedifferent-web
     restart: unless-stopped
     env_file:
@@ -46,6 +49,12 @@ services:
       CRON_SECRET: ${CRON_SECRET}
       DATA_DIR: /app/data
       NEXT_PUBLIC_APP_URL: https://bedifferent.smarbiz.sbs
+      JOURNEY_ONBOARDING_ENABLED: ${JOURNEY_ONBOARDING_ENABLED:-false}
+      JOURNEY_EDITOR_ENABLED: ${JOURNEY_EDITOR_ENABLED:-false}
+      JOURNEY_TESTS_ENABLED: ${JOURNEY_TESTS_ENABLED:-false}
+      JOURNEY_OVERVIEW_ENABLED: ${JOURNEY_OVERVIEW_ENABLED:-false}
+      NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED: ${NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED:-false}
+      NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED: ${NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED:-false}
     volumes:
       - bedifferent-data:/app/data
     depends_on:

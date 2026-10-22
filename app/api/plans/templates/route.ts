@@ -4,5 +4,5 @@ import {errorJson,requireApiUser} from "../../../../lib/http";
 export async function GET(){
   const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
   const items=await prisma.trainingPlan.findMany({where:{active:true,isTemplate:true,...(user.subscriptionTier==="FREE"?{proOnly:false}:{})},include:{items:{include:{exercise:true},orderBy:[{dayIndex:"asc"},{orderIndex:"asc"}]}},orderBy:{name:"asc"}});
-  return NextResponse.json({ok:true,items});
+  return NextResponse.json({ok:true,items:items.map(p=>({...p,items:p.items.map(i=>({...i,exercise:{...i.exercise,videoUrl:user.subscriptionTier==="FREE"?null:i.exercise.videoUrl}}))}))});
 }

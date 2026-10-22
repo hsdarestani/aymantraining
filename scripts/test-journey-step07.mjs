@@ -40,7 +40,7 @@ try{
  const chapter2=await db.journeyChapter.create({data:{levelId:ready.id,position:2,titleDe:"Noch gesperrt",description:"Vertraulicher Inhalt"}});
  const chapter3=await db.journeyChapter.create({data:{levelId:awake.id,position:1,titleDe:"AWAKE Abschnitt",description:"Noch gesperrt"}});
  const item1=await db.journeyChapterItem.create({data:{chapterId:chapter1.id,position:1,kind:"GUIDANCE",titleDe:"Mobilität",description:"Privater Hinweis",mandatory:true}});
- const item2=await db.journeyChapterItem.create({data:{chapterId:chapter1.id,position:2,kind:"EXERCISE",titleDe:"Kniebeugen",description:"Immer kontrolliert",mandatory:true}});
+ const item2=await db.journeyChapterItem.create({data:{chapterId:chapter1.id,position:2,kind:"EXERCISE",titleDe:"Kniebeugen",description:"Immer kontrolliert",mandatory:true,publishedSnapshot:{schemaVersion:1,exercise:{nameDe:"Kniebeugen",category:"QA",equipment:null,coachTips:[]},trainingPlan:null}}});
  const lockedItem=await db.journeyChapterItem.create({data:{chapterId:chapter2.id,position:1,kind:"GUIDANCE",titleDe:"Vertrauliche Übung",description:"Geheim",mandatory:true}});
  const image=await db.mediaAsset.create({data:{ownerId:coach.id,kind:"EXERCISE_IMAGE",storageKey:"journey-media/2026/step07-img-"+stamp,originalName:"coach.png",mimeType:"image/png",sizeBytes:550}});
  const video=await db.mediaAsset.create({data:{ownerId:coach.id,kind:"EXERCISE_VIDEO",storageKey:"journey-media/2026/step07-vid-"+stamp,originalName:"coach.mp4",mimeType:"video/mp4",sizeBytes:1450}});

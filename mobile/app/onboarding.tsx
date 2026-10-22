@@ -12,7 +12,7 @@ import {syncHealth} from "../lib/health";
 import {C,radius} from "../theme";
 
 const goals=["Muskelaufbau","Fettabbau","Athletik","Fußball","Calisthenics","Gesundheit"];
-const journeyEnabled=process.env.EXPO_PUBLIC_JOURNEY_ONBOARDING_ENABLED==="true";
+const journeyEnabled=process.env.EXPO_PUBLIC_JOURNEY_ONBOARDING_ENABLED!=="false";
 const levels=[
   {code:"READY",label:"READY",description:"Du startest gerade oder steigst wieder ein. Du baust Grundlagen auf und findest Schritt für Schritt in eine Trainingsroutine."},
   {code:"AWAKE",label:"AWAKE",description:"Du hast erste Trainingserfahrung, kennst grundlegende Übungen und möchtest regelmäßig und strukturiert trainieren."},

@@ -27,7 +27,7 @@ function Clip({media,token}:{media:Media;token:string|null}){
  </View>;
 }
 export default function JourneyOverview(){
- const enabled=process.env.EXPO_PUBLIC_JOURNEY_OVERVIEW_ENABLED==="true";
+ const enabled=process.env.EXPO_PUBLIC_JOURNEY_OVERVIEW_ENABLED!=="false";
  const [data,setData]=useState<Overview|null>(null),[detail,setDetail]=useState<Detail|null>(null);
  const [loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState("");
  const [goals,setGoals]=useState<string[]>([]),[level,setLevel]=useState("READY"),[approved,setApproved]=useState(false),[token,setToken]=useState<string|null>(null);

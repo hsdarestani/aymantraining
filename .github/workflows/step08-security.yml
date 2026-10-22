@@ -1,0 +1,112 @@
+name: BE DIFFERENT Step 08 Security and Activation Gate
+on:
+  push:
+    branches: [main, feature/bedifferent-step08-security-rollout]
+    paths:
+      - 'prisma/**'
+      - 'mobile/**'
+      - 'lib/journey-*'
+      - 'lib/legacy-media-access.ts'
+      - 'app/api/media/**'
+      - 'app/api/exercises/**'
+      - 'app/api/plans/templates/**'
+      - 'app/api/admin/exercises/**'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - 'scripts/test-journey-step08.mjs'
+      - 'scripts/backfill-published-journey-snapshots.mjs'
+      - 'scripts/activate-journey-production.sh'
+      - '.github/workflows/step08-security.yml'
+      - '.github/workflows/journey-production-activation.yml'
+  pull_request:
+    paths:
+      - "prisma/schema.prisma"
+      - "lib/legacy-media-access.ts"
+      - "lib/journey-editor-service.ts"
+      - "lib/journey-reader.ts"
+      - "app/api/media/**"
+      - "app/api/admin/exercises/**"
+      - "Dockerfile"
+      - "docker-compose.yml"
+      - "scripts/test-journey-step08.mjs"
+      - ".github/workflows/step08-security.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: bedifferent_test
+          POSTGRES_USER: bedifferent
+          POSTGRES_PASSWORD: bedifferent_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U bedifferent -d bedifferent_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://bedifferent:bedifferent_test@127.0.0.1:5432/bedifferent_test?schema=public
+      NODE_ENV: test
+      JOURNEY_EDITOR_ENABLED: "true"
+      JOURNEY_TESTS_ENABLED: "true"
+      JOURNEY_ONBOARDING_ENABLED: "true"
+      NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED: "true"
+      JOURNEY_OVERVIEW_ENABLED: "true"
+      NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED: "true"
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - name: Schema and TypeScript validation
+        run: npm run check
+      - name: Validate safe production rollout script
+        run: |
+          bash -n scripts/activate-journey-production.sh
+          node --check scripts/backfill-published-journey-snapshots.mjs
+          ! grep -q 'reset --hard' scripts/activate-journey-production.sh
+          ! grep -q 'systemctl restart nginx' scripts/activate-journey-production.sh
+      - name: Reject destructive production migrations and demo re-seeding
+        run: |
+          ! grep -Eq -- '--accept-data-loss|scripts/seed.mjs|apply-hstest-preview' Dockerfile
+          ! grep -Eq 'DROP TABLE|DROP COLUMN|DROP TYPE' prisma/schema.prisma
+      - name: Recreate previous main schema and preserve historical data
+        run: |
+          git show origin/main:prisma/schema.prisma > prisma/step08-previous.prisma
+          npx prisma db push --schema prisma/step08-previous.prisma
+          node scripts/test-journey-legacy.mjs seed
+          node scripts/test-journey-step05-migration.mjs seed
+          npx prisma migrate diff --from-schema-datamodel prisma/step08-previous.prisma --to-schema-datamodel prisma/schema.prisma --script >/tmp/step08.sql
+          if grep -Ei 'DROP (TABLE|COLUMN|TYPE)|ALTER TABLE .* DROP' /tmp/step08.sql; then
+            echo "Destructive DDL blocked" >&2; exit 1
+          fi
+          npx prisma db push
+          node scripts/test-journey-legacy.mjs verify
+          node scripts/test-journey-step05-migration.mjs verify
+      - name: Security hardening and immutable snapshots
+        run: node scripts/test-journey-step08.mjs
+      - name: Existing coach curriculum publish and frozen references
+        run: node scripts/test-journey-step05.mjs
+      - name: Existing Level engine
+        run: node scripts/test-journey-step03.mjs
+      - name: Existing chapter and opt-in protections
+        run: node scripts/test-journey-step07.mjs
+      - name: Production web build
+        run: npm run build
+      - name: Native client typecheck
+        run: |
+          cd mobile
+          npm ci
+          npm run typecheck

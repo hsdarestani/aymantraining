@@ -244,6 +244,33 @@ export async function cloneCoachJourneyVersion(actorId:string,pathwayId:string){
   return {id:newVersion.id,version:newVersion.version};
  });
 }
+/** Capture mutable legacy exercise/plan references at the exact publication boundary. */
+async function freezeCurriculumReferences(tx:Tx,versionId:string){
+ const items=await tx.journeyChapterItem.findMany({
+  where:{chapter:{level:{versionId}}},include:{
+   exercise:true,trainingPlan:{include:{items:{orderBy:[{dayIndex:"asc"},{orderIndex:"asc"}],include:{exercise:true}}}}
+  }
+ });
+ for(const i of items){
+  const exercise=i.exercise?{
+   nameDe:i.exercise.nameDe,category:i.exercise.category,
+   equipment:i.exercise.equipment,coachTips:[i.exercise.coachCue1,i.exercise.coachCue2,i.exercise.coachCue3].filter(Boolean),
+   imageStart:i.exercise.imageStart,imageMiddle:i.exercise.imageMiddle,imageEnd:i.exercise.imageEnd,
+   // Legacy mutable video URLs are never copied into the Journey media release.
+  }:null;
+  const plan=i.trainingPlan?{
+   name:i.trainingPlan.name,description:i.trainingPlan.description,
+   items:i.trainingPlan.items.map(p=>({
+    dayIndex:p.dayIndex,orderIndex:p.orderIndex,targetSets:p.targetSets,targetReps:p.targetReps,
+    targetRpe:p.targetRpe,restSeconds:p.restSeconds,notes:p.notes,
+    exercise:{nameDe:p.exercise.nameDe,equipment:p.exercise.equipment}
+   }))
+  }:null;
+  await tx.journeyChapterItem.update({where:{id:i.id},data:{
+   publishedSnapshot:{schemaVersion:1,exercise,trainingPlan:plan} as Prisma.InputJsonValue
+  }});
+ }
+}
 export async function publishCoachJourneyVersion(actorId:string,versionId:string){
  await requireCoach(actorId);
  return prisma.$transaction(async tx=>{
@@ -260,6 +287,7 @@ export async function publishCoachJourneyVersion(actorId:string,versionId:string
   // A pending intake is matched by exact canonical goal set, never by any subset.
   const selected=[...row.goalSlugs].sort();
   if(!selected.length)unchanged("MISSING_GOALS");
+  await freezeCurriculumReferences(tx,versionId);
   const claim=await tx.journeyPathwayVersion.updateMany({where:{
    id:row.id,state:"DRAFT",updatedAt:row.updatedAt
   },data:{state:"PUBLISHED",publishedAt:new Date()}});
