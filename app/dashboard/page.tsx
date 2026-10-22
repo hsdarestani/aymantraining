@@ -7,6 +7,9 @@ import {dateOnly} from "../../lib/http";
 import DigitalTwinHero from "../components/DigitalTwinHero";
 import ScoreRadar from "../components/ScoreRadar";
 import RhythmHorizon from "../components/RhythmHorizon";
+import WomenDashboard from "../components/WomenDashboard";
+import {getDashboardPreference} from "../../lib/women-dashboard";
+import "../women-dashboard.css";
 export const dynamic="force-dynamic";
 
 const dayMs=86400000;
@@ -16,6 +19,8 @@ function sameDay(a:Date,b:Date){return dateOnly(a).getTime()===dateOnly(b).getTi
 export default async function Dashboard(){
   const user=await requireUser();
   const dailyProfile=await getDailyProfile(user.id);
+  const dashboardPreference=await getDashboardPreference(user.id);
+  const womenGoals=dashboardPreference.mode==="WOMEN"?await prisma.goal.findMany({where:{userId:user.id,active:true},select:{type:true},take:12}):[];
   const today=dateOnly();
   const timelineStart=new Date(today.getTime()-dayMs);
   const timelineEnd=new Date(today.getTime()+2*dayMs);
@@ -86,6 +91,10 @@ export default async function Dashboard(){
       <div className="bd-hero-index"><span>01</span><b><Copy text="ATHLETENMODUS"/></b></div>
     </section>
 
+    <WomenDashboard preference={dashboardPreference} confirmedLevel={dailyProfile.journey.confirmedLevel}
+      completed={dailyProfile.plan.completed} scheduled={dailyProfile.plan.scheduled}
+      energy={dailyProfile.today.energy} sleepHours={dailyProfile.today.sleepHours}
+      goals={womenGoals.map(g=>g.type)}/>
     {priority&&<Link href="/lifestyle" className="bd-priority bd-priority-line">
       <span><Copy text="HEUTE WICHTIG"/></span><strong><Copy text={priority.title}/></strong><p><Copy text={priority.action}/></p><b>→</b>
     </Link>}
