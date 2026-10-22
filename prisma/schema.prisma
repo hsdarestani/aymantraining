@@ -36,6 +36,11 @@ enum MediaKind {
 
 model User {
   reviewedPathwayTests JourneyTestAttempt[] @relation("PathwayTestReviewer")
+  recoveryDaysAsAthlete PlannedRecoveryDay[] @relation("MilestoneRecoveryAthlete")
+  recoveryDaysAsCoach PlannedRecoveryDay[] @relation("MilestoneRecoveryCoach")
+  coachedMilestoneRules MilestoneRule[] @relation("MilestoneRuleCoach")
+  athleteMilestoneRules MilestoneRule[] @relation("MilestoneRuleAthlete")
+  milestoneAwards MilestoneAward[]
   cyclePreferences CyclePrivacy?
   journeyIntake JourneyIntake?
   dashboardPreference AthleteDashboardPreference?
@@ -1136,4 +1141,56 @@ model CycleJournalEntry {
  privacy      CyclePrivacy @relation(fields:[userId],references:[userId],onDelete:Cascade)
  @@unique([userId,date])
  @@index([userId,date])
+}
+
+// Coach-scheduled rest days, not self-reported or inferred from an empty calendar.
+// Only days planned before they occur qualify for a verified streak.
+model PlannedRecoveryDay {
+ id         String @id @default(cuid())
+ athleteId  String
+ coachId    String
+ day        DateTime @db.Date
+ reason     String?
+ createdAt  DateTime @default(now())
+ athlete    User @relation("MilestoneRecoveryAthlete",fields:[athleteId],references:[id],onDelete:Cascade)
+ coach      User @relation("MilestoneRecoveryCoach",fields:[coachId],references:[id],onDelete:Cascade)
+ @@unique([athleteId,day])
+ @@index([coachId,day])
+}
+
+// Athletes' coach can customize milestones. No score-derived or cycle-derived level.
+model MilestoneRule {
+ id               String @id @default(cuid())
+ coachId          String
+ athleteId        String
+ key              String
+ metric           String
+ threshold        Int
+ title            String
+ message          String
+ visualIntensity  String @default("SMALL")
+ enabled          Boolean @default(true)
+ createdAt        DateTime @default(now())
+ updatedAt        DateTime @updatedAt
+ coach            User @relation("MilestoneRuleCoach",fields:[coachId],references:[id],onDelete:Cascade)
+ athlete          User @relation("MilestoneRuleAthlete",fields:[athleteId],references:[id],onDelete:Cascade)
+ @@unique([athleteId,key])
+ @@index([coachId,athleteId])
+}
+
+// Immutable, idempotent unlock key; the future celebration engine (step 14)
+// can consume only these records without recomputing claims from app opens.
+model MilestoneAward {
+ id              String @id @default(cuid())
+ userId          String
+ key             String
+ title           String
+ message         String
+ visualIntensity String @default("SMALL")
+ achievedAt      DateTime
+ createdAt       DateTime @default(now())
+ seenAt          DateTime?
+ user            User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ @@unique([userId,key])
+ @@index([userId,createdAt])
 }
