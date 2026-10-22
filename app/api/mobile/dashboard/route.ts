@@ -4,25 +4,17 @@ import {errorJson,requireApiUser,dateOnly} from "../../../../lib/http";
 import {scoreView} from "../../../../lib/score-view";
 import {getDailyProfile} from "../../../../lib/daily-profile-service";
 import {getDashboardPreference} from "../../../../lib/women-dashboard";
+import {privateCycle} from "../../../../lib/cycle-service";
 import {hasFeature} from "../../../../lib/entitlements";
 
 const dayMs=86400000;
 const isoDay=(d:Date)=>dateOnly(d).toISOString().slice(0,10);
 
-function cycleSummary(enabled:boolean|undefined,start:Date|null|undefined,lengthRaw:number|undefined){
- if(!enabled||!start)return null;
- const length=Math.max(20,Math.min(45,lengthRaw||28));
- const days=Math.max(0,Math.floor((dateOnly(new Date()).getTime()-dateOnly(start).getTime())/dayMs));
- const day=days%length+1;
- const ovulation=Math.max(10,Math.round(length-14));
- const phase=day<=5?"MENSTRUATION":day<ovulation-1?"FOLLIKELPHASE":day<=ovulation+1?"OVULATIONSFENSTER":"LUTEALPHASE";
- return {day,length,phase};
-}
-
 export async function GET(){
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
  const dailyProfile=await getDailyProfile(user.id);
  const dashboardPreference=await getDashboardPreference(user.id);
+ const cycleOverview=await privateCycle(user.id,{includeEntries:false});
  const womenGoals=dashboardPreference.mode==="WOMEN"?await prisma.goal.findMany({where:{userId:user.id,active:true},select:{type:true},take:12}):[];
  const today=new Date(dailyProfile.date+"T00:00:00.000Z");
  const tomorrow=new Date(today.getTime()+dayMs);
@@ -35,7 +27,7 @@ export async function GET(){
   prisma.dailyCheck.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
   prisma.wearableDaily.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
   prisma.workout.findFirst({where:{userId:user.id,completedAt:null,scheduledAt:{gte:new Date(Date.now()-43200000)}},include:{exercises:{include:{exercise:true},orderBy:{orderIndex:"asc"}}},orderBy:{scheduledAt:"asc"}}),
-  prisma.recommendation.findMany({where:{userId:user.id,date:today},orderBy:{createdAt:"desc"},take:3}),
+  prisma.recommendation.findMany({where:{userId:user.id,date:today,sourceRule:{not:"cycle_context"}},orderBy:{createdAt:"desc"},take:3}),
   prisma.nutritionDaily.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
   hasFeature(user.subscriptionTier,"coach_radar_full"),
   hasFeature(user.subscriptionTier,"score_details"),
@@ -71,7 +63,8 @@ export async function GET(){
   differentLine:line,
   heroPhotoId:heroPhoto?.id??null,
   dayStrip,
-  cycle:cycleSummary(context?.cycleTrackingEnabled,context?.cycleStartDate,context?.cycleLengthDays),
+  cycle:cycleOverview.enabled&&cycleOverview.forecast?{day:cycleOverview.forecast.day,approximate:true}:null,
+  cycleJournalEnabled:cycleOverview.enabled,
   check,wearable:advancedWearable?wearable:wearable?{date:wearable.date,steps:wearable.steps,activeCalories:wearable.activeCalories,totalCalories:wearable.totalCalories,sleepMinutes:wearable.sleepMinutes}:null,nextWorkout,recommendations:radar,radarLocked:!radarFull,scoreDetailsLocked:!scoreDetails,
   activity:{
    steps:wearable?.date?.toISOString().slice(0,10)===dailyProfile.date?wearable.steps??check?.steps??null:check?.steps??null,

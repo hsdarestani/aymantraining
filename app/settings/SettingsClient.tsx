@@ -1,6 +1,7 @@
 "use client";
 import {Copy,useT} from "../components/Locale";
 import DashboardPreference from "./DashboardPreference";
+import Link from "next/link";
 
 import {FormEvent,useState} from "react";
 type Pref={category:string;enabled:boolean;quietFrom:string|null;quietTo:string|null};
@@ -31,6 +32,8 @@ export default function SettingsClient({initialPrefs}:{initialPrefs:Pref[]}){
 
  return <div className="settings-stack">
   <DashboardPreference/>
+  <article className="panel" style={{padding:22}}><span className="eyebrow">PRIVATER ZYKLUSKALENDER</span><h2>Freiwillig und jederzeit löschbar.</h2><p className="muted">Nur mit deiner ausdrücklichen Zustimmung. Getrennt von Trainingsstufe, Leistungswert und allgemeinem Tagescheck.</p><a className="secondary" href="/cycle">PRIVATEN KALENDER ÖFFNEN →</a></article>
+  <section className="panel" style={{padding:20}}><span className="eyebrow">PRIVAT UND FREIWILLIG</span><h2>Dein persönlicher Zykluskalender</h2><p>Nur mit separater Zustimmung. Du kannst Einträge löschen und die Freigabe für deinen Trainer selbst steuern.</p><Link href="/cycle" className="secondary">PRIVATEN ZYKLUSKALENDER ÖFFNEN</Link></section>
   <form className="panel mini-form wide" onSubmit={checkin}>
    <span className="eyebrow"><Copy text={"10 SEKUNDEN TAGESCHECK"}/></span><h2><Copy text={"Wie fühlst du dich heute?"}/></h2>
    <div className="input-grid compact-inputs">
