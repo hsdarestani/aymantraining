@@ -71,12 +71,14 @@ test("coach access is disabled until separate grant; minimized after consent; re
 });
 test("user exports own data and can revoke and erase all, without resurrecting old entries",async({browser})=>{
  const a=await browserAs(browser,"owner");await a.page.goto(host+"/cycle");
+ await db.cycleJournalEntry.create({data:{userId:athlete.id,date:new Date("2026-03-01T00:00:00Z"),planChoice:"REST"}});
  const exported=await a.page.evaluate(async()=>{
   const r=await fetch("/api/privacy/export");return {status:r.status,data:await r.json(),cache:r.headers.get("cache-control")};
  });
  expect(exported.status).toBe(200);expect(exported.cache).toContain("no-store");
  expect(exported.data.cycleJournal.enabled).toBe(true);
  expect(exported.data.cycleJournal.entries[0].flow).toBe("LIGHT");
+ expect(exported.data.cycleJournal.entries.some(x=>x.date==="2026-03-01")).toBe(true);
  const gone=await send(a.page,"/api/cycle/preferences",{action:"DISABLE",confirmDeletion:true});expect(gone.status).toBe(200);
  expect(gone.body.enabled).toBe(false);
  expect(await db.cycleJournalEntry.count({where:{userId:athlete.id}})).toBe(0);

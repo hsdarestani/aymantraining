@@ -3,7 +3,7 @@ import {canCoachAccess} from "./coach-access";
 import {cycleFeatureEnabled,estimateCycle} from "./cycle-contract";
 import {localDateKey} from "./daily-profile";
 export const cyclePrivateHeaders={"cache-control":"private, no-store"};
-export async function privateCycle(userId:string,options:{includeEntries?:boolean}={}){
+export async function privateCycle(userId:string,options:{includeEntries?:boolean;allEntries?:boolean}={}){
  if(!cycleFeatureEnabled())return {enabled:false,available:false,shareWithCoach:false,remindersEnabled:false,
   consentedAt:null,lastPeriodStart:null,cycleLengthDays:null,forecast:null,entries:[],reminder:null};
  const privacy=await prisma.cyclePrivacy.findUnique({where:{userId}});
@@ -12,8 +12,8 @@ export async function privateCycle(userId:string,options:{includeEntries?:boolea
  const user=await prisma.user.findUnique({where:{id:userId},select:{timezone:true}});
  const today=localDateKey(new Date(),user?.timezone||"Europe/Berlin");
  const since=new Date(Date.parse(today+"T00:00:00Z")-119*86400000);
- const entries=options.includeEntries===false?[]:await prisma.cycleJournalEntry.findMany({where:{userId,date:{gte:since}},
-  orderBy:{date:"desc"},take:120,select:{id:true,date:true,flow:true,symptoms:true,energy:true,mood:true,
+ const entries=options.includeEntries===false?[]:await prisma.cycleJournalEntry.findMany({where:{userId,...(options.allEntries?{}:{date:{gte:since}})},
+  orderBy:{date:"desc"},...(options.allEntries?{}:{take:120}),select:{id:true,date:true,flow:true,symptoms:true,energy:true,mood:true,
    discomfort:true,planChoice:true,updatedAt:true}});
  const forecast=estimateCycle({lastPeriodStart:privacy.lastPeriodStart,cycleLengthDays:privacy.cycleLengthDays,today});
  // In-app, private reminder only, not a push containing reproductive health data.
