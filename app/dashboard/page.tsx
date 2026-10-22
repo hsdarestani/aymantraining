@@ -91,7 +91,7 @@ export default async function Dashboard(){
       <div className="bd-hero-index"><span>01</span><b><Copy text="ATHLETENMODUS"/></b></div>
     </section>
 
-    <WomenDashboard preference={dashboardPreference} confirmedLevel={dailyProfile.journey.confirmedLevel}
+    <WomenDashboard preference={dashboardPreference} journeyEnabled={process.env.JOURNEY_OVERVIEW_ENABLED==="true"} confirmedLevel={dailyProfile.journey.confirmedLevel}
       completed={dailyProfile.plan.completed} scheduled={dailyProfile.plan.scheduled}
       energy={dailyProfile.today.energy} sleepHours={dailyProfile.today.sleepHours}
       goals={womenGoals.map(g=>g.type)}/>
