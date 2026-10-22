@@ -25,7 +25,7 @@ export default function Milestones(){
    <Text style={s.heading}>DEIN NÄCHSTER SCHRITT.</Text>
    {(data.next as Progress[]).map(n=><View key={n.key} style={s.next}><View style={s.nextHeading}><Text style={s.nextLabel}>{n.title}</Text>
      <Text style={s.kicker}>{Math.min(n.progress,n.threshold)} / {n.threshold}</Text></View>
-     <View style={s.track}><View style={[s.fill,{width:Math.max(0,Math.min(100,n.progress/n.threshold*100))+"%"}]}/></View>
+     <View style={s.track}><View style={[s.fill,{width:(Math.max(0,Math.min(100,n.progress/n.threshold*100))+"%") as `${number}%`}]}/></View>
     </View>)}
   </>}
   <Pressable style={s.action} onPress={()=>router.push("/(tabs)/training")}><Text style={s.actionText}>TRAINING ANSEHEN →</Text></Pressable>
