@@ -1,5 +1,4 @@
 import {prisma} from "./db";
-import {dateOnly} from "./http";
 
 function localDay(d:Date,zone:string){
   try{return new Intl.DateTimeFormat("en-CA",{timeZone:zone,year:"numeric",month:"2-digit",day:"2-digit"}).format(d)}
@@ -14,8 +13,8 @@ export async function getAthleteDay(userId:string){
  const [workouts,check,recovery,assigned,pending,feedback,brief,recommendations]=await Promise.all([
   prisma.workout.findMany({where:{userId,scheduledAt:{gte:new Date(Date.now()-36*3600000),lte:new Date(Date.now()+72*3600000)}},
    orderBy:{scheduledAt:"asc"},select:{id:true,title:true,scheduledAt:true,completedAt:true,startedAt:true,rpe:true,notes:true},take:50}),
-  prisma.dailyCheck.findMany({where:{userId,date:{gte:new Date(Date.now()-2*86400000)}}},orderBy:{date:"desc"},take:3}),
-  prisma.wearableDaily.findMany({where:{userId,date:{gte:new Date(Date.now()-2*86400000)}}},orderBy:{date:"desc"},take:5,
+  prisma.dailyCheck.findMany({where:{userId,date:{gte:new Date(Date.now()-2*86400000)}},orderBy:{date:"desc"},take:3}),
+  prisma.wearableDaily.findMany({where:{userId,date:{gte:new Date(Date.now()-2*86400000)}},orderBy:{date:"desc"},take:5,
    select:{date:true,sleepMinutes:true,hrv:true,restingHr:true,source:true}}),
   prisma.coachAssignment.findFirst({where:{athleteId:userId,active:true,OR:[{endsAt:null},{endsAt:{gt:now}}]},select:{coachId:true}}),
   prisma.videoFeedback.findMany({where:{athleteId:userId,status:"OPEN"},select:{id:true,createdAt:true},orderBy:{createdAt:"desc"},take:10}),
