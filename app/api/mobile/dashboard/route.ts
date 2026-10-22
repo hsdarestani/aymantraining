@@ -3,6 +3,7 @@ import {prisma} from "../../../../lib/db";
 import {errorJson,requireApiUser,dateOnly} from "../../../../lib/http";
 import {scoreView} from "../../../../lib/score-view";
 import {getDailyProfile} from "../../../../lib/daily-profile-service";
+import {getDashboardPreference} from "../../../../lib/women-dashboard";
 import {hasFeature} from "../../../../lib/entitlements";
 
 const dayMs=86400000;
@@ -21,6 +22,8 @@ function cycleSummary(enabled:boolean|undefined,start:Date|null|undefined,length
 export async function GET(){
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
  const dailyProfile=await getDailyProfile(user.id);
+ const dashboardPreference=await getDashboardPreference(user.id);
+ const womenGoals=dashboardPreference.mode==="WOMEN"?await prisma.goal.findMany({where:{userId:user.id,active:true},select:{type:true},take:12}):[];
  const today=new Date(dailyProfile.date+"T00:00:00.000Z");
  const tomorrow=new Date(today.getTime()+dayMs);
  const opened=await prisma.analyticsEvent.findFirst({where:{userId:user.id,name:"app_open",createdAt:{gte:today,lt:tomorrow}},select:{id:true}});
@@ -59,6 +62,8 @@ export async function GET(){
   user:{id:user.id,name:user.name,tier:user.subscriptionTier,onboardingCompleted:user.onboardingCompleted,locale:user.locale},
   score:scoreView(score,scoreDetails,dailyProfile.journey.confirmedLevel),
   dailyProfile,
+  dashboardPreference,
+  womenGoals:womenGoals.map(g=>g.type),
   pillarPreview:scoreDetails&&score?{
    strength:score.strength,endurance:score.endurance,athleticism:score.athleticism,mobility:score.mobility,
    recovery:score.recovery,fuel:score.fuel,consistency:score.consistency

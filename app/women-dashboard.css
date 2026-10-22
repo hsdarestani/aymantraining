@@ -1,0 +1,11 @@
+.bd-women-home{background:linear-gradient(135deg,#16211e,#111618 68%);border:1px solid #3e6354;border-top:3px solid #b4dfac;border-radius:14px;padding:clamp(17px,3vw,32px);margin:20px 0 24px;color:#f5fbf6}
+.bd-women-heading span,.bd-women-tiles small,.bd-women-goals small{font:700 11px/1.5 sans-serif;letter-spacing:.11em;color:#a8d4b9}
+.bd-women-heading h2{font-size:clamp(26px,4.2vw,46px);line-height:1.06;letter-spacing:-.04em;margin:13px 0 12px}
+.bd-women-heading p,.bd-women-foot{max-width:670px;line-height:1.6;color:#cfdbd4}
+.bd-women-heading>a,.bd-women-tiles a{color:#d4ff00;display:inline-block;margin-top:11px;font-size:12px;font-weight:700;text-decoration:none}
+.bd-women-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:23px}
+.bd-women-tiles article{min-width:0;background:#203029;border:1px solid #486254;padding:18px;border-radius:10px;display:flex;flex-direction:column;align-items:flex-start}
+.bd-women-tiles strong{font-size:18px;line-height:1.35;margin:12px 0 2px}.bd-women-tiles p{color:#cfdbd4;margin:6px 0}
+.bd-women-goals{margin-top:20px;padding-top:18px;border-top:1px solid #476256}.bd-women-goals p{line-height:1.5;margin:8px 0 0}
+.bd-women-foot{margin:17px 0 0;font-size:12px}
+@media(max-width:750px){.bd-women-tiles{grid-template-columns:1fr}.bd-women-tiles article{padding:15px}.bd-women-heading h2{font-size:30px}}

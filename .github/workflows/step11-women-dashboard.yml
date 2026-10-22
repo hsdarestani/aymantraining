@@ -1,0 +1,83 @@
+name: BE DIFFERENT Step 11 Women Dashboard QA
+on:
+  push:
+    branches:
+      - feature/step11-women-dashboard-20261022
+  pull_request:
+    paths:
+      - "prisma/schema.prisma"
+      - "lib/women-dashboard.ts"
+      - "lib/journey-reader.ts"
+      - "app/api/dashboard-preference/**"
+      - "app/api/mobile/dashboard/**"
+      - "app/components/WomenDashboard.tsx"
+      - "app/dashboard/**"
+      - "app/settings/**"
+      - "app/women-dashboard.css"
+      - "mobile/components/DashboardPreference.tsx"
+      - "mobile/app/(tabs)/index.tsx"
+      - "mobile/app/settings.tsx"
+      - "tests/browser/step11-women-dashboard.spec.mjs"
+      - "scripts/test-step11-presenter-contract.mjs"
+      - ".github/workflows/step11-women-dashboard.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: bedifferent_test
+          POSTGRES_USER: bedifferent
+          POSTGRES_PASSWORD: test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U bedifferent -d bedifferent_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://bedifferent:test@127.0.0.1:5432/bedifferent_test?schema=public
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      NODE_ENV: test
+      WOMEN_DASHBOARD_ENABLED: "true"
+      JOURNEY_ONBOARDING_ENABLED: "true"
+      JOURNEY_OVERVIEW_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: node scripts/test-step11-presenter-contract.mjs
+      - run: node scripts/check-visible-copy.mjs
+      - run: npm run check
+      - run: npx prisma db push
+      - run: npm run build
+      - run: cd mobile && npm ci && npm run typecheck
+      - run: npx playwright install --with-deps chromium
+      - name: Start isolated web
+        run: |
+          NODE_ENV=production npm start > /tmp/step11-next.log 2>&1 &
+          for i in $(seq 1 50); do
+            if curl -fsS http://127.0.0.1:3000/api/ready >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/step11-next.log
+          exit 1
+      - run: npx playwright test tests/browser/step11-women-dashboard.spec.mjs --workers=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: step11-browser
+          path: |
+            test-results
+            playwright-report
+      - if: failure()
+        run: cat /tmp/step11-next.log || true

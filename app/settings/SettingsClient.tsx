@@ -1,5 +1,6 @@
 "use client";
 import {Copy,useT} from "../components/Locale";
+import DashboardPreference from "./DashboardPreference";
 
 import {FormEvent,useState} from "react";
 type Pref={category:string;enabled:boolean;quietFrom:string|null;quietTo:string|null};
@@ -29,6 +30,7 @@ export default function SettingsClient({initialPrefs}:{initialPrefs:Pref[]}){
  async function deleteAccount(){if(!confirm(t("Konto und persönliche Daten endgültig löschen?")))return;const r=await fetch("/api/privacy/delete",{method:"DELETE"});if(r.ok)location.href="/register"}
 
  return <div className="settings-stack">
+  <DashboardPreference/>
   <form className="panel mini-form wide" onSubmit={checkin}>
    <span className="eyebrow"><Copy text={"10 SEKUNDEN TAGESCHECK"}/></span><h2><Copy text={"Wie fühlst du dich heute?"}/></h2>
    <div className="input-grid compact-inputs">
