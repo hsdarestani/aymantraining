@@ -1,0 +1,12 @@
+.cy-stack{display:grid;gap:18px;padding:12px 0 40px}.cy-stack .panel{padding:clamp(18px,3vw,28px);border-radius:12px}.cy-stack h2{margin:0 0 12px;font-size:clamp(20px,3vw,27px)}
+.cy-stack p{max-width:780px;line-height:1.6;color:var(--muted,#b2bbc0)}
+.cy-stack input:not([type=checkbox]),.cy-stack select{display:block;width:100%;max-width:380px;min-height:44px;padding:8px 10px;margin-top:8px;background:#171d1b;color:#f7fbf8;border:1px solid #5b6e62;border-radius:8px;font:inherit}
+.cy-stack label{display:block;line-height:1.5;margin:12px 0}.cy-stack input[type=checkbox]{width:18px;height:18px;vertical-align:middle;margin:0 9px 0 0}
+.cy-stack button{cursor:pointer}.cy-stack button:disabled{opacity:.48;cursor:not-allowed}.cy-consent{border-top:3px solid #b1dfb5}.cy-settings{border-top:3px solid #8ab3a4}
+.cy-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.cy-calendar header{display:flex;gap:18px;align-items:center;justify-content:space-between;max-width:520px}.cy-calendar header button{font-size:25px;min-width:48px;min-height:44px;border:1px solid #5b6e62;border-radius:8px;background:#18231e;color:#fff}
+.cy-days{max-width:520px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:18px 0}
+.cy-days>*{display:grid;place-items:center;min-height:43px;padding:3px;font-size:13px;border:1px solid transparent;border-radius:8px;text-align:center;color:#f0f6f1}.cy-days button{background:#1d2923;border:1px solid #33453a}
+.cy-days .cy-recorded{border-color:#b1dfb5}.cy-days .cy-selected{background:#b9e778;color:#11180f;font-weight:800}.cy-days .cy-estimate{border:2px dotted #f0ce7c}
+.cy-symptoms{display:flex;gap:6px 19px;flex-wrap:wrap}.cy-symptoms label{flex:0 1 170px}.cy-entry fieldset{border:1px solid #52645a;border-radius:9px;margin:14px 0;padding:15px}
+.cy-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.cy-note{font-size:12px}.cy-delete{border:1px solid #965558}.cy-ok{color:#b9e778!important}.cy-error{color:#ffc3c3!important}
+@media(max-width:640px){.cy-fields{grid-template-columns:1fr}.cy-days{gap:3px}.cy-days>*{min-height:40px}.cy-actions>*{width:100%}}
