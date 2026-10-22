@@ -12,7 +12,7 @@ async function makeSession(user,label){
 }
 test.beforeAll(async()=>{
  if(!process.env.DATABASE_URL?.includes("bedifferent_test"))throw Error("Isolated Postgres required");
- athlete=await db.user.create({data:{email:"step6-athlete-"+stamp+"@example.invalid",passwordHash:"test",role:"ATHLETE"}});
+ athlete=await db.user.create({data:{email:"step6-athlete-"+stamp+"@example.invalid",passwordHash:"test",role:"ATHLETE",onboardingCompleted:true}});
  coach=await db.user.create({data:{email:"step6-coach-"+stamp+"@example.invalid",passwordHash:"test",role:"COACH"}});
  await db.coachAssignment.create({data:{coachId:coach.id,athleteId:athlete.id,active:true}});
  await makeSession(athlete,"athlete");await makeSession(coach,"coach");
