@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: bedifferent-journey-safe-production
   cancel-in-progress: false
@@ -28,6 +29,24 @@ jobs:
             echo "BLOCKED: tested source is no longer the latest main revision."
             exit 1
           fi
+      - name: Require green product quality for identical main SHA
+        env:
+          CHECKED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 50); do
+            quality="$(gh api "repos/$REPO/actions/runs?head_sha=$CHECKED_SHA&per_page=100"               --jq '[.workflow_runs[] | select(.name=="Product Quality Gate")] | first | .conclusion // "pending"')"
+            if [ "$quality" = "success" ]; then exit 0; fi
+            if [ "$quality" = "failure" ] || [ "$quality" = "cancelled" ]; then
+              echo "BLOCKED: Product Quality Gate failed for this commit" >&2
+              exit 1
+            fi
+            sleep 12
+          done
+          echo "BLOCKED: could not verify a successful product quality gate" >&2
+          exit 1
       - name: Backup then activate only BE DIFFERENT
         uses: appleboy/ssh-action@v1.2.0
         with:
