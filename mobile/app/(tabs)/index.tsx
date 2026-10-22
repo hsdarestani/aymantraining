@@ -49,7 +49,7 @@ export default function Home(){
  const nextFocus=[...scorePillars].filter(p=>p.value!=null).sort((a,b)=>(a.value??101)-(b.value??101))[0];
  if(!d)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
  return <SafeAreaView edges={["top"]} style={s.safe}><ScrollView style={s.safe} contentContainerStyle={[s.content,{paddingBottom:126+bottomClearance}]} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={C.volt}/>}>
-  <View style={s.top}><Brand compact/><View style={s.topActions}><LanguagePicker inline/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,recordedValue!=null&&recordedValue<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}><Copy text="BD SCORE"/></Text><Text style={s.scorePillValue}>{recordedValue==null?"—":recordedValue+"%"}</Text></Pressable></View></View>
+  <View style={s.top}><Brand compact/><View style={s.topActions}><LanguagePicker inline/><Pressable onPress={()=>router.push("/digital-twin")} style={[s.scorePill,recordedValue!=null&&recordedValue<55&&s.scorePillAlert]}><Text style={s.scorePillLabel}><Copy text="BD SCORE"/></Text><Text style={s.scorePillValue}>{recordedValue==null?"?":recordedValue+"%"}</Text></Pressable></View></View>
 
   <View style={s.heroEditorial}>
    {d.heroPhotoId&&mediaToken&&!photoFailed?
@@ -79,14 +79,14 @@ export default function Home(){
    <Text style={s.dailyProofTitle}>{plan?.status==="NOT_SCHEDULED"?"Kein Training eingetragen":plan?.status==="DONE"?"Alle Einheiten erledigt":plan?.status==="PARTIAL"?"Training teilweise erledigt":"Training steht an"}</Text>
    <Text style={s.dailyProofText}>{plan?.scheduled?plan.completed+" von "+plan.scheduled+" geplanten Einheiten erledigt":"Das bedeutet nicht automatisch einen Erholungstag."}</Text>
    <Text style={s.dailyProofText}>ENERGIE: {profile.today.energy??"Keine Angabe"} · SCHLAF: {profile.today.sleepHours==null?"Keine Angabe":profile.today.sleepHours+" h"}</Text>
-   <Text style={s.dailyProofText}>BESTÄTIGTES LEVEL: {profile.journey.confirmedLevel??"Noch nicht bestätigt"}</Text>
+   <Text style={s.dailyProofText}>BESTÄTIGTE STUFE: {profile.journey.confirmedLevel??"Noch nicht bestätigt"}</Text>
    <Pressable accessibilityRole="button" onPress={()=>router.push("/(tabs)/training")}><Text style={s.dailyProofLink}>TRAININGSPLAN ANSEHEN →</Text></Pressable>
   </View>}
   <View style={s.editorialScore}>
    <View style={s.editorialIntro}>
     <Text style={s.editorialEyebrow}><Copy text="BE DIFFERENT SCORE"/></Text>
     <View style={s.editorialFigure}><Text style={s.editorialValue}>{recordedValue??"—"}</Text><Text style={s.editorialPercent}>%</Text></View>
-    <Text style={s.editorialLevel}>LEISTUNGSPROFIL · KEIN LEVEL</Text>
+    <Text style={s.editorialLevel}>LEISTUNGSPROFIL · KEINE STUFE</Text>
     <Text style={s.editorialTarget}>MESSSTAND: {profile?.profile.recordedDate??"Keine Angabe"}</Text>
     <Text style={s.editorialData}>DATENABDECKUNG {profile?.profile.completeness??0}%</Text>
    </View>
