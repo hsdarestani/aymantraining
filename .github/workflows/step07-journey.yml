@@ -1,0 +1,68 @@
+name: BE DIFFERENT Step 07 Chapter Journey QA
+on:
+  push:
+    branches:
+      - feature/bedifferent-step07-journey-navigation
+  pull_request:
+    paths:
+      - "lib/journey-reader.ts"
+      - "app/journey/**"
+      - "app/api/journey/overview/**"
+      - "app/api/journey/chapters/**"
+      - "app/api/journey/legacy-transition/**"
+      - "mobile/app/journey.tsx"
+      - "scripts/test-journey-step07.mjs"
+      - ".github/workflows/step07-journey.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  journey-map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: bedifferent_test
+          POSTGRES_USER: bedifferent
+          POSTGRES_PASSWORD: bedifferent_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bedifferent -d bedifferent_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://bedifferent:bedifferent_test@127.0.0.1:5432/bedifferent_test?schema=public
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      NODE_ENV: test
+      JOURNEY_OVERVIEW_ENABLED: "true"
+      NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED: "true"
+      EXPO_PUBLIC_JOURNEY_OVERVIEW_ENABLED: "true"
+      JOURNEY_TESTS_ENABLED: "true"
+      JOURNEY_EDITOR_ENABLED: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - name: Validate schema and TypeScript
+        run: npm run check
+      - name: Create isolated Postgres
+        run: npx prisma db push
+      - name: New confidential overview and legacy preservation tests
+        run: node scripts/test-journey-step07.mjs
+      - name: Previous progression engine tests
+        run: node scripts/test-journey-step03.mjs
+      - name: Native app typecheck
+        run: |
+          cd mobile
+          npm ci
+          npm run typecheck
+      - name: Production build
+        run: npm run build
