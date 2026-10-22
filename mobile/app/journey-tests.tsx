@@ -61,7 +61,7 @@ function ExamCard({exam,enrollmentId,ready,reload}:{exam:Exam;enrollmentId:strin
 export default function JourneyTests(){
  const [data,setData]=useState<Journey[]>([]),[loading,setLoading]=useState(true);
  const [err,setErr]=useState(""),[busy,setBusy]=useState("");
- const enabled=process.env.EXPO_PUBLIC_JOURNEY_TESTS_ENABLED==="true";
+ const enabled=process.env.EXPO_PUBLIC_JOURNEY_TESTS_ENABLED!=="false";
  const refresh=useCallback(async()=>{
   if(!enabled){setLoading(false);return;}
   try{const v=await api<{enrollments:Journey[]}>("/api/journey/tests");setData(v.enrollments);setErr("");}
