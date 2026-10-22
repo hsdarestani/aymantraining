@@ -57,7 +57,7 @@ export async function GET(){
  return NextResponse.json({
   ok:true,
   user:{id:user.id,name:user.name,tier:user.subscriptionTier,onboardingCompleted:user.onboardingCompleted,locale:user.locale},
-  score:scoreView(score,scoreDetails),
+  score:scoreView(score,scoreDetails,dailyProfile.journey.confirmedLevel),
   dailyProfile,
   pillarPreview:scoreDetails&&score?{
    strength:score.strength,endurance:score.endurance,athleticism:score.athleticism,mobility:score.mobility,
