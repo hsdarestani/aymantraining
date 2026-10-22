@@ -41,9 +41,9 @@ export default function Home(){
  const score=d?.score,a=d?.activity||{},pillars=d?.pillarPreview||d?.score||{};
  const profile=d?.dailyProfile,recordedValue=profile?.profile?.value??null,plan=profile?.plan;
  const line=String(d?.differentLine||"Heute zählt die nächste saubere Entscheidung.");
- const sleep=a.sleepHours;
+ const sleep=profile?.today?.sleepHours??null;
  const wearable=d?.wearable||{};
- const sleepDisplay=wearable?.sleepMinutes!=null?Math.floor(wearable.sleepMinutes/60)+":"+String(wearable.sleepMinutes%60).padStart(2,"0"):sleep==null?null:String(sleep);
+ const sleepDisplay=sleep==null?null:String(sleep);
  const priority=useMemo(()=>d?.recommendations?.[0]||null,[d]);
  const scorePillars=pillarMeta.map(([letter,key,label])=>({letter,key,label,value:typeof pillars?.[key]==="number"&&Number.isFinite(pillars[key])?Number(pillars[key]):null}));
  const nextFocus=[...scorePillars].filter(p=>p.value!=null).sort((a,b)=>(a.value??101)-(b.value??101))[0];
