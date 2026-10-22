@@ -1,25 +1,21 @@
-# BE DIFFERENT — Step 12: Privater Zykluskalender
+# BE DIFFERENT — Schritt 12: Privates Zyklustagebuch und Einwilligung
+22. Oktober 2026. Implementiert für Web und Expo; Codebereitstellung ist keine Freischaltung auf dem gemeinsamen Esthetic-Server.
 
-Datum: 22.10.2026. Ein sensibler privater Fitness-Kontext, keine medizinische Beratung oder Verhütungsmethode.
+## Fertiger Umfang
+- Optionales, eigenes Tagebuch. Keine automatische Einwilligung aus Geschlecht, Frauenansicht, allgemeiner Gesundheitszustimmung oder älteren App-Versionen.
+- Getrennte ausdrückliche Zustimmung vor jedem Eintrag; eigene bestätigungspflichtige Trainerfreigabe; Widerruf sofort möglich.
+- Datumsbasierte Aufzeichnungen: Blutungsstärke, Beschwerden, Energie, Stimmung, empfundene Belastung und persönlicher Wunsch nach leichterem Training oder Ruhe.
+- Letzter vom Nutzer beobachteter Periodenbeginn und optionale übliche Länge 20–45 Tage. Nur grobe Termine; bei fehlenden/veralteten Angaben keine Vorhersage, kein Fertilitäts- oder Empfängnisverhütungsdienst.
+- Persönlicher Wunsch hat *keine* automatische Wirkung auf Trainingsplan, Testbestehen, Scores, Level, Abzeichen oder Freischaltung; Trainer müssen Trainingsänderungen separat prüfen.
+- Erinnerung nur privat **innerhalb** des Tagebuchs, keine Push-Nachricht, die sensible Daten offenlegen könnte.
+- Speichern/Löschen einzelner Tage, Export aller privaten Einträge per eigenem Konto und **vollständige Löschung aller Zyklusdaten und Freigaben bei Widerruf**.
+- Der Coach-Endpoint ist nur für den zugewiesenen, aktuell berechtigten Trainer oder Admin nach separater ausdrücklicher Freigabe zugänglich. Er liefert nur Trainingswunsch, Energie und empfundenes Unwohlsein aus den letzten 14 Tagen, **keine** Blutungsstärke, Symptomsammlung, Zyklustage oder Prognose.
+- Alte allgemeine AthleteContext-Zyklusfelder werden nicht mehr aktiviert und in GET neutralisiert. Alte Versionen dürfen ohne eigene Zustimmung keine neuen Zyklusdaten speichern.
+- Früher erzeugte Cycle-Kontextempfehlungen werden bei Bewertung entfernt und nicht mehr auf dem Haupt-Dashboard ausgeliefert.
 
-## Funktionen
-- Eigenständige Einwilligung zum privaten Zykluskalender; freiwillig und standardmäßig **aus**, unabhängig von Geschlecht, Frauenansicht, Abo, Training und Level.
-- Eigener Datenschutzbereich für Blutung (optional), Beschwerden, Energie, Stimmung, Schmerzen, ausdrücklich gewählte leichtere Einheit oder gewünschten Ruhetag. Keine automatische Änderung des Trainingsplans und keine automatische Freischaltung/Abwertung einer Stufe.
-- Optionaler letzter Beginn und ungefähre Intervalldauer (20 bis 45 Tage). Datumsangaben sind grobe Schätzungen. Bei alten Aufzeichnungen (>90 Tage) wird die Schätzung unterdrückt. Es werden weder Eisprung- noch Fruchtbarkeitstage ausgegeben. Nicht zur Verhütung oder Schwangerschaftsplanung nutzen.
-- Dezente Hinweise **nur innerhalb des privaten Bereichs**, separat abschaltbar. Keine vertraulichen Inhalte in Push-Benachrichtigungen.
-- Separate, ausdrücklich bestätigte Trainerfreigabe: Ein zugeordneter Trainer sieht höchstens die letzten 14 Tage mit Belastungswunsch, Energie und Belastungsempfinden. Keine Blutung, Symptome, Zykluslänge oder Vorhersagen. Ohne Freigabe 403, auch für Administratoren. Andere Nutzer haben keinen Zugang.
-- Vollständiger Export über den bestehenden benutzereigenen Download. Einzelne Tage löschen, Trainerfreigabe zurückziehen, oder den Kalender einschließlich Aufzeichnungen, Freigaben und Einstellungen deaktivieren und löschen. Kontolöschung löscht über DB-Kaskade ebenfalls beide neuen Tabellen.
-- Altes AthleteContext-Tracking ist deaktiviert und wird bei Änderung, Zustimmung oder Löschung bereinigt. Frühere pauschale Zyklusphasen-Empfehlungen sind aus der globalen Coaching-Engine entfernt und werden in Home-Endpunkten nicht mehr angezeigt.
+## Schema und sichere Freischaltung
+Zwei neue rein personenbezogene Prisma-Modelle CyclePrivacy/CycleJournalEntry mit Cascade und eindeutiger userId/date-Beziehung. Das Flag `CYCLE_JOURNAL_ENABLED` ist standardmäßig *aus*. Erst vollständige Backups und isoliertes Preflight auf dem gemeinsam genutzten VPS durchführen, additive Schemaänderungen vorsichtig ausrollen, und **erst dann** das Flag aktivieren. Niemals eine ungeprüfte `prisma db push` gegen den Produktivserver ausführen. Bei nicht aktivierter Funktion greift die App nicht auf diese neuen Tabellen zu.
+Kein live VPS-Deployment, keine Store-Builds, keine Lizenzen oder klinische Freigabe durch den Code-Commit.
 
-## Datenhaltung und Sicherheit
-- Private Datensätze CyclePrivacy/CycleJournalEntry, nur am User verknüpft. Alle Besitzerabfragen sind an die authentifizierte Nutzer-ID gebunden, keine Benutzer-ID in Write-Payloads. Die Coach-Ansicht prüft Rolle, Trainer-Zuordnung **und** gesonderte Zustimmung.
-- API antwortet mit Cache-Control private, no-store. POST/PUT/DELETE prüfen Login, Athletenrolle, Same-Origin/Mobile-Token und JSON-Schema inklusive gültigem Datum und erlaubten Werten.
-- Neue Tabellen werden bei CYCLE_JOURNAL_ENABLED=false nicht gelesen. Keine neuen Berechtigungen aus der Frauen-Dashboard-Auswahl ableiten.
-
-## Rollout und Abnahme
-1. CI Step12 mit isolierter PostgreSQL-Datenbank: reiner Kalender-Test, Typecheck Web, Next.js Build, Expo Typecheck, Browser-Tests zu Zustimmung, Eigentümer-Isolation, Trainerfreigabe, Export und Löschen.
-2. Vor Aktivierung auf gemeinsamem Esthetic-VPS: bekannte Prisma-Migrator-Abhängigkeit (jiti) beheben, nur für BE DIFFERENT Sicherung von Datenbank/Medien/Env und additiven Schema-Abgleich auf bedifferent_temp durchführen. Keinesfalls die Esthetic-Datenbanken oder Dienste migrieren.
-3. Erst nach erfolgreichem Smoke-Test CYCLE_JOURNAL_ENABLED=true setzen; auf echtem Server Routen und Deaktivierung nochmal testen.
-4. Neue Android- und iOS-Builds erstellen, Gerätetests und Store-Einreichung gesondert bestätigen.
-
-Nicht behaupten, dass die Änderungen ohne geprüften Produktions-Rollout bereits live sind. Es gibt keine externen Trainer-Medien für diesen Schritt.
+## Akzeptanz und Grenzen
+CI: Datenbanktest in isoliertem PostgreSQL, Schema/TypeScript, Next-Build, Expo-Typecheck, browserbasierter ausdrücklicher Opt-in, Schreibsperre ohne Zustimmung, per-User-Isolation, eigene Rechte für Coach, minimaler Share-Scope, Export, Löschung/Widerruf, alte API gesperrt und unveränderte Journey-Berechtigungen. Bei ungewöhnlich starker Blutung, starken Schmerzen oder auffälligen Beschwerden weist die UI nicht auf automatische medizinische Empfehlungen hin; gesundheitliche Fragen sollen durch medizinisches Personal geklärt werden.

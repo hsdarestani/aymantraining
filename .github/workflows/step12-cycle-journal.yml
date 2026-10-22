@@ -1,7 +1,7 @@
 name: BE DIFFERENT Step 12 Private Cycle Journal QA
 on:
   push:
-    branches: [feature/step12-private-cycle-journal-20261022]
+    branches: [feature/step12-private-cycle-journal-20261022, main]
   pull_request:
     paths:
       - "prisma/schema.prisma"
