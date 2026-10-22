@@ -17,8 +17,11 @@ export async function getDailyProfile(userId:string,now=new Date()){
   prisma.workout.findMany({where:{userId,scheduledAt:{
    gte:new Date(now.getTime()-36*3600000),lte:new Date(now.getTime()+36*3600000)}},
    select:{id:true,title:true,scheduledAt:true,completedAt:true},orderBy:{scheduledAt:"asc"}}),
-  prisma.journeyEnrollment.findFirst({where:{userId,state:{in:["ACTIVE","FINISHED"]},confirmedLevel:{not:null}},
-   orderBy:{startedAt:"desc"},select:{confirmedLevel:true}})
+  // An older shared-host database can legitimately lack Journey tables until Step 08 activation.
+  process.env.JOURNEY_OVERVIEW_ENABLED==="true"
+   ? prisma.journeyEnrollment.findFirst({where:{userId,state:{in:["ACTIVE","FINISHED"]},confirmedLevel:{not:null}},
+      orderBy:{startedAt:"desc"},select:{confirmedLevel:true}})
+   : Promise.resolve(null)
  ]);
  // Different wearable sources can report the same date. Prefer the latest dated valid measure.
  const sleep=sleepRows.find(row=>row.date.toISOString().slice(0,10)===day)
