@@ -53,8 +53,8 @@ export default async function Dashboard(){
     return {offset,date,workouts};
   });
   const dayNames=["GESTERN","HEUTE","MORGEN"];
-  const sleepHours=wearable?.sleepMinutes!=null?Math.round(wearable.sleepMinutes/6)/10:check?.sleepHours;
-  const sleepDisplay=wearable?.sleepMinutes!=null?Math.floor(wearable.sleepMinutes/60)+":"+String(wearable.sleepMinutes%60).padStart(2,"0"):sleepHours==null?null:String(sleepHours);
+  const sleepHours=dailyProfile.today.sleepHours;
+  const sleepDisplay=sleepHours==null?null:String(sleepHours);
   const sleepStageObject=wearable?.sleepStages&&typeof wearable.sleepStages==="object"&&!Array.isArray(wearable.sleepStages)?wearable.sleepStages as Record<string,unknown>:null;
   const currentHeartRate=typeof sleepStageObject?.currentHeartRate==="number"?sleepStageObject.currentHeartRate:null;
   const protein=nutrition?.proteinG??check?.proteinG??null;
