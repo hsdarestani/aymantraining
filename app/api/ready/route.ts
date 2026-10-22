@@ -11,7 +11,7 @@ export async function GET(){
     womenDashboard:process.env.WOMEN_DASHBOARD_ENABLED==="true",
     cycleJournal:process.env.CYCLE_JOURNAL_ENABLED==="true",
     milestones:process.env.MILESTONES_ENABLED==="true",
-    celebrations:process.env.CELEBRATIONS_ENABLED==="true"
+    celebrations:process.env.CELEBRATIONS_ENABLED==="true"&&process.env.MILESTONES_ENABLED==="true"
    },
    journey:{
     onboarding:process.env.JOURNEY_ONBOARDING_ENABLED==="true",
