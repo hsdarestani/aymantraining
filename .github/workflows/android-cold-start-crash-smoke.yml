@@ -9,6 +9,7 @@ on:
       - mobile/app/_layout.tsx
       - mobile/components/LaunchIntro.tsx
       - .github/workflows/android-cold-start-crash-smoke.yml
+      - mobile/scripts/ci/step15-android-cold-start.sh
 
 permissions:
   contents: read
@@ -48,39 +49,22 @@ jobs:
           CI=1 npx expo prebuild --platform android --clean --non-interactive
           chmod +x android/gradlew
           ./android/gradlew -p android --no-daemon :app:assembleDebug
+      - name: Validate reused cold-start script
+        run: bash -n scripts/ci/step15-android-cold-start.sh
       - name: Repeated cold starts and Android crash capture
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
           arch: x86_64
           profile: pixel_6
-          disable-animations: true
+          ram-size: 2048M
+          emulator-boot-timeout: 900
+          disable-animations: false
           working-directory: mobile
-          script: |
-            set -eu
-            mkdir -p build/crash-smoke
-            adb install -r android/app/build/outputs/apk/debug/app-debug.apk
-            package=com.smarbiz.bedifferent
-            for attempt in $(seq 1 10); do
-              adb shell am force-stop "$package"
-              adb logcat -c
-              adb shell monkey -p "$package" -c android.intent.category.LAUNCHER 1 > /dev/null
-              sleep 9
-              adb logcat -d -v time > "build/crash-smoke/launch-$attempt.log"
-              if grep -E -A 16 'FATAL EXCEPTION|Fatal signal|Force finishing activity.*com.smarbiz.bedifferent' "build/crash-smoke/launch-$attempt.log" > "build/crash-smoke/fatal-$attempt.txt"; then
-                echo "Android crash on launch $attempt"
-                cat "build/crash-smoke/fatal-$attempt.txt"
-                exit 1
-              fi
-              if ! adb shell pidof "$package" >/dev/null; then
-                echo "App process exited during cold start $attempt"
-                exit 1
-              fi
-              echo "Launch $attempt stable"
-            done
+          script: bash scripts/ci/step15-android-cold-start.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: bedifferent-android-launch-logcat
-          path: mobile/build/crash-smoke
+          path: mobile/build/step15
           retention-days: 7
