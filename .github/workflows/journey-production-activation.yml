@@ -47,6 +47,14 @@ jobs:
           done
           echo "BLOCKED: could not verify a successful product quality gate" >&2
           exit 1
+      - name: Require authorized server key
+        env:
+          SSH_KEY_PRESENT: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          if [ -z "$SSH_KEY_PRESENT" ]; then
+            echo "::error::Deployment paused. Set SSH_PRIVATE_KEY in repository Actions secrets for the BE DIFFERENT host."
+            exit 1
+          fi
       - name: Backup then activate only BE DIFFERENT
         uses: appleboy/ssh-action@v1.2.0
         with:
