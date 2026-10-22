@@ -63,7 +63,7 @@ test("only athlete owner can submit video and only assigned coach can review it"
  await assigned.page.goto(host+"/admin/journey-videos");
  await expect(assigned.page.getByText("Bitte Technik der Kniebeuge kontrollieren")).toBeVisible();
  await assigned.page.getByRole("textbox",{name:"Persönliches Feedback"}).fill("Achte auf kontrollierte Kniebewegung und stabile Rumpfmuskulatur.");
- await assigned.page.getByRole("combobox").selectOption(workout.id);
+ await assigned.page.getByRole("combobox",{name:"Optionaler Bezug zur nächsten geplanten Einheit"}).selectOption(workout.id);
  await assigned.page.getByRole("textbox",{name:"Fokus"}).fill("Rumpfstabilität");
  await assigned.page.getByRole("textbox",{name:"Hinweise"}).fill("Beim nächsten Training drei Sätze langsam ausführen.");
  await assigned.page.getByRole("button",{name:"BEWERTUNG SPEICHERN"}).click();
