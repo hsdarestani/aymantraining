@@ -5,6 +5,7 @@ on:
     branches: [main, "completion/**"]
     paths:
       - "mobile/**"
+      - "release-request.json"
       - ".github/workflows/native-check.yml"
   workflow_dispatch:
 

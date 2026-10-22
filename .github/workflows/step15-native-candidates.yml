@@ -1,0 +1,150 @@
+name: BE DIFFERENT Step 15 Native Store Candidates
+on:
+  push:
+    branches: [main, feature/step15-final-qa-release-20261022]
+    paths:
+      - "mobile/**"
+      - "release-request.json"
+      - "scripts/test-step15-release-request.mjs"
+      - ".github/workflows/step15-native-candidates.yml"
+  pull_request:
+    paths:
+      - "mobile/**"
+      - "release-request.json"
+      - "scripts/test-step15-release-request.mjs"
+      - ".github/workflows/step15-native-candidates.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android:
+    name: Android installable APK and repeated cold starts
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Verify release version, Firebase configuration and typecheck
+        run: |
+          node ../scripts/test-step15-release-request.mjs
+          npm ci
+          npm run typecheck
+          node scripts/prepare-native-config.mjs --require-android
+          CI=1 npx expo prebuild --platform android --clean --non-interactive
+      - name: Build Android installable candidate
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew --no-daemon :app:assembleDebug
+          test -s app/build/outputs/apk/debug/app-debug.apk
+      - name: Android emulator cold start 10 times, check fatal crashes
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          working-directory: mobile
+          script: |
+            set -eu
+            mkdir -p build/step15
+            adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+            for attempt in $(seq 1 10); do
+              adb shell am force-stop com.smarbiz.bedifferent
+              adb logcat -c
+              adb shell monkey -p com.smarbiz.bedifferent -c android.intent.category.LAUNCHER 1 >/dev/null
+              sleep 6
+              adb logcat -d -v time > "build/step15/cold-start-$attempt.log"
+              if grep -E -A 16 "FATAL EXCEPTION|Fatal signal|Force finishing activity.*com.smarbiz.bedifferent" "build/step15/cold-start-$attempt.log" > "build/step15/fatal-$attempt.txt"; then
+                cat "build/step15/fatal-$attempt.txt"
+                exit 1
+              fi
+              adb shell pidof com.smarbiz.bedifferent >/dev/null || { echo "App exited after start $attempt"; exit 1; }
+              echo "Verified cold start $attempt"
+            done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BE-DIFFERENT-1.3.0-Build21-Android-debug-APK-and-smoke
+          path: |
+            mobile/android/app/build/outputs/apk/debug/app-debug.apk
+            mobile/build/step15/
+          retention-days: 14
+  ios:
+    name: iOS simulator candidate with accessibility and watch companions
+    runs-on: macos-15
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Verify release identity and dependencies
+        run: |
+          node ../scripts/test-step15-release-request.mjs
+          npm ci
+          npm run typecheck
+          node scripts/prepare-native-config.mjs --require-ios
+      - name: Prepare iOS project and companions
+        run: CI=1 npx expo prebuild --platform ios --clean --non-interactive
+      - name: Compile and package iOS simulator candidate
+        run: |
+          set -euo pipefail
+          cd ios
+          workspace="$(find . -maxdepth 1 -name '*.xcworkspace' -print -quit)"
+          test -n "$workspace"
+          scheme="$(xcodebuild -list -json -workspace "$workspace" | python3 -c 'import json,sys; print(json.load(sys.stdin)["workspace"]["schemes"][0])')"
+          xcodebuild -workspace "$workspace" -scheme "$scheme" -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/step15-ios \
+            CODE_SIGNING_ALLOWED=NO build >/tmp/step15-ios-build.log 2>&1 || { tail -n 120 /tmp/step15-ios-build.log; exit 1; }
+          app="$(find /tmp/step15-ios/Build/Products/Debug-iphonesimulator -maxdepth 1 -name '*.app' -type d -print -quit)"
+          test -d "$app"
+          # The simulator bundle is NOT an Apple Store IPA. Ad-hoc-sign it
+          # with a local Keychain access group so SecureStore login can work.
+          # The Publisher separately performs real distribution signing.
+          entitlement_plist="$(mktemp /tmp/bedifferent-step15-entitlement.XXXXXX)"
+          python3 - "$entitlement_plist" <<'PY'
+          import plistlib,sys
+          team="884MVA2MD5"
+          bundle="com.smarbiz.bedifferent"
+          with open(sys.argv[1],"wb") as file:
+              plistlib.dump({
+                "application-identifier":f"{team}.{bundle}",
+                "com.apple.developer.team-identifier":team,
+                "keychain-access-groups":[f"{team}.{bundle}"],
+              },file)
+          PY
+          if test -d "$app/Frameworks/hermes.framework"; then
+            codesign --force --sign - "$app/Frameworks/hermes.framework"
+          fi
+          if test -d "$app/PlugIns/widget.appex"; then
+            codesign --force --sign - "$app/PlugIns/widget.appex"
+          fi
+          codesign --force --sign - --entitlements "$entitlement_plist" "$app"
+          codesign --verify --deep --strict "$app"
+          mkdir -p build/step15
+          ditto -c -k --sequesterRsrc --keepParent "$app" build/step15/BE-DIFFERENT-1.3.0-Build21-iOS-Simulator.zip
+          unzip -t build/step15/BE-DIFFERENT-1.3.0-Build21-iOS-Simulator.zip | tail -n 3
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: BE-DIFFERENT-1.3.0-Build21-iOS-Simulator
+          path: mobile/ios/build/step15/BE-DIFFERENT-1.3.0-Build21-iOS-Simulator.zip
+          if-no-files-found: error
+          retention-days: 14

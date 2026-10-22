@@ -18,6 +18,7 @@ concurrency:
 jobs:
   trigger:
     runs-on: ubuntu-latest
+    timeout-minutes: 105
     steps:
       - uses: actions/checkout@v4
 
@@ -26,6 +27,56 @@ jobs:
         run: |
           enabled="$(jq -r '.enabled // false' release-request.json)"
           echo "enabled=$enabled" >> "$GITHUB_OUTPUT"
+
+      - name: Reject stale or mismatched release metadata
+        if: steps.request.outputs.enabled == 'true'
+        run: |
+          set -euo pipefail
+          node scripts/test-step15-release-request.mjs --enabled
+          test "$GITHUB_REF" = "refs/heads/main"
+          echo "Publisher request matches exact mobile version and production bundle."
+
+      - name: Require green CI on exact source before Publisher submission
+        if: steps.request.outputs.enabled == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          required=(
+            "Product Quality Gate"
+            "BE DIFFERENT Step 08 Security and Activation Gate"
+            "BE DIFFERENT Step 11 Women Dashboard QA"
+            "BE DIFFERENT Step 12 Private Cycle Journal QA"
+            "BE DIFFERENT Step 13 Verified Streak and Milestones QA"
+            "BE DIFFERENT Step 14 Accessible Celebrations QA"
+            "BE DIFFERENT Step 15 Release Acceptance"
+            "Native App Check"
+            "BE DIFFERENT Step 15 Native Store Candidates"
+          )
+          for attempt in $(seq 1 120); do
+            response="$(curl -fsS --connect-timeout 8 --max-time 20 \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$GITHUB_SHA&per_page=100")"
+            done_count=0
+            for check in "${required[@]}"; do
+              result="$(printf '%s' "$response" | jq -r --arg name "$check" \
+                '[.workflow_runs[] | select(.name==$name) | .conclusion] | first // "pending"')"
+              case "$result" in
+                success) done_count=$((done_count+1));;
+                failure|cancelled|timed_out|action_required|skipped)
+                  echo "::error::Release blocked: $check = $result"
+                  exit 1;;
+                *) ;;
+              esac
+            done
+            if [ "$done_count" -eq "${#required[@]}" ]; then
+              echo "All ${#required[@]} required exact-source checks passed."
+              exit 0
+            fi
+            sleep 45
+          done
+          echo "::error::Timed out waiting for exact-source quality and native checks."
+          exit 1
 
       - name: Queue Publisher builds
         if: steps.request.outputs.enabled == 'true'

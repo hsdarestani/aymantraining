@@ -1,0 +1,88 @@
+name: BE DIFFERENT Step 15 Release Acceptance
+on:
+  push:
+    branches: [main, feature/step15-final-qa-release-20261022]
+  pull_request:
+    paths:
+      - "mobile/**"
+      - "release-request.json"
+      - "scripts/test-step15-release-request.mjs"
+      - ".github/workflows/publisher-release.yml"
+      - ".github/workflows/step15-release-acceptance.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  release-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: bedifferent_test
+          POSTGRES_USER: bedifferent
+          POSTGRES_PASSWORD: test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U bedifferent -d bedifferent_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      DATABASE_URL: postgresql://bedifferent:test@127.0.0.1:5432/bedifferent_test?schema=public
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      NODE_ENV: test
+      MILESTONES_ENABLED: "true"
+      CELEBRATIONS_ENABLED: "true"
+      WOMEN_DASHBOARD_ENABLED: "true"
+      CYCLE_JOURNAL_ENABLED: "true"
+      JOURNEY_ONBOARDING_ENABLED: "false"
+      JOURNEY_OVERVIEW_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Exact native/store version contract
+        run: node scripts/test-step15-release-request.mjs
+      - name: Web and native regression contracts
+        run: |
+          node scripts/test-step10-daily-profile.mjs
+          node scripts/test-step10-level-isolation.mjs
+          node scripts/test-step11-presenter-contract.mjs
+          node scripts/test-step12-cycle-contract.mjs
+          node scripts/test-step13-streak.mjs
+          node scripts/test-step14-celebration-contract.mjs
+          node scripts/check-visible-copy.mjs
+          node scripts/check-navigation.mjs
+      - name: Dependency vulnerabilities
+        run: npm audit --omit=dev --audit-level=high
+      - name: Database and server production build
+        run: |
+          npm run check
+          npx prisma db push
+          npm run build
+      - name: Compile native TypeScript and validate Expo config
+        run: |
+          cd mobile
+          npm ci
+          npm run typecheck
+          npx expo config --type public > /tmp/bd-step15-config.json
+      - name: Verify live shared-host release (non-destructive)
+        run: |
+          set -euo pipefail
+          for endpoint in \
+            "https://bedifferent.smarbiz.sbs/api/ready" \
+            "https://esthetic.smarbiz.sbs/api/mobile/status/" \
+            "https://book.a-esthetic.de/api/health/"; do
+            curl -fsS --retry 2 --connect-timeout 10 --max-time 25 "$endpoint" > /tmp/step15-live-health.json
+          done
+          curl -fsS --retry 2 --connect-timeout 10 --max-time 25 \
+            "https://bedifferent.smarbiz.sbs/api/ready" |
+            jq -e '.ok == true and .stepFeatures.womenDashboard == true and .stepFeatures.cycleJournal == true and .stepFeatures.milestones == true and .stepFeatures.celebrations == true'
+      - name: Store candidate summary
+        run: |
+          node -e "let a=require('./mobile/app.json').expo; console.log('RELEASE='+a.version+' BUILD='+a.android.versionCode+' iOS='+a.ios.buildNumber)"

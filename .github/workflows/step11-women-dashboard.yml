@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/step11-women-dashboard-20261022
+      - main
   pull_request:
     paths:
       - "prisma/schema.prisma"
