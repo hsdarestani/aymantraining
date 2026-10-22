@@ -1,0 +1,93 @@
+name: BE DIFFERENT Journey Production Activation
+on:
+  workflow_run:
+    workflows: ["BE DIFFERENT Step 08 Security and Activation Gate"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bedifferent-journey-safe-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Validate production source SHA
+        env:
+          CHECKED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          current="$(gh api "repos/$REPO/commits/main" --jq '.sha')"
+          if [ "$current" != "$CHECKED_SHA" ]; then
+            echo "BLOCKED: tested source is no longer the latest main revision."
+            exit 1
+          fi
+      - name: Backup then activate only BE DIFFERENT
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
+          port: ${{ secrets.SSH_PORT || '22' }}
+          command_timeout: 35m
+          script_stop: true
+          script: |
+            set -euo pipefail
+            test -d /opt/bedifferent/.git
+            git -C /opt/bedifferent fetch --quiet origin main
+            git -C /opt/bedifferent show origin/main:scripts/activate-journey-production.sh | bash -s
+      - name: Public readiness check through Cloudflare
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 8); do
+            if curl -fsS --connect-timeout 8 --max-time 15 https://bedifferent.smarbiz.sbs/api/ready; then
+              echo "BD_JOURNEY_PRODUCTION_READY"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Production readiness not verified" >&2
+          exit 1
+  publisher:
+    name: Queue refreshed Android and iOS builds after safe deploy
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - name: Queue BE DIFFERENT 1.2.9 with active Journey client
+        env:
+          SOURCE_COMMIT: ${{ github.event.workflow_run.head_sha || github.sha }}
+          PUBLISHER_URL: https://publisher.smarbiz.sbs
+        run: |
+          set -euo pipefail
+          token_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https%3A%2F%2Fpublisher.smarbiz.sbs")"
+          oidc="$(printf '%s' "$token_json" | jq -r '.value')"
+          test -n "$oidc" && test "$oidc" != null
+          payload="$(jq --arg sha "$SOURCE_COMMIT" '
+             .source_commit=$sha |
+             .version_name="1.2.9" | .build_number=20 | .request_revision=4 |
+             .release_notes="BE DIFFERENT: Trainingswege, Level, Kapitel und vom Trainer überprüfte Aufstiegstests. Verbesserte Zugangskontrolle für PRO Medien." |
+             .auto_submit=true | del(.enabled)' release-request.json)"
+          status="$(curl -sS --connect-timeout 10 --max-time 65 \
+            -o /tmp/publisher.json -w '%{http_code}' -X POST "$PUBLISHER_URL/apps/automation/release/" \
+            -H "X-GitHub-OIDC: $oidc" -H "Content-Type: application/json" --data "$payload")"
+          if [ "$status" != "200" ]; then
+            jq '{error,detail}' /tmp/publisher.json 2>/dev/null || true
+            exit 1
+          fi
+          jq -e '.ok == true' /tmp/publisher.json >/dev/null
+          jq '{ok,app,version_name,build_number,queued,skipped,release_id}' /tmp/publisher.json
