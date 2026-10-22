@@ -145,8 +145,8 @@ export default function Home(){
    <Pressable accessibilityRole="button" style={s.streamRow} onPress={()=>router.push("/focus")}>
     <Text style={[s.streamInitial,s.streamAccent]}>M</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="BE FOCUSED"/></Text><Text style={s.streamValue}>02:00</Text><Text style={s.streamNote}><Copy text="Atmung und Tagescheck"/></Text></View><Text style={s.streamArrow}>→</Text>
    </Pressable>
-   <Pressable accessibilityRole="button" style={s.streamRow} onPress={()=>router.push("/community")}>
-    <Text style={s.streamInitial}>C</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="HERAUSFORDERUNGEN"/></Text><Text style={s.streamValue}>{gamification?.streak??0} <Copy text="Tage"/></Text><Text style={s.streamNote}><Copy text="Serie und Rangliste"/></Text></View><Text style={s.streamArrow}>→</Text>
+   <Pressable accessibilityRole="button" style={s.streamRow} onPress={()=>router.push(gamification?.milestones?.enabled?"/milestones":"/community")}>
+    <Text style={s.streamInitial}>C</Text><View style={s.streamContent}><Text style={s.streamTag}><Copy text="HERAUSFORDERUNGEN"/></Text><Text style={s.streamValue}>{gamification?.streak??0} <Copy text="Tage"/></Text><Text style={s.streamNote}><Copy text={gamification?.milestones?.enabled?"Meilensteine und bestätigte Tage":"Serie und Rangliste"}/></Text></View><Text style={s.streamArrow}>→</Text>
    </Pressable>
    <Pressable accessibilityRole="button" style={s.quickLine} onPress={()=>router.push("/awake")}><Text style={s.quickLabel}><Copy text="BE AWAKE"/></Text><Text style={s.quickText}><Copy text="Morgenroutine · Tagesstart"/></Text><Text style={s.quickArrow}>→</Text></Pressable>
   </View>

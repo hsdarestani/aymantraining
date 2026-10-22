@@ -87,6 +87,7 @@ export default async function ProgressPage(){
     </section>
 
     {user.subscriptionTier!=="FREE"&&photos.length>=2&&<BeforeAfter beforeId={photos[photos.length-1].id} afterId={photos[0].id}/>}
+    {process.env.MILESTONES_ENABLED==="true"&&<section className="bd-progress-record"><h2>DEINE MEILENSTEINE.</h2><p>Nachgewiesenes Training und zuvor geplante Erholung zählen für deine Serie.</p><Link href="/milestones" className="primary compact">ERFOLGE ANSEHEN →</Link></section>}
     <ProgressClient/>
   </main>;
 }
