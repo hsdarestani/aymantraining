@@ -32,7 +32,7 @@ export default function MilestoneCoachClient(){
    {athletes.map(a=><option key={a.id} value={a.id}>{a.name||a.id}</option>)}</select></label>
   {msg&&<p role="status">{msg}</p>}
   <fieldset style={{padding:18,display:"grid",gap:10}}><legend>MEILENSTEIN FESTLEGEN</legend>
-   <label>Regelschlüssel (Präfix: coach_)<input value={key} onChange={e=>setKey(e.target.value)} maxLength={40}/></label>
+   <label>Eindeutiger Regelschlüssel<input value={key} onChange={e=>setKey(e.target.value)} maxLength={40}/></label>
    <label>Titel<input value={title} onChange={e=>setTitle(e.target.value)} maxLength={70}/></label>
    <label>Persönliche Botschaft<textarea value={message} onChange={e=>setMessage(e.target.value)} maxLength={250} rows={3}/></label>
    <label>Kriterium<select value={metric} onChange={e=>setMetric(e.target.value)}>
