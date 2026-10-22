@@ -18,6 +18,7 @@ on:
       - "mobile/app/(tabs)/index.tsx"
       - "mobile/app/settings.tsx"
       - "tests/browser/step11-women-dashboard.spec.mjs"
+      - "scripts/test-step11-presenter-contract.mjs"
       - ".github/workflows/step11-women-dashboard.yml"
   workflow_dispatch:
 permissions:
@@ -54,6 +55,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx prisma generate
+      - run: node scripts/test-step11-presenter-contract.mjs
       - run: node scripts/check-visible-copy.mjs
       - run: npm run check
       - run: npx prisma db push
