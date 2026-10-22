@@ -33,7 +33,7 @@ export default async function AthletePage(){
 
   return <main className="sub-shell">
     <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard"><Copy text={"BEGINN"}/></Link><Link href="/training">TRAINING</Link><Link href="/progress"><Copy text={"FORTSCHRITT"}/></Link><Link href="/coach"><Copy text={"TRAINER"}/></Link><Link className="active" href="/athlete"><Copy text={"ATHLET"}/></Link></nav></header>
-    <section className="page-hero"><div><span className="eyebrow"><Copy text={"ATHLETENANSICHT · DEIN BEREICH"}/></span><h1><Copy text={"Von Training zu Identität."}/></h1><p><Copy text={"Deine Entwicklung über alle Säulen. Prognosen werden als Trend und nie als Garantie dargestellt."}/></p></div><div className="hero-stat"><span><Copy text={"BD SCORE"}/></span><strong>{dailyProfile.profile.value==null?"—":dailyProfile.profile.value+"%"}</strong><small>BESTÄTIGTES LEVEL: {dailyProfile.journey.confirmedLevel??"OFFEN"}</small></div></section>
+    <section className="page-hero"><div><span className="eyebrow"><Copy text={"ATHLETENANSICHT · DEIN BEREICH"}/></span><h1><Copy text={"Von Training zu Identität."}/></h1><p><Copy text={"Deine Entwicklung über alle Säulen. Prognosen werden als Trend und nie als Garantie dargestellt."}/></p></div><div className="hero-stat"><span><Copy text={"BD SCORE"}/></span><strong>{dailyProfile.profile.value==null?"?":dailyProfile.profile.value+"%"}</strong><small>BESTÄTIGTE STUFE: {dailyProfile.journey.confirmedLevel??"OFFEN"}</small></div></section>
 
     <section className="athlete-grid">
       <article className={digital?"panel twin-panel":"panel twin-panel twin-preview"}>
