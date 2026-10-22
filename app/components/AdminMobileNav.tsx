@@ -12,6 +12,7 @@ const links=[
   ["/admin/plans","Trainingspläne"],
   ["/admin/journeys","Trainingswege"],
   ["/admin/journey-tests","Aufstiegstests"],
+  ["/admin/journey-videos","Technikvideos"],
   ["/admin/exercises","Übungen"],
   ["/admin/tests","Tests"],
   ["/admin/inbox","Nachrichten"],
