@@ -17,7 +17,7 @@ export default async function ProgressPage(){
   const user=await requireUser();
   const dailyProfile=await getDailyProfile(user.id);
   const [scores,metrics,tests,photos,details,timeline]=await Promise.all([
-    prisma.scoreSnapshot.findMany({where:{userId:user.id},orderBy:{date:"desc"},take:30}),
+    prisma.scoreSnapshot.findMany({where:{userId:user.id,completeness:{gt:0}},orderBy:{date:"desc"},take:30}),
     prisma.bodyMetric.findMany({where:{userId:user.id},orderBy:{date:"desc"},take:30}),
     prisma.performanceTest.findMany({where:{userId:user.id},include:{results:true},orderBy:{completedAt:"desc"},take:30}),
     prisma.mediaAsset.findMany({where:{relatedUserId:user.id,kind:"PROGRESS_PHOTO"},orderBy:{createdAt:"desc"},take:user.subscriptionTier==="FREE"?3:60}),
