@@ -41,6 +41,9 @@ export default function Home(){
  const score=d?.score,a=d?.activity||{},pillars=d?.pillarPreview||d?.score||{};
  const profile=d?.dailyProfile,recordedValue=profile?.profile?.value??null,plan=profile?.plan;
  const line=String(d?.differentLine||"Heute zählt die nächste saubere Entscheidung.");
+ const womenMode=d?.dashboardPreference?.enabled&&d?.dashboardPreference?.mode==="WOMEN";
+ const womenGoals:Array<string>=Array.isArray(d?.womenGoals)?d.womenGoals:[];
+ const goalLabel:Record<string,string>={muscle_building:"Muskelaufbau",fat_loss:"Fettabbau",athleticism:"Athletik",football:"Fußball",calisthenics:"Calisthenics",health:"Gesundheit"};
  const sleep=profile?.today?.sleepHours??null;
  const wearable=d?.wearable||{};
  const sleepDisplay=sleep==null?null:String(sleep);
@@ -62,13 +65,31 @@ export default function Home(){
     </View>} 
    <LinearGradient pointerEvents="none" colors={["#080A0B33","#080A0B5C","#080A0BF9"]} locations={[0,.48,1]} style={s.heroShade}/>
    <View style={s.heroCopy}>
-    <Text style={s.eyebrow}><Copy text="DEIN ATHLETEN DASHBOARD"/></Text>
+    <Text style={s.eyebrow}><Copy text={womenMode?"DEINE PERSÖNLICHE TRAININGSANSICHT":"DEIN ATHLETEN DASHBOARD"}/></Text>
     <Text style={s.heroName}>{(d.user.name||"ATHLET").toUpperCase()}</Text>
     <Text style={s.morningLine}><Copy text={line}/></Text>
     <Pressable accessibilityRole="button" onPress={()=>router.push("/focus")}><Text style={s.focusLink}><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Text></Pressable>
    </View>
    <View style={s.heroIndex}><Text style={s.heroIndexNumber}>01</Text><Text style={s.heroIndexLabel}><Copy text="ATHLETENMODUS"/></Text></View>
   </View>
+
+    {womenMode&&<View style={s.womenPanel}>
+     <Text style={s.womenEyebrow}>DEINE ANSICHT · DEINE ENTSCHEIDUNG</Text>
+     <Text style={s.womenHeading}>STARK IN DEINEM TEMPO.</Text>
+     <Text style={s.womenCopy}>Deine Ziele und deine echten Fortschritte. Alle Sportarten bleiben verfügbar.</Text>
+     <View style={s.womenCard}><Text style={s.womenEyebrow}>TRAINING HEUTE</Text>
+      <Text style={s.womenFact}>{plan?.scheduled?plan.completed+" von "+plan.scheduled+" Einheiten":"Kein Training eingetragen"}</Text>
+      <Pressable accessibilityRole="button" onPress={()=>router.push("/(tabs)/training")}><Text style={s.womenAction}>TRAINING ANSEHEN →</Text></Pressable>
+     </View>
+     <View style={s.womenCard}><Text style={s.womenEyebrow}>DEIN BEFINDEN</Text>
+      <Text style={s.womenFact}>Energie: {profile?.today?.energy??"Keine Angabe"}</Text>
+      <Text style={s.womenCopy}>Schlaf: {profile?.today?.sleepHours==null?"Keine Angabe":profile.today.sleepHours+" h"}</Text>
+      <Pressable accessibilityRole="button" onPress={()=>router.push("/lifestyle")}><Text style={s.womenAction}>TAGESCHECK ÖFFNEN →</Text></Pressable>
+     </View>
+     {womenGoals.length>0&&<Text style={s.womenCopy}>DEINE ZIELE: {womenGoals.map(g=>goalLabel[g]||g).join(" · ")}</Text>}
+     <Text style={s.womenCopy}>Bestätigte Stufe: {profile?.journey?.confirmedLevel?.replaceAll("_"," ")??"Noch keine Einstufung"}</Text>
+     <Pressable accessibilityRole="button" onPress={()=>router.push("/settings")}><Text style={s.womenAction}>ANSICHT ANPASSEN →</Text></Pressable>
+    </View>}
 
     {priority?<Pressable onPress={()=>router.push("/lifestyle")} style={[s.priority,priority.severity==="critical"&&s.priorityCritical]}>
    <Text style={s.priorityKicker}><Copy text="HEUTE WICHTIG"/></Text><Text style={s.priorityTitle}><Copy text={priority.title}/></Text><Text style={s.priorityCopy}><Copy text={priority.action}/></Text>
@@ -145,6 +166,7 @@ export default function Home(){
  </ScrollView></SafeAreaView>;
 }
 const s=StyleSheet.create({
+ womenPanel:{backgroundColor:"#18271F",borderWidth:1,borderColor:"#517860",borderTopWidth:3,borderTopColor:"#B4DFAC",padding:18,gap:13,marginVertical:12},womenEyebrow:{color:"#ABD4BA",fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:.9},womenHeading:{color:C.ink,fontFamily:"Archivo",fontSize:27,lineHeight:32},womenCopy:{color:"#D0DDD2",fontFamily:"Manrope",fontSize:12,lineHeight:19},womenCard:{backgroundColor:"#24392C",padding:13,gap:9,borderRadius:8},womenFact:{color:C.ink,fontFamily:"Archivo",fontSize:18},womenAction:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:11,marginTop:3},
  dailyProof:{backgroundColor:"#142019",padding:18,borderTopColor:C.volt,borderTopWidth:2,marginTop:6,gap:9},dailyProofEyebrow:{fontFamily:"ManropeSemiBold",fontSize:10,color:C.volt,letterSpacing:1},dailyProofTitle:{fontFamily:"Archivo",fontSize:21,color:C.ink},dailyProofText:{fontFamily:"Manrope",fontSize:12,color:C.ink,lineHeight:20},dailyProofLink:{color:C.volt,fontSize:11,fontFamily:"ManropeSemiBold",marginTop:6},
 
  heroEditorial:{height:335,backgroundColor:"#0B1011",overflow:"hidden",position:"relative",justifyContent:"flex-end",marginHorizontal:-16,marginTop:-3},
