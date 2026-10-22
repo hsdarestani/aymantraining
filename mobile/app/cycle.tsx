@@ -63,7 +63,7 @@ export default function PrivateCycle(){
    </View>
    <View style={s.panel}><Text style={s.section}>TAGESAUFZEICHNUNG · {date}</Text>
     <Text style={s.label}>BLUTUNG (OPTIONAL)</Text><View style={s.choices}>{flows.map(([code,label])=><Pressable key={code||"empty"} accessibilityRole="button" accessibilityState={{selected:(entry.flow||"")===code}} onPress={()=>setEntry({...entry,flow:code||null})} style={[s.chip,(entry.flow||"")===code&&s.chipOn]}><Text style={s.choiceText}>{label}</Text></Pressable>)}</View>
-    {field("ENERGIE (1–10)",entry.energy,"energy",1)}{field("STIMMUNG (1–10)",entry.mood,"mood",1)}{field("BESCHWERDEN (0–10)",entry.discomfort,"discomfort",0)}
+    {field("ENERGIE (1 bis 10)",entry.energy,"energy",1)}{field("STIMMUNG (1 bis 10)",entry.mood,"mood",1)}{field("BESCHWERDEN (0 bis 10)",entry.discomfort,"discomfort",0)}
     <Text style={s.label}>SYMPTOME (OPTIONAL)</Text><View style={s.choices}>{codes.map(([code,label])=><Pressable key={code} accessibilityRole="checkbox" accessibilityState={{checked:entry.symptoms.includes(code)}} onPress={()=>setEntry({...entry,symptoms:entry.symptoms.includes(code)?entry.symptoms.filter(x=>x!==code):[...entry.symptoms,code]})} style={[s.chip,entry.symptoms.includes(code)&&s.chipOn]}><Text style={s.choiceText}>{entry.symptoms.includes(code)?"✓ ":""}{label}</Text></Pressable>)}</View>
     <Text style={s.label}>WUNSCH FÜR DEIN TRAINING</Text><View style={s.choices}>{choices.map(([code,label])=><Pressable key={code} accessibilityRole="button" accessibilityState={{selected:entry.planChoice===code}} onPress={()=>setEntry({...entry,planChoice:code})} style={[s.chip,entry.planChoice===code&&s.chipOn]}><Text style={s.choiceText}>{label}</Text></Pressable>)}</View>
     <Text style={s.note}>Ein Wunsch ändert keine geplante Einheit. Bei Bedarf mit dem Trainer abstimmen.</Text>
@@ -74,7 +74,7 @@ export default function PrivateCycle(){
    <View style={s.panel}><Text style={s.section}>PRIVATSPHÄRE UND SCHÄTZUNGEN</Text>
     <Text style={s.label}>LETZTER BEGINN (JJJJ-MM-TT)</Text>
     <TextInput style={s.input} value={period} onChangeText={setPeriod} placeholder="2026-10-01" placeholderTextColor={C.dim}/>
-    <Text style={s.label}>ZYKLUSLÄNGE (20–45 TAGE)</Text>
+    <Text style={s.label}>ZYKLUSLÄNGE (20 bis 45 TAGE)</Text>
     <TextInput style={s.input} keyboardType="number-pad" value={length} onChangeText={setLength}/>
     <Pressable accessibilityRole="button" disabled={busy||Number(length)<20||Number(length)>45||!Number.isInteger(Number(length))}
      style={s.secondary} onPress={()=>change("/api/cycle/preferences","POST",{action:"UPDATE",lastPeriodStart:period||null,cycleLengthDays:Number(length),remindersEnabled:value.remindersEnabled})}>
