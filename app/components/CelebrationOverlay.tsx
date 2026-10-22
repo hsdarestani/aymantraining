@@ -1,6 +1,6 @@
 "use client";
 import {useCallback,useEffect,useRef,useState} from "react";
-import "../celebrations.css";
+
 type Award={id:string;title:string;message:string;intensity:"SMALL"|"MEDIUM"|"FULL";achievedAt:string};
 type Settings={enabled:boolean;reduceMotion:boolean};
 type Response={ok:boolean;enabled:boolean;preference:Settings;pending:Award[]};

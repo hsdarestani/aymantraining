@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./celebrations.css";
 import "./product.css";
 import "./admin-extra.css";
 import "./pricing.css";

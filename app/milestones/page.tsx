@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CelebrationOverlay from "../components/CelebrationOverlay";
 import {requireUser} from "../../lib/auth";
 import {getMilestoneSnapshot} from "../../lib/milestone-service";
 import {milestonesEnabled} from "../../lib/milestone-contract";
@@ -8,6 +9,7 @@ export default async function Milestones(){
  const user=await requireUser();
  const data=milestonesEnabled()?await getMilestoneSnapshot(user.id):null;
  return <main className="sub-shell bd-milestones">
+  {process.env.CELEBRATIONS_ENABLED==="true"&&<CelebrationOverlay/>}
   <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard">STARTSEITE</Link><Link href="/progress">FORTSCHRITT</Link></nav></header>
   <section className="milestone-hero"><span>DEIN ECHTER FORTSCHRITT</span><h1>JEDER TAG.<br/>EIN SCHRITT.</h1>
    <p>Erfolge entstehen durch dokumentiertes Training, echte Tageschecks und im Voraus geplante Erholung. Das reine Öffnen der Anwendung zählt nicht.</p></section>
