@@ -99,6 +99,10 @@ jobs:
         run: node scripts/test-journey-step08.mjs
       - name: Existing coach curriculum publish and frozen references
         run: node scripts/test-journey-step05.mjs
+      - name: Existing coach review and placement rules
+        run: node scripts/test-journey-step06.mjs
+      - name: Encrypted and plain media range regression
+        run: node scripts/test-media-ranges.mjs
       - name: Existing Level engine
         run: node scripts/test-journey-step03.mjs
       - name: Existing chapter and opt-in protections
