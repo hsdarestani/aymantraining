@@ -13,6 +13,11 @@ on:
       - "mobile/app/(tabs)/index.tsx"
       - "mobile/app/(tabs)/progress.tsx"
       - "scripts/test-step10-daily-profile.mjs"
+      - "scripts/test-step10-level-isolation.mjs"
+      - "lib/gamification.ts"
+      - "app/api/score/**"
+      - "app/api/digital-twin/**"
+      - "mobile/app/digital-twin.tsx"
       - ".github/workflows/step10-score-profile.yml"
   workflow_dispatch:
 permissions:
@@ -32,6 +37,7 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
       - run: node scripts/test-step10-daily-profile.mjs
+      - run: node scripts/test-step10-level-isolation.mjs
       - run: node scripts/check-visible-copy.mjs
       - run: npm run check
       - run: npm run build

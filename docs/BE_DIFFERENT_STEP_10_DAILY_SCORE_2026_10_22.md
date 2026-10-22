@@ -14,3 +14,9 @@ Implemented October 22, 2026 on the existing codebase without schema migration.
 
 ## Acceptance
 The dedicated isolated Step10 CI exercises missing data, 0%-coverage, stale score, DST and local midnight boundaries, partial/completed workouts and independent READY approval. Web/native typechecks and Next production build. Complete live acceptance additionally requires a safe deployment and App Store/Play Store build with physical-device checks.
+
+## Legacy score and achievement paths
+- Score calculation endpoint no longer returns an earned Level derived from the numeric result.
+- Gamification Level and Level badges come from verified JourneyEnrollment/JourneyLevelAward records, not score thresholds. Existing historical badges are preserved without deleting athlete history.
+- Digital Twin uses confirmed level or explicit unconfirmed state, and missing pillars stay missing instead of automatic red zero readings.
+- The full quality workflow runs `scripts/test-step10-level-isolation.mjs` to reject future score-derived Level regressions.
