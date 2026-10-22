@@ -49,8 +49,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx prisma generate
-      - name: Types
-        run: npm run check
+      - name: Types and isolated release script syntax
+        run: |
+          npm run check
+          bash -n scripts/activate-journey-esthetic-sharedhost.sh
       - name: Isolated DB
         run: npx prisma db push
       - name: Existing pathway promotion and gating regression
