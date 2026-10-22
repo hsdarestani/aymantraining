@@ -37,7 +37,6 @@ enum MediaKind {
 model User {
   reviewedPathwayTests JourneyTestAttempt[] @relation("PathwayTestReviewer")
   cyclePreferences CyclePrivacy?
-  cycleJournal CycleJournalEntry[]
   journeyIntake JourneyIntake?
   dashboardPreference AthleteDashboardPreference?
   pathwayEnrollments JourneyEnrollment[]
@@ -1109,6 +1108,7 @@ model JourneyIntake {
 
 // Private and optional. Not connected to Journey score, levels or coach filters.
 model CyclePrivacy {
+ entries           CycleJournalEntry[]
  userId            String @id
  enabled           Boolean @default(false)
  consentVersion    String?
@@ -1133,7 +1133,7 @@ model CycleJournalEntry {
  planChoice   String @default("AS_PLANNED") // EASIER/REST are requests, not coach-approved edits
  createdAt    DateTime @default(now())
  updatedAt    DateTime @updatedAt
- user         User @relation(fields:[userId],references:[id],onDelete:Cascade)
+ privacy      CyclePrivacy @relation(fields:[userId],references:[userId],onDelete:Cascade)
  @@unique([userId,date])
  @@index([userId,date])
 }
