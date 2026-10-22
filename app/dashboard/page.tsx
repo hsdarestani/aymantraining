@@ -101,6 +101,7 @@ export default async function Dashboard(){
       <p>BESTÄTIGTE STUFE: {dailyProfile.journey.confirmedLevel??"Noch nicht bestätigt"}</p>
       <Link href={process.env.JOURNEY_DAILY_ENABLED==="true"?"/journey/today":"/training"}>DEINEN PLAN ANSEHEN →</Link>
     </section>
+    {process.env.MILESTONES_ENABLED==="true"&&<Link href="/milestones" className="bd-workout-card" style={{display:"block",padding:22,borderTop:"3px solid #d4ff00"}}><span>DEINE MEILENSTEINE</span><h2>DEINE TAGE ZÄHLEN.</h2><p>Deine echte Serie, geplante Erholung und verdiente Erfolge.</p><b>ERFOLGE ANSEHEN →</b></Link>}
     <section className="bd-score-editorial">
       <div className="bd-score-intro">
         <span className="eyebrow"><Copy text="BE DIFFERENT SCORE"/></span>
