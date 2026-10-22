@@ -48,7 +48,7 @@ export default async function ProgressPage(){
         <p>MESSSTAND {dailyProfile.profile.recordedDate??"FEHLT"} · DATENABDECKUNG {dailyProfile.profile.completeness}%</p>
       </div>
     </section>
-    <section className="bd-progress-record"><p>Der BD Score beschreibt dein langfristiges Leistungsprofil, nicht den heutigen Trainingsstand oder dein Level.</p><p>HEUTE: {dailyProfile.plan.scheduled?dailyProfile.plan.completed+" / "+dailyProfile.plan.scheduled+" Einheiten":"Keine Einheit geplant"} · LEVEL: {dailyProfile.journey.confirmedLevel??"Noch nicht bestätigt"}</p>
+    <section className="bd-progress-record"><p>Der Leistungswert beschreibt dein längerfristiges Profil, nicht die Tagesform oder eine bestätigte Stufe.</p><p>HEUTE: {dailyProfile.plan.scheduled?dailyProfile.plan.completed+" / "+dailyProfile.plan.scheduled+" Einheiten":"Keine Einheit geplant"} · BESTÄTIGTE STUFE: {dailyProfile.journey.confirmedLevel??"Noch nicht bestätigt"}</p>
       <header className="bd-progress-record-head"><div><span className="bd-section-serial">01 / <Copy text="DEIN VERLAUF"/></span><h2><Copy text="NICHT GESCHÄTZT. GEMESSEN."/></h2></div>
         {details&&change!==null&&<div className="bd-progress-delta"><span><Copy text="VERÄNDERUNG"/></span><strong>{change>0?"+":""}{change}</strong></div>}
       </header>
