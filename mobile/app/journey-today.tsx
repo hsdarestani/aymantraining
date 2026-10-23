@@ -1,3 +1,4 @@
+import {Copy} from "../components/Locale";
 import {useCallback,useState} from "react";
 import {ActivityIndicator,Pressable,ScrollView,StyleSheet,Text,TextInput,View} from "react-native";
 import {useFocusEffect,router} from "expo-router";
@@ -41,7 +42,7 @@ export default function Today(){
   }catch(e){setError(e instanceof Error?e.message:"Upload fehlgeschlagen.");}finally{setBusy(false);}
  }
  return <SafeAreaView style={s.safe} edges={["top"]}><ScrollView contentContainerStyle={s.content}>
-  <Pressable onPress={()=>router.back()}><Text style={s.link}>← ZURÜCK</Text></Pressable>
+  <Pressable onPress={()=>router.back()}><Text style={s.link}><Copy text="← ZURÜCK"/></Text></Pressable>
   <Text style={s.tag}>BE DIFFERENT · HEUTE</Text><Text style={s.title}>DEIN HEUTIGER WEG.</Text>
   {!enabled?<View style={s.card}><Text style={s.p}>Diese Ansicht wird vorbereitet. Dein bestehendes Training bleibt erhalten.</Text></View>:
    loading?<ActivityIndicator color={C.volt}/>:
@@ -53,7 +54,7 @@ export default function Today(){
        <Text style={s.p}>{data.actual.completedToday}/{data.actual.scheduledToday} geplante Einheiten erledigt</Text>
        {data.actual.workout&&<Text style={s.p}>Heute: {data.actual.workout.title}</Text>}
        {data.actual.nextWorkout&&<Text style={s.p}>Nächste Einheit: {data.actual.nextWorkout.title} · {when(data.actual.nextWorkout.scheduledAt)}</Text>}
-       <Pressable onPress={()=>router.push("/training")}><Text style={s.link}>TRAINING ANSEHEN →</Text></Pressable>
+       <Pressable onPress={()=>router.push("/training")}><Text style={s.link}><Copy text="TRAINING ANSEHEN →"/></Text></Pressable>
       </View>
       <View style={s.card}><Text style={s.tag}>ERHOLUNG & CHECKIN</Text>
        <Text style={s.p}>Energie: {data.actual.energy??"Keine Angabe"} · Muskelgefühl: {data.actual.soreness??"Keine Angabe"}</Text>
