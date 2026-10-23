@@ -61,28 +61,28 @@ export default function JourneyOverview(){
  }
  return <SafeAreaView style={s.safe} edges={["top"]}><ScrollView contentContainerStyle={s.content}>
   <Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text="← ZURÜCK"/></Text></Pressable>
-  <Text style={s.eyebrow}>BE DIFFERENT · DEIN WEG</Text><Text style={s.title}>DEIN FORTSCHRITT.</Text>
-  <Text style={s.muted}>Deine bestätigten Leistungsstufen und Kapitel. Punkte und PRO ersetzen keine Aufstiegstests.</Text>
-  {!enabled?<View style={s.card}><Text style={s.muted}>Der neue Trainingsweg wird vorbereitet. Deine bisherigen Daten bleiben erhalten.</Text></View>:
+  <Text style={s.eyebrow}><Copy text="BE DIFFERENT · DEIN WEG"/></Text><Text style={s.title}><Copy text="DEIN FORTSCHRITT."/></Text>
+  <Text style={s.muted}><Copy text="Deine bestätigten Leistungsstufen und Kapitel. Punkte und PRO ersetzen keine Aufstiegstests."/></Text>
+  {!enabled?<View style={s.card}><Text style={s.muted}><Copy text="Der neue Trainingsweg wird vorbereitet. Deine bisherigen Daten bleiben erhalten."/></Text></View>:
    loading?<ActivityIndicator color={C.volt}/>:
    <>{!!error&&<Text style={s.error}>{error}</Text>}
-    {data?.intake&&<View style={s.card}><Text style={s.tag}>DEINE AUSWAHL</Text>
+    {data?.intake&&<View style={s.card}><Text style={s.tag}><Copy text="DEINE AUSWAHL"/></Text>
      <Text style={s.muted}>{data.intake.goals.map(x=>data.goals.find(g=>g.slug===x)?.label??x).join(" + ")}</Text>
      <Text style={s.muted}>{data.intake.status==="PENDING_PATHWAY"?"Dein Weg wird vorbereitet.":data.intake.status==="PENDING_PLACEMENT"?"Deine Einstufung ist noch offen.":"Einstieg bestätigt."}</Text>
     </View>}
     {data?.legacy.transitionAvailable&&data.enrollments.length===0&&<View style={s.card}>
-     <Text style={s.subtitle}>FREIWILLIGER WECHSEL</Text><Text style={s.muted}>Deine bisherigen Trainingspläne, Einheiten, Punkte und Abzeichen bleiben unverändert.</Text>
-     <Text style={s.tag}>ZIELE KOMBINIEREN</Text>
+     <Text style={s.subtitle}><Copy text="FREIWILLIGER WECHSEL"/></Text><Text style={s.muted}><Copy text="Deine bisherigen Trainingspläne, Einheiten, Punkte und Abzeichen bleiben unverändert."/></Text>
+     <Text style={s.tag}><Copy text="ZIELE KOMBINIEREN"/></Text>
      {data.goals.map(g=><Pressable accessibilityRole="checkbox" accessibilityState={{checked:goals.includes(g.slug)}}
        style={s.option} key={g.slug} onPress={()=>setGoals(old=>old.includes(g.slug)?old.filter(x=>x!==g.slug):[...old,g.slug])}>
        <Text style={s.optionText}>{goals.includes(g.slug)?"✓  ":"○  "}{g.label}</Text></Pressable>)}
-     <Text style={s.tag}>SELBSTEINSCHÄTZUNG</Text>
+     <Text style={s.tag}><Copy text="SELBSTEINSCHÄTZUNG"/></Text>
      <View style={s.levelPills}>{data.levels.map(l=><Pressable key={l.code} onPress={()=>setLevel(l.code)}
        style={[s.pill,level===l.code&&s.pillOn]}><Text style={s.small}>{l.code.replaceAll("_"," ")}</Text></Pressable>)}</View>
      <Pressable accessibilityRole="checkbox" accessibilityState={{checked:approved}} onPress={()=>setApproved(!approved)} style={s.option}>
       <Text style={s.muted}>{approved?"✓  ":"○  "}Ich möchte den neuen Weg beginnen, ohne alte Daten zu überschreiben.</Text></Pressable>
      <Pressable disabled={busy||!approved||!goals.length} style={[s.btn,(!approved||!goals.length)&&s.disabled]} onPress={transition}>
-      <Text style={s.btnText}>WECHSEL VORMERKEN</Text></Pressable>
+      <Text style={s.btnText}><Copy text="WECHSEL VORMERKEN"/></Text></Pressable>
     </View>}
     {data?.enrollments.map(e=><View key={e.id} style={s.card}>
      <Text style={s.tag}>{e.pathway} · {e.completedChapters}/{e.totalChapters} KAPITEL</Text>
@@ -95,9 +95,9 @@ export default function JourneyOverview(){
        <Text style={s.small}>{ch.finished?"ABGESCHLOSSEN":ch.unlocked?String(ch.mandatoryDone)+"/"+ch.mandatoryTotal+" PFLICHTINHALTE":"GESPERRT"}</Text>
       </Pressable>)}
      </View>)}
-     {data.testsEnabled&&<Pressable style={s.btn} onPress={()=>router.push("/journey-tests")}><Text style={s.btnText}>KAPITELTESTS ÖFFNEN →</Text></Pressable>}
+     {data.testsEnabled&&<Pressable style={s.btn} onPress={()=>router.push("/journey-tests")}><Text style={s.btnText}><Copy text="KAPITELTESTS ÖFFNEN →"/></Text></Pressable>}
     </View>)}
-    {detail&&<View style={s.card}><Pressable onPress={()=>setDetail(null)}><Text style={s.back}>× SCHLIESSEN</Text></Pressable>
+    {detail&&<View style={s.card}><Pressable onPress={()=>setDetail(null)}><Text style={s.back}><Copy text="× SCHLIESSEN"/></Text></Pressable>
      <Text style={s.tag}>{detail.level.replaceAll("_"," ")} · FREIGESCHALTET</Text><Text style={s.subtitle}>{detail.titleDe}</Text>
      <Text style={s.muted}>{detail.description}</Text><Text style={s.muted}>{detail.mandatoryDone}/{detail.mandatoryTotal} Pflichtinhalte erledigt</Text>
      {detail.items.map(item=><View key={item.id} style={s.levelCard}>
