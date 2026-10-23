@@ -1,4 +1,6 @@
 "use client";
+import {Copy} from "../../components/Locale";
+
 import {useCallback,useEffect,useRef,useState} from "react";
 
 type Metric={key:string;unit:string;min?:number;max?:number};
@@ -19,20 +21,20 @@ async function call(path:string,method="GET",body?:unknown){
 function Feedback({attempt,exam}:{attempt:Attempt;exam:Exam}){
  const f=attempt.feedback;
  return <div className={"j6-result "+(attempt.verdict==="PASSED"?"j6-passed":attempt.verdict==="FAILED"?"j6-failed":"j6-pending")}>
-  <strong>{attempt.verdict==="PENDING"?"IN PRÜFUNG":attempt.verdict==="PASSED"?"TEST BESTANDEN":"NOCH NICHT BESTANDEN"}</strong>
-  <p>{attempt.verdict==="PENDING"?"Deine Ergebnisse wurden gesendet. Dein Trainer prüft die Werte.":
+  <strong><Copy text={attempt.verdict==="PENDING"?"IN PRÜFUNG":attempt.verdict==="PASSED"?"TEST BESTANDEN":"NOCH NICHT BESTANDEN"}/></strong>
+  <p><Copy text={attempt.verdict==="PENDING"?"Deine Ergebnisse wurden gesendet. Dein Trainer prüft die Werte.":
    attempt.verdict==="PASSED"?"Stark! Der nächste Trainingsabschnitt wird entsprechend deinem Weg freigeschaltet.":
-   "Du bist noch nicht so weit. Hier siehst du genau, woran du weiterarbeiten kannst."}</p>
+   "Du bist noch nicht so weit. Hier siehst du genau, woran du weiterarbeiten kannst."}/></p>
   {attempt.verdict==="FAILED"&&<div className="j6-improvements">
-   {Array.isArray(f?.missing)&&f.missing.length>0&&<p>Fehlende Messungen: {f.missing.join(", ")}</p>}
+   {Array.isArray(f?.missing)&&f.missing.length>0&&<p><Copy text={"Fehlende Messungen: "}/>{f.missing.join(", ")}</p>}
    {Array.isArray(f?.failed)&&f.failed.map((x:{key:string;expected:string;actual:number},i:number)=>
-    <p key={i}>{x.key}: {x.actual} · Ziel {x.expected}</p>)}
+    <p key={i}>{x.key}: {x.actual}<Copy text={" · Ziel "}/>{x.expected}</p>)}
    {exam.guidanceDe&&<p>{exam.guidanceDe}</p>}
   </div>}
-  {f?.coachFeedbackDe&&<p><b>Dein Trainer:</b> {String(f.coachFeedbackDe)}</p>}
+  {f?.coachFeedbackDe&&<p><b><Copy text={"Dein Trainer:"}/></b> {String(f.coachFeedbackDe)}</p>}
   {attempt.verdict==="FAILED"&&exam.nextRetestAt&&new Date(exam.nextRetestAt).getTime()>Date.now()&&
-   <small>Nächster Test frühestens: {when(exam.nextRetestAt)}</small>}
-  <small>Abgegeben am {when(attempt.submittedAt)}</small>
+   <small><Copy text={"Nächster Test frühestens: "}/>{when(exam.nextRetestAt)}</small>}
+  <small><Copy text={"Abgegeben am "}/>{when(attempt.submittedAt)}</small>
  </div>;
 }
 function ExamForm({exam,enrollmentId,onSaved,canStart}:{exam:Exam;enrollmentId:string;onSaved:()=>Promise<void>;canStart:boolean}){
@@ -63,12 +65,12 @@ function ExamForm({exam,enrollmentId,onSaved,canStart}:{exam:Exam;enrollmentId:s
       <small>{m.min!==undefined?"Ab "+m.min+" ":""}{m.max!==undefined?"Bis "+m.max:""}</small>
       <input type="number" step="any" inputMode="decimal" value={values[m.key]??""}
        onChange={e=>setValues(old=>({...old,[m.key]:e.target.value}))}/></label>)}</div>
-    {error&&<p role="alert" className="j6-error">{error}</p>}
-    <button type="button" disabled={busy} className="primary compact" onClick={submit}>{busy?"WIRD GESENDET …":"ERGEBNIS EINREICHEN"}</button>
-   </div>:<p className="j6-muted">{latest?.verdict==="PENDING"?"Auf die Prüfung durch deinen Trainer warten.":
+    {error&&<p role="alert" className="j6-error"><Copy text={error}/></p>}
+    <button type="button" disabled={busy} className="primary compact" onClick={submit}><Copy text={busy?"WIRD GESENDET …":"ERGEBNIS EINREICHEN"}/></button>
+   </div>:<p className="j6-muted"><Copy text={latest?.verdict==="PENDING"?"Auf die Prüfung durch deinen Trainer warten.":
     latest?.verdict==="PASSED"?"Dieser Test wurde bestanden.":
     exam.nextRetestAt&&new Date(exam.nextRetestAt).getTime()>Date.now()?"Die Wiederholung ist noch nicht freigegeben.":
-    "Erst die Pflichtinhalte dieses Kapitels abschließen."}</p>}
+    "Erst die Pflichtinhalte dieses Kapitels abschließen."}/></p>}
  </div>;
 }
 export default function AthleteTests(){
@@ -87,36 +89,36 @@ export default function AthleteTests(){
   catch(e){setError(e instanceof Error?e.message:"Nicht möglich.");}
   finally{setBusyItem("");}
  }
- if(loading)return <p role="status">Trainingsweg wird geladen …</p>;
+ if(loading)return <p role="status"><Copy text={"Trainingsweg wird geladen …"}/></p>;
  return <div className="j6-workspace">
-  {error&&<p role="alert" className="j6-error">{error}</p>}
-  {!enrollments.length&&<article className="panel"><h2>Dein Trainingsweg wird vorbereitet.</h2><p>Nach der Auswahl deiner Ziele und der Freigabe durch den Trainer erscheint dein persönlicher Weg hier.</p></article>}
+  {error&&<p role="alert" className="j6-error"><Copy text={error}/></p>}
+  {!enrollments.length&&<article className="panel"><h2><Copy text={"Dein Trainingsweg wird vorbereitet."}/></h2><p><Copy text={"Nach der Auswahl deiner Ziele und der Freigabe durch den Trainer erscheint dein persönlicher Weg hier."}/></p></article>}
   {enrollments.map(e=><section className="panel j6-path" key={e.id}>
-   <div className="j6-path-header"><div><span className="eyebrow">TRAININGSWEG · VERSION {e.version}</span><h2>{e.pathway}</h2></div>
+   <div className="j6-path-header"><div><span className="eyebrow"><Copy text={"TRAININGSWEG · VERSION "}/>{e.version}</span><h2>{e.pathway}</h2></div>
    <span className="j6-status">{e.confirmedLevel?e.confirmedLevel.replaceAll("_"," "):"EINSTUFUNG OFFEN"}</span></div>
-   <p>Selbsteinschätzung: {e.selfLevel?.replaceAll("_"," ")||"Keine Angabe"} · Bestätigtes Level: {e.confirmedLevel?.replaceAll("_"," ")||"Noch offen"}</p>
+   <p><Copy text={"Selbsteinschätzung: "}/><Copy text={e.selfLevel?.replaceAll("_"," ")||"Keine Angabe"}/><Copy text={" · Bestätigtes Level: "}/>{e.confirmedLevel?.replaceAll("_"," ")||"Noch offen"}</p>
    {e.state==="PENDING"&&<article className="j6-chapter j6-wait">
-    <h3>Dein Einstiegslevel wird bestätigt.</h3>
-    <p>Eine höhere Selbsteinschätzung und ein PRO Abo öffnen keine weiteren Kapitel.</p>
+    <h3><Copy text={"Dein Einstiegslevel wird bestätigt."}/></h3>
+    <p><Copy text={"Eine höhere Selbsteinschätzung und ein PRO Abo öffnen keine weiteren Kapitel."}/></p>
     {e.placement?<ExamForm exam={e.placement} enrollmentId={e.id} onSaved={load} canStart/>:
-     <p>Der Trainer kann deine Einstufung nach persönlicher Prüfung bestätigen.</p>}
-    {e.placement?.attempts[0]?.verdict==="PASSED"&&<p>Test bestanden. Die Einstufung wird vom Trainer abschließend bestätigt.</p>}
+     <p><Copy text={"Der Trainer kann deine Einstufung nach persönlicher Prüfung bestätigen."}/></p>}
+    {e.placement?.attempts[0]?.verdict==="PASSED"&&<p><Copy text={"Test bestanden. Die Einstufung wird vom Trainer abschließend bestätigt."}/></p>}
    </article>}
    <div className="j6-chapters">{e.chapters.map(ch=><article className={"j6-chapter "+(!ch.unlocked?"j6-locked":"")} key={ch.id}>
     <div className="j6-chapter-head"><div><span className="eyebrow">{ch.level.replaceAll("_"," ")}</span><h3>{ch.titleDe}</h3></div><span className="j6-status">
-    {ch.finished?"BESTANDEN":ch.unlocked?"FREIGESCHALTET":"GESPERRT"}</span></div>
+    <Copy text={ch.finished?"BESTANDEN":ch.unlocked?"FREIGESCHALTET":"GESPERRT"}/></span></div>
     {ch.unlocked?<div>
-      <p>{ch.mandatoryDone} von {ch.mandatoryTotal} Pflichtinhalten abgeschlossen</p>
+      <p>{ch.mandatoryDone}<Copy text={" von "}/>{ch.mandatoryTotal}<Copy text={" Pflichtinhalten abgeschlossen"}/></p>
       <div className="j6-items">{ch.items.map(item=><div className="j6-item" key={item.id}>
-       <div><strong>{item.titleDe}</strong><small>{item.kind==="GUIDANCE"?"HINWEIS":item.kind==="EXERCISE"?"ÜBUNG":"TRAININGSPLAN"} · {item.mandatory?"PFLICHT":"OPTIONAL"}</small>
+       <div><strong>{item.titleDe}</strong><small><Copy text={item.kind==="GUIDANCE"?"HINWEIS":item.kind==="EXERCISE"?"ÜBUNG":"TRAININGSPLAN"}/> · <Copy text={item.mandatory?"PFLICHT":"OPTIONAL"}/></small>
         {item.description&&<p>{item.description}</p>}</div>
        <button type="button" disabled={item.done||busyItem===item.id||ch.finished} onClick={()=>complete(e.id,item.id)}>
-        {item.done?"ERLEDIGT":busyItem===item.id?"SPEICHERN …":"ALS ERLEDIGT MARKIEREN"}</button>
+        <Copy text={item.done?"ERLEDIGT":busyItem===item.id?"SPEICHERN …":"ALS ERLEDIGT MARKIEREN"}/></button>
       </div>)}</div>
       {ch.assessment?<ExamForm exam={ch.assessment} enrollmentId={e.id} onSaved={load}
        canStart={!ch.finished&&ch.mandatoryDone===ch.mandatoryTotal}/>:
-       <p>Der Abschlusstest wird durch den Trainer vorbereitet.</p>}
-     </div>:<p>Schließe zuerst die erforderlichen Kapitel und Tests ab.</p>}
+       <p><Copy text={"Der Abschlusstest wird durch den Trainer vorbereitet."}/></p>}
+     </div>:<p><Copy text={"Schließe zuerst die erforderlichen Kapitel und Tests ab."}/></p>}
    </article>)}</div>
   </section>)}
  </div>;

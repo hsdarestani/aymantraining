@@ -69,3 +69,36 @@ for(const file of ['app/journey/JourneyOverview.tsx','app/journey/today/TodayCli
 }
 assert(inspected>400,'Language coverage scan did not find expected native copy literals');
 console.log(`LANGUAGE_COVERAGE_OK ${inspected} native copy literals validated`);
+
+// Fixed production labels must participate in language changes, including new
+// journey, cycle and coach pages; user-authored content is deliberately excluded.
+let fixedWebLabels=0;
+function checkWebLabels(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
+ const file=path.join(dir,entry.name);
+ if(entry.isDirectory()){if(!['api','prototype','legal'].includes(entry.name))checkWebLabels(file);continue}
+ if(!file.endsWith('.tsx')||file==='app/components/Locale.tsx')continue;
+ const source=fs.readFileSync(file,'utf8');
+ const ast=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+ function inspect(node){
+  if(ts.isJsxText(node)){
+   const value=node.text.replace(/\s+/g,' ').trim();
+   if(value&&Object.hasOwn(en,value))assert.fail(`Fixed label bypasses locale provider in ${file}: ${value}`);
+  }
+  if(ts.isJsxSelfClosingElement(node)&&node.tagName.getText(ast)==='Copy'){
+   const attr=node.attributes.properties.find(x=>ts.isJsxAttribute(x)&&x.name.getText(ast)==='text');
+   let value=attr?.initializer;
+   if(value&&ts.isJsxExpression(value))value=value.expression;
+   if(value&&ts.isStringLiteral(value)){
+    assert(Object.hasOwn(en,value.text.trim()),`Missing fixed web translation in ${file}: ${value.text}`);fixedWebLabels++;
+   }
+  }
+  ts.forEachChild(node,inspect);
+ }inspect(ast);
+}}
+checkWebLabels('app');
+assert(fixedWebLabels>400,'Production web language scan is incomplete');
+for(const file of ['app/onboarding/page.tsx','app/cycle/CycleClient.tsx','app/admin/journeys/JourneyBuilder.tsx']){
+ const source=fs.readFileSync(file,'utf8');
+ assert(!source.includes('>{g.label}<')&&!source.includes('>{level.description}<'),'Preset labels must translate in '+file);
+}
+console.log(`WEB_LANGUAGE_COVERAGE_OK ${fixedWebLabels} fixed labels checked`);

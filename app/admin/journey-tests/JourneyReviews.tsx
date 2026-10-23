@@ -1,4 +1,6 @@
 "use client";
+import {Copy} from "../../components/Locale";
+
 import {useCallback,useEffect,useState} from "react";
 type Pending={id:string;enrollmentId:string;assessmentId:string;titleDe:string;kind:"PLACEMENT"|"CHAPTER_FINAL";
  submittedAt:string;results:unknown;criteria:unknown;athlete:{name:string;email:string};
@@ -55,34 +57,34 @@ export default function JourneyReviews(){
   finally{setBusy("");}
  }
  return <div className="j6-review-workspace">
-  {error&&<div role="alert" className="j6-alert">{error}</div>}
+  {error&&<div role="alert" className="j6-alert"><Copy text={error}/></div>}
   {message&&<div role="status" className="j6-success">{message}</div>}
   <section className="panel">
-   <div className="j6-review-title"><div><span className="eyebrow">PRÜFUNG AUSSTEHEND</span><h2>Abschlusstests & Einstufungstests</h2></div><span>{pending.length} offen</span></div>
-   {pending.length===0&&<p className="muted">Derzeit warten keine Prüfungen auf die Bewertung.</p>}
+   <div className="j6-review-title"><div><span className="eyebrow"><Copy text={"PRÜFUNG AUSSTEHEND"}/></span><h2><Copy text={"Abschlusstests & Einstufungstests"}/></h2></div><span>{pending.length}<Copy text={" offen"}/></span></div>
+   {pending.length===0&&<p className="muted"><Copy text={"Derzeit warten keine Prüfungen auf die Bewertung."}/></p>}
    <div className="j6-review-cards">{pending.map(x=><article className="j6-review-card" key={x.id}>
     <div className="j6-review-top"><div><span className="eyebrow">{x.kind==="PLACEMENT"?"EINSTUFUNGSTEST":"KAPITELABSCHLUSS"}</span><h3>{x.athlete.name}</h3>
      <p>{x.pathway} · {x.titleDe}</p></div><small>{date(x.submittedAt)}</small></div>
     <div className="j6-review-columns">
-     <div><h4>Eingereichte Ergebnisse</h4><pre>{JSON.stringify(x.results,null,2)}</pre></div>
-     <div><h4>Fachlich freigegebene Kriterien</h4><pre>{JSON.stringify(x.criteria,null,2)}</pre></div>
+     <div><h4><Copy text={"Eingereichte Ergebnisse"}/></h4><pre>{JSON.stringify(x.results,null,2)}</pre></div>
+     <div><h4><Copy text={"Fachlich freigegebene Kriterien"}/></h4><pre>{JSON.stringify(x.criteria,null,2)}</pre></div>
     </div>
-    <label>Persönliche Rückmeldung<textarea rows={3} maxLength={2000} value={comments[x.id]??""} onChange={e=>setComments(old=>({...old,[x.id]:e.target.value}))}
+    <label><Copy text={"Persönliche Rückmeldung"}/><textarea rows={3} maxLength={2000} value={comments[x.id]??""} onChange={e=>setComments(old=>({...old,[x.id]:e.target.value}))}
      placeholder="Was wurde gut gemacht? Was soll als Nächstes verbessert werden?"/></label>
     <button className="primary compact" type="button" disabled={busy===x.id} onClick={()=>review(x)}>
-     {busy===x.id?"WIRD GEPRÜFT …":"ERGEBNIS FACHLICH PRÜFEN"}</button>
-    <p className="muted">Bestehen oder Nichtbestehen wird anhand der zuvor freigegebenen Kriterien ermittelt. Die persönliche Rückmeldung wird gespeichert.</p>
+     <Copy text={busy===x.id?"WIRD GEPRÜFT …":"ERGEBNIS FACHLICH PRÜFEN"}/></button>
+    <p className="muted"><Copy text={"Bestehen oder Nichtbestehen wird anhand der zuvor freigegebenen Kriterien ermittelt. Die persönliche Rückmeldung wird gespeichert."}/></p>
    </article>)}</div>
   </section>
   <section className="panel">
-   <div className="j6-review-title"><div><span className="eyebrow">EINSTIEG FREIGEBEN</span><h2>Offene Einstufungen</h2></div><span>{placements.length} offen</span></div>
-   <p className="muted">Ein bestandener Einstufungstest bestätigt die Messwerte. Der tatsächliche Startlevel wird hier nach deiner fachlichen Einschätzung freigegeben. Ohne Freigabe bleiben alle Kapitel geschlossen.</p>
+   <div className="j6-review-title"><div><span className="eyebrow"><Copy text={"EINSTIEG FREIGEBEN"}/></span><h2><Copy text={"Offene Einstufungen"}/></h2></div><span>{placements.length}<Copy text={" offen"}/></span></div>
+   <p className="muted"><Copy text={"Ein bestandener Einstufungstest bestätigt die Messwerte. Der tatsächliche Startlevel wird hier nach deiner fachlichen Einschätzung freigegeben. Ohne Freigabe bleiben alle Kapitel geschlossen."}/></p>
    <div className="j6-review-cards">{placements.map(p=><div className="j6-placement" key={p.id}>
-    <div><strong>{p.user.name||"Athlet"}</strong><small>{p.version.pathway.titleDe} · Selbsteinschätzung {p.selfLevel?.replaceAll("_"," ")||"offen"}</small></div>
-    <label>Bestätigtes Level<select value={levels[p.id]??p.selfLevel??"READY"} onChange={e=>setLevels(old=>({...old,[p.id]:e.target.value}))}>
+    <div><strong><Copy text={p.user.name||"Athlet"}/></strong><small>{p.version.pathway.titleDe}<Copy text={" · Selbsteinschätzung "}/><Copy text={p.selfLevel?.replaceAll("_"," ")||"offen"}/></small></div>
+    <label><Copy text={"Bestätigtes Level"}/><select value={levels[p.id]??p.selfLevel??"READY"} onChange={e=>setLevels(old=>({...old,[p.id]:e.target.value}))}>
       {p.version.levels.map(x=><option value={x.code} key={x.code}>{x.code.replaceAll("_"," ")}</option>)}
      </select></label>
-    <button type="button" className="primary compact" disabled={busy===p.id} onClick={()=>confirm(p)}>EINSTIEG BESTÄTIGEN</button>
+    <button type="button" className="primary compact" disabled={busy===p.id} onClick={()=>confirm(p)}><Copy text={"EINSTIEG BESTÄTIGEN"}/></button>
    </div>)}</div>
   </section>
  </div>;

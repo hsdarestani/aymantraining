@@ -30,6 +30,6 @@ export default function PhotoUploader(){
    <Copy text={busy?"WIRD HOCHGELADEN…":"FOTOS AUSWÄHLEN"}/>
    <input hidden type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e=>upload(e.target.files)}/>
   </label>
-  {status?<p className="muted" role="status" style={{marginTop:10}}>{/^\d+$/.test(status)?<><Copy text="HOCHGELADEN"/>: {status}</>:status}</p>:null}
+  {status?<p className="muted" role="status" style={{marginTop:10}}>{/^\d+$/.test(status)?<><Copy text="HOCHGELADEN"/>: <Copy text={status}/></>:status}</p>:null}
  </div>;
 }

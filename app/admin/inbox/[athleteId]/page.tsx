@@ -24,11 +24,10 @@ export default async function Thread({params}:{params:Promise<{athleteId:string}
  return <main className="admin-content" style={{margin:"0 auto"}}>
   <header className="admin-header"><div><span className="eyebrow"><Copy text={"TRAINER POSTFACH"}/></span><h1>{athlete.name||athlete.email}</h1></div><div className="row-actions"><Link href={`/admin/customers/${athleteId}`} className="ghost"><Copy text={"ATHLETENPROFIL"}/></Link><Link href="/admin/inbox" className="ghost"><Copy text={"← NACHRICHTEN"}/></Link></div></header>
   {sharedCycle?.entries.length?<section className="panel" style={{marginBottom:18,padding:20}}>
-   <span className="eyebrow">FREIWILLIG GETEILTE ANGABEN</span><h2>TRAININGSWÜNSCHE UND BELASTUNGSEMPFINDEN</h2>
-   <p>Nur ausdrücklich von diesem Athleten für den Trainer freigegebene Angaben der letzten 14 Tage. Keine Blutung, Symptome oder Vorhersagen.</p>
+   <span className="eyebrow"><Copy text={"FREIWILLIG GETEILTE ANGABEN"}/></span><h2><Copy text={"TRAININGSWÜNSCHE UND BELASTUNGSEMPFINDEN"}/></h2>
+   <p><Copy text={"Nur ausdrücklich von diesem Athleten für den Trainer freigegebene Angaben der letzten 14 Tage. Keine Blutung, Symptome oder Vorhersagen."}/></p>
    <div style={{display:"grid",gap:10}}>{sharedCycle.entries.map(e=><div key={e.date} style={{borderTop:"1px solid #445",paddingTop:10}}>
-    <strong>{e.date}</strong><p>Trainingswunsch: {e.planChoice==="REST"?"Ruhe gewünscht":e.planChoice==="EASIER"?"Leichtere Einheit gewünscht":"Wie geplant"}.
-    Energie: {e.energy??"Keine Angabe"}. Belastungsempfinden: {e.discomfort??"Keine Angabe"}.</p>
+    <strong>{e.date}</strong><p><Copy text={"Trainingswunsch: "}/><Copy text={e.planChoice==="REST"?"Ruhe gewünscht":e.planChoice==="EASIER"?"Leichtere Einheit gewünscht":"Wie geplant"}/><Copy text={". Energie: "}/><Copy text={e.energy??"Keine Angabe"}/><Copy text={". Belastungsempfinden: "}/><Copy text={e.discomfort??"Keine Angabe"}/>.</p>
    </div>)}</div>
   </section>:null}
   <ThreadClient athleteId={athleteId} messages={messages.map(m=>({id:m.id,senderId:m.senderId,athleteId:m.athleteId,kind:m.kind,text:m.text,mediaId:m.mediaId,durationSec:m.durationSec,createdAt:m.createdAt.toISOString()}))} media={media} feedback={feedback.map(f=>({id:f.id,mediaId:f.mediaId,annotations:f.annotations,createdAt:f.createdAt.toISOString()}))}/>

@@ -30,6 +30,7 @@ export async function getAthleteDay(userId:string){
  const active=todays.find(w=>!w.completedAt)??null;
  const latestCheck=check.find(c=>todayOf(c.date,zone)===today)??null;
  const latestSleep=recovery.find(r=>todayOf(r.date,zone)===today||todayOf(r.date,zone)===todayOf(new Date(Date.now()-86400000),zone))??null;
+ const sleepMinutes=latestSleep?.sleepMinutes??(latestCheck?.sleepHours!=null?Math.round(latestCheck.sleepHours*60):null);
  const dayState=active?"TRAINING_PLANNED":todays.length&&completed===todays.length?"TRAINING_DONE":"NO_WORKOUT_SCHEDULED";
  const notes=recommendations.filter(r=>r.date&&localDay(r.date,zone)>=today).map(r=>({
    title:r.title,action:r.action,explanation:r.explanation,date:r.date.toISOString().slice(0,10)
@@ -40,9 +41,9 @@ export async function getAthleteDay(userId:string){
    workout:active?{id:active.id,title:active.title,scheduledAt:active.scheduledAt}:null,
    nextWorkout:next?{id:next.id,title:next.title,scheduledAt:next.scheduledAt}:null,
    energy:latestCheck?.energy??null,soreness:latestCheck?.soreness??null,
-   sleepMinutes:latestSleep?.sleepMinutes??null,
-   checkInDate:latestCheck?.date??null,sleepDate:latestSleep?.date??null},
-  recovery:{needsCheckIn:!latestCheck,hasSleep:latestSleep?.sleepMinutes!=null,
+   sleepMinutes,
+   checkInDate:latestCheck?.date??null,sleepDate:latestSleep?.sleepMinutes!=null?latestSleep.date:latestCheck?.sleepHours!=null?latestCheck.date:null},
+  recovery:{needsCheckIn:!latestCheck,hasSleep:sleepMinutes!=null,
    // Avoid diagnosing fatigue or overruling the athlete's own plan from incomplete data.
    note:latestCheck?.energy!=null&&latestCheck.energy<=2?
     "Du hast wenig Energie angegeben. Besprich eine Anpassung vor der nächsten intensiven Einheit mit deinem Trainer.":

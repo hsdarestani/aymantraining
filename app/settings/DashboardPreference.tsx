@@ -47,6 +47,6 @@ export default function DashboardPreference(){
   </label>}
   <p className="muted"><Copy text="Das ändert weder deine Einstufung noch Trainingspläne. Zyklusdaten werden hier nicht erhoben."/></p>
   {saved&&<p role="status" style={{color:"#d4ff00"}}>{saved}</p>}
-  {error&&<p role="alert" style={{color:"#ffb6b6"}}>{error}</p>}
+  {error&&<p role="alert" style={{color:"#ffb6b6"}}><Copy text={error}/></p>}
  </section>;
 }

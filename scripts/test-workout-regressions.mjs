@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {createRequire} from 'node:module';
+import ts from 'typescript';
+const require=createRequire(import.meta.url);
+let workout,updates=0,evaluations=0;
+const user={id:'qa-owner'};
+const db={workout:{findFirst:async()=>workout,update:async({data})=>{updates++;Object.assign(workout,data);return workout}},setLog:{findMany:async()=>[],upsert:async()=>{throw Error('Unexpected write')}}};
+const http={requireApiUser:async()=>user,isSameOrigin:()=>true,errorJson:(error,status)=>Response.json({ok:false,error},{status})};
+function load(file){const full=path.resolve(file);const mod={exports:{}};const js=ts.transpileModule(fs.readFileSync(full,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;new Function('require','module','exports',js)(name=>{
+ if(name.endsWith('/db'))return {prisma:db};if(name.endsWith('/http'))return http;
+ if(name.endsWith('/scoring'))return {recomputeScoreForUser:async()=>evaluations++};
+ if(name.endsWith('/recommendations'))return {evaluateRecommendations:async()=>{}};
+ if(name.endsWith('/gamification'))return {gamificationSnapshot:async()=>{}};
+ if(name.endsWith('/contextual-workout'))return {contextualWorkout:x=>x};
+ return require(name);
+},mod,mod.exports);return mod.exports;}
+const route=load('app/api/workouts/[id]/route.ts'),sets=load('app/api/workouts/[id]/sets/route.ts');
+const ctx={params:Promise.resolve({id:'qa-workout'})};
+const patch=body=>route.PATCH(new Request('http://localhost/api/workouts/qa-workout',{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify(body)}),ctx);
+const post=body=>sets.POST(new Request('http://localhost/api/workouts/qa-workout/sets',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}),ctx);
+workout={id:'qa-workout',userId:user.id,completedAt:null,startedAt:null,exercises:[{exerciseId:'press',targetSets:2},{exerciseId:'plank',targetSets:1}],sets:[]};
+assert.equal((await patch({action:'complete',rpe:6})).status,422,'Empty workout must not earn success');assert.equal(updates,0);assert.equal(evaluations,0);
+workout.sets=[{exerciseId:'press',setNumber:1,reps:8}];assert.equal((await patch({action:'complete'})).status,422,'Partial workout must remain incomplete');
+assert.equal((await post({exerciseId:'press',setNumber:1,rpe:8})).status,422,'RPE alone is not a completed set');
+assert.equal((await post({exerciseId:'press',setNumber:3,reps:8})).status,422,'Out of plan set is rejected');
+workout.sets.push({exerciseId:'press',setNumber:2,reps:8},{exerciseId:'plank',setNumber:1,durationS:45});
+assert.equal((await patch({action:'complete',rpe:6})).status,200,'Strength and timed sets can complete a workout');assert.equal(updates,1);assert.equal(evaluations,1);
+const completedAt=workout.completedAt;assert.equal((await patch({action:'complete',rpe:10})).status,200);assert.equal(updates,1);assert.equal(workout.completedAt,completedAt,'Repeat must preserve original completion time');
+assert.equal((await patch({action:'start'})).status,200);assert.equal(updates,1,'Completed workout must not restart');assert.equal((await post({exerciseId:'press',setNumber:1,reps:10})).status,409,'Completed sets are read only');
+Object.assign(db,{user:{findUnique:async()=>({id:user.id,timezone:'Europe/Berlin',subscriptionTier:'PRO'})},dailyCheck:{findMany:async()=>[{date:new Date(),energy:3,soreness:7,sleepHours:5}]},wearableDaily:{findMany:async()=>[]},coachAssignment:{findFirst:async()=>null},videoFeedback:{findMany:async()=>[]},coachBrief:{findFirst:async()=>null},recommendation:{findMany:async()=>[]}});db.workout.findMany=async()=>[];
+const daily=load('lib/journey-daily.ts');let day=await daily.getAthleteDay(user.id);assert.equal(day.actual.sleepMinutes,300);assert.equal(day.recovery.hasSleep,true,'Manual sleep must be available in Today');
+db.wearableDaily.findMany=async()=>[{date:new Date(),sleepMinutes:420}];day=await daily.getAthleteDay(user.id);assert.equal(day.actual.sleepMinutes,420,'Measured sleep takes precedence');
+console.log('PASS: empty/partial workout, timed sets, invalid sets, completion replay, read-only history and manual/measured sleep regressions');

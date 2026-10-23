@@ -26,16 +26,16 @@ export default async function Kpi(){
  return <main className="admin-content" style={{margin:"0 auto"}}>
   <header className="admin-header"><div><span className="eyebrow"><Copy text={"ERFOLGSKENNZAHLEN"}/></span><h1><Copy text={"Produkt KPI"}/></h1></div><Link className="ghost" href="/admin"><Copy text={"← ÜBERSICHT"}/></Link></header>
   <div className="kpis">
-   {metric("ONBOARDING",pct(onboard,total)+"%","Ziel über 70 %",pct(onboard,total)>70)}
-   {metric("GERÄT VERBUNDEN",pct(wear,total)+"%","Ziel über 50 %",pct(wear,total)>50)}
-   {metric("BINDUNG NACH 7 TAGEN",pct(ret7,eligible7.length)+"%","Ziel über 35 %",pct(ret7,eligible7.length)>35)}
-   {metric("BINDUNG NACH 30 TAGEN",pct(ret30,eligible30.length)+"%","Ziel über 20 %",pct(ret30,eligible30.length)>20)}
+   <Copy text={metric("ONBOARDING",pct(onboard,total)+"%","Ziel über 70 %",pct(onboard,total)>70)}/>
+   <Copy text={metric("GERÄT VERBUNDEN",pct(wear,total)+"%","Ziel über 50 %",pct(wear,total)>50)}/>
+   <Copy text={metric("BINDUNG NACH 7 TAGEN",pct(ret7,eligible7.length)+"%","Ziel über 35 %",pct(ret7,eligible7.length)>35)}/>
+   <Copy text={metric("BINDUNG NACH 30 TAGEN",pct(ret30,eligible30.length)+"%","Ziel über 20 %",pct(ret30,eligible30.length)>20)}/>
   </div>
   <div className="kpis">
-   {metric("KOSTENLOS ZU PRO",pct(pro,total)+"%","Ziel 3 bis 8 %",pct(pro,total)>=3&&pct(pro,total)<=8)}
-   {metric("TRAINER ANTWORTZEIT",avgResponse==null?"Keine Daten":(Math.round(avgResponse*10)/10)+" h","Ziel unter 24 h",avgResponse!=null&&avgResponse<24)}
-   {metric("ATHLETEN",String(total),"Aktive Produktbasis",total>0)}
-   {metric("PRO UND ELITE",String(pro),"Kapazität beobachten",true)}
+   <Copy text={metric("KOSTENLOS ZU PRO",pct(pro,total)+"%","Ziel 3 bis 8 %",pct(pro,total)>=3&&pct(pro,total)<=8)}/>
+   <Copy text={metric("TRAINER ANTWORTZEIT",avgResponse==null?"Keine Daten":(Math.round(avgResponse*10)/10)+" h","Ziel unter 24 h",avgResponse!=null&&avgResponse<24)}/>
+   <Copy text={metric("ATHLETEN",String(total),"Aktive Produktbasis",total>0)}/>
+   <Copy text={metric("PRO UND ELITE",String(pro),"Kapazität beobachten",true)}/>
   </div>
   <section className="admin-cols"><article className="panel"><span className="eyebrow"><Copy text={"ZAHLUNGSMETRIKEN"}/></span><h2><Copy text={"Bewusst ausgenommen"}/></h2><p className="muted"><Copy text={"Testphase zu Bezahlabo und Kündigungsrate werden erst aktiviert, wenn die Store Zahlung final angeschlossen ist. Alle anderen KPI werden aus echten Produktdaten berechnet."}/></p></article><article className="panel"><span className="eyebrow"><Copy text={"MESSUNG"}/></span><h2><Copy text={hasDemo?"DEMO DATEN":"Keine erfundenen Zahlen"}/></h2><p className="muted"><Copy text={hasDemo?"DEMO Ansicht: Beispielkonten und synthetische Nachrichten sind in diesen Kennzahlen enthalten. Dies sind keine echten Geschäftsergebnisse.":"Bindung basiert auf realer Sitzungsaktivität. Die Quote verbundener Geräte basiert auf aktiven Verbindungen. Die Antwortzeit des Trainers basiert auf echten Nachrichtenpaaren."}/></p></article></section>
  </main>;

@@ -1,4 +1,6 @@
 "use client";
+import {Copy} from "./Locale";
+
 import {useCallback,useEffect,useRef,useState} from "react";
 
 type Award={id:string;title:string;message:string;intensity:"SMALL"|"MEDIUM"|"FULL";achievedAt:string};
@@ -67,15 +69,15 @@ export default function CelebrationOverlay(){
     {active.intensity!=="SMALL"&&Array.from({length:active.intensity==="FULL"?10:5},(_,i)=>
      <i key={i} style={{["--piece" as string]:i}}/>)}
    </div>
-   <span className="bd-celebration-eyebrow">{active.intensity==="FULL"?"EIN GROSSER MOMENT":active.intensity==="MEDIUM"?"DU HAST ES GESCHAFFT":"EIN ECHTER SCHRITT"}</span>
+   <span className="bd-celebration-eyebrow"><Copy text={active.intensity==="FULL"?"EIN GROSSER MOMENT":active.intensity==="MEDIUM"?"DU HAST ES GESCHAFFT":"EIN ECHTER SCHRITT"}/></span>
    <h2 id="bd-celebration-title">{active.title}</h2>
    <p id="bd-celebration-description">{active.message}</p>
-   <p className="bd-celebration-note">Du hast dir diesen Erfolg verdient. Er wurde durch deinen dokumentierten Fortschritt bestätigt.</p>
-   {error&&<p className="bd-celebration-error" role="alert">{error}</p>}
-   <button type="button" className="bd-celebration-next" autoFocus disabled={busy} onClick={()=>void seen()}>WEITER</button>
+   <p className="bd-celebration-note"><Copy text={"Du hast dir diesen Erfolg verdient. Er wurde durch deinen dokumentierten Fortschritt bestätigt."}/></p>
+   {error&&<p className="bd-celebration-error" role="alert"><Copy text={error}/></p>}
+   <button type="button" className="bd-celebration-next" autoFocus disabled={busy} onClick={()=>void seen()}><Copy text={"WEITER"}/></button>
    {!isReduced&&<button type="button" className="bd-celebration-quiet" disabled={busy}
-    onClick={()=>void reduce()}>BEWEGUNGEN REDUZIEREN</button>}
-   {queue.length>1&&<span className="bd-celebration-counter">{queue.length} bestätigte Erfolge</span>}
+    onClick={()=>void reduce()}><Copy text={"BEWEGUNGEN REDUZIEREN"}/></button>}
+   {queue.length>1&&<span className="bd-celebration-counter">{queue.length}<Copy text={" bestätigte Erfolge"}/></span>}
   </div>}
  </dialog>;
 }
