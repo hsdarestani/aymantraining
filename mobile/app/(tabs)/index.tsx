@@ -129,11 +129,11 @@ export default function Home(){
     <RhythmHorizon days={d.dayStrip||[]}/>
 
   {process.env.EXPO_PUBLIC_JOURNEY_OVERVIEW_ENABLED!=="false"&&<Pressable accessibilityRole="button" onPress={()=>router.push("/journey")} style={s.priority}><Text style={s.priorityKicker}><Copy text="DEIN TRAININGSWEG"/></Text><Text style={s.priorityTitle}><Copy text="LEVEL & KAPITEL →"/></Text><Text style={s.priorityCopy}><Copy text="Entdecke deinen bestätigten Fortschritt und den nächsten Schritt."/></Text></Pressable>}
-    {process.env.EXPO_PUBLIC_JOURNEY_DAILY_ENABLED!=="false"&&<Pressable accessibilityRole="button" onPress={()=>router.push("/journey-today")} style={s.priority}><Text style={s.priorityKicker}><Copy text="HEUTE MIT DEINEM TRAINER"/></Text><Text style={s.priorityTitle}><Copy text="DEIN TRAINING & DEINE ERHOLUNG →"/></Text><Text style={s.priorityCopy}>Deine geplante Einheit und persönliches Technikfeedback.</Text></Pressable>}
+    {process.env.EXPO_PUBLIC_JOURNEY_DAILY_ENABLED!=="false"&&<Pressable accessibilityRole="button" onPress={()=>router.push("/journey-today")} style={s.priority}><Text style={s.priorityKicker}><Copy text="HEUTE MIT DEINEM TRAINER"/></Text><Text style={s.priorityTitle}><Copy text="DEIN TRAINING & DEINE ERHOLUNG →"/></Text><Text style={s.priorityCopy}><Copy text="Deine geplante Einheit und persönliches Technikfeedback."/></Text></Pressable>}
     {process.env.EXPO_PUBLIC_JOURNEY_TESTS_ENABLED==="true"&&<Pressable accessibilityRole="button" onPress={()=>router.push("/journey-tests")} style={s.priority}>
    <Text style={s.priorityKicker}><Copy text="DEIN TRAININGSWEG"/></Text>
-   <Text style={s.priorityTitle}>KAPITEL & AUFSTIEGSTESTS →</Text>
-   <Text style={s.priorityCopy}>Sehe deine Freischaltungen, reiche Tests ein und lies Trainerfeedback.</Text>
+   <Text style={s.priorityTitle}><Copy text="KAPITEL & AUFSTIEGSTESTS →"/></Text>
+   <Text style={s.priorityCopy}><Copy text="Sehe deine Freischaltungen, reiche Tests ein und lies Trainerfeedback."/></Text>
   </Pressable>}
 
   <View style={s.performanceStream}>
@@ -152,7 +152,7 @@ export default function Home(){
    <Pressable accessibilityRole="button" style={s.quickLine} onPress={()=>router.push("/awake")}><Text style={s.quickLabel}><Copy text="BE AWAKE"/></Text><Text style={s.quickText}><Copy text="Morgenroutine · Tagesstart"/></Text><Text style={s.quickArrow}>→</Text></Pressable>
   </View>
 
-    {d.cycleJournalEnabled?<Pressable accessibilityRole="button" onPress={()=>router.push("/cycle")} style={s.cycle}><Text style={s.cycleTag}>PRIVATER ZYKLUSKALENDER</Text><Text style={s.cycleTitle}>{d.cycle?"TAG "+d.cycle.day+" · NUR SCHÄTZUNG":"DEINE AUFZEICHNUNGEN"}</Text><Text style={s.cycleCopy}>Du entscheidest, welche Daten gespeichert und geteilt werden.</Text></Pressable>:null}
+    {d.cycleJournalEnabled?<Pressable accessibilityRole="button" onPress={()=>router.push("/cycle")} style={s.cycle}><Text style={s.cycleTag}><Copy text="PRIVATER ZYKLUSKALENDER"/></Text><Text style={s.cycleTitle}>{d.cycle?"TAG "+d.cycle.day+" · NUR SCHÄTZUNG":"DEINE AUFZEICHNUNGEN"}</Text><Text style={s.cycleCopy}><Copy text="Du entscheidest, welche Daten gespeichert und geteilt werden."/></Text></Pressable>:null}
 
   <Pressable onPress={()=>router.push(d.nextWorkout?`/workout/${d.nextWorkout.id}`:"/(tabs)/training")}><View style={s.workout}><Text style={s.workoutKicker}><Copy text="HEUTIGES TRAINING"/></Text><Text style={s.workoutTitle}>{d.nextWorkout?.title?<>{d.nextWorkout.title}</>:<Copy text="KEIN TRAINING EINGETRAGEN"/>}</Text><Text style={s.cardCopy}>{d.nextWorkout?.scheduledAt?<LocalizedValue value={new Date(d.nextWorkout.scheduledAt)}/>:<Copy text="Noch kein Erholungstag bestätigt."/>}</Text><Text style={s.arrow}><Copy text={d.nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></Text></View></Pressable>
 
