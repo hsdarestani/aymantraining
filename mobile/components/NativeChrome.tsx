@@ -42,12 +42,16 @@ export default function NativeChrome(){
   function back(){Haptics.selectionAsync().catch(()=>undefined);if(router.canGoBack())router.back();else router.replace("/(tabs)")}
 
   return <>
-    <Animated.View entering={FadeInUp.duration(420)} pointerEvents="box-none" style={[s.chrome,{bottom:bottomClearance+14}]}>
+    {/* The navigation dock participates in normal layout instead of covering
+        workout controls or the last rows of an internal screen. */}
+    <View style={[s.dock,{paddingBottom:bottomClearance+8}]}>
+    <Animated.View entering={FadeInUp.duration(420)} style={s.chrome}>
       <Pressable accessibilityLabel={translate("Zurück")} onPress={back} style={s.quick}><ArrowLeft color={C.ink} size={18}/><Text style={s.quickText}><Copy text={"ZURÜCK"}/></Text></Pressable>
       <Pressable accessibilityLabel={translate("Start öffnen")} onPress={()=>go("/(tabs)")} style={s.iconQuick}><House color={C.ink} size={18}/></Pressable>
       <Pressable accessibilityLabel={translate("Training öffnen")} onPress={()=>go("/(tabs)/training")} style={s.iconQuick}><Dumbbell color={C.ink} size={18}/></Pressable>
       <Pressable accessibilityLabel={translate("Menü öffnen")} onPress={()=>setOpen(true)} style={s.menuPill}><Menu color={C.bg} size={18}/><Text style={s.menuText}><Copy text={"MENÜ"}/></Text></Pressable>
     </Animated.View>
+    </View>
 
     <Modal visible={open} transparent animationType="fade" onRequestClose={()=>setOpen(false)}>
       <View style={s.modal}>
@@ -64,7 +68,8 @@ export default function NativeChrome(){
   </>;
 }
 const s=StyleSheet.create({
- chrome:{position:"absolute",zIndex:90,left:12,right:12,bottom:14,height:58,borderRadius:29,backgroundColor:"#101313F3",borderWidth:1,borderColor:C.line,flexDirection:"row",alignItems:"center",padding:6,gap:6,shadowColor:"#000",shadowOpacity:.38,shadowRadius:16,shadowOffset:{width:0,height:9}},
+ dock:{paddingHorizontal:12,paddingTop:8,backgroundColor:C.bg,borderTopWidth:1,borderTopColor:C.line},
+ chrome:{height:58,borderRadius:29,backgroundColor:"#101313F3",borderWidth:1,borderColor:C.line,flexDirection:"row",alignItems:"center",padding:6,gap:6,shadowColor:"#000",shadowOpacity:.38,shadowRadius:16,shadowOffset:{width:0,height:9}},
  quick:{height:46,borderRadius:23,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingHorizontal:13,backgroundColor:C.panel2,borderWidth:1,borderColor:C.line},quickText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1},
  iconQuick:{width:46,height:46,borderRadius:23,alignItems:"center",justifyContent:"center",backgroundColor:C.panel2,borderWidth:1,borderColor:C.line},
  menuPill:{flex:1,height:46,borderRadius:23,backgroundColor:C.red,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:7,paddingHorizontal:15},menuText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.2},
