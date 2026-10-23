@@ -1,3 +1,4 @@
+import {Copy} from "../components/Locale";
 import {useCallback,useEffect,useState} from "react";
 import {ActivityIndicator,Image,Pressable,ScrollView,StyleSheet,Text,View} from "react-native";
 import {useFocusEffect,router} from "expo-router";
@@ -59,7 +60,7 @@ export default function JourneyOverview(){
   catch(e){setError(e instanceof Error?e.message:"Wechsel nicht möglich");}finally{setBusy(false);}
  }
  return <SafeAreaView style={s.safe} edges={["top"]}><ScrollView contentContainerStyle={s.content}>
-  <Pressable onPress={()=>router.back()}><Text style={s.back}>← ZURÜCK</Text></Pressable>
+  <Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text="← ZURÜCK"/></Text></Pressable>
   <Text style={s.eyebrow}>BE DIFFERENT · DEIN WEG</Text><Text style={s.title}>DEIN FORTSCHRITT.</Text>
   <Text style={s.muted}>Deine bestätigten Leistungsstufen und Kapitel. Punkte und PRO ersetzen keine Aufstiegstests.</Text>
   {!enabled?<View style={s.card}><Text style={s.muted}>Der neue Trainingsweg wird vorbereitet. Deine bisherigen Daten bleiben erhalten.</Text></View>:
