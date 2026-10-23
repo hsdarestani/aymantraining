@@ -41,15 +41,15 @@ export default function Cycle(){
  if(loading)return <View style={s.loading}><ActivityIndicator color={C.volt}/></View>;
  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.body} keyboardShouldPersistTaps="handled">
   <View style={s.header}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.link}><Copy text="ZURÜCK"/></Text></Pressable></View>
-  <Text style={s.kicker}>FREIWILLIG · PRIVAT</Text><Text style={s.heading}>DEIN ZYKLUS.{"\n"}DEINE DATEN.</Text>
-  <Text style={s.copy}>Deine Aufzeichnungen bleiben privat. Du bestimmst selbst, was du speicherst. Kein Einfluss auf Trainingsstufe oder Leistungswert.</Text>
-  <Text style={s.copy}>Schätzungen sind weder für Verhütung noch für Schwangerschaftsberatung geeignet und können stark abweichen.</Text>
+  <Text style={s.kicker}><Copy text="FREIWILLIG · PRIVAT"/></Text><Text style={s.heading}>DEIN ZYKLUS.{"\n"}DEINE DATEN.</Text>
+  <Text style={s.copy}><Copy text="Deine Aufzeichnungen bleiben privat. Du bestimmst selbst, was du speicherst. Kein Einfluss auf Trainingsstufe oder Leistungswert."/></Text>
+  <Text style={s.copy}><Copy text="Schätzungen sind weder für Verhütung noch für Schwangerschaftsberatung geeignet und können stark abweichen."/></Text>
   {!!status&&<Text accessibilityRole="alert" style={s.status}>{status}</Text>}
-  {!d?.available?<View style={s.card}><Text style={s.copy}>Diese Funktion ist noch nicht freigeschaltet. Dein Training bleibt unverändert.</Text></View>:
-   !d.enabled?<View style={s.card}><Text style={s.title}>DEINE FREIWILLIGE ENTSCHEIDUNG</Text>
-     <Text style={s.copy}>Das Tagebuch kann Blutung, Beschwerden, Energie und Stimmung enthalten. Niemand erhält Zugriff ohne deine getrennte Freigabe.</Text>
-     <Text style={s.copy}>Du kannst jederzeit alle Daten und die Einwilligung endgültig löschen. Es werden keine intimen Angaben per Push versendet.</Text>
-     <View style={s.row}><Text style={[s.copy,{flex:1}]}>ICH STIMME DER VERARBEITUNG MEINER SENSIBLEN ZYKLUSDATEN AUSDRÜCKLICH ZU</Text>
+  {!d?.available?<View style={s.card}><Text style={s.copy}><Copy text="Diese Funktion ist noch nicht freigeschaltet. Dein Training bleibt unverändert."/></Text></View>:
+   !d.enabled?<View style={s.card}><Text style={s.title}><Copy text="DEINE FREIWILLIGE ENTSCHEIDUNG"/></Text>
+     <Text style={s.copy}><Copy text="Das Tagebuch kann Blutung, Beschwerden, Energie und Stimmung enthalten. Niemand erhält Zugriff ohne deine getrennte Freigabe."/></Text>
+     <Text style={s.copy}><Copy text="Du kannst jederzeit alle Daten und die Einwilligung endgültig löschen. Es werden keine intimen Angaben per Push versendet."/></Text>
+     <View style={s.row}><Text style={[s.copy,{flex:1}]}><Copy text="ICH STIMME DER VERARBEITUNG MEINER SENSIBLEN ZYKLUSDATEN AUSDRÜCKLICH ZU"/></Text>
       <Switch value={consent} onValueChange={setConsent} trackColor={{true:C.volt}}/></View>
      <Pressable style={[s.primary,(!consent||busy)&&s.disabled]} disabled={!consent||busy} onPress={()=>pref({action:"ENABLE",acknowledgeSensitiveData:true},"TAGEBUCH AKTIVIERT")}><Text style={s.primaryText}>TAGEBUCH AKTIVIEREN</Text></Pressable>
     </View>:<>
@@ -89,7 +89,7 @@ export default function Cycle(){
      <View style={s.card}><Text style={s.kicker}>DEINE AUFZEICHNUNGEN</Text>
       {d.entries.length===0?<Text style={s.copy}>Noch keine Tage erfasst.</Text>:d.entries.slice(0,35).map(e=><Pressable key={e.date} onPress={()=>editDay(e.date)} style={[s.history,entry.date===e.date&&s.historyOn]}><Text style={s.historyTitle}>{e.date}</Text><Text style={s.copy}>{e.planChoice==="REST"?"Ruhe gewünscht":e.planChoice==="EASIER"?"Leichtere Einheit gewünscht":"Wie geplant"} · Energie {e.energy??"—"}</Text></Pressable>)}
      </View>
-     <View style={s.card}><Text style={s.title}>DEINE KONTROLLE.</Text>
+     <View style={s.card}><Text style={s.title}><Copy text="DEINE KONTROLLE."/></Text>
       <View style={s.row}><Text style={[s.copy,{flex:1}]}>PRIVATE HINWEISE NUR IM TAGEBUCH</Text><Switch value={d.remindersEnabled} disabled={busy}
        onValueChange={v=>pref({action:"UPDATE",remindersEnabled:v},"HINWEISE GESPEICHERT")} trackColor={{true:C.volt}}/></View>
       <View style={s.row}><Text style={[s.copy,{flex:1}]}>BEGRENZTE TRAININGSSIGNALE MIT ZUGEWIESENEM TRAINER TEILEN</Text>
@@ -100,7 +100,7 @@ export default function Cycle(){
       <Pressable style={s.danger} onPress={revoke} disabled={busy}><Text style={s.dangerText}>ALLE DATEN LÖSCHEN & EINWILLIGUNG WIDERRUFEN</Text></Pressable>
      </View>
     </>}
-  <Pressable onPress={()=>router.back()}><Text style={s.link}>ZURÜCK</Text></Pressable>
+  <Pressable onPress={()=>router.back()}><Text style={s.link}><Copy text="ZURÜCK"/></Text></Pressable>
  </ScrollView></SafeAreaView>
 }
 const s=StyleSheet.create({safe:{flex:1,backgroundColor:C.bg},loading:{flex:1,justifyContent:"center"},body:{padding:18,paddingBottom:90,gap:12},header:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",minHeight:55},
