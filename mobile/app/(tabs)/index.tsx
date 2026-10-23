@@ -1,4 +1,5 @@
 import {Copy,LocalizedValue,LanguagePicker} from "../../components/Locale";
+import {translate,useLocale} from "../../lib/i18n/locale";
 import {useCallback,useMemo,useState} from "react";
 import {ActivityIndicator,Image,Platform,Pressable,RefreshControl,ScrollView,StyleSheet,Text,View} from "react-native";
 import {LinearGradient} from "expo-linear-gradient";
@@ -24,6 +25,7 @@ const pillarMeta=[
 function Bar({value,max,accent=C.volt}:{value:number;max:number;accent?:string}){const pct=Math.max(0,Math.min(100,max?value/max*100:0));return <View style={s.metricTrack}><View style={[s.metricFill,{width:`${pct}%`,backgroundColor:accent}]}/></View>}
 
 export default function Home(){
+ useLocale();
  const insets=useSafeAreaInsets();
  const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):Math.max(insets.bottom,12);
  const [d,setD]=useState<any>(null),[gamification,setGamification]=useState<any>(null),[refreshing,setRefreshing]=useState(false),[syncing,setSyncing]=useState(false);
@@ -79,16 +81,16 @@ export default function Home(){
      <Text style={s.womenHeading}><Copy text="STARK IN DEINEM TEMPO."/></Text>
      <Text style={s.womenCopy}><Copy text="Deine Ziele und deine echten Fortschritte. Alle Sportarten bleiben verfügbar."/></Text>
      <View style={s.womenCard}><Text style={s.womenEyebrow}><Copy text="TRAINING HEUTE"/></Text>
-      <Text style={s.womenFact}>{plan?.scheduled?plan.completed+" von "+plan.scheduled+" Einheiten":"Kein Training eingetragen"}</Text>
+      <Text style={s.womenFact}>{plan?.scheduled?<>{plan.completed} <Copy text="von"/> {plan.scheduled} <Copy text="Einheiten"/></>:<Copy text="Kein Training eingetragen"/>}</Text>
       <Pressable accessibilityRole="button" onPress={()=>router.push("/(tabs)/training")}><Text style={s.womenAction}><Copy text="TRAINING ANSEHEN →"/></Text></Pressable>
      </View>
      <View style={s.womenCard}><Text style={s.womenEyebrow}><Copy text="DEIN BEFINDEN"/></Text>
-      <Text style={s.womenFact}>Energie: {profile?.today?.energy??"Keine Angabe"}</Text>
-      <Text style={s.womenCopy}>Schlaf: {profile?.today?.sleepHours==null?"Keine Angabe":profile.today.sleepHours+" h"}</Text>
+      <Text style={s.womenFact}><Copy text="Energie:"/> {profile?.today?.energy??<Copy text="Keine Angabe"/>}</Text>
+      <Text style={s.womenCopy}><Copy text="Schlaf:"/> {profile?.today?.sleepHours==null?<Copy text="Keine Angabe"/>:profile.today.sleepHours+" h"}</Text>
       <Pressable accessibilityRole="button" onPress={()=>router.push("/lifestyle")}><Text style={s.womenAction}><Copy text="TAGESCHECK ÖFFNEN →"/></Text></Pressable>
      </View>
-     {womenGoals.length>0&&<Text style={s.womenCopy}>DEINE ZIELE: {womenGoals.map(g=>goalLabel[g]||g).join(" · ")}</Text>}
-     <Text style={s.womenCopy}>Bestätigte Stufe: {profile?.journey?.confirmedLevel?.replaceAll("_"," ")??"Noch keine Einstufung"}</Text>
+     {womenGoals.length>0&&<Text style={s.womenCopy}><Copy text="DEINE ZIELE:"/> {womenGoals.map(g=>translate(goalLabel[g]||g)).join(" · ")}</Text>}
+     <Text style={s.womenCopy}><Copy text="Bestätigte Stufe:"/> {profile?.journey?.confirmedLevel?.replaceAll("_"," ")??<Copy text="Noch keine Einstufung"/>}</Text>
      <Pressable accessibilityRole="button" onPress={()=>router.push("/settings")}><Text style={s.womenAction}><Copy text="ANSICHT ANPASSEN →"/></Text></Pressable>
     </View>}
 
@@ -97,11 +99,11 @@ export default function Home(){
   </Pressable>:null}
 
   {profile&&<View style={s.dailyProof}>
-   <Text style={s.dailyProofEyebrow}>HEUTE · {profile.date}</Text>
-   <Text style={s.dailyProofTitle}>{plan?.status==="NOT_SCHEDULED"?"Kein Training eingetragen":plan?.status==="DONE"?"Alle Einheiten erledigt":plan?.status==="PARTIAL"?"Training teilweise erledigt":"Training steht an"}</Text>
-   <Text style={s.dailyProofText}>{plan?.scheduled?plan.completed+" von "+plan.scheduled+" geplanten Einheiten erledigt":"Das bedeutet nicht automatisch einen Erholungstag."}</Text>
-   <Text style={s.dailyProofText}>ENERGIE: {profile.today.energy??"Keine Angabe"} · SCHLAF: {profile.today.sleepHours==null?"Keine Angabe":profile.today.sleepHours+" h"}</Text>
-   <Text style={s.dailyProofText}>BESTÄTIGTE STUFE: {profile.journey.confirmedLevel??"Noch nicht bestätigt"}</Text>
+   <Text style={s.dailyProofEyebrow}><Copy text="HEUTE"/> · {profile.date}</Text>
+   <Text style={s.dailyProofTitle}><Copy text={plan?.status==="NOT_SCHEDULED"?"Kein Training eingetragen":plan?.status==="DONE"?"Alle Einheiten erledigt":plan?.status==="PARTIAL"?"Training teilweise erledigt":"Training steht an"}/></Text>
+   <Text style={s.dailyProofText}>{plan?.scheduled?<>{plan.completed} <Copy text="von"/> {plan.scheduled} <Copy text="Einheiten"/> · <Copy text="ERLEDIGT"/></>:<Copy text="Das bedeutet nicht automatisch einen Erholungstag."/>}</Text>
+   <Text style={s.dailyProofText}><Copy text="ENERGIE:"/> {profile.today.energy??<Copy text="Keine Angabe"/>} · <Copy text="SCHLAF:"/> {profile.today.sleepHours==null?<Copy text="Keine Angabe"/>:profile.today.sleepHours+" h"}</Text>
+   <Text style={s.dailyProofText}><Copy text="BESTÄTIGTE STUFE:"/> {profile.journey.confirmedLevel??<Copy text="Noch nicht bestätigt"/>}</Text>
    <Pressable accessibilityRole="button" onPress={()=>router.push("/(tabs)/training")}><Text style={s.dailyProofLink}><Copy text="TRAININGSPLAN ANSEHEN →"/></Text></Pressable>
   </View>}
   <View style={s.editorialScore}>
@@ -109,12 +111,12 @@ export default function Home(){
     <Text style={s.editorialEyebrow}><Copy text="BE DIFFERENT SCORE"/></Text>
     <View style={s.editorialFigure}><Text style={s.editorialValue}>{recordedValue??"—"}</Text><Text style={s.editorialPercent}>%</Text></View>
     <Text style={s.editorialLevel}><Copy text="LEISTUNGSPROFIL · KEINE STUFE"/></Text>
-    <Text style={s.editorialTarget}>MESSSTAND: {profile?.profile.recordedDate??"Keine Angabe"}</Text>
-    <Text style={s.editorialData}>DATENABDECKUNG {profile?.profile.completeness??0}%</Text>
+    <Text style={s.editorialTarget}><Copy text="MESSSTAND:"/> {profile?.profile.recordedDate??<Copy text="Keine Angabe"/>}</Text>
+    <Text style={s.editorialData}><Copy text="DATENABDECKUNG"/> {profile?.profile.completeness??0}%</Text>
    </View>
    <View style={s.radarPanel}>
     <ScoreRadar pillars={scorePillars}/>
-    <View style={s.radarFocus}><Text style={s.radarFocusTag}><Copy text="NÄCHSTER FOKUS"/></Text><Text style={s.radarFocusName}><Copy text={nextFocus?.label||"NOCH KEINE DATEN"}/></Text><Text style={s.radarFocusValue}>{nextFocus?.value==null?"Keine Angabe":Math.round(nextFocus.value)+"%"}</Text></View>
+    <View style={s.radarFocus}><Text style={s.radarFocusTag}><Copy text="NÄCHSTER FOKUS"/></Text><Text style={s.radarFocusName}><Copy text={nextFocus?.label||"NOCH KEINE DATEN"}/></Text><Text style={s.radarFocusValue}>{nextFocus?.value==null?<Copy text="Keine Angabe"/>:Math.round(nextFocus.value)+"%"}</Text></View>
    </View>
    <View style={s.pillarRows}>
     {scorePillars.map(p=><Pressable key={p.key} accessibilityRole="button" onPress={()=>router.push("/digital-twin")} style={s.pillarRow}>
