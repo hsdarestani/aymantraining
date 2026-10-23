@@ -1,3 +1,4 @@
+import {Copy} from "../components/Locale";
 "use client";
 import {useCallback,useEffect,useState} from "react";
 import Link from "next/link";
@@ -44,22 +45,22 @@ export default function JourneyOverview(){
   }catch(e){setError(e instanceof Error?e.message:"Wechsel nicht möglich");}
   finally{setBusy(false);}
  }
- if(loading)return <p role="status">Trainingsweg wird geladen …</p>;
+ if(loading)return <p role="status"><Copy text="Trainingsweg wird geladen …"/></p>;
  if(!data)return <p role="alert" className="j7-error">{error||"Trainingsweg nicht erreichbar."}</p>;
  return <div className="j7-stack">
   {error&&<p role="alert" className="j7-error">{error}</p>}{notice&&<p role="status" className="j7-success">{notice}</p>}
-  {data.intake&&<section className="panel j7-intake"><strong>DEINE AUSWAHL</strong><p>{data.intake.goals.map(g=>data.goals.find(x=>x.slug===g)?.label??g).join(" + ")}</p>
+  {data.intake&&<section className="panel j7-intake"><strong><Copy text="DEINE AUSWAHL"/></strong><p>{data.intake.goals.map(g=>data.goals.find(x=>x.slug===g)?.label??g).join(" + ")}</p>
    <p>{data.intake.status==="PENDING_PATHWAY"?"Dein Trainingsweg wird vorbereitet.":data.intake.status==="PENDING_PLACEMENT"?"Deine Einstufung wird geprüft.":"Dein Einstieg wurde bestätigt."}</p>
    <small>Deine Selbsteinschätzung {label(data.intake.selfLevel)} öffnet noch keine Kapitel.</small>
   </section>}
   {!data.enrollments.length&&data.legacy.transitionAvailable&&<section className="panel j7-transition">
-   <span className="eyebrow">FREIWILLIGER WECHSEL</span><h2>Deine Leistungen bleiben erhalten.</h2>
-   <p>Bestehende Trainingspläne, Einheiten, Punkte und Auszeichnungen bleiben unverändert. Du entscheidest selbst, ob du den neuen Weg beginnst. Die Einstufung wird später bestätigt.</p>
+   <span className="eyebrow"><Copy text="FREIWILLIGER WECHSEL"/></span><h2><Copy text="Deine Leistungen bleiben erhalten."/></h2>
+   <p><Copy text="Bestehende Trainingspläne, Einheiten, Punkte und Auszeichnungen bleiben unverändert. Du entscheidest selbst, ob du den neuen Weg beginnst. Die Einstufung wird später bestätigt."/></p>
    <p>Deine bisherigen Trainingseinheiten: {data.legacy.workoutCount}</p>
-   <strong>Ziele kombinieren</strong><div className="j7-goals">{data.goals.map(g=><label key={g.slug}><input type="checkbox" checked={selectedGoals.includes(g.slug)} onChange={e=>setSelectedGoals(old=>e.target.checked?[...old,g.slug]:old.filter(x=>x!==g.slug))}/>{g.label}</label>)}</div>
+   <strong><Copy text="Ziele kombinieren"/></strong><div className="j7-goals">{data.goals.map(g=><label key={g.slug}><input type="checkbox" checked={selectedGoals.includes(g.slug)} onChange={e=>setSelectedGoals(old=>e.target.checked?[...old,g.slug]:old.filter(x=>x!==g.slug))}/>{g.label}</label>)}</div>
    <label>Deine Selbsteinschätzung<select value={selfLevel} onChange={e=>setSelfLevel(e.target.value as Code)}>{data.levels.map(l=><option key={l.code} value={l.code}>{label(l.code)}</option>)}</select></label>
    <label className="j7-agree"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/> Ich möchte den neuen Weg beginnen. Meine bisherigen Daten werden nicht überschrieben.</label>
-   <button className="primary compact" disabled={busy||!consent||!selectedGoals.length} onClick={optIn}>WECHSEL VORMERKEN</button>
+   <button className="primary compact" disabled={busy||!consent||!selectedGoals.length} onClick={optIn}><Copy text="WECHSEL VORMERKEN"/></button>
   </section>}
   {data.enrollments.map(e=><section key={e.id} className="panel j7-path"><header className="j7-head"><div><span className="eyebrow">TRAININGSWEG · VERSION {e.version}</span><h2>{e.pathway}</h2><p>{e.confirmedLevel?"BESTÄTIGT: "+label(e.confirmedLevel):"EINSTUFUNG AUSSTEHEND"}</p></div><strong>{e.completedChapters}/{e.totalChapters} KAPITEL</strong></header>
    {e.levels.map(l=><div className="j7-level" key={l.code}><div className="j7-level-head"><div><h3>{label(l.code)}</h3><p>{l.description}</p></div><span>{l.earned?"ERREICHT":"NOCH GESPERRT"}</span></div>
