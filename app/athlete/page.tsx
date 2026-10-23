@@ -52,7 +52,7 @@ export default async function AthletePage(){
       </article>
 
       <article className="panel"><span className="eyebrow"><Copy text={"DEINE LEISTUNGSBEREICHE"}/></span><h2><Copy text={"Leistungsprofil"}/></h2>
-        {details?<div className="athlete-bars">{rows.map(([name,val])=><div key={name}><span>{name}</span><div className="weight-track"><i style={{width:`${val??0}%`}}/></div><strong><Copy text={val??"Keine Angabe"}/></strong></div>)}</div>:<div className="locked-copy"><p className="muted"><Copy text={"KOSTENLOS zeigt deinen Gesamtwert. Teilwerte und Erklärungen werden mit PRO freigeschaltet."}/></p><Link href="/pricing" className="secondary"><Copy text={"DETAILS FREISCHALTEN"}/></Link></div>}
+        {details?<div className="athlete-bars">{rows.map(([name,val])=><div key={name}><span><Copy text={name}/></span><div className="weight-track"><i style={{width:`${val??0}%`}}/></div><strong><Copy text={val??"Keine Angabe"}/></strong></div>)}</div>:<div className="locked-copy"><p className="muted"><Copy text={"KOSTENLOS zeigt deinen Gesamtwert. Teilwerte und Erklärungen werden mit PRO freigeschaltet."}/></p><Link href="/pricing" className="secondary"><Copy text={"DETAILS FREISCHALTEN"}/></Link></div>}
       </article>
     </section>
 
@@ -64,7 +64,7 @@ export default async function AthletePage(){
         {n:"02",title:"BE FUEL",description:"Ernährung und Energie",href:"/fuel",tone:"fuel"},
         {n:"03",title:"BE RESTED",description:"Schlaf und Regeneration",href:"/lifestyle",tone:"rest"},
         {n:"04",title:"BE FOCUSED",description:"Atmung und Fokus",href:"/focus",tone:"focus"},
-        {n:"05",title:"GADGETS",description:"Gesundheitsdaten verbinden",href:"/wearables",tone:"gadget"},
+        {n:"05",title:"GADGETS",description:"Gesundheitsdaten verbinden.",href:"/wearables",tone:"gadget"},
         {n:"06",title:"COACH",description:"Feedback und Austausch",href:"/coach",tone:"coach"}
        ].map(x=><Link href={x.href} key={x.n} className={"bd-experience-card "+x.tone}><span>{x.n}</span><strong><Copy text={x.title}/></strong><p><Copy text={x.description}/></p><b>↗</b></Link>)}
       </div>
