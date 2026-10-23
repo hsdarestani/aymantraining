@@ -10,8 +10,6 @@ const goalLabels:Record<string,string>={
 };
 export default function WomenDashboard({preference,journeyEnabled,confirmedLevel,completed,scheduled,energy,sleepHours,goals}:Props){
  if(!preference.enabled||preference.mode!=="WOMEN")return null;
- const training=scheduled===0?"Keine Einheit eingetragen":
-  completed===scheduled?"Alle geplanten Einheiten erledigt":completed+" von "+scheduled+" Einheiten geschafft";
  return <section className="bd-women-home" aria-label="Persönliche Trainingsansicht">
   <div className="bd-women-heading">
    <span><Copy text="DEINE ANSICHT · DEINE ENTSCHEIDUNG"/></span>
@@ -20,7 +18,7 @@ export default function WomenDashboard({preference,journeyEnabled,confirmedLevel
    <Link href="/settings"><Copy text="ANSICHT ANPASSEN →"/></Link>
   </div>
   <div className="bd-women-tiles">
-   <article><small><Copy text="HEUTE"/></small><strong><Copy text={training}/></strong><Link href="/training"><Copy text="TRAININGSPLAN ANSEHEN →"/></Link></article>
+   <article><small><Copy text="HEUTE"/></small><strong>{scheduled===0?<Copy text="Keine Einheit eingetragen"/>:completed===scheduled?<Copy text="Alle geplanten Einheiten erledigt"/>:<>{completed} <Copy text="von"/> {scheduled} <Copy text="Einheiten geschafft"/></>}</strong><Link href="/training"><Copy text="TRAININGSPLAN ANSEHEN →"/></Link></article>
    <article><small><Copy text="DEINE TAGESFORM"/></small><strong><Copy text="Energie:"/> {energy??<Copy text="Keine Angabe"/>}</strong>
      <p><Copy text="Schlaf:"/> {sleepHours==null?<Copy text="Keine Angabe"/>:sleepHours+" h"}</p><Link href="/lifestyle"><Copy text="TAGESCHECK ÖFFNEN →"/></Link></article>
    <article><small><Copy text="DEIN BESTÄTIGTER STAND"/></small><strong>{confirmedLevel?.replaceAll("_"," ")??<Copy text="Noch keine Einstufung"/>}</strong>
