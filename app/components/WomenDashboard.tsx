@@ -20,13 +20,13 @@ export default function WomenDashboard({preference,journeyEnabled,confirmedLevel
    <Link href="/settings"><Copy text="ANSICHT ANPASSEN →"/></Link>
   </div>
   <div className="bd-women-tiles">
-   <article><small><Copy text="HEUTE"/></small><strong>{training}</strong><Link href="/training"><Copy text="TRAININGSPLAN ANSEHEN →"/></Link></article>
-   <article><small><Copy text="DEINE TAGESFORM"/></small><strong>Energie: {energy??"Keine Angabe"}</strong>
-     <p>Schlaf: {sleepHours==null?"Keine Angabe":sleepHours+" h"}</p><Link href="/lifestyle"><Copy text="TAGESCHECK ÖFFNEN →"/></Link></article>
-   <article><small><Copy text="DEIN BESTÄTIGTER STAND"/></small><strong>{confirmedLevel?.replaceAll("_"," ")??"Noch keine Einstufung"}</strong>
+   <article><small><Copy text="HEUTE"/></small><strong><Copy text={training}/></strong><Link href="/training"><Copy text="TRAININGSPLAN ANSEHEN →"/></Link></article>
+   <article><small><Copy text="DEINE TAGESFORM"/></small><strong><Copy text="Energie:"/> {energy??<Copy text="Keine Angabe"/>}</strong>
+     <p><Copy text="Schlaf:"/> {sleepHours==null?<Copy text="Keine Angabe"/>:sleepHours+" h"}</p><Link href="/lifestyle"><Copy text="TAGESCHECK ÖFFNEN →"/></Link></article>
+   <article><small><Copy text="DEIN BESTÄTIGTER STAND"/></small><strong>{confirmedLevel?.replaceAll("_"," ")??<Copy text="Noch keine Einstufung"/>}</strong>
     <Link href={journeyEnabled?"/journey":"/training"}><Copy text={journeyEnabled?"TRAININGSWEG ANSEHEN →":"TRAININGSPLAN ANSEHEN →"}/></Link></article>
   </div>
-  {goals.length>0&&<div className="bd-women-goals"><small><Copy text="DEINE ZIELE"/></small><p>{goals.map(g=>goalLabels[g]??g).join(" · ")}</p></div>}
+  {goals.length>0&&<div className="bd-women-goals"><small><Copy text="DEINE ZIELE"/></small><p>{goals.map((g,i)=><span key={i}>{i>0?" · ":""}<Copy text={goalLabels[g]??g}/></span>)}</p></div>}
   <p className="bd-women-foot"><Copy text={preference.presenterPreference==="TRAINERIN"
   ?"Aufnahmen mit Trainerinnen werden bevorzugt angezeigt, sofern freigegebenes Material verfügbar ist. Keine Übungen werden aufgrund dieser Ansicht gesperrt."
   :"In den Einstellungen kannst du Aufnahmen mit Trainerinnen bevorzugen, sofern verfügbar. Keine Übung wird dadurch gesperrt."}/></p>
