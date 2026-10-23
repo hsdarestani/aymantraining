@@ -1,5 +1,5 @@
-import {Copy} from "../components/Locale";
 "use client";
+import {Copy} from "../components/Locale";
 import {useCallback,useEffect,useState} from "react";
 import Link from "next/link";
 type Code="READY"|"AWAKE"|"DIFFERENT"|"BE_DIFFERENT"|"TRULY_DIFFERENT";
