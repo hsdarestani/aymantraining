@@ -47,7 +47,7 @@ const nativeRoots=['mobile/app','mobile/components/Brand.tsx','mobile/components
 let inspected=0;
 function checkCopyLiterals(file){
  const source=fs.readFileSync(file,'utf8');
- for(const match of source.matchAll(/<Copy\\s+text=(?:"([^"]+)"|'([^']+)'|\\{["']([^"']+)["']\\})/g)){
+ for(const match of source.matchAll(/<Copy\s+text=(?:"([^"]+)"|'([^']+)'|\{["']([^"']+)["']\})/g)){
   const literal=match[1]||match[2]||match[3];
   assert(Object.prototype.hasOwnProperty.call(en,literal),`Missing English translation in ${file}: ${literal}`);
   inspected++;
@@ -67,4 +67,5 @@ for(const file of ['app/focus/page.tsx','app/components/RhythmHorizon.tsx']){
 for(const file of ['app/journey/JourneyOverview.tsx','app/journey/today/TodayClient.tsx']){
  assert(fs.readFileSync(file,'utf8').trimStart().startsWith('"use client";'),'Localized interactive pages must retain client boundaries');
 }
+assert(inspected>400,'Language coverage scan did not find expected native copy literals');
 console.log(`LANGUAGE_COVERAGE_OK ${inspected} native copy literals validated`);
