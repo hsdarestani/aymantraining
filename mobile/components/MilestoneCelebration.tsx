@@ -3,6 +3,7 @@ import {AccessibilityInfo,Animated,Easing,Modal,Pressable,StyleSheet,Text,View} 
 import {useFocusEffect} from "expo-router";
 import {api} from "../lib/api";
 import {C} from "../theme";
+import {Copy} from "./Locale";
 type Award={id:string;title:string;message:string;intensity:"SMALL"|"MEDIUM"|"FULL"};
 type Setting={enabled:boolean;reduceMotion:boolean};
 type Response={enabled:boolean;preference:Setting;pending:Award[]};
@@ -68,18 +69,18 @@ export default function MilestoneCelebration(){
       transform:[{rotate:(i*(360/Math.max(1,strength)))+"deg"},{translateY:award?.intensity==="FULL"?-87:-75}]
      }]}/>)}
     </View>
-    <Text style={s.kicker}>{award?.intensity==="FULL"?"EIN GROSSER MOMENT":award?.intensity==="MEDIUM"?"DU HAST ES GESCHAFFT":"EIN ECHTER SCHRITT"}</Text>
-    <Text style={s.title} accessibilityRole="header">{award?.title}</Text>
-    <Text style={s.message}>{award?.message}</Text>
-    <Text style={s.note}>Du hast dir diesen Erfolg verdient. Dein Fortschritt ist dokumentiert.</Text>
-    {!!error&&<Text accessibilityRole="alert" style={s.error}>{error}</Text>}
+    <Text style={s.kicker}><Copy text={award?.intensity==="FULL"?"EIN GROSSER MOMENT":award?.intensity==="MEDIUM"?"DU HAST ES GESCHAFFT":"EIN ECHTER SCHRITT"}/></Text>
+    <Text style={s.title} accessibilityRole="header"><Copy text={award?.title||""}/></Text>
+    <Text style={s.message}><Copy text={award?.message||""}/></Text>
+    <Text style={s.note}><Copy text="Du hast dir diesen Erfolg verdient. Dein Fortschritt ist dokumentiert."/></Text>
+    {!!error&&<Text accessibilityRole="alert" style={s.error}><Copy text={error}/></Text>}
     <Pressable style={[s.action,busy&&s.disabled]} accessibilityRole="button" disabled={busy} onPress={()=>void acknowledge()}>
-     <Text style={s.actionText}>WEITER</Text>
+     <Text style={s.actionText}><Copy text="WEITER"/></Text>
     </Pressable>
     {!still&&<Pressable style={s.quiet} accessibilityRole="button" disabled={busy} onPress={()=>void reduce()}>
-     <Text style={s.quietText}>BEWEGUNGEN REDUZIEREN</Text>
+     <Text style={s.quietText}><Copy text="BEWEGUNGEN REDUZIEREN"/></Text>
     </Pressable>}
-    {queue.length>1&&<Text style={s.note}>{queue.length} bestätigte Erfolge</Text>}
+    {queue.length>1&&<Text style={s.note}>{queue.length} <Copy text="bestätigte Erfolge"/></Text>}
    </View>
   </View>
  </Modal>;
