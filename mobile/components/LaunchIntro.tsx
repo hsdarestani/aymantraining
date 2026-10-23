@@ -3,6 +3,8 @@ import {AccessibilityInfo,Animated,Easing,StyleSheet,Text,View} from "react-nati
 import {LinearGradient} from "expo-linear-gradient";
 import Svg,{Defs,RadialGradient,Rect,Stop} from "react-native-svg";
 import {C} from "../theme";
+import {Copy} from "./Locale";
+import {useLocale} from "../lib/i18n/locale";
 
 const SEGMENTS=7;
 const SEGMENT_WIDTH=26;
@@ -41,6 +43,7 @@ function Halo({secondary=false}:{secondary?:boolean}){
 }
 
 export default function LaunchIntro({onDone}:{onDone:()=>void}){
+  const locale=useLocale();
   const progress=useRef(new Animated.Value(0)).current;
   const glow=useRef(new Animated.Value(0)).current;
   const breath=useRef(new Animated.Value(0)).current;
@@ -94,7 +97,7 @@ export default function LaunchIntro({onDone}:{onDone:()=>void}){
     };
   },[onDone,progress,glow,breath,opacity]);
 
-  return <View style={styles.safe} accessibilityLabel="BE DIFFERENT startet">
+  return <View style={styles.safe} accessibilityLabel={locale==="en"?"BE DIFFERENT is starting":"BE DIFFERENT startet"}>
     <LinearGradient colors={["#050606","#0A100B","#060807","#050606"]}
       locations={[0,0.4,0.74,1]} style={StyleSheet.absoluteFillObject}/>
     <Animated.View pointerEvents="none" style={[styles.halo,styles.haloTop,{
@@ -115,12 +118,12 @@ export default function LaunchIntro({onDone}:{onDone:()=>void}){
         transform:[{scale:breath.interpolate({inputRange:[0,1],outputRange:[1,1.018]})}]
       }}>
         <Text style={styles.wordmark}>BE DIFFERENT</Text>
-        <Text style={styles.subtitle}>ATHLETEN SYSTEM</Text>
+        <Text style={styles.subtitle}><Copy text="ATHLETEN SYSTEM"/></Text>
       </Animated.View>
-      <View style={styles.track} accessibilityLabel="Startfortschritt">
+      <View style={styles.track} accessibilityLabel={locale==="en"?"Launch progress":"Startfortschritt"}>
         {Array.from({length:SEGMENTS},(_,i)=><ProgressSegment key={i} index={i} progress={progress}/>)}
       </View>
-      <Text style={styles.caption}>DEIN SYSTEM STARTET</Text>
+      <Text style={styles.caption}><Copy text="DEIN SYSTEM STARTET"/></Text>
     </Animated.View>
   </View>;
 }
