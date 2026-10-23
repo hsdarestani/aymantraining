@@ -1,4 +1,5 @@
 import {Copy,LocalizedTextInput} from "../components/Locale";
+import {currentLocale,translate,useLocale} from "../lib/i18n/locale";
 import {useEffect,useRef,useState} from "react";
 import {Animated,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from "react-native";
 import Svg,{Circle} from "react-native-svg";
@@ -27,6 +28,7 @@ const CLOCK_CIRCUMFERENCE=2*Math.PI*101;
 const clock=(seconds:number)=>Math.floor(seconds/60)+":"+String(seconds%60).padStart(2,"0");
 
 export default function Focus(){
+ const locale=useLocale();
  const [d,setD]=useState<any>(null),[stress,setStress]=useState(5),[mood,setMood]=useState(7),[energy,setEnergy]=useState(7),[soreness,setSoreness]=useState(4),[sleepHours,setSleepHours]=useState("");
  const [seconds,setSeconds]=useState(DURATION),[running,setRunning]=useState(false),[voiceEnabled,setVoiceEnabled]=useState(false),[status,setStatus]=useState("");
  const timer=useRef<ReturnType<typeof setInterval>|null>(null);
@@ -50,8 +52,9 @@ export default function Focus(){
  function narrate(text:string){
   if(!voiceRef.current)return;
   Speech.stop().catch(()=>{});
-  Speech.speak(text,{language:"de-DE",rate:.86,pitch:1,onStart:()=>{speaking.current=true},onDone:()=>{speaking.current=false},onStopped:()=>{speaking.current=false},onError:()=>{speaking.current=false}});
+  Speech.speak(translate(text),{language:currentLocale()==="en"?"en-US":"de-DE",rate:.86,pitch:1,onStart:()=>{speaking.current=true},onDone:()=>{speaking.current=false},onStopped:()=>{speaking.current=false},onError:()=>{speaking.current=false}});
  }
+ useEffect(()=>{Speech.stop().catch(()=>{})},[locale]);
  function clearTimer(){if(timer.current){clearInterval(timer.current);timer.current=null}}
  function breathe(){
   if(running){
@@ -87,7 +90,7 @@ export default function Focus(){
   <View style={s.top}><Brand compact/><Pressable accessibilityRole="button" onPress={()=>router.back()}><Text style={s.back}><Copy text="ZURÜCK"/></Text></Pressable></View>
   <View style={s.hero}><Text style={s.heroKicker}>BE FOCUSED / 001</Text><Text style={s.title}><Copy text="DEIN MOMENT."/>{"\n"}<Text style={s.accent}><Copy text="DEIN FOKUS."/></Text></Text><Text style={s.intro}><Copy text="120 Sekunden für dich. Ohne Leistungsdruck. Du bestimmst das Tempo."/></Text></View>
   <View style={s.breathCard}>
-   <View style={s.breathHeader}><Text style={s.exerciseTag}>ATEMTRAINING</Text><Text style={s.exerciseNumber}>01 / 02 MIN</Text></View>
+   <View style={s.breathHeader}><Text style={s.exerciseTag}><Copy text="ATEMTRAINING"/></Text><Text style={s.exerciseNumber}>01 / 02 MIN</Text></View>
    <View style={s.breathStage}>
     <Animated.View pointerEvents="none" style={[s.breathGlow,{transform:[{scale:breath}]}]}/>
     <Svg width={248} height={248} viewBox="0 0 248 248" style={s.progressSvg}>
@@ -101,7 +104,7 @@ export default function Focus(){
     <Pressable accessibilityRole="button" style={[s.primary,s.controlPrimary]} onPress={breathe}><Text style={s.primaryText}><Copy text={running?"PAUSIEREN":seconds===0?"ERNEUT STARTEN":seconds===DURATION?"STARTEN":"FORTSETZEN"}/></Text></Pressable>
     <Pressable accessibilityRole="button" style={[s.secondary,s.controlSecondary]} onPress={reset}><Text style={s.secondaryText}><Copy text="ZURÜCKSETZEN"/></Text></Pressable>
    </View>
-   <Pressable accessibilityRole="switch" accessibilityState={{checked:voiceEnabled}} onPress={toggleVoice} style={s.voiceRow}><View style={[s.voiceIndicator,voiceEnabled&&s.voiceOn]}/><View style={s.voiceCopy}><Text style={s.voiceTitle}><Copy text={voiceEnabled?"SPRACHBEGLEITUNG AKTIV":"SPRACHBEGLEITUNG EINSCHALTEN"}/></Text><Text style={s.voiceCaption}><Copy text="Aktuell Gerätestimme. Trainerstimme folgt nach Freigabe der Aufnahme."/></Text></View><Text style={s.voiceArrow}>{voiceEnabled?"AN":"AUS"}</Text></Pressable>
+   <Pressable accessibilityRole="switch" accessibilityState={{checked:voiceEnabled}} onPress={toggleVoice} style={s.voiceRow}><View style={[s.voiceIndicator,voiceEnabled&&s.voiceOn]}/><View style={s.voiceCopy}><Text style={s.voiceTitle}><Copy text={voiceEnabled?"SPRACHBEGLEITUNG AKTIV":"SPRACHBEGLEITUNG EINSCHALTEN"}/></Text><Text style={s.voiceCaption}><Copy text="Aktuell Gerätestimme. Trainerstimme folgt nach Freigabe der Aufnahme."/></Text></View><Text style={s.voiceArrow}><Copy text={voiceEnabled?"AN":"AUS"}/></Text></Pressable>
    <Text style={s.safety}><Copy text="Bei Unwohlsein stoppen. Normal weiteratmen. Kein Luftanhalten notwendig."/></Text>
   </View>
   <Card style={s.lineCard}><Eyebrow><Copy text="DEINE DIFFERENT LINE"/></Eyebrow><Text style={s.line}><Copy text={d?.line||"Heute zählt die nächste saubere Entscheidung."}/></Text></Card>
@@ -109,7 +112,7 @@ export default function Focus(){
   {status?<Text style={s.status}><Copy text={status}/></Text>:null}
  </ScrollView></SafeAreaView>;
 }
-function Scale({label,value,set}:{label:string;value:number;set:(n:number)=>void}){return <View style={s.scale}><Text style={s.scaleLabel}>{label} · {value}</Text><View style={s.choices}>{[1,2,3,4,5,6,7,8,9,10].map(n=><Pressable key={n} onPress={()=>set(n)} style={[s.choice,n===value&&s.choiceOn]}><Text style={[s.choiceText,n===value&&s.choiceTextOn]}>{n}</Text></Pressable>)}</View></View>}
+function Scale({label,value,set}:{label:string;value:number;set:(n:number)=>void}){return <View style={s.scale}><Text style={s.scaleLabel}><Copy text={label}/> · {value}</Text><View style={s.choices}>{[1,2,3,4,5,6,7,8,9,10].map(n=><Pressable key={n} onPress={()=>set(n)} style={[s.choice,n===value&&s.choiceOn]}><Text style={[s.choiceText,n===value&&s.choiceTextOn]}>{n}</Text></Pressable>)}</View></View>}
 const s=StyleSheet.create({
  safe:{flex:1,backgroundColor:C.bg},content:{padding:18,paddingBottom:100,gap:15},
  top:{height:54,flexDirection:"row",justifyContent:"space-between",alignItems:"center"},back:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:11},
