@@ -37,9 +37,9 @@ function ExamCard({exam,enrollmentId,ready,reload}:{exam:Exam;enrollmentId:strin
   <Text style={s.examTitle}>{exam.titleDe}</Text>
   {latest&&<View style={[s.feedback,latest.verdict==="FAILED"&&s.failed]}>
    <Text style={s.accent}>{latest.verdict==="PENDING"?"TRAINER PRÜFT":latest.verdict==="PASSED"?"BESTANDEN":"NOCH NICHT BESTANDEN"}</Text>
-   {latest.verdict==="PENDING"&&<Text style={s.hint}>Dein Trainer prüft die Messwerte.</Text>}
-   {latest.verdict==="PASSED"&&<Text style={s.hint}>Dein Fortschritt wurde bestätigt. Der nächste Abschnitt ist frei, sobald die Voraussetzungen erfüllt sind.</Text>}
-   {latest.verdict==="FAILED"&&<><Text style={s.hint}>Du kannst gezielt an diesen Punkten weiterarbeiten:</Text>
+   {latest.verdict==="PENDING"&&<Text style={s.hint}><Copy text="Dein Trainer prüft die Messwerte."/></Text>}
+   {latest.verdict==="PASSED"&&<Text style={s.hint}><Copy text="Dein Fortschritt wurde bestätigt. Der nächste Abschnitt ist frei, sobald die Voraussetzungen erfüllt sind."/></Text>}
+   {latest.verdict==="FAILED"&&<><Text style={s.hint}><Copy text="Du kannst gezielt an diesen Punkten weiterarbeiten:"/></Text>
     {Array.isArray(latest.feedback?.missing)&&latest.feedback.missing.map((m:string)=><Text key={m} style={s.hint}>Fehlender Messwert: {m}</Text>)}
     {Array.isArray(latest.feedback?.failed)&&latest.feedback.failed.map((f:{key:string;expected:string;actual:number},i:number)=>
      <Text key={i} style={s.hint}>{f.key}: {f.actual} · Ziel {f.expected}</Text>)}
@@ -78,17 +78,17 @@ export default function JourneyTests(){
  }
  return <SafeAreaView style={s.safe} edges={["top"]}><ScrollView contentContainerStyle={s.content}>
   <Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text="← ZURÜCK"/></Text></Pressable>
-  <Text style={s.eyebrow}>BE DIFFERENT · TRAININGSWEG</Text><Text style={s.title}>DEIN NÄCHSTER SCHRITT.</Text>
-  <Text style={s.hint}>Deine Leistungsstufe wird durch Prüfungen und den Trainer bestätigt, nicht durch deine Punkte oder ein PRO Abo.</Text>
-  {!enabled?<View style={s.card}><Text style={s.hint}>Der neue Trainingsweg wird vorbereitet. Dein bisheriges Training bleibt unverändert.</Text></View>:
+  <Text style={s.eyebrow}><Copy text="BE DIFFERENT · TRAININGSWEG"/></Text><Text style={s.title}><Copy text="DEIN NÄCHSTER SCHRITT."/></Text>
+  <Text style={s.hint}><Copy text="Deine Leistungsstufe wird durch Prüfungen und den Trainer bestätigt, nicht durch deine Punkte oder ein PRO Abo."/></Text>
+  {!enabled?<View style={s.card}><Text style={s.hint}><Copy text="Der neue Trainingsweg wird vorbereitet. Dein bisheriges Training bleibt unverändert."/></Text></View>:
    loading?<ActivityIndicator color={C.volt}/>:
    <>{!!err&&<Text style={s.err}>{err}</Text>}
-    {!data.length&&<View style={s.card}><Text style={s.hint}>Noch kein zugeordneter Trainingsweg. Die Auswahl deiner Ziele bleibt gespeichert.</Text></View>}
+    {!data.length&&<View style={s.card}><Text style={s.hint}><Copy text="Noch kein zugeordneter Trainingsweg. Die Auswahl deiner Ziele bleibt gespeichert."/></Text></View>}
     {data.map(e=><View key={e.id} style={s.card}>
      <Text style={s.eyebrow}>{e.pathway}</Text><Text style={s.subtitle}>{e.confirmedLevel?.replaceAll("_"," ")??"EINSTUFUNG AUSSTEHEND"}</Text>
-     {e.state==="PENDING"&&<View style={s.chapter}><Text style={s.subtitle}>Dein Einstieg</Text>
+     {e.state==="PENDING"&&<View style={s.chapter}><Text style={s.subtitle}><Copy text="Dein Einstieg"/></Text>
       {e.placement?<ExamCard exam={e.placement} enrollmentId={e.id} ready reload={refresh}/>:
-       <Text style={s.hint}>Der Trainer bestätigt dein Startlevel.</Text>}
+       <Text style={s.hint}><Copy text="Der Trainer bestätigt dein Startlevel."/></Text>}
      </View>}
      {e.chapters.map(ch=><View key={ch.id} style={[s.chapter,!ch.unlocked&&s.locked]}>
       <Text style={s.accent}>{ch.level.replaceAll("_"," ")}</Text><Text style={s.subtitle}>{ch.titleDe}</Text>
@@ -100,7 +100,7 @@ export default function JourneyTests(){
          <Text style={s.small}>{it.done?"ERLEDIGT":busy===it.id?"SPEICHERN …":"ALS ERLEDIGT MARKIEREN"}</Text></Pressable>
        </View>)}
        {ch.assessment&&<ExamCard exam={ch.assessment} enrollmentId={e.id} ready={!ch.finished&&ch.mandatoryDone===ch.mandatoryTotal} reload={refresh}/>}
-      </>:<Text style={s.hint}>Erst die vorherigen Kapitel und Tests abschließen.</Text>}
+      </>:<Text style={s.hint}><Copy text="Erst die vorherigen Kapitel und Tests abschließen."/></Text>}
      </View>)}
     </View>)}
    </>}
