@@ -7,6 +7,10 @@ export function translate(text:string,locale:Locale){
  if(value!==undefined)return text.replace(trimmed,value);
 
  const patterns:[RegExp,(...parts:string[])=>string][]=[
+  [/^Veröffentlicht\. (\d+) offene Zielkombinationen vorgemerkt\.$/,(_,n)=>`Published. ${n} pending goal combinations matched.`],
+  [/^Test bestanden: Level (.+) freigeschaltet\.$/,(_,level)=>`Test passed: level ${level} unlocked.`],
+  [/^Test bestanden: nächstes Kapitel freigeschaltet\.$/,()=>"Test passed: next chapter unlocked."],
+  [/^Einstieg freigegeben\. Erstes Kapitel: (.+)$/,(_,id)=>`Starting level approved. First chapter: ${id}`],
   [/^REGENERATION (\d+|Keine Angabe)$/,(_,a)=>`RECOVERY ${a==='Keine Angabe'?'No data':a}`],
   [/^(.*) · Tag (\d+)$/,(_,a,b)=>`${a} · Day ${b}`],
   [/^(\d+) Übungen importiert(?: · (\d+) Hinweise)?\.$/,(_,a,b)=>`${a} exercises imported${b?` · ${b} notices`:""}.`],
