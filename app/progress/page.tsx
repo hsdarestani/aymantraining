@@ -39,7 +39,7 @@ export default async function ProgressPage(){
     <section className="bd-progress-hero">
       <div className="bd-progress-hero-main">
         <span className="bd-section-serial">03 / <Copy text="DEINE ENTWICKLUNG"/></span>
-        <h1>DEIN GRIND.<br/><em>DEINE SPUREN.</em></h1>
+        <h1>DEIN GRIND.<br/><em><Copy text="DEINE SPUREN."/></em></h1>
         <p><Copy text="Hier zählt, was du wirklich erreicht hast. Messwerte, Tests und Entwicklung im eigenen Tempo."/></p>
       </div>
       <div className="bd-progress-score">
@@ -48,7 +48,7 @@ export default async function ProgressPage(){
         <p>MESSSTAND {dailyProfile.profile.recordedDate??"FEHLT"} · DATENABDECKUNG {dailyProfile.profile.completeness}%</p>
       </div>
     </section>
-    <section className="bd-progress-record"><p>Der Leistungswert beschreibt dein längerfristiges Profil, nicht die Tagesform oder eine bestätigte Stufe.</p><p>HEUTE: {dailyProfile.plan.scheduled?dailyProfile.plan.completed+" / "+dailyProfile.plan.scheduled+" Einheiten":"Keine Einheit geplant"} · BESTÄTIGTE STUFE: {dailyProfile.journey.confirmedLevel??"Noch nicht bestätigt"}</p>
+    <section className="bd-progress-record"><p><Copy text="Der Leistungswert beschreibt dein längerfristiges Profil, nicht die Tagesform oder eine bestätigte Stufe."/></p><p>HEUTE: {dailyProfile.plan.scheduled?dailyProfile.plan.completed+" / "+dailyProfile.plan.scheduled+" Einheiten":"Keine Einheit geplant"} · BESTÄTIGTE STUFE: {dailyProfile.journey.confirmedLevel??"Noch nicht bestätigt"}</p>
       <header className="bd-progress-record-head"><div><span className="bd-section-serial">01 / <Copy text="DEIN VERLAUF"/></span><h2><Copy text="NICHT GESCHÄTZT. GEMESSEN."/></h2></div>
         {details&&change!==null&&<div className="bd-progress-delta"><span><Copy text="VERÄNDERUNG"/></span><strong>{change>0?"+":""}{change}</strong></div>}
       </header>
@@ -68,7 +68,7 @@ export default async function ProgressPage(){
       </div>}
     </section>
     <section className="bd-progress-measurements">
-      <div className="bd-progress-section-title"><span className="bd-section-serial">02 / <Copy text="KÖRPERDATEN"/></span><h2>FAKTEN STATT GEFÜHL.</h2></div>
+      <div className="bd-progress-section-title"><span className="bd-section-serial">02 / <Copy text="KÖRPERDATEN"/></span><h2><Copy text="FAKTEN STATT GEFÜHL."/></h2></div>
       <div className="bd-progress-facts">
         <div><span><Copy text="GEWICHT"/></span><strong>{metrics[0]?.weightKg??"—"}<small>{metrics[0]?.weightKg==null?"":" kg"}</small></strong><p>{metrics[0]?.date.toLocaleDateString("de-DE")??"Keine Angabe"}</p></div>
         <div><span><Copy text="TAILLE"/></span><strong>{metrics[0]?.waistCm??"—"}<small>{metrics[0]?.waistCm==null?"":" cm"}</small></strong><p><Copy text="LETZTER WERT"/></p></div>
@@ -87,7 +87,7 @@ export default async function ProgressPage(){
     </section>
 
     {user.subscriptionTier!=="FREE"&&photos.length>=2&&<BeforeAfter beforeId={photos[photos.length-1].id} afterId={photos[0].id}/>}
-    {process.env.MILESTONES_ENABLED==="true"&&<section className="bd-progress-record"><h2>DEINE MEILENSTEINE.</h2><p>Nachgewiesenes Training und zuvor geplante Erholung zählen für deine Serie.</p><Link href="/milestones" className="primary compact">ERFOLGE ANSEHEN →</Link></section>}
+    {process.env.MILESTONES_ENABLED==="true"&&<section className="bd-progress-record"><h2><Copy text="DEINE MEILENSTEINE."/></h2><p><Copy text="Nachgewiesenes Training und zuvor geplante Erholung zählen für deine Serie."/></p><Link href="/milestones" className="primary compact">ERFOLGE ANSEHEN →</Link></section>}
     <ProgressClient/>
   </main>;
 }
