@@ -24,7 +24,7 @@ export default function Awake(){
   catch(e:any){setStatus(e.message||"Speichern fehlgeschlagen")}finally{setSaving(false)}
  }
  return <Screen>
-  <View style={s.hero}><Text style={s.eyebrow}>MORGENROUTINE / 01</Text><Text style={s.title}>BE{"\n"}<Text style={s.accent}>AWAKE.</Text></Text><Text style={s.description}><Copy text="Dein Tag beginnt mit Bewusstsein. Wähle deinen nächsten Schritt."/></Text></View>
+  <View style={s.hero}><Text style={s.eyebrow}><Copy text="MORGENROUTINE / 01"/></Text><Text style={s.title}>BE{"\n"}<Text style={s.accent}>AWAKE.</Text></Text><Text style={s.description}><Copy text="Dein Tag beginnt mit Bewusstsein. Wähle deinen nächsten Schritt."/></Text></View>
   <View style={s.checkPanel}>
     <Text style={s.checkTitle}><Copy text="WIE IST DEINE ENERGIE HEUTE?"/></Text>
     <Text style={s.checkHint}><Copy text="Ein Wert für deinen Tagescheck. Du kannst ihn später ändern."/></Text>
