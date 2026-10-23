@@ -80,7 +80,9 @@ try{
  async function watchCall(body,status=200){const r=await fetch(base+'/api/companion',{method:body?'POST':'GET',headers:{authorization:'Bearer '+watch,'x-bd-client':'watch',origin:base,'content-type':'application/json'},body:body?JSON.stringify(body):undefined});const j=await r.json();assert.equal(r.status,status,JSON.stringify(j));checks++;return j}
  const companion=await watchCall();assert.equal(companion.locale,'en');assert.equal(companion.workout.exercises[0].name,'Acceptance exercise');checks+=2;
  const cw=companion.workout;await watchCall({action:'set',workoutId:cw.id,exerciseId:exId,setNumber:1,reps:11,weightKg:25,rpe:7});assert.equal((await db.setLog.findUnique({where:{workoutId_exerciseId_setNumber:{workoutId:cw.id,exerciseId:exId,setNumber:1}}})).reps,11);checks++;
- await watchCall({action:'set',workoutId:cw.id,exerciseId:'other',setNumber:1},422);await watchCall({action:'complete',workoutId:cw.id,rpe:7});assert((await db.workout.findUnique({where:{id:cw.id}})).completedAt);checks++;
+ await watchCall({action:'set',workoutId:cw.id,exerciseId:'other',setNumber:1},422);
+ for(const exercise of cw.exercises)for(let setNumber=1;setNumber<=exercise.sets;setNumber++)await watchCall({action:'set',workoutId:cw.id,exerciseId:exercise.id,setNumber,reps:11,rpe:7});
+ await watchCall({action:'complete',workoutId:cw.id,rpe:7});assert((await db.workout.findUnique({where:{id:cw.id}})).completedAt);checks++;
  const logout=await fetch(base+'/api/auth/logout',{method:'POST',headers:{authorization:'Bearer '+watch,'x-bd-client':'watch',origin:base}});assert.equal(logout.status,200);checks++;await watchCall(undefined,401);
  for(const endpoint of ['focus','lifestyle','gamification','challenges','performance-timeline','digital-twin','weekly-report','events','notifications','mobile/dashboard']){const result=await call(athlete,'/api/'+endpoint);assert.equal(result.ok,true);checks++}
  await call(free,'/api/digital-twin',undefined,403);await call(free,'/api/performance-timeline',undefined,403);
