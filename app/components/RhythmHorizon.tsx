@@ -1,7 +1,7 @@
 "use client";
 import {useState} from "react";
 import Link from "next/link";
-import {Copy} from "./Locale";
+import {Copy,useT} from "./Locale";
 
 export type RhythmDay={
   number:string;
@@ -11,6 +11,7 @@ export type RhythmDay={
 };
 
 export default function RhythmHorizon({days}:{days:RhythmDay[]}){
+  const t=useT();
   const [active,setActive]=useState(1);
   const current=days[active]??days[1]??days[0];
   if(!current)return null;
@@ -24,7 +25,7 @@ export default function RhythmHorizon({days}:{days:RhythmDay[]}){
       </div>
       <div className="bd-rhythm-monogram" aria-hidden="true"><strong>72</strong><span>H /</span></div>
     </div>
-    <div className="bd-rhythm-tape" role="group" aria-label="Trainingstag auswählen">
+    <div className="bd-rhythm-tape" role="group" aria-label={t("Trainingstag auswählen")}>
       {days.map((day,index)=>{
         const selected=index===active;
         return <button
@@ -32,7 +33,7 @@ export default function RhythmHorizon({days}:{days:RhythmDay[]}){
           type="button"
           onClick={()=>setActive(index)}
           aria-pressed={selected}
-          aria-label={day.label+" "+day.number+" "+day.month}
+          aria-label={t(day.label)+" "+day.number+" "+t(day.month)}
           className={"bd-rhythm-stop"+(selected?" selected":"")+(day.workouts.length?" with-session":"")}
         >
           <span className="bd-rhythm-stop-meta"><span className="bd-rhythm-step">0{index+1} / 03</span><span className="bd-rhythm-stop-name"><Copy text={day.label}/></span></span>
@@ -45,12 +46,12 @@ export default function RhythmHorizon({days}:{days:RhythmDay[]}){
     <div className="bd-rhythm-stage" aria-live="polite" aria-atomic="true">
       <div className="bd-rhythm-stage-date">
         <span className="bd-section-serial"><Copy text="AUSGEWÄHLTER TAG"/></span>
-        <div className="bd-rhythm-number">{current.number}<span className="bd-rhythm-month">{current.month}</span></div>
+        <div className="bd-rhythm-number">{current.number}<span className="bd-rhythm-month"><Copy text={current.month}/></span></div>
       </div>
       <div className="bd-rhythm-stage-info">
         <span className="bd-rhythm-stage-kicker">{current.workouts.length? <Copy text="BEWEGUNG GEPLANT"/>:<Copy text="ERHOLUNG IM PLAN"/>}</span>
         <strong>{first?<Copy text={first.title}/>:<Copy text="KEIN TRAINING. TROTZDEM FORTSCHRITT."/>}</strong>
-        <p>{first?<><Copy text={current.workouts.length===1?"1 Trainingseinheit":"Trainingseinheiten"}/>{current.workouts.length>1?" · "+current.workouts.length:""} · {first.time} {first.completed?"· ERLEDIGT":""}</>:<Copy text="Regeneration ist Teil deiner Trainingswoche. Kein Belastungswert ohne Messdaten."/>}</p>
+        <p>{first?<><Copy text={current.workouts.length===1?"1 Trainingseinheit":"Trainingseinheiten"}/>{current.workouts.length>1?" · "+current.workouts.length:""} · {first.time} {first.completed?<>· <Copy text="ERLEDIGT"/></>:""}</>:<Copy text="Regeneration ist Teil deiner Trainingswoche. Kein Belastungswert ohne Messdaten."/>}</p>
         <Link href={first?"/training/"+first.id:"/training"} className="bd-rhythm-action"><Copy text={first?"EINHEIT ANSEHEN":"TRAININGSPLAN ANSEHEN"}/><span aria-hidden="true">↗</span></Link>
       </div>
       <div className="bd-rhythm-stage-glyph" aria-hidden="true">
