@@ -28,11 +28,11 @@ export default function MilestoneCoachClient(){
   }catch(e){setMsg(e instanceof Error?e.message:"Fehler")}
   finally{setBusy(false)}
  }
- if(athletes.length===0)return <p role="status">{msg||"Noch keine zugeordneten Athleten."}</p>;
+ if(athletes.length===0)return <p role="status"><Copy text={msg||"Noch keine zugeordneten Athleten."}/></p>;
  return <div style={{display:"grid",gap:20}}>
   <label><Copy text={"Athlet auswählen"}/><select style={{display:"block",width:"100%",padding:11,marginTop:6}} value={athleteId} onChange={e=>setAthleteId(e.target.value)}>
    {athletes.map(a=><option key={a.id} value={a.id}>{a.name||a.id}</option>)}</select></label>
-  {msg&&<p role="status">{msg}</p>}
+  {msg&&<p role="status"><Copy text={msg}/></p>}
   <fieldset style={{padding:18,display:"grid",gap:10}}><legend><Copy text={"MEILENSTEIN FESTLEGEN"}/></legend>
    <label><Copy text={"Eindeutiger Regelschlüssel"}/><input value={key} onChange={e=>setKey(e.target.value)} maxLength={40}/></label>
    <label><Copy text={"Titel"}/><input value={title} onChange={e=>setTitle(e.target.value)} maxLength={70}/></label>
@@ -40,7 +40,13 @@ export default function MilestoneCoachClient(){
    <label><Copy text={"Kriterium"}/><select value={metric} onChange={e=>setMetric(e.target.value)}>
     <option value="STREAK_DAYS"><Copy text={"Nachgewiesene Tage in Folge"}/></option>
     <option value="WORKOUT_COUNT"><Copy text={"Abgeschlossene Einheiten"}/></option>
-    <option value="EARNED_LEVELS"><Copy text={"Bestätigte Stufen nach Trainertest"}/></option></select></label>
+    <option value="EARNED_LEVELS"><Copy text={"Bestätigte Stufen nach Trainertest"}/></option>
+    <option value="NUTRITION_DAYS"><Copy text="Dokumentierte Ernährungstage"/></option>
+    <option value="RECOVERY_DAYS"><Copy text="Geplante Erholungstage"/></option>
+    <option value="CHAPTER_COUNT"><Copy text="Abgeschlossene Kapitel"/></option>
+    <option value="PASSED_TESTS"><Copy text="Bestätigte bestandene Tests"/></option>
+    <option value="LEVEL_UPS"><Copy text="Erarbeitete Levelaufstiege"/></option>
+    <option value="TRULY_DIFFERENT">TRULY DIFFERENT</option></select></label>
    <label><Copy text={"Schwelle"}/><input type="number" min={1} max={1000} value={threshold} onChange={e=>setThreshold(e.target.value)}/></label>
    <label><Copy text={"Intensität der späteren Erfolgsdarstellung"}/><select value={intensity} onChange={e=>setIntensity(e.target.value)}>
     <option value="SMALL"><Copy text={"Klein"}/></option><option value="MEDIUM"><Copy text={"Mittel"}/></option><option value="FULL"><Copy text={"Groß"}/></option></select></label>

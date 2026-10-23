@@ -32,6 +32,10 @@ test("onboarding-selected women layout remains voluntary and no cycle tracking i
  await page.goto(host+"/dashboard");
  await expect(page.getByRole("heading",{name:"STARK IN DEINEM TEMPO."})).toBeVisible();
  await expect(page.getByText(/Alle Sportarten stehen dir offen/)).toBeVisible();
+ const localDay=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',day:'2-digit'}).format(new Date());
+ await expect(page.getByRole('group',{name:'Trainingstag auswählen'}).getByRole('button',{name:new RegExp('HEUTE '+localDay+' ')})).toHaveAttribute('aria-pressed','true');
+ await expect(page.getByText('ERHOLUNG IM PLAN',{exact:true})).toHaveCount(0);
+ await expect(page.getByText('OHNE PLANUNG KEIN BESTÄTIGTER ERHOLUNGSTAG',{exact:true})).toBeVisible();
  await ctx.close();
 });
 test("preferences persist for one athlete without changing other users or earned progress",async({browser})=>{

@@ -49,9 +49,9 @@ export default function RhythmHorizon({days}:{days:RhythmDay[]}){
         <div className="bd-rhythm-number">{current.number}<span className="bd-rhythm-month"><Copy text={current.month}/></span></div>
       </div>
       <div className="bd-rhythm-stage-info">
-        <span className="bd-rhythm-stage-kicker">{current.workouts.length? <Copy text="BEWEGUNG GEPLANT"/>:<Copy text="ERHOLUNG IM PLAN"/>}</span>
-        <strong>{first?<Copy text={first.title}/>:<Copy text="KEIN TRAINING. TROTZDEM FORTSCHRITT."/>}</strong>
-        <p>{first?<><Copy text={current.workouts.length===1?"1 Trainingseinheit":"Trainingseinheiten"}/>{current.workouts.length>1?" · "+current.workouts.length:""} · {first.time} {first.completed?<>· <Copy text="ERLEDIGT"/></>:""}</>:<Copy text="Regeneration ist Teil deiner Trainingswoche. Kein Belastungswert ohne Messdaten."/>}</p>
+        <span className="bd-rhythm-stage-kicker">{current.workouts.length? <Copy text="BEWEGUNG GEPLANT"/>:<Copy text="KEIN TRAINING EINGETRAGEN"/>}</span>
+        <strong>{first?<Copy text={first.title}/>:<Copy text="OHNE PLANUNG KEIN BESTÄTIGTER ERHOLUNGSTAG"/>}</strong>
+        <p>{first?<><Copy text={current.workouts.length===1?"1 Trainingseinheit":"Trainingseinheiten"}/>{current.workouts.length>1?" · "+current.workouts.length:""} · {first.time} {first.completed?<>· <Copy text="ERLEDIGT"/></>:""}</>:<Copy text="Ohne Trainingsplan ist dies nicht automatisch ein Erholungstag."/>}</p>
         <Link href={first?"/training/"+first.id:"/training"} className="bd-rhythm-action"><Copy text={first?"EINHEIT ANSEHEN":"TRAININGSPLAN ANSEHEN"}/><span aria-hidden="true">↗</span></Link>
       </div>
       <div className="bd-rhythm-stage-glyph" aria-hidden="true">

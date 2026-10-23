@@ -15,12 +15,7 @@ export function contextualWorkout<T extends {scheduledAt:Date|null;exercises:Arr
     if(hours>=0&&hours<=48){setFactor=.6;rpeDelta=-1;reason="SPIELTAG VORBEREITUNG"}
     else if(hours<0&&hours>=-30){setFactor=.5;rpeDelta=-2;reason="REGENERATION NACH SPIELTAG"}
   }
-  if(ctx.cycleTrackingEnabled&&ctx.cycleStartDate){
-    const len=Math.max(20,ctx.cycleLengthDays||28);
-    const days=Math.max(0,Math.floor((scheduled.getTime()-ctx.cycleStartDate.getTime())/86400000));
-    const cycleDay=days%len+1;
-    if(cycleDay<=5){setFactor=Math.min(setFactor,.8);rpeDelta=Math.min(rpeDelta,-1);reason=reason??"ZYKLUS KONTEXT"}
-  }
+  // Calendar dates alone must never prescribe lighter training. Cycle guidance uses the athlete’s explicit day preference.
   const travel=Boolean(ctx.travelModeUntil&&ctx.travelModeUntil>scheduled);
   const exercises=workout.exercises.map((x:any)=>({
     ...x,

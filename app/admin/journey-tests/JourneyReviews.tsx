@@ -47,7 +47,7 @@ export default function JourneyReviews(){
  }
  async function confirm(p:Placement){
   const chosen=levels[p.id]??p.selfLevel??"READY";
-  if(!window.confirm("Einstiegslevel "+chosen.replaceAll("_"," ")+" für "+(p.user.name||"Athlet")+" bestätigen?"))return;
+  if(!window.confirm(t("Einstiegslevel")+" "+chosen.replaceAll("_"," ")+" "+t("für")+" "+(p.user.name||t("Athlet"))+" "+t("bestätigen?")))return;
   setError("");setMessage("");setBusy(p.id);
   try{
    const result=await call("/api/journey/placement","POST",{enrollmentId:p.id,confirmedLevel:chosen,

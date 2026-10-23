@@ -3,7 +3,7 @@ import Link from "next/link";
 import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";
 import {getDailyProfile} from "../../lib/daily-profile-service";
-import {dateOnly} from "../../lib/http";
+import {localDateKey} from "../../lib/daily-profile";
 import DigitalTwinHero from "../components/DigitalTwinHero";
 import ScoreRadar from "../components/ScoreRadar";
 import RhythmHorizon from "../components/RhythmHorizon";
@@ -16,7 +16,6 @@ export const dynamic="force-dynamic";
 
 const dayMs=86400000;
 function signal(value:number|null|undefined){return value==null?"empty":value<60?"red":value<80?"amber":"green"}
-function sameDay(a:Date,b:Date){return dateOnly(a).getTime()===dateOnly(b).getTime()}
 
 export default async function Dashboard(){
   const user=await requireUser();
@@ -24,14 +23,14 @@ export default async function Dashboard(){
   const dashboardPreference=await getDashboardPreference(user.id);
   const cycleOverview=await privateCycle(user.id,{includeEntries:false});
   const womenGoals=dashboardPreference.mode==="WOMEN"?await prisma.goal.findMany({where:{userId:user.id,active:true},select:{type:true},take:12}):[];
-  const today=dateOnly();
-  const timelineStart=new Date(today.getTime()-dayMs);
-  const timelineEnd=new Date(today.getTime()+2*dayMs);
-  const [score,check,wearable,nextWorkout,recs,nutrition,context,timelineWorkouts,lineSetting,heroPhoto]=await Promise.all([
+  const today=new Date(dailyProfile.date+"T00:00:00Z");
+  const timelineStart=new Date(today.getTime()-dayMs-14*3600000);
+  const timelineEnd=new Date(today.getTime()+2*dayMs+14*3600000);
+  const [score,check,wearable,nextWorkouts,recs,nutrition,context,timelineWorkouts,lineSetting,heroPhoto]=await Promise.all([
     prisma.scoreSnapshot.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
     prisma.dailyCheck.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
     prisma.wearableDaily.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
-    prisma.workout.findFirst({where:{userId:user.id,completedAt:null,scheduledAt:{gte:new Date(Date.now()-12*60*60*1000)}},orderBy:{scheduledAt:"asc"}}),
+    prisma.workout.findMany({where:{userId:user.id,completedAt:null,scheduledAt:{gte:new Date(today.getTime()-14*3600000)}},orderBy:{scheduledAt:"asc"},take:50}),
     prisma.recommendation.findMany({where:{userId:user.id,date:today,sourceRule:{not:"cycle_context"}},orderBy:{createdAt:"desc"},take:3}),
     prisma.nutritionDaily.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
     prisma.athleteContext.findUnique({where:{userId:user.id}}),
@@ -40,6 +39,7 @@ export default async function Dashboard(){
     prisma.mediaAsset.findFirst({where:{relatedUserId:user.id,kind:"PROGRESS_PHOTO"},orderBy:{createdAt:"desc"}})
   ]);
 
+  const nextWorkout=nextWorkouts.find(w=>w.scheduledAt&&localDateKey(w.scheduledAt,dailyProfile.timeZone)>=dailyProfile.date)??null;
   const total=dailyProfile.profile.value;
   const day=dailyProfile.plan;
   const pillars=[
@@ -57,7 +57,7 @@ export default async function Dashboard(){
   const dailyLine=String(lines[Math.floor(Date.now()/dayMs)%Math.max(1,lines.length)]||"Heute zählt die nächste saubere Entscheidung.");
   const dayStrip=[-1,0,1].map(offset=>{
     const date=new Date(today.getTime()+offset*dayMs);
-    const workouts=timelineWorkouts.filter(w=>w.scheduledAt&&sameDay(w.scheduledAt,date));
+    const workouts=timelineWorkouts.filter(w=>w.scheduledAt&&localDateKey(w.scheduledAt,dailyProfile.timeZone)===date.toISOString().slice(0,10));
     return {offset,date,workouts};
   });
   const dayNames=["GESTERN","HEUTE","MORGEN"];
@@ -131,7 +131,7 @@ export default async function Dashboard(){
       workouts:day.workouts.map(workout=>({
         id:workout.id,
         title:workout.title,
-        time:workout.scheduledAt?new Intl.DateTimeFormat("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Berlin"}).format(workout.scheduledAt):"",
+        time:workout.scheduledAt?new Intl.DateTimeFormat("de-DE",{hour:"2-digit",minute:"2-digit",timeZone:dailyProfile.timeZone}).format(workout.scheduledAt):"",
         completed:Boolean(workout.completedAt)
       }))
     }))}/>
@@ -155,7 +155,7 @@ export default async function Dashboard(){
 
     <Link href={nextWorkout?"/training/"+nextWorkout.id:"/training"} className="bd-workout-card bd-workout-editorial">
       <div className="bd-workout-index"><Copy text="NÄCHSTE EINHEIT"/></div>
-      <span><Copy text="HEUTIGES TRAINING"/></span><h2>{nextWorkout?.title||<Copy text="KEIN TRAINING EINGETRAGEN"/>}</h2>
+      <span><Copy text="NÄCHSTE GEPLANTE EINHEIT"/></span><h2>{nextWorkout?.title||<Copy text="KEIN TRAINING EINGETRAGEN"/>}</h2>
       <p>{nextWorkout?.scheduledAt?<LocalizedValue value={nextWorkout.scheduledAt}/>:<Copy text="Ohne Planung ist kein Erholungstag bestätigt."/>}</p>
       <b><Copy text={nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></b>
     </Link>

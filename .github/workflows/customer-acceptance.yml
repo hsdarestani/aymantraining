@@ -59,6 +59,7 @@ jobs:
         run: |
           set -e
           for step in 03 05 06 07 08; do node "scripts/test-journey-step$step.mjs"; done
+          node scripts/test-milestone-events.mjs
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - name: Start isolated production application
@@ -93,4 +94,3 @@ jobs:
             test-results
       - if: failure()
         run: cat /tmp/customer-acceptance.log || true
-

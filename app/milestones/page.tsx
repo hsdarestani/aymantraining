@@ -1,4 +1,4 @@
-import {Copy} from "../components/Locale";
+import {Copy,LocalizedValue} from "../components/Locale";
 import Link from "next/link";
 import CelebrationOverlay from "../components/CelebrationOverlay";
 import {requireUser} from "../../lib/auth";
@@ -23,8 +23,8 @@ export default async function Milestones(){
    </section>
    <section className="milestone-card"><h2><Copy text="DEINE MEILENSTEINE."/></h2>
     {data.awards.length===0?<p><Copy text={"Der erste bestätigte Erfolg wartet auf dich."}/></p>:
-    <div className="milestone-awards">{data.awards.map(a=><article key={a.id}><small>{a.visualIntensity==="FULL"?"GROSSER ERFOLG":a.visualIntensity==="MEDIUM"?"MEILENSTEIN":"ERFOLG"}</small>
-      <h3>{a.title}</h3><p>{a.message}</p><time>{a.achievedAt.toLocaleDateString("de-DE")}</time></article>)}</div>}
+    <div className="milestone-awards">{data.awards.map(a=><article key={a.id}><small><Copy text={a.visualIntensity==="FULL"?"GROSSER ERFOLG":a.visualIntensity==="MEDIUM"?"MEILENSTEIN":"ERFOLG"}/></small>
+      <h3>{a.title}</h3><p>{a.message}</p><time><LocalizedValue value={a.achievedAt} format="toLocaleDateString"/></time></article>)}</div>}
    </section>
    <section className="milestone-card"><h2><Copy text="DEIN NÄCHSTER SCHRITT."/></h2>
     {data.next.length===0?<p><Copy text={"Alle derzeit verfügbaren Ziele erreicht."}/></p>:<div className="milestone-next">{data.next.map(rule=><div key={rule.key}>

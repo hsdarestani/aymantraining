@@ -11,6 +11,9 @@ assert.equal(translate('REGENERATION Keine Angabe','en'),'RECOVERY No data');
 assert.equal(translate('REGENERATION 0','en'),'RECOVERY 0');
 assert.equal(translate('REGENERATION 85','de'),'REGENERATION 85');
 assert.equal(translate('AUSGANGSWERT','en'),'BASELINE');
+assert.equal(translate('Entwurf gespeichert.','en'),'Draft saved.');
+assert.equal(translate('Test bestanden: Level AWAKE freigeschaltet.','en'),'Test passed: level AWAKE unlocked.');
+assert.equal(translate('READY / Owner $& chapter: Ein fachlich freigegebener Abschlusstest ist erforderlich. | AWAKE: Mindestens ein Trainingskapitel erforderlich.','en'),'READY / Owner $& chapter: A coach-approved chapter test is required. | AWAKE: At least one training chapter is required.');
 let files=0;function walk(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const file=path.join(dir,e.name);if(e.isDirectory()){if(file!=='app/api')walk(file)}else if(file.endsWith('.tsx')){const content=fs.readFileSync(file,'utf8');if(content.includes('<Copy'))files++}}}walk('app');walk('mobile/app');assert(files>90,'Expected full platform copy wiring');
 console.log(`LANGUAGE_TESTS_OK ${Object.keys(en).length} translations, ${files} localized screens/components`);
 
