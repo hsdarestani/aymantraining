@@ -59,7 +59,7 @@ export default function Home(){
    {d.heroPhotoId&&mediaToken&&!photoFailed?
     <Image source={{uri:API+"/api/media/"+d.heroPhotoId,headers:{Authorization:"Bearer "+mediaToken}}} resizeMode="cover" style={s.heroPhoto} onError={()=>setPhotoFailed(true)}/>:
     <View style={s.heroEmpty}>
-     <View style={s.heroArt}><Text style={s.heroArtText}>B<Text style={s.heroArtVolt}>D</Text></Text><View style={s.heroArtLine}/><Text style={s.heroArtSub}>DIE NÄCHSTE VERSION DEINER SELBST.</Text></View>
+     <View style={s.heroArt}><Text style={s.heroArtText}>B<Text style={s.heroArtVolt}>D</Text></Text><View style={s.heroArtLine}/><Text style={s.heroArtSub}><Copy text="DIE NÄCHSTE VERSION DEINER SELBST."/></Text></View>
      <Pressable accessibilityRole="button" onPress={()=>router.push("/progress-photos")} style={s.heroPhotoLink}>
       <Text style={s.heroPhotoLinkText}><Copy text="PERSÖNLICHES BILD HINZUFÜGEN ↗"/></Text>
      </Pressable>
@@ -102,13 +102,13 @@ export default function Home(){
    <Text style={s.dailyProofText}>{plan?.scheduled?plan.completed+" von "+plan.scheduled+" geplanten Einheiten erledigt":"Das bedeutet nicht automatisch einen Erholungstag."}</Text>
    <Text style={s.dailyProofText}>ENERGIE: {profile.today.energy??"Keine Angabe"} · SCHLAF: {profile.today.sleepHours==null?"Keine Angabe":profile.today.sleepHours+" h"}</Text>
    <Text style={s.dailyProofText}>BESTÄTIGTE STUFE: {profile.journey.confirmedLevel??"Noch nicht bestätigt"}</Text>
-   <Pressable accessibilityRole="button" onPress={()=>router.push("/(tabs)/training")}><Text style={s.dailyProofLink}>TRAININGSPLAN ANSEHEN →</Text></Pressable>
+   <Pressable accessibilityRole="button" onPress={()=>router.push("/(tabs)/training")}><Text style={s.dailyProofLink}><Copy text="TRAININGSPLAN ANSEHEN →"/></Text></Pressable>
   </View>}
   <View style={s.editorialScore}>
    <View style={s.editorialIntro}>
     <Text style={s.editorialEyebrow}><Copy text="BE DIFFERENT SCORE"/></Text>
     <View style={s.editorialFigure}><Text style={s.editorialValue}>{recordedValue??"—"}</Text><Text style={s.editorialPercent}>%</Text></View>
-    <Text style={s.editorialLevel}>LEISTUNGSPROFIL · KEINE STUFE</Text>
+    <Text style={s.editorialLevel}><Copy text="LEISTUNGSPROFIL · KEINE STUFE"/></Text>
     <Text style={s.editorialTarget}>MESSSTAND: {profile?.profile.recordedDate??"Keine Angabe"}</Text>
     <Text style={s.editorialData}>DATENABDECKUNG {profile?.profile.completeness??0}%</Text>
    </View>
@@ -128,10 +128,10 @@ export default function Home(){
 
     <RhythmHorizon days={d.dayStrip||[]}/>
 
-  {process.env.EXPO_PUBLIC_JOURNEY_OVERVIEW_ENABLED!=="false"&&<Pressable accessibilityRole="button" onPress={()=>router.push("/journey")} style={s.priority}><Text style={s.priorityKicker}>DEIN TRAININGSWEG</Text><Text style={s.priorityTitle}>LEVEL & KAPITEL →</Text><Text style={s.priorityCopy}>Entdecke deinen bestätigten Fortschritt und den nächsten Schritt.</Text></Pressable>}
-    {process.env.EXPO_PUBLIC_JOURNEY_DAILY_ENABLED!=="false"&&<Pressable accessibilityRole="button" onPress={()=>router.push("/journey-today")} style={s.priority}><Text style={s.priorityKicker}>HEUTE MIT DEINEM TRAINER</Text><Text style={s.priorityTitle}>DEIN TRAINING & DEINE ERHOLUNG →</Text><Text style={s.priorityCopy}>Deine geplante Einheit und persönliches Technikfeedback.</Text></Pressable>}
+  {process.env.EXPO_PUBLIC_JOURNEY_OVERVIEW_ENABLED!=="false"&&<Pressable accessibilityRole="button" onPress={()=>router.push("/journey")} style={s.priority}><Text style={s.priorityKicker}><Copy text="DEIN TRAININGSWEG"/></Text><Text style={s.priorityTitle}><Copy text="LEVEL & KAPITEL →"/></Text><Text style={s.priorityCopy}><Copy text="Entdecke deinen bestätigten Fortschritt und den nächsten Schritt."/></Text></Pressable>}
+    {process.env.EXPO_PUBLIC_JOURNEY_DAILY_ENABLED!=="false"&&<Pressable accessibilityRole="button" onPress={()=>router.push("/journey-today")} style={s.priority}><Text style={s.priorityKicker}><Copy text="HEUTE MIT DEINEM TRAINER"/></Text><Text style={s.priorityTitle}><Copy text="DEIN TRAINING & DEINE ERHOLUNG →"/></Text><Text style={s.priorityCopy}>Deine geplante Einheit und persönliches Technikfeedback.</Text></Pressable>}
     {process.env.EXPO_PUBLIC_JOURNEY_TESTS_ENABLED==="true"&&<Pressable accessibilityRole="button" onPress={()=>router.push("/journey-tests")} style={s.priority}>
-   <Text style={s.priorityKicker}>DEIN TRAININGSWEG</Text>
+   <Text style={s.priorityKicker}><Copy text="DEIN TRAININGSWEG"/></Text>
    <Text style={s.priorityTitle}>KAPITEL & AUFSTIEGSTESTS →</Text>
    <Text style={s.priorityCopy}>Sehe deine Freischaltungen, reiche Tests ein und lies Trainerfeedback.</Text>
   </Pressable>}
