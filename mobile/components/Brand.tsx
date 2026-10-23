@@ -1,12 +1,13 @@
 import {StyleSheet,Text,View} from "react-native";
 import Animated,{FadeIn} from "react-native-reanimated";
 import {C} from "../theme";
+import {Copy} from "./Locale";
 
 export default function Brand({compact=false}:{compact?:boolean}){
   return <Animated.View entering={FadeIn.duration(420)} style={s.row}>
     <View>
       <Text style={[s.wordmark,compact&&s.wordmarkCompact]}>BE DIFFERENT</Text>
-      {!compact?<Text style={s.sub}>ATHLETEN SYSTEM</Text>:null}
+      {!compact?<Text style={s.sub}><Copy text="ATHLETEN SYSTEM"/></Text>:null}
     </View>
   </Animated.View>;
 }
