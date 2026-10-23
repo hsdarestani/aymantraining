@@ -3,6 +3,7 @@ import {Pressable,StyleSheet,Text,View} from "react-native";
 import Svg,{Circle,Line,Path} from "react-native-svg";
 import {router} from "expo-router";
 import {Copy} from "./Locale";
+import {translate,useLocale} from "../lib/i18n/locale";
 import {C} from "../theme";
 
 type Session={id?:string;title?:string;completed?:boolean;scheduledAt?:string};
@@ -15,6 +16,7 @@ function number(date:string){const part=date.slice(8,10);return /^\d{2}$/.test(p
 function month(date:string){const n=Number(date.slice(5,7));return ["","JAN","FEB","MÄR","APR","MAI","JUN","JUL","AUG","SEP","OKT","NOV","DEZ"][n]||""}
 
 export default function RhythmHorizon({days}:{days:Day[]}){
+ useLocale();
  const [selected,setSelected]=useState(1);
  const normalized=useMemo(()=>days.slice(0,3),[days]);
  const active=Math.min(selected,Math.max(0,normalized.length-1));
@@ -33,7 +35,7 @@ export default function RhythmHorizon({days}:{days:Day[]}){
    {normalized.map((day,i)=>{
     const isActive=i===active;
     const hasWorkout=Boolean(day.workouts?.length);
-    return <Pressable key={day.date||i} onPress={()=>setSelected(i)} accessibilityRole="tab" accessibilityState={{selected:isActive}} accessibilityLabel={captions[i]+" "+number(day.date)} style={[s.stop,isActive&&s.stopActive,i===0&&s.stopFirst]}>
+    return <Pressable key={day.date||i} onPress={()=>setSelected(i)} accessibilityRole="tab" accessibilityState={{selected:isActive}} accessibilityLabel={translate(captions[i])+" "+number(day.date)} style={[s.stop,isActive&&s.stopActive,i===0&&s.stopFirst]}>
       <Text style={[s.stopIndex,isActive&&s.activeIndex]}>0{i+1}/03</Text>
       <Text style={s.stopLabel}><Copy text={captions[i]}/></Text>
       <Text style={[s.stopDate,isActive&&s.stopDateActive]}>{number(day.date)}</Text>
@@ -43,11 +45,11 @@ export default function RhythmHorizon({days}:{days:Day[]}){
    })}
   </View>
   <View style={s.stage}>
-    <View style={s.dateRail}><Text style={s.dateKicker}><Copy text="AUSGEWÄHLTER TAG"/></Text><View style={s.bigDate}><Text style={s.bigDateNumber}>{number(chosen.date)}</Text><Text style={s.bigMonth}>{month(chosen.date)}</Text></View></View>
+    <View style={s.dateRail}><Text style={s.dateKicker}><Copy text="AUSGEWÄHLTER TAG"/></Text><View style={s.bigDate}><Text style={s.bigDateNumber}>{number(chosen.date)}</Text><Text style={s.bigMonth}><Copy text={month(chosen.date)}/></Text></View></View>
     <View style={s.stageMain}>
       <Text style={s.stageLabel}><Copy text={session?"BEWEGUNG GEPLANT":"ERHOLUNG IM PLAN"}/></Text>
       <Text style={s.stageTitle} numberOfLines={3}>{session?.title||<Copy text="KEIN TRAINING. TROTZDEM FORTSCHRITT."/>}</Text>
-      <Text style={s.stageDetails}>{session?<><Copy text={workouts.length===1?"1 TRAININGSEINHEIT":"TRAININGSEINHEITEN"}/>{workouts.length>1?" · "+workouts.length:""}{session.completed?" · ERLEDIGT":""}</>:<Copy text="Regeneration gehört zum Plan. Keine Schätzwerte ohne Messdaten."/>}</Text>
+      <Text style={s.stageDetails}>{session?<><Copy text={workouts.length===1?"1 TRAININGSEINHEIT":"TRAININGSEINHEITEN"}/>{workouts.length>1?" · "+workouts.length:""}{session.completed?<> · <Copy text="ERLEDIGT"/></>:""}</>:<Copy text="Regeneration gehört zum Plan. Keine Schätzwerte ohne Messdaten."/>}</Text>
       <Pressable accessibilityRole="button" onPress={()=>router.push(session?.id?("/workout/"+session.id) as any:"/(tabs)/training")} style={s.action}>
        <Text style={s.actionLabel}><Copy text={session?"EINHEIT ÖFFNEN":"TRAININGSPLAN ANSEHEN"}/></Text><Text style={s.actionArrow}>↗</Text>
       </Pressable>
