@@ -43,8 +43,8 @@ export default function Today(){
  }
  return <SafeAreaView style={s.safe} edges={["top"]}><ScrollView contentContainerStyle={s.content}>
   <Pressable onPress={()=>router.back()}><Text style={s.link}><Copy text="← ZURÜCK"/></Text></Pressable>
-  <Text style={s.tag}>BE DIFFERENT · HEUTE</Text><Text style={s.title}>DEIN HEUTIGER WEG.</Text>
-  {!enabled?<View style={s.card}><Text style={s.p}>Diese Ansicht wird vorbereitet. Dein bestehendes Training bleibt erhalten.</Text></View>:
+  <Text style={s.tag}><Copy text="BE DIFFERENT · HEUTE"/></Text><Text style={s.title}><Copy text="DEIN HEUTIGER WEG."/></Text>
+  {!enabled?<View style={s.card}><Text style={s.p}><Copy text="Diese Ansicht wird vorbereitet. Dein bestehendes Training bleibt erhalten."/></Text></View>:
    loading?<ActivityIndicator color={C.volt}/>:
    <>
     {!!error&&<Text style={s.error}>{error}</Text>}{!!notice&&<Text style={s.tag}>{notice}</Text>}
@@ -56,24 +56,24 @@ export default function Today(){
        {data.actual.nextWorkout&&<Text style={s.p}>Nächste Einheit: {data.actual.nextWorkout.title} · {when(data.actual.nextWorkout.scheduledAt)}</Text>}
        <Pressable onPress={()=>router.push("/training")}><Text style={s.link}><Copy text="TRAINING ANSEHEN →"/></Text></Pressable>
       </View>
-      <View style={s.card}><Text style={s.tag}>ERHOLUNG & CHECKIN</Text>
+      <View style={s.card}><Text style={s.tag}><Copy text="ERHOLUNG & CHECKIN"/></Text>
        <Text style={s.p}>Energie: {data.actual.energy??"Keine Angabe"} · Muskelgefühl: {data.actual.soreness??"Keine Angabe"}</Text>
        <Text style={s.p}>Schlaf: {data.actual.sleepMinutes==null?"Keine Messwerte":Math.round(data.actual.sleepMinutes/6)/10+" Stunden"}</Text>
        <Text style={s.p}>{data.recovery.note}</Text>
-       <Pressable onPress={()=>router.push("/lifestyle")}><Text style={s.link}>TAGESCHECK →</Text></Pressable>
+       <Pressable onPress={()=>router.push("/lifestyle")}><Text style={s.link}><Copy text="TAGESCHECK →"/></Text></Pressable>
       </View>
-      <View style={s.card}><Text style={s.tag}>PERSÖNLICHER TRAINER</Text>
+      <View style={s.card}><Text style={s.tag}><Copy text="PERSÖNLICHER TRAINER"/></Text>
        {data.coach.brief&&<Text style={s.p}>{data.coach.brief.title} · {data.coach.brief.body}</Text>}
-       {data.coach.adjustments.length===0&&<Text style={s.p}>Noch keine neuen Anweisungen für die nächste Einheit.</Text>}
+       {data.coach.adjustments.length===0&&<Text style={s.p}><Copy text="Noch keine neuen Anweisungen für die nächste Einheit."/></Text>}
        {data.coach.adjustments.map((x,i)=><Text key={i} style={s.p}>{x.title} · {x.action}</Text>)}
        {data.coach.feedback.map(f=><View key={f.id} style={s.feedback}><Text style={s.p}>Technikfeedback: {f.coachNote}</Text>
         {f.nextSession&&<Text style={s.p}>{f.nextSession.focus}: {f.nextSession.advice}</Text>}</View>)}
       </View>
-      <View style={s.card}><Text style={s.tag}>DEIN TECHNIKVIDEO</Text>
-       <Text style={s.p}>Videos sind privat. Der Upload braucht deine Zustimmung zur Verarbeitung und eine PRO Betreuung.</Text>
+      <View style={s.card}><Text style={s.tag}><Copy text="DEIN TECHNIKVIDEO"/></Text>
+       <Text style={s.p}><Copy text="Videos sind privat. Der Upload braucht deine Zustimmung zur Verarbeitung und eine PRO Betreuung."/></Text>
        <Text style={s.p}>{data.coach.openVideos} Video(s) warten auf Prüfung.</Text>
        {data.coach.assigned?<><TextInput multiline style={s.input} placeholder="Was soll der Trainer ansehen?" placeholderTextColor="#aebdaf" value={question} onChangeText={setQuestion}/>
-        <Pressable onPress={send} disabled={busy} style={s.button}><Text style={s.buttonText}>{busy?"WIRD GESENDET …":"VIDEO AUSWÄHLEN & SENDEN"}</Text></Pressable></>:<Text style={s.p}>Noch kein Trainer zugewiesen.</Text>}
+        <Pressable onPress={send} disabled={busy} style={s.button}><Text style={s.buttonText}>{busy?"WIRD GESENDET …":"VIDEO AUSWÄHLEN & SENDEN"}</Text></Pressable></>:<Text style={s.p}><Copy text="Noch kein Trainer zugewiesen."/></Text>}
       </View>
     </>}
    </>}
