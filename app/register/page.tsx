@@ -66,7 +66,7 @@ export default function RegisterPage() {
       <h1><Copy text={"Dein Athlet beginnt hier."}/></h1>
       <p><Copy text={"Du startest im kostenlosen Tarif. PRO kann später freigeschaltet werden."}/></p>
 
-      <label>Name<input name="name" autoComplete="name" minLength={2} required /></label>
+      <label><Copy text={"Name"}/><input name="name" autoComplete="name" minLength={2} required /></label>
       <label><Copy text={"E Mail"}/><input name="email" type="email" autoComplete="email" required /></label>
       <label><Copy text={"Passwort"}/><input name="password" type="password" autoComplete="new-password" minLength={10} required /><small><Copy text={"Mindestens 10 Zeichen"}/></small></label>
       <label><Copy text={"Ziel"}/><select name="goal" defaultValue="Athletik"><option><Copy text={"Muskelaufbau"}/></option><option><Copy text={"Fettabbau"}/></option><option><Copy text={"Athletik"}/></option><option><Copy text={"Fußball"}/></option><option>Calisthenics</option><option><Copy text={"Gesundheit"}/></option></select></label>

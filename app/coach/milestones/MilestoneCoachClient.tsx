@@ -1,4 +1,6 @@
 "use client";
+import {Copy} from "../../components/Locale";
+
 import {useEffect,useState} from "react";
 type Athlete={id:string;name:string|null};
 type Rule={id:string;key:string;title:string;message:string;metric:string;threshold:number;visualIntensity:string;enabled:boolean};
@@ -28,36 +30,36 @@ export default function MilestoneCoachClient(){
  }
  if(athletes.length===0)return <p role="status">{msg||"Noch keine zugeordneten Athleten."}</p>;
  return <div style={{display:"grid",gap:20}}>
-  <label>Athlet auswählen<select style={{display:"block",width:"100%",padding:11,marginTop:6}} value={athleteId} onChange={e=>setAthleteId(e.target.value)}>
+  <label><Copy text={"Athlet auswählen"}/><select style={{display:"block",width:"100%",padding:11,marginTop:6}} value={athleteId} onChange={e=>setAthleteId(e.target.value)}>
    {athletes.map(a=><option key={a.id} value={a.id}>{a.name||a.id}</option>)}</select></label>
   {msg&&<p role="status">{msg}</p>}
-  <fieldset style={{padding:18,display:"grid",gap:10}}><legend>MEILENSTEIN FESTLEGEN</legend>
-   <label>Eindeutiger Regelschlüssel<input value={key} onChange={e=>setKey(e.target.value)} maxLength={40}/></label>
-   <label>Titel<input value={title} onChange={e=>setTitle(e.target.value)} maxLength={70}/></label>
-   <label>Persönliche Botschaft<textarea value={message} onChange={e=>setMessage(e.target.value)} maxLength={250} rows={3}/></label>
-   <label>Kriterium<select value={metric} onChange={e=>setMetric(e.target.value)}>
-    <option value="STREAK_DAYS">Nachgewiesene Tage in Folge</option>
-    <option value="WORKOUT_COUNT">Abgeschlossene Einheiten</option>
-    <option value="EARNED_LEVELS">Bestätigte Stufen nach Trainertest</option></select></label>
-   <label>Schwelle<input type="number" min={1} max={1000} value={threshold} onChange={e=>setThreshold(e.target.value)}/></label>
-   <label>Intensität der späteren Erfolgsdarstellung<select value={intensity} onChange={e=>setIntensity(e.target.value)}>
-    <option value="SMALL">Klein</option><option value="MEDIUM">Mittel</option><option value="FULL">Groß</option></select></label>
+  <fieldset style={{padding:18,display:"grid",gap:10}}><legend><Copy text={"MEILENSTEIN FESTLEGEN"}/></legend>
+   <label><Copy text={"Eindeutiger Regelschlüssel"}/><input value={key} onChange={e=>setKey(e.target.value)} maxLength={40}/></label>
+   <label><Copy text={"Titel"}/><input value={title} onChange={e=>setTitle(e.target.value)} maxLength={70}/></label>
+   <label><Copy text={"Persönliche Botschaft"}/><textarea value={message} onChange={e=>setMessage(e.target.value)} maxLength={250} rows={3}/></label>
+   <label><Copy text={"Kriterium"}/><select value={metric} onChange={e=>setMetric(e.target.value)}>
+    <option value="STREAK_DAYS"><Copy text={"Nachgewiesene Tage in Folge"}/></option>
+    <option value="WORKOUT_COUNT"><Copy text={"Abgeschlossene Einheiten"}/></option>
+    <option value="EARNED_LEVELS"><Copy text={"Bestätigte Stufen nach Trainertest"}/></option></select></label>
+   <label><Copy text={"Schwelle"}/><input type="number" min={1} max={1000} value={threshold} onChange={e=>setThreshold(e.target.value)}/></label>
+   <label><Copy text={"Intensität der späteren Erfolgsdarstellung"}/><select value={intensity} onChange={e=>setIntensity(e.target.value)}>
+    <option value="SMALL"><Copy text={"Klein"}/></option><option value="MEDIUM"><Copy text={"Mittel"}/></option><option value="FULL"><Copy text={"Groß"}/></option></select></label>
    <button type="button" className="primary compact" disabled={busy||!athleteId} onClick={()=>submit({action:"UPSERT_RULE",rule:{
-    athleteId,key,title,message,metric,threshold:Number(threshold),visualIntensity:intensity,enabled:true}})}>MEILENSTEIN SPEICHERN</button>
+    athleteId,key,title,message,metric,threshold:Number(threshold),visualIntensity:intensity,enabled:true}})}><Copy text={"MEILENSTEIN SPEICHERN"}/></button>
   </fieldset>
-  <fieldset style={{padding:18,display:"grid",gap:10}}><legend>ERHOLUNG IM VORAUS PLANEN</legend>
-   <p>Erholung zählt nur, wenn sie vor dem Tag gespeichert wurde und keine Trainingseinheit für diesen Tag geplant ist.</p>
-   <label>Tag<input type="date" value={date} onChange={e=>setDate(e.target.value)}/></label>
-   <label>Begründung (optional)<input value={reason} onChange={e=>setReason(e.target.value)} maxLength={200}/></label>
-   <button className="primary compact" type="button" disabled={busy||!athleteId} onClick={()=>submit({action:"PLAN_RECOVERY",plan:{athleteId,day:date,reason}})}>ERHOLUNG PLANEN</button>
+  <fieldset style={{padding:18,display:"grid",gap:10}}><legend><Copy text={"ERHOLUNG IM VORAUS PLANEN"}/></legend>
+   <p><Copy text={"Erholung zählt nur, wenn sie vor dem Tag gespeichert wurde und keine Trainingseinheit für diesen Tag geplant ist."}/></p>
+   <label><Copy text={"Tag"}/><input type="date" value={date} onChange={e=>setDate(e.target.value)}/></label>
+   <label><Copy text={"Begründung (optional)"}/><input value={reason} onChange={e=>setReason(e.target.value)} maxLength={200}/></label>
+   <button className="primary compact" type="button" disabled={busy||!athleteId} onClick={()=>submit({action:"PLAN_RECOVERY",plan:{athleteId,day:date,reason}})}><Copy text={"ERHOLUNG PLANEN"}/></button>
   </fieldset>
-  <section><h2>Konfigurierte Meilensteine</h2>{details?.rules.length?details.rules.map(r=><article key={r.id} style={{padding:"12px 0",borderTop:"1px solid #486"}}>
+  <section><h2><Copy text={"Konfigurierte Meilensteine"}/></h2>{details?.rules.length?details.rules.map(r=><article key={r.id} style={{padding:"12px 0",borderTop:"1px solid #486"}}>
    <strong>{r.title}</strong><p>{r.message}</p><small>{r.metric} · {r.threshold} · {r.visualIntensity} · {r.enabled?"Aktiv":"Inaktiv"}</small>
-   {r.enabled&&<button type="button" disabled={busy} onClick={()=>submit({action:"DISABLE_RULE",athleteId,key:r.key})}>DEAKTIVIEREN</button>}
-  </article>):<p>Keine eigenen Regeln.</p>}</section>
-  <section><h2>Geplante Erholung</h2>{details?.rest.length?details.rest.map(r=><div key={r.id} style={{display:"flex",gap:12,alignItems:"center",justifyContent:"space-between",padding:"8px 0"}}>
+   {r.enabled&&<button type="button" disabled={busy} onClick={()=>submit({action:"DISABLE_RULE",athleteId,key:r.key})}><Copy text={"DEAKTIVIEREN"}/></button>}
+  </article>):<p><Copy text={"Keine eigenen Regeln."}/></p>}</section>
+  <section><h2><Copy text={"Geplante Erholung"}/></h2>{details?.rest.length?details.rest.map(r=><div key={r.id} style={{display:"flex",gap:12,alignItems:"center",justifyContent:"space-between",padding:"8px 0"}}>
    <span>{String(r.day).slice(0,10)} · {r.reason||"Erholung"}</span>
-   <button type="button" disabled={busy} onClick={()=>submit({action:"REMOVE_RECOVERY",athleteId,day:String(r.day).slice(0,10)})}>ENTFERNEN</button>
-  </div>):<p>Keine Erholung eingetragen.</p>}</section>
+   <button type="button" disabled={busy} onClick={()=>submit({action:"REMOVE_RECOVERY",athleteId,day:String(r.day).slice(0,10)})}><Copy text={"ENTFERNEN"}/></button>
+  </div>):<p><Copy text={"Keine Erholung eingetragen."}/></p>}</section>
  </div>;
 }

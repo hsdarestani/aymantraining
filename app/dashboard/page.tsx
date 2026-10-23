@@ -80,7 +80,7 @@ export default async function Dashboard(){
       {heroPhoto?<div className="bd-athlete-private-photo"><img src={"/api/media/"+heroPhoto.id} alt=""/></div>:<DigitalTwinHero/>}
       <div className="bd-hero-copy">
         <span className="eyebrow"><Copy text="DEIN ATHLETEN DASHBOARD"/></span>
-        <h1>{(user.name||"ATHLET").toUpperCase()}</h1>
+        <h1><Copy text={(user.name||"ATHLET").toUpperCase()}/></h1>
         <p><Copy text={dailyLine}/></p>
         <Link href="/focus" className="bd-red-link"><Copy text="BE FOCUSED · 2 MIN ATMUNG →"/></Link>
       </div>
@@ -96,7 +96,7 @@ export default async function Dashboard(){
     </Link>}
 
     <section className="bd-workout-card" aria-label="Dein Tag und dein bestätigter Stand">
-      <span>HEUTE · {dailyProfile.date}</span>
+      <span><Copy text={"HEUTE · "}/>{dailyProfile.date}</span>
       <h2><Copy text={day.status==="NOT_SCHEDULED"?"Kein Training eingetragen":day.status==="DONE"?"Alle geplanten Einheiten erledigt":day.status==="PARTIAL"?"Training teilweise erledigt":"Training geplant"}/></h2>
       <p>{day.scheduled?<>{day.completed} <Copy text="von"/> {day.scheduled} <Copy text="Einheiten"/> · <Copy text="ERLEDIGT"/></>:<Copy text="Ohne Trainingsplan ist dies nicht automatisch ein Erholungstag."/>}</p>
       <p><Copy text="ENERGIE:"/> {dailyProfile.today.energy??<Copy text="Keine Angabe"/>} · <Copy text="SCHLAF:"/> {dailyProfile.today.sleepHours==null?<Copy text="Keine Angabe"/>:dailyProfile.today.sleepHours+" h"}</p>

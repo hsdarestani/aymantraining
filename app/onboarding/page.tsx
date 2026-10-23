@@ -1,5 +1,5 @@
 "use client";
-import {Copy} from "../components/Locale";
+import {Copy,useT} from "../components/Locale";
 
 
 import {useMemo,useState} from "react";
@@ -40,6 +40,7 @@ function Stepper({label,value,onChange,min,max,step=1,unit}:{label:string;value:
 }
 
 export default function Onboarding(){
+ const t=useT();
   const [step,setStep]=useState(1);
   const [goal,setGoal]=useState("Athletik");
   const [selectedGoals,setSelectedGoals]=useState<string[]>(["Athletik"]);
@@ -128,9 +129,9 @@ export default function Onboarding(){
 
       {step===2&&<>
         <h1><Copy text={"Was willst du verändern?"}/></h1>
-        <p>{journeyEnabled?"Du kannst mehrere Ziele kombinieren. Dein Coach stellt daraus einen zusammenhängenden Trainingsweg zusammen.":"Wähle deinen Trainingsfokus."}</p>
-        <div className="goals">{goals.map(x=>{const selected=journeyEnabled?selectedGoals.includes(x):goal===x;return <button type="button" aria-pressed={selected} key={x} className={selected?"selected":""} onClick={()=>journeyEnabled?setSelectedGoals(old=>old.includes(x)?old.filter(g=>g!==x):[...old,x]):setGoal(x)}><span>{x}</span><b>{selected?"✓":"+"}</b></button>})}</div>
-        {journeyEnabled&&<p className="journey-note">DEIN WEG: {selectedGoals.length?selectedGoals.join(" + "):"Bitte Ziele auswählen"}<br/>Wenn diese Kombination noch nicht hinterlegt ist, bleibt deine Anfrage zur Zuordnung gespeichert. Es wird kein Trainingsplan erfunden.</p>}
+        <p><Copy text={journeyEnabled?"Du kannst mehrere Ziele kombinieren. Dein Coach stellt daraus einen zusammenhängenden Trainingsweg zusammen.":"Wähle deinen Trainingsfokus."}/></p>
+        <div className="goals">{goals.map(x=>{const selected=journeyEnabled?selectedGoals.includes(x):goal===x;return <button type="button" aria-pressed={selected} key={x} className={selected?"selected":""} onClick={()=>journeyEnabled?setSelectedGoals(old=>old.includes(x)?old.filter(g=>g!==x):[...old,x]):setGoal(x)}><span><Copy text={x}/></span><b>{selected?"✓":"+"}</b></button>})}</div>
+        {journeyEnabled&&<p className="journey-note"><Copy text={"DEIN WEG: "}/><Copy text={selectedGoals.length?selectedGoals.map(t).join(" + "):"Bitte Ziele auswählen"}/><br/><Copy text={"Wenn diese Kombination noch nicht hinterlegt ist, bleibt deine Anfrage zur Zuordnung gespeichert. Es wird kein Trainingsplan erfunden."}/></p>}
       </>}
 
       {step===3&&<>
@@ -143,9 +144,9 @@ export default function Onboarding(){
         </div>
         <div className="segmented-field">
           <label><Copy text={"Geschlecht"}/></label>
-          <div>{[["male","Männlich"],["female","Weiblich"],["diverse","Divers"],["prefer_not_to_say","Keine Angabe"]].map(([value,label])=><button type="button" key={value} className={sex===value?"selected":""} onClick={()=>{setSex(value);if(value!=="female")setWomenDashboard(false)}}>{label}</button>)}</div>
+          <div>{[["male","Männlich"],["female","Weiblich"],["diverse","Divers"],["prefer_not_to_say","Keine Angabe"]].map(([value,label])=><button type="button" key={value} className={sex===value?"selected":""} onClick={()=>{setSex(value);if(value!=="female")setWomenDashboard(false)}}><Copy text={label}/></button>)}</div>
         </div>
-        {journeyEnabled&&sex==="female"&&<div className="journey-dashboard-choice"><strong>OPTIONALE STARTANSICHT</strong><p>Du kannst das Frauen-Dashboard oder die allgemeine Ansicht wählen. Alle Sportarten bleiben offen.</p><label><input type="checkbox" checked={womenDashboard} onChange={e=>setWomenDashboard(e.target.checked)}/> Frauen-Dashboard als Startansicht vormerken</label></div>}
+        {journeyEnabled&&sex==="female"&&<div className="journey-dashboard-choice"><strong><Copy text={"OPTIONALE STARTANSICHT"}/></strong><p><Copy text={"Du kannst das Frauen-Dashboard oder die allgemeine Ansicht wählen. Alle Sportarten bleiben offen."}/></p><label><input type="checkbox" checked={womenDashboard} onChange={e=>setWomenDashboard(e.target.checked)}/><Copy text={" Frauen-Dashboard als Startansicht vormerken"}/></label></div>}
         <div className="stepper-grid">
           <Stepper label="Größe" value={height} onChange={v=>{setHeight(v);setError("")}} min={120} max={230} unit=" cm"/>
           <Stepper label="Gewicht" value={weight} onChange={v=>{setWeight(v);setError("")}} min={35} max={250} step={0.5} unit=" kg"/>
@@ -153,10 +154,10 @@ export default function Onboarding(){
       </>}
 
       {journeyEnabled&&step===4&&<>
-        <h1>Wo stehst du?</h1><p>Schätze dich passend zu deiner Zielkombination ein. Ein höheres Level wird erst nach einem Einstufungstest oder einer Bestätigung durch den Coach freigeschaltet.</p>
-        <div className="journey-selected">DEIN WEG: {selectedGoals.join(" + ")}</div>
-        <div className="journey-levels">{levelCards.map(level=><button type="button" aria-pressed={selfLevel===level.code} className={selfLevel===level.code?"journey-level selected":"journey-level"} key={level.code} onClick={()=>setSelfLevel(level.code)}><strong>{level.label}</strong><span>{level.description}</span><b>{selfLevel===level.code?"✓":"○"}</b></button>)}</div>
-        <p className="journey-note">Deine Selbsteinschätzung öffnet noch keine Kapitel. Der genaue Einstufungstest und die Kriterien werden vom Coach festgelegt.</p>
+        <h1><Copy text={"Wo stehst du?"}/></h1><p><Copy text={"Schätze dich passend zu deiner Zielkombination ein. Ein höheres Level wird erst nach einem Einstufungstest oder einer Bestätigung durch den Coach freigeschaltet."}/></p>
+        <div className="journey-selected"><Copy text={"DEIN WEG: "}/>{selectedGoals.map(t).join(" + ")}</div>
+        <div className="journey-levels">{levelCards.map(level=><button type="button" aria-pressed={selfLevel===level.code} className={selfLevel===level.code?"journey-level selected":"journey-level"} key={level.code} onClick={()=>setSelfLevel(level.code)}><strong>{level.label}</strong><span><Copy text={level.description}/></span><b>{selfLevel===level.code?"✓":"○"}</b></button>)}</div>
+        <p className="journey-note"><Copy text={"Deine Selbsteinschätzung öffnet noch keine Kapitel. Der genaue Einstufungstest und die Kriterien werden vom Coach festgelegt."}/></p>
       </>}
 
       {step===healthStep&&<>
@@ -186,7 +187,7 @@ export default function Onboarding(){
       {step===finalStep&&<>
         <div className="first-score"><span className="eyebrow"><Copy text={"BEREIT"}/></span><strong>100%</strong><b><Copy text={"EINRICHTUNG"}/></b></div>
         <h1><Copy text={"Jetzt beginnt die Entwicklung."}/></h1>
-        {journeyEnabled&&<div className="journey-note"><strong>Deine Selbsteinschätzung: {selfLevel?.replaceAll("_"," ")}</strong><p>Dein tatsächliches Einstiegslevel wird erst durch den Coach oder einen freigegebenen Einstufungstest bestätigt. Falls deine Zielkombination noch nicht fertig ist, bleibt sie für die Zuordnung vorgemerkt. PRO überspringt keine Tests.</p></div>}
+        {journeyEnabled&&<div className="journey-note"><strong><Copy text={"Deine Selbsteinschätzung: "}/>{selfLevel?.replaceAll("_"," ")}</strong><p><Copy text={"Dein tatsächliches Einstiegslevel wird erst durch den Coach oder einen freigegebenen Einstufungstest bestätigt. Falls deine Zielkombination noch nicht fertig ist, bleibt sie für die Zuordnung vorgemerkt. PRO überspringt keine Tests."}/></p></div>}
         <p><Copy text={"Der erste echte Leistungswert wird aus deinen gespeicherten Daten berechnet. Fehlende Werte werden nicht erfunden."}/></p>
       </>}
 

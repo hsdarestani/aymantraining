@@ -27,12 +27,12 @@ export default async function TrainingPage(){
   return <main className="sub-shell bd-train">
     <header className="sub-top">
       <Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link>
-      <nav><Link href="/dashboard"><Copy text="BEGINN"/></Link><Link href="/training" className="active">TRAINING</Link><Link href="/progress"><Copy text="FORTSCHRITT"/></Link><Link href="/coach"><Copy text="TRAINER"/></Link><Link href="/athlete"><Copy text="ATHLET"/></Link></nav>
+      <nav><Link href="/dashboard"><Copy text="BEGINN"/></Link><Link href="/training" className="active"><Copy text={"TRAINING"}/></Link><Link href="/progress"><Copy text="FORTSCHRITT"/></Link><Link href="/coach"><Copy text="TRAINER"/></Link><Link href="/athlete"><Copy text="ATHLET"/></Link></nav>
     </header>
     <section className="bd-train-hero">
       <div className="bd-train-hero-main">
-        <span className="eyebrow">01 / TRAINING</span>
-        <h1>DEIN PLAN.<br/><em>DEIN ANTRIEB.</em></h1>
+        <span className="eyebrow"><Copy text={"01 / TRAINING"}/></span>
+        <h1><Copy text={"DEIN PLAN."}/><br/><em><Copy text={"DEIN ANTRIEB."}/></em></h1>
         <p><Copy text="Jede Einheit bringt dich weiter. Entscheidend sind dein Rhythmus, deine Technik und deine Entwicklung."/></p>
         <div className="bd-train-shortcuts">
           <Link href="/plans"><Copy text="TRAININGSPLÄNE"/> <span aria-hidden="true">↗</span></Link>
@@ -74,9 +74,9 @@ export default async function TrainingPage(){
       <aside className="bd-train-aside">
         <article className="bd-train-history">
           <div className="bd-train-section-heading"><div><span className="eyebrow"><Copy text="DEINE SPUREN"/></span><h2><Copy text="VERLAUF."/></h2></div><span className="bd-train-count"><Copy text={user.subscriptionTier==="FREE"?"30 TAGE":"UNBEGRENZT"}/></span></div>
-          {history.length?history.slice(0,user.subscriptionTier==="FREE"?30:100).map((w,i)=><div className="bd-train-history-row" key={w.id}><span>{String(i+1).padStart(2,"0")}</span><div><strong><Copy text={w.title}/></strong><small><LocalizedValue value={w.completedAt} format="toLocaleDateString"/> · RPE {w.rpe??"Keine Angabe"}</small></div></div>):<p className="bd-train-history-empty"><Copy text="Deine abgeschlossenen Einheiten erscheinen hier."/></p>}
+          {history.length?history.slice(0,user.subscriptionTier==="FREE"?30:100).map((w,i)=><div className="bd-train-history-row" key={w.id}><span>{String(i+1).padStart(2,"0")}</span><div><strong><Copy text={w.title}/></strong><small><LocalizedValue value={w.completedAt} format="toLocaleDateString"/> · RPE <Copy text={w.rpe??"Keine Angabe"}/></small></div></div>):<p className="bd-train-history-empty"><Copy text="Deine abgeschlossenen Einheiten erscheinen hier."/></p>}
         </article>
-        <article className="bd-train-recovery"><span className="eyebrow"><Copy text="REGENERATION"/></span><strong>PAUSE IST<br/>FORTSCHRITT.</strong><p><Copy text="Erholung ist Teil deines Plans. Gib deinem Körper die Zeit, die er braucht."/></p></article>
+        <article className="bd-train-recovery"><span className="eyebrow"><Copy text="REGENERATION"/></span><strong><Copy text={"PAUSE IST"}/><br/><Copy text={"FORTSCHRITT."}/></strong><p><Copy text="Erholung ist Teil deines Plans. Gib deinem Körper die Zeit, die er braucht."/></p></article>
       </aside>
     </section>
   </main>;
