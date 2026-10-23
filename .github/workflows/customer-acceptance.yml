@@ -1,0 +1,96 @@
+name: Customer journey acceptance
+on:
+  push:
+    branches: ["completion/full-customer-acceptance-20261024"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: customer-acceptance-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  integrated-journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: bedifferent_test
+          POSTGRES_USER: bedifferent
+          POSTGRES_PASSWORD: bedifferent_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U bedifferent -d bedifferent_test"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://bedifferent:bedifferent_test@127.0.0.1:5432/bedifferent_test?schema=public
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      NODE_ENV: test
+      JOURNEY_ONBOARDING_ENABLED: "true"
+      NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED: "true"
+      JOURNEY_OVERVIEW_ENABLED: "true"
+      NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED: "true"
+      JOURNEY_EDITOR_ENABLED: "true"
+      JOURNEY_TESTS_ENABLED: "true"
+      JOURNEY_DAILY_ENABLED: "true"
+      WOMEN_DASHBOARD_ENABLED: "true"
+      CYCLE_JOURNAL_ENABLED: "true"
+      MILESTONES_ENABLED: "true"
+      CELEBRATIONS_ENABLED: "true"
+      DATA_DIR: /tmp/bedifferent-customer-acceptance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run check
+      - run: npx prisma db push
+      - name: Exercise, scoring, language and privacy contracts
+        run: |
+          set -e
+          for name in workout-regressions step10-daily-profile step10-level-isolation step11-presenter-contract step12-cycle step12-cycle-contract step13-streak step14-celebration-contract languages media-ranges native-outbox health-values; do
+            node "scripts/test-$name.mjs"
+          done
+      - name: Database progression, coach editor, review, locks and permissions
+        run: |
+          set -e
+          for step in 03 05 06 07 08; do node "scripts/test-journey-step$step.mjs"; done
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Start isolated production application
+        run: |
+          NODE_ENV=production npm start > /tmp/customer-acceptance.log 2>&1 &
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:3000/api/ready >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/customer-acceptance.log
+          exit 1
+      - name: Customer feature browser operations with all features enabled
+        run: >-
+          npx playwright test
+          tests/browser/step04-onboarding.spec.mjs
+          tests/browser/step05-journey-editor.spec.mjs
+          tests/browser/step06-journey.spec.mjs
+          tests/browser/step07-journey.spec.mjs
+          tests/browser/step09-daily-coach.spec.mjs
+          tests/browser/step11-women-dashboard.spec.mjs
+          tests/browser/step12-cycle-journal.spec.mjs
+          tests/browser/step12-cycle.spec.mjs
+          tests/browser/step13-milestones.spec.mjs
+          tests/browser/step14-celebrations.spec.mjs
+          --workers=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: customer-feature-browser-evidence
+          path: |
+            playwright-report
+            test-results
+      - if: failure()
+        run: cat /tmp/customer-acceptance.log || true
+
