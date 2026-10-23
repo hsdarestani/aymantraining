@@ -1,5 +1,5 @@
 "use client";
-import {Copy} from "../../components/Locale";
+import {Copy,useLocale,useT} from "../../components/Locale";
 
 import {useCallback,useEffect,useState} from "react";
 type Pending={id:string;enrollmentId:string;assessmentId:string;titleDe:string;kind:"PLACEMENT"|"CHAPTER_FINAL";
@@ -13,8 +13,9 @@ async function call(path:string,method="GET",body?:unknown){
  const json=await r.json().catch(()=>({error:"Keine Antwort erhalten."}));
  if(!r.ok)throw new Error(json.error||"Aktion fehlgeschlagen.");return json;
 }
-function date(x:string){return new Date(x).toLocaleString("de-DE",{dateStyle:"medium",timeStyle:"short"});}
 export default function JourneyReviews(){
+ const locale=useLocale(),t=useT();
+ const date=(x:string)=>new Date(x).toLocaleString(locale==="en"?"en-GB":"de-DE",{dateStyle:"medium",timeStyle:"short"});
  const [pending,setPending]=useState<Pending[]>([]);
  const [placements,setPlacements]=useState<Placement[]>([]);
  const [comments,setComments]=useState<Record<string,string>>({});
@@ -46,7 +47,7 @@ export default function JourneyReviews(){
  }
  async function confirm(p:Placement){
   const chosen=levels[p.id]??p.selfLevel??"READY";
-  if(!window.confirm("Einstiegslevel "+chosen.replaceAll("_"," ")+" für "+(p.user.name||"Athlet")+" bestätigen?"))return;
+  if(!window.confirm(t("Einstiegslevel")+" "+chosen.replaceAll("_"," ")+" "+t("für")+" "+(p.user.name||t("Athlet"))+" "+t("bestätigen?")))return;
   setError("");setMessage("");setBusy(p.id);
   try{
    const result=await call("/api/journey/placement","POST",{enrollmentId:p.id,confirmedLevel:chosen,
@@ -58,12 +59,12 @@ export default function JourneyReviews(){
  }
  return <div className="j6-review-workspace">
   {error&&<div role="alert" className="j6-alert"><Copy text={error}/></div>}
-  {message&&<div role="status" className="j6-success">{message}</div>}
+  {message&&<div role="status" className="j6-success"><Copy text={message}/></div>}
   <section className="panel">
    <div className="j6-review-title"><div><span className="eyebrow"><Copy text={"PRÜFUNG AUSSTEHEND"}/></span><h2><Copy text={"Abschlusstests & Einstufungstests"}/></h2></div><span>{pending.length}<Copy text={" offen"}/></span></div>
    {pending.length===0&&<p className="muted"><Copy text={"Derzeit warten keine Prüfungen auf die Bewertung."}/></p>}
    <div className="j6-review-cards">{pending.map(x=><article className="j6-review-card" key={x.id}>
-    <div className="j6-review-top"><div><span className="eyebrow">{x.kind==="PLACEMENT"?"EINSTUFUNGSTEST":"KAPITELABSCHLUSS"}</span><h3>{x.athlete.name}</h3>
+    <div className="j6-review-top"><div><span className="eyebrow"><Copy text={x.kind==="PLACEMENT"?"EINSTUFUNGSTEST":"KAPITELABSCHLUSS"}/></span><h3>{x.athlete.name}</h3>
      <p>{x.pathway} · {x.titleDe}</p></div><small>{date(x.submittedAt)}</small></div>
     <div className="j6-review-columns">
      <div><h4><Copy text={"Eingereichte Ergebnisse"}/></h4><pre>{JSON.stringify(x.results,null,2)}</pre></div>

@@ -65,7 +65,7 @@ export default function JourneyBuilder(){
   setPaths(response.paths);setWaiting(response.waiting);
  }
  async function load(id:string){
-  if(dirty&&!window.confirm("Ungespeicherte Änderungen verwerfen?"))return;
+  if(dirty&&!window.confirm(t("Ungespeicherte Änderungen verwerfen?")))return;
   setError("");setNotice("");setBusy(true);
   try{
    const data=await request("/api/admin/journeys/"+encodeURIComponent(id));
@@ -103,7 +103,7 @@ export default function JourneyBuilder(){
  }
  async function publish(){
   if(!version||!draft||dirty)return;
-  if(!window.confirm("Version "+version.version+" verbindlich veröffentlichen? Sie bleibt danach unveränderlich."))return;
+  if(!window.confirm(t("Version")+" "+version.version+": "+t("Verbindlich veröffentlichen? Sie bleibt danach unveränderlich.")))return;
   setBusy(true);setError("");setNotice("");
   try{const result=await request("/api/admin/journeys/"+version.id+"/publish","POST",{});
    setNotice("Veröffentlicht. "+result.matchedIntakes+" offene Zielkombinationen vorgemerkt.");
@@ -111,7 +111,7 @@ export default function JourneyBuilder(){
   }catch(e){setError(e instanceof Error?e.message:String(e));}finally{setBusy(false);}
  }
  async function clone(pathwayId:string){
-  if(dirty&&!window.confirm("Ungespeicherte Änderungen verwerfen?"))return;
+  if(dirty&&!window.confirm(t("Ungespeicherte Änderungen verwerfen?")))return;
   setBusy(true);setError("");setNotice("");
   try{
    const result=await request("/api/admin/journeys/clone","POST",{pathwayId});

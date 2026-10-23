@@ -33,7 +33,7 @@ export function calculateStreak(today:string,events:Activity[],scheduled:Schedul
 }
 export const ruleSchema=z.object({
  athleteId:z.string().min(1),key:z.string().regex(/^[a-z0-9_]{3,40}$/),
- metric:z.enum(["STREAK_DAYS","WORKOUT_COUNT","EARNED_LEVELS"]),
+ metric:z.enum(["STREAK_DAYS","WORKOUT_COUNT","EARNED_LEVELS","NUTRITION_DAYS","RECOVERY_DAYS","CHAPTER_COUNT","PASSED_TESTS","LEVEL_UPS","TRULY_DIFFERENT"]),
  threshold:z.number().int().min(1).max(1000),
  title:z.string().trim().min(3).max(70),
  message:z.string().trim().min(3).max(250),
@@ -47,7 +47,16 @@ export const defaultRules=[
  {key:"step13_streak_7",metric:"STREAK_DAYS",threshold:7,title:"7 TAGE BESTÄNDIG",
   message:"Sieben nachgewiesene Tage, einschließlich im Voraus geplanter Erholung.",visualIntensity:"SMALL"},
  {key:"step13_streak_30",metric:"STREAK_DAYS",threshold:30,title:"30 TAGE BESTÄNDIG",
-  message:"Dreißig nachgewiesene Tage. Die Erholung gehört zum Plan.",visualIntensity:"MEDIUM"},
+  message:"Dreißig nachgewiesene Tage. Die Erholung gehört zum Plan.",visualIntensity:"FULL"},
  {key:"step13_first_workout",metric:"WORKOUT_COUNT",threshold:1,title:"ERSTE EINHEIT",
   message:"Deine erste abgeschlossene Trainingseinheit ist dokumentiert.",visualIntensity:"SMALL"}
+,
+ {key:"step13_streak_14",metric:"STREAK_DAYS",threshold:14,title:"14 TAGE BESTÄNDIG",message:"Vierzehn nachgewiesene Tage. Dein Rhythmus wird beständiger.",visualIntensity:"MEDIUM"},
+ {key:"first_planned_recovery",metric:"RECOVERY_DAYS",threshold:1,title:"ERHOLUNG GEHÖRT DAZU",message:"Du hast einen im Voraus geplanten Erholungstag eingehalten.",visualIntensity:"SMALL"},
+ {key:"first_nutrition_entry",metric:"NUTRITION_DAYS",threshold:1,title:"DEIN TAG IST DOKUMENTIERT",message:"Dein Ernährungseintrag zählt. Regelmäßiges Dokumentieren wird gefeiert, nicht weniger Essen.",visualIntensity:"SMALL"},
+ {key:"nutrition_seven_days",metric:"NUTRITION_DAYS",threshold:7,title:"7 TAGE ERNÄHRUNG DOKUMENTIERT",message:"Sieben verschiedene Tage dokumentiert. Du machst deine Gewohnheiten sichtbar.",visualIntensity:"MEDIUM"},
+ {key:"first_chapter_completed",metric:"CHAPTER_COUNT",threshold:1,title:"KAPITEL GESCHAFFT",message:"Ein Trainingskapitel ist mit bestätigtem Abschlusstest abgeschlossen.",visualIntensity:"MEDIUM"},
+ {key:"first_test_passed",metric:"PASSED_TESTS",threshold:1,title:"TEST BESTANDEN",message:"Dein Trainer hat deinen bestandenen Test bestätigt.",visualIntensity:"MEDIUM"},
+ {key:"first_level_up",metric:"LEVEL_UPS",threshold:1,title:"NÄCHSTES LEVEL ERREICHT",message:"Deine abgeschlossenen Kapitel und bestätigten Tests haben das nächste Level freigeschaltet.",visualIntensity:"FULL"},
+ {key:"truly_different_confirmed",metric:"TRULY_DIFFERENT",threshold:1,title:"TRULY DIFFERENT",message:"Dein höchstes Level wurde bestätigt. Dieser Erfolg gehört dir.",visualIntensity:"FULL"}
 ] as const;

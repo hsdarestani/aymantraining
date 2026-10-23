@@ -34,7 +34,6 @@ export default function SettingsClient({initialPrefs}:{initialPrefs:Pref[]}){
  return <div className="settings-stack">
   <DashboardPreference/>
   <CelebrationSettings/>
-  <article className="panel" style={{padding:22}}><span className="eyebrow"><Copy text="PRIVATER ZYKLUSKALENDER"/></span><h2><Copy text="Freiwillig und jederzeit löschbar."/></h2><p className="muted"><Copy text="Nur mit deiner ausdrücklichen Zustimmung. Getrennt von Trainingsstufe, Leistungswert und allgemeinem Tagescheck."/></p><a className="secondary" href="/cycle"><Copy text={"PRIVATEN KALENDER ÖFFNEN →"}/></a></article>
   <section className="panel" style={{padding:20}}><span className="eyebrow"><Copy text="PRIVAT UND FREIWILLIG"/></span><h2><Copy text="Dein persönlicher Zykluskalender"/></h2><p><Copy text="Nur mit separater Zustimmung. Du kannst Einträge löschen und die Freigabe für deinen Trainer selbst steuern."/></p><Link href="/cycle" className="secondary"><Copy text={"PRIVATEN ZYKLUSKALENDER ÖFFNEN"}/></Link></section>
   <form className="panel mini-form wide" onSubmit={checkin}>
    <span className="eyebrow"><Copy text={"10 SEKUNDEN TAGESCHECK"}/></span><h2><Copy text={"Wie fühlst du dich heute?"}/></h2>

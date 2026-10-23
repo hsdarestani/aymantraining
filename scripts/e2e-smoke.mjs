@@ -29,7 +29,12 @@ try{
   const workouts=await expect("/api/workouts?history=1",{},200);assert(workouts.workouts.length>=1,"starter workout missing");
   const workout=workouts.workouts.find(x=>x.exercises?.length)||workouts.workouts[0];
   await expect(`/api/workouts/${workout.id}`,{method:"PATCH",body:{action:"start"}},200);
-  if(workout.exercises?.[0])await expect(`/api/workouts/${workout.id}/sets`,{method:"POST",body:{exerciseId:workout.exercises[0].exerciseId,setNumber:1,reps:10,weightKg:20,rpe:7}},200);
+  await expect(`/api/workouts/${workout.id}`,{method:"PATCH",body:{action:"complete",rpe:7}},422);
+  for(const exercise of workout.exercises){
+    for(let setNumber=1;setNumber<=exercise.targetSets;setNumber++){
+      await expect(`/api/workouts/${workout.id}/sets`,{method:"POST",body:{exerciseId:exercise.exerciseId,setNumber,reps:10,weightKg:20,rpe:7}},200);
+    }
+  }
   await expect(`/api/workouts/${workout.id}`,{method:"PATCH",body:{action:"complete",rpe:7}},200);
 
   await expect("/api/daily-check",{method:"POST",body:{energy:7,soreness:3,mood:8,stress:4,sleepHours:7.4,steps:8000,waterMl:2300,proteinG:120}},200);

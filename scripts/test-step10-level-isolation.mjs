@@ -4,7 +4,8 @@ const sources=[
   "lib/gamification.ts",
   "app/api/score/route.ts",
   "app/api/digital-twin/route.ts",
-  "lib/score-view.ts"
+  "lib/score-view.ts",
+  "app/api/companion/route.ts"
 ];
 for(const file of sources){
  const code=readFileSync(file,"utf8");

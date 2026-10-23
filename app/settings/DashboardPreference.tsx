@@ -46,7 +46,7 @@ export default function DashboardPreference(){
     <span><Copy text="Aufnahmen mit Trainerinnen bevorzugen, sofern vorhanden"/></span>
   </label>}
   <p className="muted"><Copy text="Das ändert weder deine Einstufung noch Trainingspläne. Zyklusdaten werden hier nicht erhoben."/></p>
-  {saved&&<p role="status" style={{color:"#d4ff00"}}>{saved}</p>}
+  {saved&&<p role="status" style={{color:"#d4ff00"}}><Copy text={saved}/></p>}
   {error&&<p role="alert" style={{color:"#ffb6b6"}}><Copy text={error}/></p>}
  </section>;
 }

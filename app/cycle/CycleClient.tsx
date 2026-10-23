@@ -1,7 +1,7 @@
 "use client";
 import {useCallback,useEffect,useState} from "react";
 import Link from "next/link";
-import {Copy} from "../components/Locale";
+import {useT,Copy} from "../components/Locale";
 type Entry={date:string;flow:string|null;symptoms:string[];energy:number|null;mood:number|null;discomfort:number|null;planChoice:"AS_PLANNED"|"EASIER"|"REST"};
 type Data={available:boolean;enabled:boolean;shareWithCoach:boolean;remindersEnabled:boolean;lastPeriodStart:string|null;cycleLengthDays:number|null;consentedAt:string|null;
  forecast:null|{day:number;estimatedNextStarts:string[];approximate:boolean;notForContraception:boolean};entries:Entry[];reminder:null|{text:string}};
@@ -17,6 +17,7 @@ async function send(path:string,method:string,body:unknown){
  return data;
 }
 export default function CycleClient(){
+ const t=useT();
  const [data,setData]=useState<Data|null>(null),[entry,setEntry]=useState<Entry>(initial);
  const [consent,setConsent]=useState(false),[coachConsent,setCoachConsent]=useState(false);
  const [period,setPeriod]=useState(""),[length,setLength]=useState("28");
@@ -73,7 +74,7 @@ export default function CycleClient(){
       <p><Copy text={"Dein Wunsch verändert den Trainingsplan nicht automatisch. Du kannst dich jederzeit selbst für Ruhe entscheiden."}/></p>
       <button className="cycle-primary" disabled={busy} onClick={()=>action("/api/cycle/entries","PUT",entry,"Eintrag privat gespeichert.")}><Copy text={"TAG SPEICHERN"}/></button>
       {data.entries.some(e=>e.date===entry.date)&&<button className="cycle-danger" disabled={busy} onClick={()=>{
-       if(window.confirm("Eintrag dieses Tages endgültig löschen?"))void action("/api/cycle/entries","DELETE",{date:entry.date},"Tagesdaten gelöscht.");
+       if(window.confirm(t("Eintrag dieses Tages endgültig löschen?")))void action("/api/cycle/entries","DELETE",{date:entry.date},"Tagesdaten gelöscht.");
       }}><Copy text={"DIESEN TAG LÖSCHEN"}/></button>}
     </article>
    </div>
@@ -93,7 +94,7 @@ export default function CycleClient(){
       <button disabled={busy} className="cycle-primary" onClick={async()=>{await action("/api/cycle/preferences","POST",{action:"SHARE",shareWithCoach:true,confirmShare:true},"Trainerfreigabe erteilt.");setCoachConsent(false)}}><Copy text={"FREIGABE AUSDRÜCKLICH BESTÄTIGEN"}/></button>
       <button className="cycle-secondary" onClick={()=>setCoachConsent(false)}><Copy text={"ABBRECHEN"}/></button></div>}
     <p><Link href="/api/privacy/export"><Copy text={"DEINE DATEN EXPORTIEREN →"}/></Link></p>
-    <button className="cycle-danger" disabled={busy} onClick={()=>{if(window.confirm("Das private Zyklustagebuch, alle Tage und Freigaben unwiderruflich löschen?"))void action("/api/cycle/preferences","POST",{action:"DISABLE",confirmDeletion:true},"Alle Zyklusdaten gelöscht und Einwilligung widerrufen.");}}><Copy text={"ALLE DATEN LÖSCHEN & ZUSTIMMUNG WIDERRUFEN"}/></button>
+    <button className="cycle-danger" disabled={busy} onClick={()=>{if(window.confirm(t("Das private Zyklustagebuch, alle Tage und Freigaben unwiderruflich löschen?")))void action("/api/cycle/preferences","POST",{action:"DISABLE",confirmDeletion:true},"Alle Zyklusdaten gelöscht und Einwilligung widerrufen.");}}><Copy text={"ALLE DATEN LÖSCHEN & ZUSTIMMUNG WIDERRUFEN"}/></button>
    </article>
   </>}
   <p className="cycle-back"><Link href="/dashboard"><Copy text={"ZURÜCK ZUR STARTSEITE →"}/></Link></p>
