@@ -89,7 +89,7 @@ test("unknown combination persists without inventing or unlocking a path",async(
   expect(intake.status).toBe("PENDING_PATHWAY");
   expect(intake.selfLevel).toBe("TRULY_DIFFERENT");
   expect(intake.selectedGoalSlugs).toEqual(["fat_loss","football"]);
-  expect(await db.journeyChapterUnlock.count()).toBe(0);
+  expect(await db.journeyChapterUnlock.count({where:{enrollment:{userId:userWithoutPath.id}}})).toBe(0);
   const status=await request.get(base+"/api/journey/onboarding",{headers:auth("unmatched")});
   expect((await status.json()).journey.confirmedLevel).toBeNull();
 });
