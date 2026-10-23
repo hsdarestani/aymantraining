@@ -1,3 +1,4 @@
+import {Copy} from "../components/Locale";
 import {useCallback,useState} from "react";
 import {ActivityIndicator,Pressable,ScrollView,StyleSheet,Text,TextInput,View} from "react-native";
 import {useFocusEffect,router} from "expo-router";
@@ -76,7 +77,7 @@ export default function JourneyTests(){
   finally{setBusy("");}
  }
  return <SafeAreaView style={s.safe} edges={["top"]}><ScrollView contentContainerStyle={s.content}>
-  <Pressable onPress={()=>router.back()}><Text style={s.back}>← ZURÜCK</Text></Pressable>
+  <Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text="← ZURÜCK"/></Text></Pressable>
   <Text style={s.eyebrow}>BE DIFFERENT · TRAININGSWEG</Text><Text style={s.title}>DEIN NÄCHSTER SCHRITT.</Text>
   <Text style={s.hint}>Deine Leistungsstufe wird durch Prüfungen und den Trainer bestätigt, nicht durch deine Punkte oder ein PRO Abo.</Text>
   {!enabled?<View style={s.card}><Text style={s.hint}>Der neue Trainingsweg wird vorbereitet. Dein bisheriges Training bleibt unverändert.</Text></View>:
