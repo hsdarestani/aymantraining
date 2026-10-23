@@ -28,8 +28,8 @@ export default function Athlete(){
  return <Screen>
   <View style={st.hero}><Eyebrow><Copy text="BE DIFFERENT / DEIN SYSTEM"/></Eyebrow><Text style={st.big}><Copy text="ALLES. FÜR"/>{"\n"}<Copy text="DEIN LEVEL."/></Text><Text style={st.heroCopy}><Copy text="START zeigt deinen Tag. ATHLET öffnet deine Routinen, Ernährung, Regeneration und alle Module."/></Text></View>
   <View style={st.entryRow}>
-   <Pressable accessibilityRole="button" onPress={()=>router.push("/awake")} style={st.entryAwake}><Text style={st.entryCount}>01 / MORGEN</Text><Text style={st.entryTitle}><Copy text="BE AWAKE"/></Text><Text style={st.entryDetail}><Copy text="STARTE DEINEN TAG ↗"/></Text></Pressable>
-   <Pressable accessibilityRole="button" onPress={()=>router.push("/fuel")} style={st.entryFuel}><Text style={st.entryCount}>02 / ENERGIE</Text><Text style={st.entryTitle}><Copy text="BE FUEL"/></Text><Text style={st.entryDetail}><Copy text="ERNÄHRUNG ÖFFNEN ↗"/></Text></Pressable>
+   <Pressable accessibilityRole="button" onPress={()=>router.push("/awake")} style={st.entryAwake}><Text style={st.entryCount}><Copy text="01 / MORGEN"/></Text><Text style={st.entryTitle}><Copy text="BE AWAKE"/></Text><Text style={st.entryDetail}><Copy text="STARTE DEINEN TAG ↗"/></Text></Pressable>
+   <Pressable accessibilityRole="button" onPress={()=>router.push("/fuel")} style={st.entryFuel}><Text style={st.entryCount}><Copy text="02 / ENERGIE"/></Text><Text style={st.entryTitle}><Copy text="BE FUEL"/></Text><Text style={st.entryDetail}><Copy text="ERNÄHRUNG ÖFFNEN ↗"/></Text></Pressable>
   </View>
 
   <Pressable onPress={()=>router.push("/digital-twin")} style={st.identity}>
@@ -38,7 +38,7 @@ export default function Athlete(){
   </Pressable>
 
   <Pressable accessibilityRole="button" onPress={()=>router.push("/digital-twin")} style={st.twinStage}>
-    <AthleteTwin compact/><View style={st.twinCopy}><Text style={st.twinOverline}>DIGITALES ABBILD / 01</Text><Text style={st.twinTitle}><Copy text="DEIN DIGITALER ATHLET"/></Text><Text style={st.twinDescription}><Copy text="Animierte Vorschau öffnen und Leistungsprofil erkunden."/></Text><Text style={st.twinAction}><Copy text="ERKUNDEN ↗"/></Text></View>
+    <AthleteTwin compact/><View style={st.twinCopy}><Text style={st.twinOverline}><Copy text="DIGITALES ABBILD / 01"/></Text><Text style={st.twinTitle}><Copy text="DEIN DIGITALER ATHLET"/></Text><Text style={st.twinDescription}><Copy text="Animierte Vorschau öffnen und Leistungsprofil erkunden."/></Text><Text style={st.twinAction}><Copy text="ERKUNDEN ↗"/></Text></View>
    </Pressable>
   <View style={st.discovery}><Text style={st.discoveryIndex}>04 / <Copy text="DEINE MODULE"/></Text><Text style={st.discoveryTitle}><Copy text="JEDER RAUM."/></Text><Text style={st.discoveryAccent}><Copy text="EIN NEUER IMPULS."/></Text></View>
   <View style={st.grid}>{modules.map((item,i)=><Pressable accessibilityRole="button" key={item.label} onPress={()=>router.push(item.path as any)} style={[st.module,i===0&&st.moduleFeature,i===3&&st.moduleWide,item.accent==="red"&&st.moduleRed,item.accent==="score"&&st.moduleScore]}>
