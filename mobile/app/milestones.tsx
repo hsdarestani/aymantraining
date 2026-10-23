@@ -21,10 +21,10 @@ export default function Milestones(){
     <View style={s.stat}><Text style={s.kicker}><Copy text="BESTE SERIE"/></Text><Text style={s.number}>{data.best}</Text><Text style={s.copy}><Copy text="TAGE"/></Text></View></View>
    <Text style={s.copy}>{data.todayStatus==="PLANNED_RECOVERY"?"Heute zählt deine vorab geplante Erholung.":data.todayStatus==="ACHIEVED"?"Heute hast du Fortschritt dokumentiert.":"Heute liegt noch keine passende Aktivität vor."}</Text>
    <Text style={s.heading}><Copy text="DEINE MEILENSTEINE."/></Text>
-   {(data.awards as Milestone[]).length===0?<Text style={s.copy}>Dein erster bestätigter Meilenstein kommt mit einer echten Aktivität.</Text>:
-    (data.awards as Milestone[]).map(a=><View style={s.award} key={a.id}><Text style={s.kicker}>ERREICHT</Text><Text style={s.awardTitle}>{a.title}</Text>
+   {(data.awards as Milestone[]).length===0?<Text style={s.copy}><Copy text="Dein erster bestätigter Meilenstein kommt mit einer echten Aktivität."/></Text>:
+    (data.awards as Milestone[]).map(a=><View style={s.award} key={a.id}><Text style={s.kicker}><Copy text="ERREICHT"/></Text><Text style={s.awardTitle}>{a.title}</Text>
      <Text style={s.copy}>{a.message}</Text><Text style={s.kicker}>{new Date(a.achievedAt).toLocaleDateString("de-DE")}</Text></View>)}
-   <Text style={s.heading}>DEIN NÄCHSTER SCHRITT.</Text>
+   <Text style={s.heading}><Copy text="DEIN NÄCHSTER SCHRITT."/></Text>
    {(data.next as Progress[]).map(n=><View key={n.key} style={s.next}><View style={s.nextHeading}><Text style={s.nextLabel}>{n.title}</Text>
      <Text style={s.kicker}>{Math.min(n.progress,n.threshold)} / {n.threshold}</Text></View>
      <View style={s.track}><View style={[s.fill,{width:(Math.max(0,Math.min(100,n.progress/n.threshold*100))+"%") as `${number}%`}]}/></View>
