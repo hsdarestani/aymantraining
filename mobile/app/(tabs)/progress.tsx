@@ -36,7 +36,7 @@ export default function Progress(){
     <Text style={s.scoreFoot}><Copy text="DIGITALEN ATHLETEN ÖFFNEN"/>  ↗</Text>
   </Pressable>
 
-  <View style={s.records}><Text style={s.serial}>LEISTUNGSWERT: LANGFRISTIGES PROFIL</Text><Text style={s.muted}>MESSSTAND: {profile?.profile.recordedDate??"Keine Angabe"} · DATENABDECKUNG: {profile?.profile.completeness??0}%</Text><Text style={s.muted}>HEUTE: {profile?.plan?.scheduled?profile.plan.completed+" / "+profile.plan.scheduled+" geplante Einheiten":"Keine Einheit geplant"} · BESTÄTIGTE STUFE: {profile?.journey?.confirmedLevel??"Noch nicht bestätigt"}</Text>
+  <View style={s.records}><Text style={s.serial}><Copy text="LEISTUNGSWERT: LANGFRISTIGES PROFIL"/></Text><Text style={s.muted}>MESSSTAND: {profile?.profile.recordedDate??"Keine Angabe"} · DATENABDECKUNG: {profile?.profile.completeness??0}%</Text><Text style={s.muted}>HEUTE: {profile?.plan?.scheduled?profile.plan.completed+" / "+profile.plan.scheduled+" geplante Einheiten":"Keine Einheit geplant"} · BESTÄTIGTE STUFE: {profile?.journey?.confirmedLevel??"Noch nicht bestätigt"}</Text>
    <View style={s.section}><Text style={s.serial}>02 / <Copy text="KÖRPERDATEN"/></Text><Text style={s.sectionTitle}><Copy text="FAKTEN STATT GEFÜHL."/></Text></View>
    <View style={s.facts}>
      <View style={s.fact}><Text style={s.factName}><Copy text="GEWICHT"/></Text><Text style={s.factNumber}>{body?.weightKg??"?"}<Text style={s.factUnit}>{body?.weightKg==null?"":" KG"}</Text></Text></View>
