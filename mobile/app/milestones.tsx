@@ -1,3 +1,4 @@
+import {Copy} from "../components/Locale";
 import {useCallback,useState} from "react";
 import {ActivityIndicator,Pressable,StyleSheet,Text,View} from "react-native";
 import {router,useFocusEffect} from "expo-router";
@@ -11,15 +12,15 @@ export default function Milestones(){
  const [data,setData]=useState<any>(null),[status,setStatus]=useState("");
  useFocusEffect(useCallback(()=>{api("/api/milestones").then(setData).catch(e=>setStatus(e.message||"Nicht verfügbar"))},[]));
  if(!data)return <Screen><View style={s.loading}><ActivityIndicator color={C.volt}/><Text style={s.copy}>{status||"Fortschritt wird geladen ..."}</Text></View></Screen>;
- return <Screen><MilestoneCelebration/><View style={s.hero}><Text style={s.kicker}>DEIN ECHTER FORTSCHRITT</Text>
+ return <Screen><MilestoneCelebration/><View style={s.hero}><Text style={s.kicker}><Copy text="DEIN ECHTER FORTSCHRITT"/></Text>
    <Text style={s.title}>JEDER TAG.{"\n"}EIN SCHRITT.</Text>
-   <Text style={s.copy}>Nur Training, echte Tageschecks und zuvor geplante Erholung zählen. Das reine Öffnen der Anwendung zählt nicht.</Text>
+   <Text style={s.copy}><Copy text="Nur Training, echte Tageschecks und zuvor geplante Erholung zählen. Das reine Öffnen der Anwendung zählt nicht."/></Text>
   </View>
-  {!data.enabled?<Text style={s.copy}>Deine Meilensteine werden vorbereitet. Deine Daten bleiben erhalten.</Text>:<>
-   <View style={s.grid}><View style={s.stat}><Text style={s.kicker}>AKTUELLE SERIE</Text><Text style={s.number}>{data.streak}</Text><Text style={s.copy}>TAGE</Text></View>
-    <View style={s.stat}><Text style={s.kicker}>BESTE SERIE</Text><Text style={s.number}>{data.best}</Text><Text style={s.copy}>TAGE</Text></View></View>
+  {!data.enabled?<Text style={s.copy}><Copy text="Deine Meilensteine werden vorbereitet. Deine Daten bleiben erhalten."/></Text>:<>
+   <View style={s.grid}><View style={s.stat}><Text style={s.kicker}><Copy text="AKTUELLE SERIE"/></Text><Text style={s.number}>{data.streak}</Text><Text style={s.copy}><Copy text="TAGE"/></Text></View>
+    <View style={s.stat}><Text style={s.kicker}><Copy text="BESTE SERIE"/></Text><Text style={s.number}>{data.best}</Text><Text style={s.copy}><Copy text="TAGE"/></Text></View></View>
    <Text style={s.copy}>{data.todayStatus==="PLANNED_RECOVERY"?"Heute zählt deine vorab geplante Erholung.":data.todayStatus==="ACHIEVED"?"Heute hast du Fortschritt dokumentiert.":"Heute liegt noch keine passende Aktivität vor."}</Text>
-   <Text style={s.heading}>DEINE MEILENSTEINE.</Text>
+   <Text style={s.heading}><Copy text="DEINE MEILENSTEINE."/></Text>
    {(data.awards as Milestone[]).length===0?<Text style={s.copy}>Dein erster bestätigter Meilenstein kommt mit einer echten Aktivität.</Text>:
     (data.awards as Milestone[]).map(a=><View style={s.award} key={a.id}><Text style={s.kicker}>ERREICHT</Text><Text style={s.awardTitle}>{a.title}</Text>
      <Text style={s.copy}>{a.message}</Text><Text style={s.kicker}>{new Date(a.achievedAt).toLocaleDateString("de-DE")}</Text></View>)}
@@ -29,7 +30,7 @@ export default function Milestones(){
      <View style={s.track}><View style={[s.fill,{width:(Math.max(0,Math.min(100,n.progress/n.threshold*100))+"%") as `${number}%`}]}/></View>
     </View>)}
   </>}
-  <Pressable style={s.action} onPress={()=>router.push("/(tabs)/training")}><Text style={s.actionText}>TRAINING ANSEHEN →</Text></Pressable>
+  <Pressable style={s.action} onPress={()=>router.push("/(tabs)/training")}><Text style={s.actionText}><Copy text="TRAINING ANSEHEN →"/></Text></Pressable>
  </Screen>;
 }
 const s=StyleSheet.create({
