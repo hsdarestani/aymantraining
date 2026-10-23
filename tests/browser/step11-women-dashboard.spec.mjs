@@ -77,3 +77,14 @@ test("invalid writes and coach writes are rejected; response is private",async({
  expect(response).toContain("private");expect(response).toContain("no-store");
  await a.ctx.close();await c.ctx.close();
 });
+
+test("FREE dashboard cannot reveal PRO component scores",async({browser})=>{
+ const date=new Date();date.setUTCHours(0,0,0,0);
+ await db.scoreSnapshot.upsert({where:{userId_date:{userId:athleteB.id,date}},create:{userId:athleteB.id,date,total:73,strength:91,completeness:80},update:{total:73,strength:91,completeness:80}});
+ const {ctx,page}=await login(browser,"b");
+ await page.goto(host+"/dashboard");
+ await expect(page.locator('.bd-pillar-row').first().locator('b')).toHaveText('PRO');
+ await expect(page.locator('.bd-radar-stage')).not.toContainText('91');
+ await expect(page.getByText(/KOSTENLOS zeigt deinen Gesamtwert/)).toBeVisible();
+ await ctx.close();
+});

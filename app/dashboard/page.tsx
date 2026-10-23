@@ -1,6 +1,7 @@
 import {Copy,LocalizedValue} from "../components/Locale";
 import Link from "next/link";
 import {requireUser} from "../../lib/auth";
+import {hasFeature} from "../../lib/entitlements";
 import {prisma} from "../../lib/db";
 import {getDailyProfile} from "../../lib/daily-profile-service";
 import {localDateKey} from "../../lib/daily-profile";
@@ -20,6 +21,7 @@ function signal(value:number|null|undefined){return value==null?"empty":value<60
 export default async function Dashboard(){
   const user=await requireUser();
   const dailyProfile=await getDailyProfile(user.id);
+  const scoreDetails=await hasFeature(user.subscriptionTier,"score_details");
   const dashboardPreference=await getDashboardPreference(user.id);
   const cycleOverview=await privateCycle(user.id,{includeEntries:false});
   const womenGoals=dashboardPreference.mode==="WOMEN"?await prisma.goal.findMany({where:{userId:user.id,active:true},select:{type:true},take:12}):[];
@@ -43,13 +45,13 @@ export default async function Dashboard(){
   const total=dailyProfile.profile.value;
   const day=dailyProfile.plan;
   const pillars=[
-    {letter:"S",key:"strength",label:"KRAFT",value:score?.strength},
-    {letter:"E",key:"endurance",label:"AUSDAUER",value:score?.endurance},
-    {letter:"A",key:"athleticism",label:"ATHLETIK",value:score?.athleticism},
-    {letter:"M",key:"mobility",label:"BEWEGLICHKEIT",value:score?.mobility},
-    {letter:"R",key:"recovery",label:"REGENERATION",value:score?.recovery},
-    {letter:"F",key:"fuel",label:"ERNÄHRUNG",value:score?.fuel},
-    {letter:"C",key:"consistency",label:"KONSTANZ",value:score?.consistency}
+    {letter:"S",key:"strength",label:"KRAFT",value:scoreDetails?score?.strength:null},
+    {letter:"E",key:"endurance",label:"AUSDAUER",value:scoreDetails?score?.endurance:null},
+    {letter:"A",key:"athleticism",label:"ATHLETIK",value:scoreDetails?score?.athleticism:null},
+    {letter:"M",key:"mobility",label:"BEWEGLICHKEIT",value:scoreDetails?score?.mobility:null},
+    {letter:"R",key:"recovery",label:"REGENERATION",value:scoreDetails?score?.recovery:null},
+    {letter:"F",key:"fuel",label:"ERNÄHRUNG",value:scoreDetails?score?.fuel:null},
+    {letter:"C",key:"consistency",label:"KONSTANZ",value:scoreDetails?score?.consistency:null}
   ];
   const present=pillars.filter(p=>p.value!=null);
   const focus=[...present].sort((a,b)=>(a.value??101)-(b.value??101))[0]??null;
@@ -114,11 +116,11 @@ export default async function Dashboard(){
       </div>
       <div className="bd-radar-stage">
         <ScoreRadar pillars={pillars}/>
-        <div className="bd-radar-caption"><span><Copy text="NÄCHSTER FOKUS"/></span><strong><Copy text={focus?.label??"NOCH KEINE DATEN"}/></strong><b>{focus?.value==null?<Copy text="Keine Angabe"/>:Math.round(focus.value)+"%"}</b></div>
+        <div className="bd-radar-caption">{!scoreDetails&&<p><Copy text="KOSTENLOS zeigt deinen Gesamtwert. Teilwerte und Erklärungen werden mit PRO freigeschaltet."/></p>}<span><Copy text="NÄCHSTER FOKUS"/></span><strong><Copy text={scoreDetails?(focus?.label??"NOCH KEINE DATEN"):"PRO"}/></strong><b>{focus?.value==null?<Copy text="Keine Angabe"/>:Math.round(focus.value)+"%"}</b></div>
       </div>
       <div className="bd-pillar-list">
         {pillars.map(p=><Link href="/athlete" key={p.key} className={"bd-pillar-row "+signal(p.value)}>
-          <span>{p.letter}</span><strong><Copy text={p.label}/></strong><b>{p.value==null?"—":Math.round(p.value)}</b>
+          <span>{p.letter}</span><strong><Copy text={p.label}/></strong><b>{!scoreDetails?"PRO":p.value==null?"—":Math.round(p.value)}</b>
         </Link>)}
         <Link href="/athlete" className="bd-score-open"><Copy text="ATHLETE DIGITAL TWIN ÖFFNEN →"/></Link>
       </div>

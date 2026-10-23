@@ -18,7 +18,7 @@ try{
   const date=new Date(now.getTime()-day*86400000);date.setUTCHours(0,0,0,0);
   await db.nutritionDaily.create({data:{userId:athlete.id,date,calories:day%2?0:2400}});
  }
- await db.workout.create({data:{userId:athlete.id,completedAt:new Date('2026-10-23T12:00:00Z')}});
+ await db.workout.create({data:{userId:athlete.id,title:'QA completed session',completedAt:new Date('2026-10-23T12:00:00Z')}});
  await db.plannedRecoveryDay.create({data:{athleteId:athlete.id,coachId:coach.id,day:new Date('2026-10-24T00:00:00Z'),createdAt:new Date('2026-10-23T00:00:00Z')}});
  let snapshot=await getMilestoneSnapshot(athlete.id,now);
  assert.equal(snapshot.nutritionDays,14);assert.equal(snapshot.recoveryDays,1);assert.equal(snapshot.streak,14,'Nutrition and planned rest preserve one day per calendar date');
@@ -42,6 +42,9 @@ try{
  await Promise.all([getMilestoneSnapshot(athlete.id,now),getMilestoneSnapshot(athlete.id,now)]);
  snapshot=await getMilestoneSnapshot(athlete.id,now);keys=new Set(snapshot.awards.map(x=>x.key));
  for(const key of ['first_chapter_completed','first_test_passed','first_level_up','truly_different_confirmed'])assert(keys.has(key),key);
+ for(let day=14;day<30;day++){const date=new Date(now.getTime()-day*86400000);date.setUTCHours(0,0,0,0);await db.nutritionDaily.create({data:{userId:athlete.id,date,calories:2400}});}
+ snapshot=await getMilestoneSnapshot(athlete.id,now);
+ assert.equal(snapshot.best,30);assert.equal(snapshot.awards.find(x=>x.key==='step13_streak_30')?.visualIntensity,'FULL');
  const awards=await db.milestoneAward.findMany({where:{userId:athlete.id}});
  assert.equal(new Set(awards.map(x=>x.key)).size,awards.length,'Replay never duplicates awards');
  assert.equal((await db.journeyEnrollment.findUnique({where:{id:enrollment.id}})).confirmedLevel,'READY','Milestone processing cannot promote the athlete');
