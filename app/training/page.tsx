@@ -46,7 +46,7 @@ export default async function TrainingPage(){
       </div>
     </section>
     <section className="bd-train-week" aria-label="Trainingswoche">
-      <div className="bd-train-section-heading"><div><span className="eyebrow"><Copy text="DEINE TRAININGSWOCHE"/></span><h2>WOCHE IM FOKUS.</h2></div><small><Copy text="Die nächsten sieben Tage"/></small></div>
+      <div className="bd-train-section-heading"><div><span className="eyebrow"><Copy text="DEINE TRAININGSWOCHE"/></span><h2><Copy text="WOCHE IM FOKUS."/></h2></div><small><Copy text="Die nächsten sieben Tage"/></small></div>
       <div className="bd-train-days">
         {days.map((day,i)=>{
           const first=day.workouts[0];
@@ -60,7 +60,7 @@ export default async function TrainingPage(){
     </section>
     <section className="bd-train-grid">
       <article className="bd-train-next">
-        <div className="bd-train-section-heading"><div><span className="eyebrow"><Copy text="KOMMENDE EINHEITEN"/></span><h2>NÄCHSTE MOVES.</h2></div><span className="bd-train-count">{upcoming.length} <Copy text="BEREIT"/></span></div>
+        <div className="bd-train-section-heading"><div><span className="eyebrow"><Copy text="KOMMENDE EINHEITEN"/></span><h2><Copy text="NÄCHSTE MOVES."/></h2></div><span className="bd-train-count">{upcoming.length} <Copy text="BEREIT"/></span></div>
         <div className="bd-train-workouts">
           {upcoming.length?upcoming.map((w,i)=><Link className="bd-train-workout" href={`/training/${w.id}`} key={w.id}>
             <span className="bd-train-workout-index">{String(i+1).padStart(2,"0")}</span>
@@ -73,7 +73,7 @@ export default async function TrainingPage(){
       </article>
       <aside className="bd-train-aside">
         <article className="bd-train-history">
-          <div className="bd-train-section-heading"><div><span className="eyebrow"><Copy text="DEINE SPUREN"/></span><h2>VERLAUF.</h2></div><span className="bd-train-count"><Copy text={user.subscriptionTier==="FREE"?"30 TAGE":"UNBEGRENZT"}/></span></div>
+          <div className="bd-train-section-heading"><div><span className="eyebrow"><Copy text="DEINE SPUREN"/></span><h2><Copy text="VERLAUF."/></h2></div><span className="bd-train-count"><Copy text={user.subscriptionTier==="FREE"?"30 TAGE":"UNBEGRENZT"}/></span></div>
           {history.length?history.slice(0,user.subscriptionTier==="FREE"?30:100).map((w,i)=><div className="bd-train-history-row" key={w.id}><span>{String(i+1).padStart(2,"0")}</span><div><strong><Copy text={w.title}/></strong><small><LocalizedValue value={w.completedAt} format="toLocaleDateString"/> · RPE {w.rpe??"Keine Angabe"}</small></div></div>):<p className="bd-train-history-empty"><Copy text="Deine abgeschlossenen Einheiten erscheinen hier."/></p>}
         </article>
         <article className="bd-train-recovery"><span className="eyebrow"><Copy text="REGENERATION"/></span><strong>PAUSE IST<br/>FORTSCHRITT.</strong><p><Copy text="Erholung ist Teil deines Plans. Gib deinem Körper die Zeit, die er braucht."/></p></article>
