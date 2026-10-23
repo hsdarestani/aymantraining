@@ -1,4 +1,4 @@
-import {translate} from "../lib/i18n/locale";
+import {translate,useLocale} from "../lib/i18n/locale";
 
 import {Copy} from "./Locale";
 import {useEffect,useState} from "react";
@@ -27,6 +27,7 @@ const links=[
 ] as const;
 
 export default function NativeChrome(){
+  useLocale();
   const segments=useSegments();
   const insets=useSafeAreaInsets();
   const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):Math.max(insets.bottom,12);
