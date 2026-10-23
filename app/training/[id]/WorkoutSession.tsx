@@ -6,35 +6,50 @@ import {Copy,ExerciseName,LocalizedElement,useT} from "../../components/Locale";
 import Link from "next/link";
 import {useEffect,useMemo,useState} from "react";
 type Ex={id:string;exerciseId:string;targetSets:number;targetReps:string|null;targetRpe:number|null;restSeconds:number;exercise:{id:string;nameDe:string;nameEn?:string|null;equipment:string|null;coachCue1:string|null;coachCue2:string|null;coachCue3:string|null;imageStart:string|null;imageMiddle:string|null;imageEnd:string|null;videoUrl:string|null}};
-type S={exerciseId:string;setNumber:number;reps:number|null;weightKg:number|null;rpe:number|null};
+type S={exerciseId:string;setNumber:number;reps:number|null;weightKg:number|null;rpe:number|null;durationS?:number|null};
 function queueOffline(url:string,body:unknown){const key="bd_outbox";const list=JSON.parse(localStorage.getItem(key)||"[]");list.push({url,body,createdAt:Date.now()});localStorage.setItem(key,JSON.stringify(list));}
 async function flushOffline(){const key="bd_outbox";const list=JSON.parse(localStorage.getItem(key)||"[]");const remaining=[];for(const item of list){try{const r=await fetch(item.url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(item.body)});if(!r.ok)remaining.push(item);}catch{remaining.push(item);}}localStorage.setItem(key,JSON.stringify(remaining));}
-export default function WorkoutSession({workoutId,exercises,existing,previous}:{workoutId:string;exercises:Ex[];existing:S[];previous:S[]}){
+export default function WorkoutSession({workoutId,exercises,existing,previous,completed=false}:{completed?:boolean;workoutId:string;exercises:Ex[];existing:S[];previous:S[]}){
   const t=useT();
   const initial=useMemo(()=>new Map(existing.map(s=>[`${s.exerciseId}:${s.setNumber}`,s])),[existing]);
   const previousMap=useMemo(()=>new Map(previous.map(s=>[`${s.exerciseId}:${s.setNumber}`,s])),[previous]);
+  const [error,setError]=useState("");
   const [saved,setSaved]=useState(initial);const [busy,setBusy]=useState("");const [completeBusy,setCompleteBusy]=useState(false);
   const [rest,setRest]=useState<{seconds:number;total:number}|null>(null);
 
-  useEffect(()=>{fetch(`/api/workouts/${workoutId}`,{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({action:"start"})}).catch(()=>undefined);const online=()=>flushOffline();window.addEventListener("online",online);flushOffline();return()=>window.removeEventListener("online",online)},[workoutId]);
+  useEffect(()=>{if(completed)return;fetch(`/api/workouts/${workoutId}`,{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({action:"start"})}).catch(()=>undefined);const online=()=>flushOffline();window.addEventListener("online",online);flushOffline();return()=>window.removeEventListener("online",online)},[workoutId,completed]);
   useEffect(()=>{if(!rest||rest.seconds<=0)return;const timer=window.setInterval(()=>setRest(x=>x?{...x,seconds:Math.max(0,x.seconds-1)}:x),1000);return()=>clearInterval(timer)},[rest]);
 
   async function saveSet(exerciseId:string,setNumber:number,restSeconds:number,form:HTMLFormElement){
-    const data=new FormData(form);const key=`${exerciseId}:${setNumber}`;setBusy(key);
-    const payload={exerciseId,setNumber,reps:Number(data.get("reps"))||undefined,weightKg:Number(data.get("weightKg"))||undefined,rpe:Number(data.get("rpe"))||undefined};
-    try{const response=await fetch(`/api/workouts/${workoutId}/sets`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});if(!response.ok)throw new Error();const json=await response.json();const next=new Map(saved);next.set(key,json.set);setSaved(next)}
+    if(completed)return;setError("");const data=new FormData(form);const key=`${exerciseId}:${setNumber}`;setBusy(key);
+    const payload={exerciseId,setNumber,reps:data.get("reps")?Number(data.get("reps")):undefined,durationS:data.get("durationS")?Number(data.get("durationS")):undefined,weightKg:data.get("weightKg")?Number(data.get("weightKg")):undefined,rpe:Number(data.get("rpe"))||undefined};
+    try{const response=await fetch(`/api/workouts/${workoutId}/sets`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});if(!response.ok){const body=await response.json().catch(()=>({}));setError(body.error||t("Satz konnte nicht gespeichert werden."));setBusy("");return;}const json=await response.json();const next=new Map(saved);next.set(key,json.set);setSaved(next)}
     catch{queueOffline(`/api/workouts/${workoutId}/sets`,payload);const next=new Map(saved);next.set(key,payload as S);setSaved(next)}
     if(navigator.vibrate)navigator.vibrate(35);setBusy("");setRest({seconds:restSeconds,total:restSeconds});
   }
-  async function finish(){const value=window.prompt(t("Wie hart war die Einheit? RPE von 1 bis 10"),"8");const rpe=Number(value);if(!rpe||rpe<1||rpe>10)return;setCompleteBusy(true);await flushOffline();const response=await fetch(`/api/workouts/${workoutId}`,{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({action:"complete",rpe})});if(response.ok){if(navigator.vibrate)navigator.vibrate([70,50,120]);window.location.href="/dashboard"}else setCompleteBusy(false)}
+  async function finish(){
+    if(completed)return;
+    setError("");
+    const value=window.prompt(t("Wie hart war die Einheit? RPE von 1 bis 10"),"8");
+    const rpe=Number(value);if(!Number.isInteger(rpe)||rpe<1||rpe>10)return;
+    setCompleteBusy(true);
+    try{
+      await flushOffline();
+      const response=await fetch(`/api/workouts/${workoutId}`,{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({action:"complete",rpe})});
+      if(response.ok){if(navigator.vibrate)navigator.vibrate([70,50,120]);window.location.href="/dashboard";}
+      else {const body=await response.json().catch(()=>({}));setError(body.error||t("Training konnte nicht abgeschlossen werden."));}
+    }catch{setError(t("Keine Verbindung. Deine Einheit wurde noch nicht abgeschlossen."));}
+    finally{setCompleteBusy(false);}
+  }
   return <>
+    {error&&<p role="alert">{t(error)}</p>}
     {rest&&rest.seconds>0&&<div className="rest-timer"><span><Copy text={"PAUSE"}/></span><strong>{Math.floor(rest.seconds/60)}:{String(rest.seconds%60).padStart(2,"0")}</strong><button onClick={()=>setRest(null)}><Copy text={"ÜBERSPRINGEN"}/></button></div>}
     <div className="session-list">{exercises.map(we=><article className="panel session-exercise" key={we.id}>
       <div className="panel-head"><div><span className="eyebrow">{we.exercise.id.replace(/[-\u2010-\u2015]/g," ")}</span><h2><ExerciseName exercise={we.exercise}/></h2><p className="muted">{we.exercise.equipment||<Copy text="Kein Equipment"/>}<Copy text={"· Ziel"}/>{we.targetReps||<Copy text="frei"/>} · RPE {we.targetRpe||<Copy text="Keine Angabe"/>}</p></div><Link className="tag" href={`/exercise/${we.exercise.id}`}><Copy text={"TECHNIK ↗"}/></Link></div>
       <div className="workout-media-mini">{[we.exercise.imageStart,we.exercise.imageMiddle,we.exercise.imageEnd].map((src,i)=>src?<img key={src} src={src} alt={t(["Start","Mitte","Ende"][i])}/>:<div key={i}><Copy text={["BEGINNEN","MITTE","ENDE"][i]}/></div>)}</div>
       <div className="cue-row">{[we.exercise.coachCue1,we.exercise.coachCue2,we.exercise.coachCue3].filter(Boolean).map(c=><span key={c!}>{c}</span>)}</div>
-      <div className="set-grid">{Array.from({length:we.targetSets},(_,index)=>{const n=index+1,key=`${we.exerciseId}:${n}`;const current=saved.get(key);const prior=previousMap.get(key);return <form key={key} onSubmit={ev=>{ev.preventDefault();saveSet(we.exerciseId,n,we.restSeconds,ev.currentTarget)}}><strong><Copy text={"SATZ"}/>{n}</strong><label className="brand-field"><span><Copy text={prior?.weightKg!=null?`${prior.weightKg} kg`:"kg"}/></span><input name="weightKg" type="number" step="0.5" min="0" placeholder={prior?.weightKg!=null?`${prior.weightKg} kg`:"kg"} defaultValue={current?.weightKg??""}/></label><label className="brand-field"><span><Copy text={prior?.reps!=null?`${prior.reps} Wdh.`:"Wdh."}/></span><input name="reps" type="number" min="0" placeholder={prior?.reps!=null?`${prior.reps} Wdh.`:"Wdh."} defaultValue={current?.reps??""}/></label><label className="brand-field"><span><Copy text={prior?.rpe!=null?`RPE ${prior.rpe}`:"RPE"}/></span><input name="rpe" type="number" min="1" max="10" placeholder={prior?.rpe!=null?`RPE ${prior.rpe}`:"RPE"} defaultValue={current?.rpe??""}/></label><button className={current?"set-done":""}><Copy text={busy===key?"…":current?"✓":"SPEICHERN"}/></button></form>})}</div><small className="rest-copy"><Copy text={"PAUSE ·"}/>{we.restSeconds}<Copy text={"SEKUNDEN"}/></small>
+      <div className="set-grid">{Array.from({length:we.targetSets},(_,index)=>{const n=index+1,key=`${we.exerciseId}:${n}`;const current=saved.get(key);const prior=previousMap.get(key);return <form key={key} onSubmit={ev=>{ev.preventDefault();saveSet(we.exerciseId,n,we.restSeconds,ev.currentTarget)}}><strong><Copy text={"SATZ"}/>{n}</strong><label className="brand-field"><span><Copy text={prior?.weightKg!=null?`${prior.weightKg} kg`:"kg"}/></span><input disabled={completed} name="weightKg" type="number" step="0.5" min="0" placeholder={prior?.weightKg!=null?`${prior.weightKg} kg`:"kg"} defaultValue={current?.weightKg??""}/></label><label className="brand-field"><span><Copy text={/sek|sec|minute/i.test(we.targetReps||"")?"Sekunden":prior?.reps!=null?`${prior.reps} Wdh.`:"Wdh."}/></span><input disabled={completed} name={/sek|sec|minute/i.test(we.targetReps||"")?"durationS":"reps"} type="number" min="0" placeholder={/sek|sec|minute/i.test(we.targetReps||"")?"Sekunden":prior?.reps!=null?`${prior.reps} Wdh.`:"Wdh."} defaultValue={(/sek|sec|minute/i.test(we.targetReps||"")?current?.durationS:current?.reps)??""}/></label><label className="brand-field"><span><Copy text={prior?.rpe!=null?`RPE ${prior.rpe}`:"RPE"}/></span><input disabled={completed} name="rpe" type="number" min="1" max="10" placeholder={prior?.rpe!=null?`RPE ${prior.rpe}`:"RPE"} defaultValue={current?.rpe??""}/></label><button disabled={completed||busy===key} className={current?"set-done":""}><Copy text={busy===key?"…":current?"✓":"SPEICHERN"}/></button></form>})}</div><small className="rest-copy"><Copy text={"PAUSE ·"}/>{we.restSeconds}<Copy text={"SEKUNDEN"}/></small>
     </article>)}
-    <button className="primary finish-workout" onClick={finish} disabled={completeBusy}><Copy text={completeBusy?"SPEICHERN…":"TRAINING ABSCHLIESSEN →"}/></button></div>
+    <button className="primary finish-workout" onClick={finish} disabled={completed||completeBusy}><Copy text={completed?"ABGESCHLOSSEN":completeBusy?"SPEICHERN…":"TRAINING ABSCHLIESSEN →"}/></button></div>
   </>;
 }

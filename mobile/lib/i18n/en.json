@@ -1090,7 +1090,7 @@
   "Trainerkonten": "Coach accounts",
   "Trainiere klar. Erhole dich bewusst.": "Train with purpose. Recover deliberately.",
   "Training 1 bis 10": "Training 1 to 10",
-  "Training konnte nicht abgeschlossen werden.": "Could not complete training.",
+  "Training konnte nicht abgeschlossen werden.": "The workout could not be completed.",
   "Training konnte nicht geladen werden.": "Could not load training.",
   "Training nicht gefunden.": "Training not found.",
   "Training ohne Geräte": "Training without equipment",
@@ -1790,7 +1790,6 @@
   "GEFÜHRTE ATEMPAUSE / 001": "GUIDED BREATHING BREAK / 001",
   "120 SEKUNDEN": "120 SECONDS",
   "Zwei Minuten Atemtraining": "Two-minute breathing exercise",
-  "Verbleibende Zeit ": "Time remaining ",
   "Du bestimmst das Tempo. Starte, wenn du bereit bist.": "You set the pace. Start when you're ready.",
   "Stark. Atme jetzt ganz normal weiter.": "Great job. Keep breathing normally.",
   "Lass die Luft langsam wieder aus.": "Let the air out slowly.",
@@ -2041,5 +2040,12 @@
   "Dein Fortschrittsbereich wird vorbereitet.": "Your progress area is being prepared.",
   "Deine bisherigen Trainingsdaten bleiben unverändert.": "Your existing training data remains unchanged.",
   "DEINE AKTUELLE SERIE": "YOUR CURRENT STREAK",
-  "DEINE LÄNGSTE SERIE": "YOUR LONGEST STREAK"
+  "DEINE LÄNGSTE SERIE": "YOUR LONGEST STREAK",
+  "Bitte dokumentiere zuerst alle geplanten Sätze mit Wiederholungen, Dauer oder Distanz.": "Please record all planned sets with repetitions, duration or distance first.",
+  "Diese Einheit ist bereits abgeschlossen.": "This workout is already complete.",
+  "Satz liegt außerhalb des Trainingsplans.": "This set is outside your training plan.",
+  "Bitte Wiederholungen, Dauer oder Distanz dokumentieren.": "Please record repetitions, duration or distance.",
+  "Satz konnte nicht gespeichert werden.": "The set could not be saved.",
+  "Keine Verbindung. Deine Einheit wurde noch nicht abgeschlossen.": "No connection. Your workout has not been completed yet.",
+  "Verbleibende Zeit": "Time remaining"
 }
