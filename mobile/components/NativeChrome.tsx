@@ -1,8 +1,8 @@
 import {translate} from "../lib/i18n/locale";
 
 import {Copy} from "./Locale";
-import {useState} from "react";
-import {Modal,Platform,Pressable,SafeAreaView,StyleSheet,Text,View} from "react-native";
+import {useEffect,useState} from "react";
+import {Keyboard,Modal,Platform,Pressable,SafeAreaView,StyleSheet,Text,View} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {router,useSegments} from "expo-router";
 import {ArrowLeft,Menu,X,House,Dumbbell,TrendingUp,MessageCircle,UserRound,BookOpen,Utensils,HeartPulse,Settings,Users} from "lucide-react-native";
@@ -31,12 +31,18 @@ export default function NativeChrome(){
   const insets=useSafeAreaInsets();
   const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):Math.max(insets.bottom,12);
   const [open,setOpen]=useState(false);
+  const [keyboardVisible,setKeyboardVisible]=useState(false);
+  useEffect(()=>{
+    const show=Keyboard.addListener("keyboardDidShow",()=>setKeyboardVisible(true));
+    const hide=Keyboard.addListener("keyboardDidHide",()=>setKeyboardVisible(false));
+    return()=>{show.remove();hide.remove()};
+  },[]);
   const first=String((segments as readonly string[])[0]||"");
   const inTabs=first==="(tabs)";
   const root=first==="";
   const onboarding=first==="onboarding";
   const auth=["login","register","forgot-password","reset-password"].includes(first);
-  if(inTabs||root||onboarding||auth)return null;
+  if(inTabs||root||onboarding||auth||keyboardVisible)return null;
 
   function go(path:any){setOpen(false);Haptics.selectionAsync().catch(()=>undefined);router.push(path)}
   function back(){Haptics.selectionAsync().catch(()=>undefined);if(router.canGoBack())router.back();else router.replace("/(tabs)")}
