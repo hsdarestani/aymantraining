@@ -5,7 +5,7 @@ import {router,useFocusEffect} from "expo-router";
 import Screen from "../../components/Screen";
 import {Card,Eyebrow} from "../../components/Card";
 import {api} from "../../lib/api";
-import {clearSession} from "../../lib/session";
+import {signOut} from "../../lib/logout";
 import {C} from "../../theme";
 import AthleteTwin from "../../components/AthleteTwin";
 
@@ -55,7 +55,7 @@ export default function Athlete(){
      ["TERMINE & VIDEOANRUFE","/events"],["FREUNDE EINLADEN","/referral"],["WOCHENCHECK","/checkin"],
      ["EINSTELLUNGEN & DATENSCHUTZ","/settings"],["KONTOSTATUS","/membership"],["PROFIL & GESUNDHEITSDATEN","/profile"]
     ].map(([label,path])=><Pressable key={path} onPress={()=>router.push(path as any)} style={st.row}><Text style={st.rowText}><Copy text={label}/></Text><Text style={st.rowArrow}>→</Text></Pressable>)}
-    <Pressable onPress={async()=>{await clearSession();router.replace("/")}} style={st.row}><Text style={st.rowText}><Copy text="ABMELDEN"/></Text><Text style={st.rowArrow}>→</Text></Pressable>
+    <Pressable accessibilityRole="button" onPress={()=>{void signOut()}} style={st.row}><Text style={st.rowText}><Copy text="ABMELDEN"/></Text><Text style={st.rowArrow}>→</Text></Pressable>
    </View>
   </Card>
  </Screen>

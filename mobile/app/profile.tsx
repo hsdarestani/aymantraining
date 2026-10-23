@@ -5,6 +5,7 @@ import Screen from "../components/Screen";
 import {Copy} from "../components/Locale";
 import {ApiError,api} from "../lib/api";
 import {clearSession} from "../lib/session";
+import {signOut} from "../lib/logout";
 import {C,radius} from "../theme";
 
 export default function Profile(){
@@ -38,8 +39,8 @@ export default function Profile(){
  async function logout(){
   if(busy)return;
   setBusy(true);
-  try{await api("/api/auth/logout",{method:"POST",body:"{}"}).catch(()=>undefined)}
-  finally{await clearSession();router.replace("/")}
+  try{await signOut()}
+  finally{setBusy(false)}
  }
  const entries=[
   {label:"FORTSCHRITTSBILDER",detail:"Private Bilder ansehen oder aufnehmen",route:"/progress-photos"},
