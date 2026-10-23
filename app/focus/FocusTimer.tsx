@@ -1,6 +1,8 @@
 "use client";
 import {useEffect,useRef,useState} from "react";
 import styles from "./focus.module.css";
+import {useLocale} from "../components/Locale";
+import {translate} from "../../lib/i18n/translate";
 
 const LENGTH=120;
 const cues=[
@@ -15,6 +17,9 @@ const cues=[
 ];
 function clock(n:number){return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0")}
 export default function FocusTimer(){
+ const locale=useLocale(),localeRef=useRef(locale);
+ localeRef.current=locale;
+ const t=(text:string)=>translate(text,locale);
  const [remaining,setRemaining]=useState(LENGTH),[running,setRunning]=useState(false),[narration,setNarration]=useState(false),[supported,setSupported]=useState(true);
  const end=useRef(0),interval=useRef<ReturnType<typeof setInterval>|null>(null),spoken=useRef(-1);
  const enabled=useRef(false);enabled.current=narration;
@@ -22,11 +27,12 @@ export default function FocusTimer(){
  function say(message:string){
   if(!enabled.current||!("speechSynthesis" in window))return;
   window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(message);u.lang="de-DE";u.rate=.88;u.pitch=1;
-  const preferred=window.speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith("de"));
+  const u=new SpeechSynthesisUtterance(translate(message,localeRef.current));u.lang=localeRef.current==="en"?"en-US":"de-DE";u.rate=.88;u.pitch=1;
+  const preferred=window.speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(localeRef.current));
   if(preferred)u.voice=preferred;
   window.speechSynthesis.speak(u);
  }
+ useEffect(()=>{window.speechSynthesis?.cancel()},[locale]);
  function stopInterval(){if(interval.current){clearInterval(interval.current);interval.current=null}}
  function tick(){
   const next=Math.max(0,Math.ceil((end.current-Date.now())/1000));
@@ -51,32 +57,32 @@ export default function FocusTimer(){
  function toggleVoice(){setNarration(!narration);window.speechSynthesis?.cancel()}
  const elapsed=LENGTH-remaining;
  const phase=Math.floor(elapsed/4)%2===0?"EINATMEN":"AUSATMEN";
- return <section className={styles.layout} aria-label="Zwei Minuten Atemtraining">
+ return <section className={styles.layout} aria-label={t("Zwei Minuten Atemtraining")}>
   <div className={styles.stage}>
-   <div className={styles.stageHeader}><span className={styles.eyebrow}>GEFÜHRTE ATEMPAUSE / 001</span><span className={styles.stageCount}>120 SEKUNDEN</span></div>
+   <div className={styles.stageHeader}><span className={styles.eyebrow}>{t("GEFÜHRTE ATEMPAUSE / 001")}</span><span className={styles.stageCount}>{t("120 SEKUNDEN")}</span></div>
    <div className={styles.orbitSpace}>
     <div className={styles.halo+" "+(running?styles.haloActive:"")} aria-hidden="true"/>
-    <div className={styles.orbit} role="timer" aria-label={"Verbleibende Zeit "+clock(remaining)} style={{background:"conic-gradient(#D4FF00 "+(elapsed/LENGTH*100)+"%,#2C393C 0%)"}}>
+    <div className={styles.orbit} role="timer" aria-label={t("Verbleibende Zeit ")+clock(remaining)} style={{background:"conic-gradient(#D4FF00 "+(elapsed/LENGTH*100)+"%,#2C393C 0%)"}}>
      <div className={styles.orbitInner}>
       <span className={styles.clock}>{clock(remaining)}</span>
-      <span aria-live="off" className={styles.phase}>{remaining===0?"GESCHAFFT":running?phase:"BEREIT"}</span>
+      <span aria-live="off" className={styles.phase}>{t(remaining===0?"GESCHAFFT":running?phase:"BEREIT")}</span>
      </div>
     </div>
    </div>
-   <div className={styles.breathPrompt} aria-live="off">{remaining===0?"Stark. Atme jetzt ganz normal weiter.":running?phase==="EINATMEN"?"Atme ruhig durch die Nase ein.":"Lass die Luft langsam wieder aus.":"Du bestimmst das Tempo. Starte, wenn du bereit bist."}</div>
+   <div className={styles.breathPrompt} aria-live="off">{t(remaining===0?"Stark. Atme jetzt ganz normal weiter.":running?phase==="EINATMEN"?"Atme ruhig durch die Nase ein.":"Lass die Luft langsam wieder aus.":"Du bestimmst das Tempo. Starte, wenn du bereit bist.")}</div>
    <div className={styles.controls}>
-    <button type="button" className={styles.start} onClick={startOrPause}>{running?"PAUSIEREN":remaining===0?"NOCH EINMAL":remaining<LENGTH?"FORTSETZEN":"JETZT STARTEN"} <span aria-hidden="true">{running?"Ⅱ":"↗"}</span></button>
-    <button type="button" className={styles.reset} onClick={reset}>ZURÜCKSETZEN</button>
+    <button type="button" className={styles.start} onClick={startOrPause}>{t(running?"PAUSIEREN":remaining===0?"NOCH EINMAL":remaining<LENGTH?"FORTSETZEN":"JETZT STARTEN")} <span aria-hidden="true">{running?"Ⅱ":"↗"}</span></button>
+    <button type="button" className={styles.reset} onClick={reset}>{t("ZURÜCKSETZEN")}</button>
    </div>
-   <p className={styles.safety}>Bei Unwohlsein stoppen und normal weiteratmen. Kein Luftanhalten notwendig.</p>
+   <p className={styles.safety}>{t("Bei Unwohlsein stoppen und normal weiteratmen. Kein Luftanhalten notwendig.")}</p>
   </div>
   <aside className={styles.sidebar}>
    <div className={styles.sidebarNumber}>01<span>/</span>02</div>
-   <div><span className={styles.eyebrow}>BE DIFFERENT / MINDSET</span><h2 className={styles.sideTitle}>STILLNESS<br/><em>IS STRENGTH.</em></h2><p className={styles.sideDescription}>Ein Moment, der nur dir gehört. Ruhiger Atem, klarer Kopf, volle Kontrolle.</p></div>
+   <div><span className={styles.eyebrow}>BE DIFFERENT / MINDSET</span><h2 className={styles.sideTitle}>STILLNESS<br/><em>IS STRENGTH.</em></h2><p className={styles.sideDescription}>{t("Ein Moment, der nur dir gehört. Ruhiger Atem, klarer Kopf, volle Kontrolle.")}</p></div>
    <button type="button" disabled={!supported} role="switch" aria-checked={narration} className={styles.narration+" "+(narration?styles.narrationActive:"")} onClick={toggleVoice}>
-    <span className={styles.speakerIcon} aria-hidden="true">◖))</span><span className={styles.speakerText}><strong>{!supported?"SPRACHE NICHT VERFÜGBAR":narration?"GUIDE AUDIO AKTIV":"GUIDE AUDIO EINSCHALTEN"}</strong><small>Geführte Atemübung mit Systemstimme</small></span><span className={styles.switch}>{narration?"ON":"OFF"}</span>
+    <span className={styles.speakerIcon} aria-hidden="true">◖))</span><span className={styles.speakerText}><strong>{t(!supported?"SPRACHE NICHT VERFÜGBAR":narration?"GUIDE AUDIO AKTIV":"GUIDE AUDIO EINSCHALTEN")}</strong><small>{t("Geführte Atemübung mit Systemstimme")}</small></span><span className={styles.switch}>{narration?"ON":"OFF"}</span>
    </button>
-   <div className={styles.sideFooter}><span>4 SEK. EIN</span><span className={styles.dot}/><span>4 SEK. AUS</span><span className={styles.dot}/><span>KEIN HALTEN</span></div>
+   <div className={styles.sideFooter}><span>{t("4 SEK. EIN")}</span><span className={styles.dot}/><span>{t("4 SEK. AUS")}</span><span className={styles.dot}/><span>{t("KEIN HALTEN")}</span></div>
   </aside>
  </section>
 }
