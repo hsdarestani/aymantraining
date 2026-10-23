@@ -1,4 +1,6 @@
-import {Tabs} from "expo-router";
+import {Redirect,Tabs,useFocusEffect} from "expo-router";
+import {useCallback,useState} from "react";
+import {getSession} from "../../lib/session";
 import {Platform} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {Dumbbell,House,MessageCircle,TrendingUp,UserRound} from "lucide-react-native";
@@ -7,10 +9,18 @@ import {useLocale} from "../../lib/i18n/locale";
 const icon=(Icon:any)=>(props:any)=><Icon {...props} size={21} strokeWidth={2}/>;
 export default function TabsLayout(){
  const locale=useLocale();
+ const [authorized,setAuthorized]=useState<boolean|null>(null);
+ useFocusEffect(useCallback(()=>{
+   let active=true;
+   getSession().then(token=>{if(active)setAuthorized(Boolean(token))}).catch(()=>{if(active)setAuthorized(false)});
+   return()=>{active=false};
+ },[]));
  const insets=useSafeAreaInsets();
  // Android 15/16 can draw 3-button navigation over the app. Keep our floating
  // controls above the actual safe area, with a fallback for devices returning 0.
  const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):Math.max(insets.bottom,12);
+ if(authorized===false)return <Redirect href="/"/>;
+ if(authorized===null)return null;
  return <Tabs screenOptions={{
   headerShown:false,tabBarHideOnKeyboard:true,tabBarActiveTintColor:C.volt,tabBarInactiveTintColor:C.dim,
   tabBarStyle:{position:"absolute",left:10,right:10,bottom:bottomClearance+10,height:70,borderTopWidth:0,borderWidth:1,borderColor:C.line,borderRadius:22,backgroundColor:"#0F1412",paddingTop:9,paddingBottom:8,elevation:10,shadowColor:"#000",shadowOpacity:.4,shadowRadius:14,shadowOffset:{width:0,height:6}},
