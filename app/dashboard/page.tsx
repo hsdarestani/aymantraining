@@ -97,20 +97,20 @@ export default async function Dashboard(){
 
     <section className="bd-workout-card" aria-label="Dein Tag und dein bestätigter Stand">
       <span>HEUTE · {dailyProfile.date}</span>
-      <h2>{day.status==="NOT_SCHEDULED"?"Kein Training eingetragen":day.status==="DONE"?"Alle geplanten Einheiten erledigt":day.status==="PARTIAL"?"Training teilweise erledigt":"Training geplant"}</h2>
-      <p>{day.scheduled?day.completed+" von "+day.scheduled+" Einheiten abgeschlossen":"Ohne Trainingsplan ist dies nicht automatisch ein Erholungstag."}</p>
-      <p>ENERGIE: {dailyProfile.today.energy??"Keine Angabe"} · SCHLAF: {dailyProfile.today.sleepHours==null?"Keine Angabe":dailyProfile.today.sleepHours+" h"}</p>
-      <p>BESTÄTIGTE STUFE: {dailyProfile.journey.confirmedLevel??"Noch nicht bestätigt"}</p>
-      <Link href={process.env.JOURNEY_DAILY_ENABLED==="true"?"/journey/today":"/training"}>DEINEN PLAN ANSEHEN →</Link>
+      <h2><Copy text={day.status==="NOT_SCHEDULED"?"Kein Training eingetragen":day.status==="DONE"?"Alle geplanten Einheiten erledigt":day.status==="PARTIAL"?"Training teilweise erledigt":"Training geplant"}/></h2>
+      <p>{day.scheduled?<>{day.completed} <Copy text="von"/> {day.scheduled} <Copy text="Einheiten"/> · <Copy text="ERLEDIGT"/></>:<Copy text="Ohne Trainingsplan ist dies nicht automatisch ein Erholungstag."/>}</p>
+      <p><Copy text="ENERGIE:"/> {dailyProfile.today.energy??<Copy text="Keine Angabe"/>} · <Copy text="SCHLAF:"/> {dailyProfile.today.sleepHours==null?<Copy text="Keine Angabe"/>:dailyProfile.today.sleepHours+" h"}</p>
+      <p><Copy text="BESTÄTIGTE STUFE:"/> {dailyProfile.journey.confirmedLevel??<Copy text="Noch nicht bestätigt"/>}</p>
+      <Link href={process.env.JOURNEY_DAILY_ENABLED==="true"?"/journey/today":"/training"}><Copy text="DEINEN PLAN ANSEHEN →"/></Link>
     </section>
-    {process.env.MILESTONES_ENABLED==="true"&&<Link href="/milestones" className="bd-workout-card" style={{display:"block",padding:22,borderTop:"3px solid #d4ff00"}}><span>DEINE MEILENSTEINE</span><h2>DEINE TAGE ZÄHLEN.</h2><p>Deine echte Serie, geplante Erholung und verdiente Erfolge.</p><b>ERFOLGE ANSEHEN →</b></Link>}
+    {process.env.MILESTONES_ENABLED==="true"&&<Link href="/milestones" className="bd-workout-card" style={{display:"block",padding:22,borderTop:"3px solid #d4ff00"}}><span><Copy text="DEINE MEILENSTEINE"/></span><h2><Copy text="DEINE TAGE ZÄHLEN."/></h2><p><Copy text="Deine echte Serie, geplante Erholung und verdiente Erfolge."/></p><b><Copy text="ERFOLGE ANSEHEN →"/></b></Link>}
     <section className="bd-score-editorial">
       <div className="bd-score-intro">
         <span className="eyebrow"><Copy text="BE DIFFERENT SCORE"/></span>
         <div className="bd-score-number"><strong>{total??"—"}</strong><i>{total==null?"":"%"}</i></div>
-        <span className={"bd-score-state "+signal(total)}>LEISTUNGSPROFIL · KEINE STUFE</span>
-        <p>MESSSTAND: {dailyProfile.profile.recordedDate??"KEIN MESSWERT"} · {dailyProfile.profile.freshness==="OLD"?"ÄLTERER MESSWERT":"DATENBASIS"}</p>
-        <small>DATENABDECKUNG {dailyProfile.profile.completeness}% · UNABHÄNGIG VOM HEUTIGEN TRAINING</small>
+        <span className={"bd-score-state "+signal(total)}><Copy text="LEISTUNGSPROFIL · KEINE STUFE"/></span>
+        <p><Copy text="MESSSTAND:"/> {dailyProfile.profile.recordedDate??<Copy text="KEIN MESSWERT"/>} · <Copy text={dailyProfile.profile.freshness==="OLD"?"ÄLTERER MESSWERT":"DATENBASIS"}/></p>
+        <small><Copy text="DATENABDECKUNG"/> {dailyProfile.profile.completeness}% · <Copy text="UNABHÄNGIG VOM HEUTIGEN TRAINING"/></small>
       </div>
       <div className="bd-radar-stage">
         <ScoreRadar pillars={pillars}/>
@@ -141,7 +141,7 @@ export default async function Dashboard(){
         <span className="bd-stream-index">R</span><div><small><Copy text="BE RESTED"/></small><strong>{sleepDisplay==null?<Copy text="Keine Angabe"/>:sleepDisplay+" h"}</strong><p>{wearable?.restingHr!=null?<><Copy text="RUHEPULS"/> {Math.round(wearable.restingHr)} · </>:null}{currentHeartRate!=null?<><Copy text="PULS"/> {currentHeartRate}</>:<Copy text="Schlaf und Erholung"/>}</p></div><b>→</b>
       </Link>
       <Link href="/fuel" className="bd-stream-row">
-        <span className="bd-stream-index">F</span><div><small><Copy text="BE FUEL"/></small><strong>{protein==null?"Keine Angabe":Math.round(protein)+" g"}</strong><p><Copy text="Protein heute"/></p></div><b>→</b>
+        <span className="bd-stream-index">F</span><div><small><Copy text="BE FUEL"/></small><strong>{protein==null?<Copy text="Keine Angabe"/>:Math.round(protein)+" g"}</strong><p><Copy text="Protein heute"/></p></div><b>→</b>
       </Link>
       <Link href="/focus" className="bd-stream-row accent">
         <span className="bd-stream-index">M</span><div><small><Copy text="BE FOCUSED"/></small><strong>02:00</strong><p><Copy text="Atmung und Tagescheck"/></p></div><b>→</b>
@@ -151,7 +151,7 @@ export default async function Dashboard(){
       </Link>
     </section>
 
-    {cycleOverview.enabled&&<Link href="/cycle" className="bd-cycle-card bd-cycle-line"><span>PRIVATER ZYKLUSKALENDER</span><strong>{cycle?"TAG "+cycle.day+" · NUR SCHÄTZUNG":"DEINE AUFZEICHNUNGEN"}</strong><p>Nur du entscheidest, welche Daten du speicherst und mit deinem Trainer teilst.</p></Link>}
+    {cycleOverview.enabled&&<Link href="/cycle" className="bd-cycle-card bd-cycle-line"><span><Copy text="PRIVATER ZYKLUSKALENDER"/></span><strong>{cycle?<><Copy text="TAG"/> {cycle.day} · <Copy text="NUR SCHÄTZUNG"/></>:<Copy text="DEINE AUFZEICHNUNGEN"/>}</strong><p><Copy text="Nur du entscheidest, welche Daten du speicherst und mit deinem Trainer teilst."/></p></Link>}
 
     <Link href={nextWorkout?"/training/"+nextWorkout.id:"/training"} className="bd-workout-card bd-workout-editorial">
       <div className="bd-workout-index"><Copy text="NÄCHSTE EINHEIT"/></div>
@@ -160,11 +160,11 @@ export default async function Dashboard(){
       <b><Copy text={nextWorkout?"STARTEN →":"TRAINING ÖFFNEN →"}/></b>
     </Link>
 
-    {process.env.JOURNEY_OVERVIEW_ENABLED==="true"&&<Link href="/journey" className="bd-workout-card"><span>DEIN WEG</span><h2>LEVEL & KAPITEL</h2><p>Dein bestätigter Fortschritt und dein nächster Trainingsschritt.</p><b>ANSEHEN →</b></Link>}
-    {process.env.JOURNEY_DAILY_ENABLED==="true"&&<Link href="/journey/today" className="bd-workout-card"><span>DEIN TAG</span><h2>TRAINING · ERHOLUNG · TRAINER</h2><p>Was heute wirklich ansteht und welches persönliche Feedback vorliegt.</p><b>HEUTE ANSEHEN →</b></Link>}
+    {process.env.JOURNEY_OVERVIEW_ENABLED==="true"&&<Link href="/journey" className="bd-workout-card"><span><Copy text="DEIN WEG"/></span><h2><Copy text="LEVEL & KAPITEL"/></h2><p><Copy text="Dein bestätigter Fortschritt und dein nächster Trainingsschritt."/></p><b><Copy text="ANSEHEN →"/></b></Link>}
+    {process.env.JOURNEY_DAILY_ENABLED==="true"&&<Link href="/journey/today" className="bd-workout-card"><span><Copy text="DEIN TAG"/></span><h2><Copy text="TRAINING · ERHOLUNG · TRAINER"/></h2><p><Copy text="Was heute wirklich ansteht und welches persönliche Feedback vorliegt."/></p><b><Copy text="HEUTE ANSEHEN →"/></b></Link>}
     {process.env.JOURNEY_TESTS_ENABLED==="true"&&<Link href="/journey/tests" className="bd-workout-card">
-      <span>DEIN TRAININGSWEG</span><h2>KAPITEL & AUFSTIEGSTESTS</h2>
-      <p>Dein bestätigter Trainingsstand, deine Prüfungen und die nächsten Schritte.</p><b>ANSEHEN →</b>
+      <span><Copy text="DEIN TRAININGSWEG"/></span><h2><Copy text="KAPITEL & AUFSTIEGSTESTS"/></h2>
+      <p><Copy text="Dein bestätigter Trainingsstand, deine Prüfungen und die nächsten Schritte."/></p><b><Copy text="ANSEHEN →"/></b>
     </Link>}
     <section className="bd-quick-lines">
       <Link href="/awake"><span><Copy text="BE AWAKE"/></span><strong><Copy text="Morgenroutine · Tagesstart"/></strong><b>→</b></Link>
