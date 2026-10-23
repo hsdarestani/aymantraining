@@ -23,3 +23,48 @@ const rawChecks=[
  ['mobile/app/(tabs)/athlete.tsx',['>MEHR<','>ABMELDEN<']]
 ];
 for(const [file,needles] of rawChecks){const content=fs.readFileSync(file,'utf8');for(const needle of needles)assert(!content.includes(needle),`Unlocalized visible copy in ${file}: ${needle}`)}
+
+
+// Regression coverage: the language picker must never leave fixed labels or
+// the guided breathing narration in German after English is selected.
+const focusNative=fs.readFileSync('mobile/app/focus.tsx','utf8');
+const focusWeb=fs.readFileSync('app/focus/FocusTimer.tsx','utf8');
+const focusPage=fs.readFileSync('app/focus/page.tsx','utf8');
+const picker=fs.readFileSync('mobile/components/Locale.tsx','utf8');
+assert(focusNative.includes('Speech.speak(translate(text)'), 'Native narration must translate cues');
+assert(focusNative.includes('currentLocale()==="en"?"en-US":"de-DE"'), 'Native narration must select the correct spoken language');
+assert(focusWeb.includes('SpeechSynthesisUtterance(translate(message,localeRef.current))'), 'Web narration must translate cues');
+assert(focusWeb.includes('localeRef.current==="en"?"en-US":"de-DE"'), 'Web narration must select its voice language');
+assert(focusPage.includes('<Copy text="DEIN MOMENT."/>'), 'Web focus headline must use the catalog');
+assert(focusNative.includes('<Copy text="ATEMTRAINING"/>'), 'Native exercise label must be localized');
+assert(picker.includes("{locale==='de'?'DE':'EN'}"), 'Language action should show the currently selected language');
+for(const [key,expected] of [['DEIN MOMENT.','YOUR MOMENT.'],['DEIN FOKUS.','YOUR FOCUS.'],['ATEMTRAINING','BREATHING EXERCISE'],['STARTEN','START'],['SPRACHBEGLEITUNG EINSCHALTEN','ENABLE VOICE GUIDANCE']]){
+ assert.equal(translate(key,'en'),expected,`Missing breathing translation: ${key}`);
+}
+// Catch newly introduced untranslated literal <Copy> labels on native routes,
+// including nested tabs, before they reach Android/iOS releases.
+const nativeRoots=['mobile/app','mobile/components/Brand.tsx','mobile/components/LaunchIntro.tsx','mobile/components/NativeChrome.tsx','mobile/components/MilestoneCelebration.tsx','mobile/components/RhythmHorizon.tsx'];
+let inspected=0;
+function checkCopyLiterals(file){
+ const source=fs.readFileSync(file,'utf8');
+ for(const match of source.matchAll(/<Copy\\s+text=(?:"([^"]+)"|'([^']+)'|\\{["']([^"']+)["']\\})/g)){
+  const literal=match[1]||match[2]||match[3];
+  assert(Object.prototype.hasOwnProperty.call(en,literal),`Missing English translation in ${file}: ${literal}`);
+  inspected++;
+ }
+}
+for(const root of nativeRoots){
+ if(fs.statSync(root).isFile()){checkCopyLiterals(root);continue}
+ function visit(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
+  const file=path.join(dir,entry.name);
+  if(entry.isDirectory())visit(file);else if(file.endsWith('.tsx'))checkCopyLiterals(file);
+ }}visit(root);
+}
+for(const file of ['app/focus/page.tsx','app/components/RhythmHorizon.tsx']){
+ const source=fs.readFileSync(file,'utf8');
+ assert(!source.includes('>DEIN FOKUS.</em>'),'Web focus surfaces must not contain raw German headings');
+}
+for(const file of ['app/journey/JourneyOverview.tsx','app/journey/today/TodayClient.tsx']){
+ assert(fs.readFileSync(file,'utf8').trimStart().startsWith('"use client";'),'Localized interactive pages must retain client boundaries');
+}
+console.log(`LANGUAGE_COVERAGE_OK ${inspected} native copy literals validated`);
