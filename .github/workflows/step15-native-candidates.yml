@@ -76,7 +76,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: BE-DIFFERENT-1.3.1-Build22-Android-debug-APK-and-smoke
+          name: BE-DIFFERENT-1.3.2-Build23-Android-debug-APK-and-smoke
           path: |
             mobile/android/app/build/outputs/apk/debug/app-debug.apk
             mobile/build/step15/
@@ -139,12 +139,12 @@ jobs:
           codesign --force --sign - --entitlements "$entitlement_plist" "$app"
           codesign --verify --deep --strict "$app"
           mkdir -p build/step15
-          ditto -c -k --sequesterRsrc --keepParent "$app" build/step15/BE-DIFFERENT-1.3.1-Build22-iOS-Simulator.zip
-          unzip -t build/step15/BE-DIFFERENT-1.3.1-Build22-iOS-Simulator.zip | tail -n 3
+          ditto -c -k --sequesterRsrc --keepParent "$app" build/step15/BE-DIFFERENT-1.3.2-Build23-iOS-Simulator.zip
+          unzip -t build/step15/BE-DIFFERENT-1.3.2-Build23-iOS-Simulator.zip | tail -n 3
       - uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: BE-DIFFERENT-1.3.1-Build22-iOS-Simulator
-          path: mobile/ios/build/step15/BE-DIFFERENT-1.3.1-Build22-iOS-Simulator.zip
+          name: BE-DIFFERENT-1.3.2-Build23-iOS-Simulator
+          path: mobile/ios/build/step15/BE-DIFFERENT-1.3.2-Build23-iOS-Simulator.zip
           if-no-files-found: error
           retention-days: 14
