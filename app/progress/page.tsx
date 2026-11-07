@@ -56,7 +56,7 @@ export default async function ProgressPage() {
             <span className="bd-kicker"><Copy text="MESSREIHE"/></span>
             <h2><Copy text={details ? "Dein erster Messpunkt" : "Verlauf mit PRO"}/></h2>
             <p><Copy text={details ? "Sobald ein Messwert vorliegt, beginnt hier dein Verlauf." : "Mit PRO kannst du deine Messwerte im Zeitverlauf vergleichen."}/></p>
-            <Link href={details ? "/tests" : "/pricing"} className="bd-text-link"><Copy text={details ? "Zu den Leistungstests" : "PRO ansehen"}/></Link>
+            <Link prefetch={false} href={details ? "/tests" : "/pricing"} className="bd-text-link"><Copy text={details ? "Zu den Leistungstests" : "PRO ansehen"}/></Link>
           </div>}
       </div>
     </section>
@@ -70,13 +70,13 @@ export default async function ProgressPage() {
         </div>)}
       </dl>
       {milestones && <section className="bd-achievement-log">
-        <div><h3><Copy text="Meilensteine"/></h3><Link className="bd-text-link" href="/milestones"><Copy text="Alle Meilensteine"/></Link></div>
+        <div><h3><Copy text="Meilensteine"/></h3><Link prefetch={false} className="bd-text-link" href="/milestones"><Copy text="Alle Meilensteine"/></Link></div>
         {awards.length ? <ol>{awards.map(award => <li key={award.id}>
           <time><LocalizedValue value={award.achievedAt} format="toLocaleDateString" options={{day:"numeric",month:"short",timeZone:daily.timeZone}}/></time><strong><Copy text={award.title}/></strong>
         </li>)}</ol> : <p><Copy text="Deine verdienten Meilensteine erscheinen hier."/></p>}
       </section>}
       <section className="bd-test-ledger">
-        <div><h3><Copy text="Leistungstests"/></h3><Link className="bd-text-link" href="/tests"><Copy text="Zu den Leistungstests"/></Link></div>
+        <div><h3><Copy text="Leistungstests"/></h3><Link prefetch={false} className="bd-text-link" href="/tests"><Copy text="Zu den Leistungstests"/></Link></div>
         {timeline && tests.length ? <ol>{tests.map(test=><li key={test.id}>
           <time><LocalizedValue value={test.completedAt} format="toLocaleDateString" options={{timeZone:daily.timeZone}}/></time>
           <div><strong><Copy text={test.name}/></strong>

@@ -29,7 +29,7 @@ export default function RhythmHorizon({days, timeZone}: {days: RhythmDay[]; time
       </button>)}
     </div>
     <div id="bd-rhythm-schedule" className="bd-rhythm-schedule" aria-live="polite">
-      {day.workouts.length ? day.workouts.map(workout => <Link key={workout.id} href={"/training/" + workout.id}>
+      {day.workouts.length ? day.workouts.map(workout => <Link prefetch={false} key={workout.id} href={"/training/" + workout.id}>
         <time><LocalizedValue value={workout.scheduledAt} format="toLocaleTimeString" options={{hour:"2-digit", minute:"2-digit", timeZone}}/></time>
         <strong><Copy text={workout.title}/></strong>
         {workout.completed && <small><Copy text="ERLEDIGT"/></small>}

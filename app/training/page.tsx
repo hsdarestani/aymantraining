@@ -33,7 +33,7 @@ export default async function TrainingPage() {
   return <main className="bd-field bd-training" data-bd-screen="training">
     <header className="bd-training-lead">
       <div><span className="bd-kicker"><Copy text="TRAINING"/></span><h1><Copy text="Der Trainingsweg"/></h1></div>
-      {next && <Link href={"/training/" + next.id} className="bd-training-next">
+      {next && <Link prefetch={false} href={"/training/" + next.id} className="bd-training-next">
         <span className="bd-kicker"><Copy text={next.startedAt ? "LAUFENDE EINHEIT" : "NÄCHSTE EINHEIT"}/></span>
         <strong><Copy text={displayWorkoutTitle(next.title)}/></strong>
         <span className="bd-text-link"><Copy text={next.startedAt ? "Training fortsetzen" : "Einheit öffnen"}/></span>
@@ -42,23 +42,23 @@ export default async function TrainingPage() {
     {journey && <section className="bd-training-journey">
       <JourneyOverview initial={journey} embedded/>
       <div className="bd-field-links">
-        {journey.legacy.transitionAvailable && <Link href="/journey"><Copy text="Trainingsweg wählen"/></Link>}
-        {journey.intake && <Link href="/journey"><Copy text="Dein Einstieg"/></Link>}
-        {journey.testsEnabled && !journey.enrollments.length && <Link href="/journey/tests"><Copy text="Tests und Rückmeldungen"/></Link>}
+        {journey.legacy.transitionAvailable && <Link prefetch={false} href="/journey"><Copy text="Trainingsweg wählen"/></Link>}
+        {journey.intake && <Link prefetch={false} href="/journey"><Copy text="Dein Einstieg"/></Link>}
+        {journey.testsEnabled && !journey.enrollments.length && <Link prefetch={false} href="/journey/tests"><Copy text="Tests und Rückmeldungen"/></Link>}
       </div>
     </section>}
     <div className="bd-training-log">
       <section>
         <h2><Copy text="Deine Einheiten"/></h2>
         {upcoming.length ? <ol className="bd-session-list">
-          {upcoming.map(w => <li key={w.id}><Link href={"/training/" + w.id}>
+          {upcoming.map(w => <li key={w.id}><Link prefetch={false} href={"/training/" + w.id}>
             <span className="bd-kicker">{w.startedAt ? <Copy text="GESTARTET"/> : w.scheduledAt
               ? <LocalizedValue value={w.scheduledAt} format="toLocaleDateString" options={{weekday:"short", day:"numeric", month:"numeric"}}/>
               : <Copy text="Ohne Termin"/>}</span>
             <strong><Copy text={displayWorkoutTitle(w.title)}/></strong><span>{w._count.exercises} <Copy text="Übungen"/></span>
           </Link></li>)}
         </ol> : <p><Copy text="Keine Einheit geplant."/></p>}
-        <div className="bd-field-links"><Link href="/plans"><Copy text="Trainingspläne"/></Link><Link href="/library"><Copy text="Übungsbibliothek"/></Link></div>
+        <div className="bd-field-links"><Link prefetch={false} href="/plans"><Copy text="Trainingspläne"/></Link><Link prefetch={false} href="/library"><Copy text="Übungsbibliothek"/></Link></div>
       </section>
       <section>
         <h2><Copy text="Trainingsverlauf"/></h2>

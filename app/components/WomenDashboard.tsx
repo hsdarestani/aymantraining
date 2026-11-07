@@ -15,14 +15,14 @@ export default function WomenDashboard({preference,journeyEnabled,confirmedLevel
    <span><Copy text="DEINE ANSICHT · DEINE ENTSCHEIDUNG"/></span>
    <h2><Copy text="STARK IN DEINEM TEMPO."/></h2>
    <p><Copy text="Deine Trainingsziele und deine echten Messwerte bleiben im Mittelpunkt. Alle Sportarten stehen dir offen."/></p>
-   <Link href="/settings"><Copy text="ANSICHT ANPASSEN →"/></Link>
+   <Link prefetch={false} href="/settings"><Copy text="ANSICHT ANPASSEN →"/></Link>
   </div>
   <div className="bd-women-tiles">
-   <article><small><Copy text="HEUTE"/></small><strong>{scheduled===0?<Copy text="Keine Einheit eingetragen"/>:completed===scheduled?<Copy text="Alle geplanten Einheiten erledigt"/>:<>{completed} <Copy text="von"/> {scheduled} <Copy text="Einheiten geschafft"/></>}</strong><Link href="/training"><Copy text="TRAININGSPLAN ANSEHEN →"/></Link></article>
+   <article><small><Copy text="HEUTE"/></small><strong>{scheduled===0?<Copy text="Keine Einheit eingetragen"/>:completed===scheduled?<Copy text="Alle geplanten Einheiten erledigt"/>:<>{completed} <Copy text="von"/> {scheduled} <Copy text="Einheiten geschafft"/></>}</strong><Link prefetch={false} href="/training"><Copy text="TRAININGSPLAN ANSEHEN →"/></Link></article>
    <article><small><Copy text="DEINE TAGESFORM"/></small><strong><Copy text="Energie:"/> {energy??<Copy text="Keine Angabe"/>}</strong>
-     <p><Copy text="Schlaf:"/> {sleepHours==null?<Copy text="Keine Angabe"/>:sleepHours+" h"}</p><Link href="/lifestyle"><Copy text="TAGESCHECK ÖFFNEN →"/></Link></article>
+     <p><Copy text="Schlaf:"/> {sleepHours==null?<Copy text="Keine Angabe"/>:sleepHours+" h"}</p><Link prefetch={false} href="/lifestyle"><Copy text="TAGESCHECK ÖFFNEN →"/></Link></article>
    <article><small><Copy text="DEIN BESTÄTIGTER STAND"/></small><strong>{confirmedLevel?.replaceAll("_"," ")??<Copy text="Noch keine Einstufung"/>}</strong>
-    <Link href={journeyEnabled?"/journey":"/training"}><Copy text={journeyEnabled?"TRAININGSWEG ANSEHEN →":"TRAININGSPLAN ANSEHEN →"}/></Link></article>
+    <Link prefetch={false} href={journeyEnabled?"/journey":"/training"}><Copy text={journeyEnabled?"TRAININGSWEG ANSEHEN →":"TRAININGSPLAN ANSEHEN →"}/></Link></article>
   </div>
   {goals.length>0&&<div className="bd-women-goals"><small><Copy text="DEINE ZIELE"/></small><p>{goals.map((g,i)=><span key={i}>{i>0?" · ":""}<Copy text={goalLabels[g]??g}/></span>)}</p></div>}
   <p className="bd-women-foot"><Copy text={preference.presenterPreference==="TRAINERIN"

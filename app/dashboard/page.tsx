@@ -99,7 +99,7 @@ export default async function Dashboard() {
           {workout.scheduledAt && <LocalizedValue value={workout.scheduledAt} options={{weekday:"short", hour:"2-digit", minute:"2-digit", timeZone:daily.timeZone}}/>}
           {workout.scheduledAt && " · "}{workout._count.exercises} <Copy text="Übungen"/>
         </p>}
-        <Link className="bd-action" href={workout ? "/training/" + workout.id : dayPlan}>
+        <Link prefetch={false} className="bd-action" href={workout ? "/training/" + workout.id : dayPlan}>
           <Copy text={workout ? (workout.startedAt ? "Training fortsetzen" : "Einheit öffnen") : "Zum Trainingsplan"}/>
           <span className="bd-action-mark" aria-hidden="true"/>
         </Link>
@@ -107,7 +107,7 @@ export default async function Dashboard() {
       <dl className="bd-cockpit-rail">
         <div><dt><Copy text="ZIEL"/></dt><dd><Copy text={goalLabel ?? "Offen"}/></dd></div>
         <div><dt><Copy text="BESTÄTIGTE STUFE"/></dt><dd>{daily.journey.confirmedLevel ? displayJourneyLevel(daily.journey.confirmedLevel) : <Copy text="Einstufung offen"/>}</dd></div>
-        <div><dt><Copy text="BD SCORE"/></dt><dd><Link href="/progress">{daily.profile.value ?? "—"}</Link></dd></div>
+        <div><dt><Copy text="BD SCORE"/></dt><dd><Link prefetch={false} href="/progress">{daily.profile.value ?? "—"}</Link></dd></div>
       </dl>
     </section>
 
@@ -120,8 +120,8 @@ export default async function Dashboard() {
         {!recommendation && brief && <><strong><Copy text={brief.title}/></strong>{brief.body && <p className="bd-brief-excerpt"><Copy text={brief.body}/></p>}</>}
         {!recommendation && !brief && <p><Copy text="Halte fest, wie du dich fühlst. Dein Tagescheck hilft bei der nächsten Einheit."/></p>}
         <div className="bd-signal-actions">
-          <Link className="bd-text-link" href="/coach"><Copy text="Zum Coach"/></Link>
-          <Link className="bd-text-link" href={daily.today.hasCheckIn ? dayPlan : "/lifestyle"}><Copy text={daily.today.hasCheckIn ? "Tagesplan" : "Tagescheck"}/></Link>
+          <Link prefetch={false} className="bd-text-link" href="/coach"><Copy text="Zum Coach"/></Link>
+          <Link prefetch={false} className="bd-text-link" href={daily.today.hasCheckIn ? dayPlan : "/lifestyle"}><Copy text={daily.today.hasCheckIn ? "Tagesplan" : "Tagescheck"}/></Link>
         </div>
       </aside>
     </div>
@@ -130,11 +130,11 @@ export default async function Dashboard() {
       completed={daily.plan.completed} scheduled={daily.plan.scheduled} energy={daily.today.energy} sleepHours={daily.today.sleepHours}
       goals={goals.map(g => g.type)}/>
     <footer className="bd-field-links">
-      <Link href="/athlete"><Copy text="Digital Twin"/></Link>
-      <Link href="/focus"><Copy text="BE FOCUSED"/></Link>
-      <Link href="/community"><Copy text="Gemeinschaft"/></Link>
-      {process.env.MILESTONES_ENABLED === "true" && <Link href="/milestones"><Copy text="Meilensteine"/></Link>}
-      {cycle.enabled && <Link href="/cycle"><Copy text="Privater Zykluskalender"/></Link>}
+      <Link prefetch={false} href="/athlete"><Copy text="Digital Twin"/></Link>
+      <Link prefetch={false} href="/focus"><Copy text="BE FOCUSED"/></Link>
+      <Link prefetch={false} href="/community"><Copy text="Gemeinschaft"/></Link>
+      {process.env.MILESTONES_ENABLED === "true" && <Link prefetch={false} href="/milestones"><Copy text="Meilensteine"/></Link>}
+      {cycle.enabled && <Link prefetch={false} href="/cycle"><Copy text="Privater Zykluskalender"/></Link>}
     </footer>
   </main>;
 }

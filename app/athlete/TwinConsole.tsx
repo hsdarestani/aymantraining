@@ -50,7 +50,7 @@ export default function TwinConsole({sleep, protein, energy, hasCheckIn}: Props)
         <strong>{active === 1 ? <Copy text={hasCheckIn ? "Erfasst" : "Offen"}/> : signal?.value != null ?
           <><LocalizedValue value={signal.value} options={{maximumFractionDigits:1}}/> <small>{signal.unit}</small></>
           : <Copy text="Keine Angabe"/>}</strong>
-        <Link href={station.href} className="bd-text-link"><Copy text={station.action}/></Link>
+        <Link prefetch={false} href={station.href} className="bd-text-link"><Copy text={station.action}/></Link>
       </div>
     </div>
   </section>;

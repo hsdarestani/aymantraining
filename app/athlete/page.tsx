@@ -45,7 +45,7 @@ export default async function AthletePage() {
   return <main className="bd-field bd-athlete-profile" data-bd-screen="athlete">
     <header className="bd-athlete-id">
       <div><span className="bd-kicker"><Copy text="ATHLETENPROFIL"/></span><h1>{user.name || <Copy text="Athlet"/>}</h1></div>
-      <Link href="/athlete/photos" className="bd-athlete-portrait" aria-label="Athletenfotos">
+      <Link prefetch={false} href="/athlete/photos" className="bd-athlete-portrait" aria-label="Athletenfotos">
         {photo ? <img src={"/api/media/"+photo.id} alt=""/> : <span aria-hidden="true">{user.name?.trim().slice(0,1).toUpperCase() || "BD"}</span>}
       </Link>
     </header>
@@ -62,7 +62,7 @@ export default async function AthletePage() {
           <div><dt><Copy text={wearable.source==="demo_preview"?"Beispieldaten":"Messstand"}/></dt>
             <dd><LocalizedValue value={wearable.date} format="toLocaleDateString" options={{timeZone:"UTC"}}/></dd></div>
         </dl>}
-        <Link className="bd-text-link" href="/wearables"><Copy text="Geräte verwalten"/></Link>
+        <Link prefetch={false} className="bd-text-link" href="/wearables"><Copy text="Geräte verwalten"/></Link>
       </section>
       <section className="bd-athlete-bio">
         <span className="bd-kicker"><Copy text="LEISTUNGSPROFIL"/></span>
@@ -71,16 +71,16 @@ export default async function AthletePage() {
         {details ? <details className="bd-profile-details"><summary><Copy text="Leistungsbereiche ansehen"/></summary>
           <dl>{strengths.map(([label,value])=><div key={label}><dt><Copy text={label}/></dt><dd>{value??"—"}</dd></div>)}</dl>
           {projection != null && <p><Copy text="Rechnerischer Trend in 12 Wochen"/> {projection} / 100</p>}
-        </details> : <Link className="bd-text-link" href="/pricing"><Copy text="Leistungsdetails mit PRO"/></Link>}
+        </details> : <Link prefetch={false} className="bd-text-link" href="/pricing"><Copy text="Leistungsdetails mit PRO"/></Link>}
       </section>
     </div>
     {badges.length > 0 && <section className="bd-athlete-badges"><h2><Copy text="Deine Abzeichen"/></h2><ul>{badges.map(b => <li key={b.id}>{b.name}</li>)}</ul></section>}
     <footer className="bd-field-links">
-      <Link href="/athlete/photos"><Copy text="Athletenfotos"/></Link>
-      <Link href="/api/story" target="_blank" rel="noopener"><Copy text="Fortschrittsbild"/></Link>
-      <Link href="/community"><Copy text="Gemeinschaft"/></Link>
-      <Link href="/coach"><Copy text="Zum Coach"/></Link>
-      <Link href="/settings"><Copy text="Einstellungen"/></Link>
+      <Link prefetch={false} href="/athlete/photos"><Copy text="Athletenfotos"/></Link>
+      <Link prefetch={false} href="/api/story" target="_blank" rel="noopener"><Copy text="Fortschrittsbild"/></Link>
+      <Link prefetch={false} href="/community"><Copy text="Gemeinschaft"/></Link>
+      <Link prefetch={false} href="/coach"><Copy text="Zum Coach"/></Link>
+      <Link prefetch={false} href="/settings"><Copy text="Einstellungen"/></Link>
     </footer>
   </main>;
 }

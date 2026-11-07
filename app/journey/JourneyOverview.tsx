@@ -115,7 +115,7 @@ export default function JourneyOverview({initial,embedded=false}:{initial?:Overv
     <span>{path.completedChapters}/{path.totalChapters} <Copy text="Kapitel"/></span>
    </header>
    <TrainingTrack key={path.id} levels={data.levels} enrollment={path} busy={busy} onChapter={ch=>openChapter(path.id,ch)}/>
-   {data.testsEnabled&&<Link className="bd-text-link" href="/journey/tests"><Copy text="Tests und Rückmeldungen"/></Link>}
+   {data.testsEnabled&&<Link prefetch={false} className="bd-text-link" href="/journey/tests"><Copy text="Tests und Rückmeldungen"/></Link>}
   </section>}
   {detail&&<section className="panel j7-detail" aria-live="polite"><div className="j7-head"><div><span className="eyebrow">{label(detail.level)}<Copy text={" · FREIGESCHALTET"}/></span><h2 ref={detailHeading} tabIndex={-1}>{detail.titleDe}</h2><p>{detail.description}</p></div><button className="j7-close" onClick={()=>setDetail(null)}><Copy text="Schließen"/></button></div>
    <p>{detail.mandatoryDone}<Copy text={" von "}/>{detail.mandatoryTotal}<Copy text={" Pflichtinhalten erledigt"}/></p>
@@ -128,7 +128,7 @@ export default function JourneyOverview({initial,embedded=false}:{initial?:Overv
     </div>)}</div>}
     {data.testsEnabled&&<button className="j7-close" disabled={busy||it.done||detail.finished} onClick={()=>mark(it.id)}><Copy text={it.done?"ERLEDIGT":"ALS ERLEDIGT MARKIEREN"}/></button>}
    </article>)}
-   {detail.test&&data.testsEnabled&&<Link className="j7-link" href="/journey/tests"><Copy text={"KAPITELTEST: "}/>{detail.test.titleDe}</Link>}
+   {detail.test&&data.testsEnabled&&<Link prefetch={false} className="j7-link" href="/journey/tests"><Copy text={"KAPITELTEST: "}/>{detail.test.titleDe}</Link>}
   </section>}
  </div>;
 }
