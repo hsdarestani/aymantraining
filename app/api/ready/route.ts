@@ -6,7 +6,7 @@ export async function GET(){
  try{
   await prisma.$queryRaw`SELECT 1`;
   return NextResponse.json({
-   ok:true,service:"bedifferent",database:"ready",
+   ok:true,service:"bedifferent",database:"ready",release:process.env.BD_RELEASE,
    stepFeatures:{
     womenDashboard:process.env.WOMEN_DASHBOARD_ENABLED==="true",
     cycleJournal:process.env.CYCLE_JOURNAL_ENABLED==="true",
@@ -22,7 +22,7 @@ export async function GET(){
     webOnboarding:process.env.NEXT_PUBLIC_JOURNEY_ONBOARDING_ENABLED==="true",
     webOverview:process.env.NEXT_PUBLIC_JOURNEY_OVERVIEW_ENABLED==="true"
    }
-  });
+  },{headers:{"cache-control":"no-store"}});
  }catch{
   return NextResponse.json({ok:false,service:"bedifferent",database:"unavailable"},{status:503});
  }

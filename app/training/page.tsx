@@ -1,83 +1,76 @@
-import {Copy,LocalizedValue} from "../components/Locale";
 import Link from "next/link";
 import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";
-export const dynamic="force-dynamic";
+import {displayWorkoutTitle} from "../../lib/workout-title";
+import {getJourneyOverview} from "../../lib/journey-reader";
+import {Copy, LocalizedValue} from "../components/Locale";
+import JourneyOverview from "../journey/JourneyOverview";
+import "../journey/journey.css";
 
-function dayKey(date:Date){
-  return new Intl.DateTimeFormat("de-DE",{weekday:"short",day:"2-digit",month:"2-digit"}).format(date);
-}
-function dayNumber(date:Date){return String(date.getDate()).padStart(2,"0")}
+export const dynamic = "force-dynamic";
 
-export default async function TrainingPage(){
-  const user=await requireUser();
-  const workouts=await prisma.workout.findMany({where:{userId:user.id},include:{exercises:true,sets:true},orderBy:{scheduledAt:"asc"},take:120});
-  const now=new Date();
-  const cutoff=new Date(now.getTime()-12*60*60*1000);
-  const upcoming=workouts.filter(w=>!w.completedAt&&(!w.scheduledAt||w.scheduledAt>=cutoff));
-  const historyAll=workouts.filter(w=>w.completedAt).reverse();
-  const history=user.subscriptionTier==="FREE"
-    ?historyAll.filter(w=>w.completedAt&&w.completedAt>=new Date(Date.now()-30*86400000))
-    :historyAll;
-  const days=Array.from({length:7},(_,i)=>{
-    const date=new Date();date.setHours(0,0,0,0);date.setDate(date.getDate()+i);
-    const end=new Date(date);end.setDate(end.getDate()+1);
-    return {date,workouts:upcoming.filter(w=>w.scheduledAt&&w.scheduledAt>=date&&w.scheduledAt<end)};
-  });
-  return <main className="sub-shell bd-train">
-    <header className="sub-top">
-      <Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link>
-      <nav><Link href="/dashboard"><Copy text="BEGINN"/></Link><Link href="/training" className="active"><Copy text={"TRAINING"}/></Link><Link href="/progress"><Copy text="FORTSCHRITT"/></Link><Link href="/coach"><Copy text="TRAINER"/></Link><Link href="/athlete"><Copy text="ATHLET"/></Link></nav>
+export default async function TrainingPage() {
+  const user = await requireUser();
+  const now = new Date();
+  const cutoff = new Date(+now - 12 * 3600000);
+  const [upcoming, history, journey] = await Promise.all([
+    prisma.workout.findMany({
+      where: {userId: user.id, completedAt: null, OR: [{startedAt: {not: null}}, {scheduledAt: null}, {scheduledAt: {gte: cutoff}}]},
+      select: {id: true, title: true, startedAt: true, scheduledAt: true, _count: {select: {exercises: true}}},
+      orderBy: {scheduledAt: "asc"},
+      take: 120,
+    }),
+    prisma.workout.findMany({
+      where: {userId: user.id, completedAt: user.subscriptionTier === "FREE" ? {gte: new Date(+now - 30 * 86400000)} : {not: null}},
+      select: {id: true, title: true, completedAt: true, rpe: true},
+      orderBy: {completedAt: "desc"},
+      take: user.subscriptionTier === "FREE" ? 30 : 100,
+    }),
+    user.role === "ATHLETE" && process.env.JOURNEY_OVERVIEW_ENABLED === "true" ? getJourneyOverview(user.id) : null,
+  ]);
+  const next = upcoming.find(w => w.startedAt) ?? upcoming[0];
+
+  return <main className="bd-field bd-training" data-bd-screen="training">
+    <header className="bd-training-lead">
+      <div><span className="bd-kicker"><Copy text="TRAINING"/></span><h1><Copy text="Der Trainingsweg"/></h1></div>
+      {next && <Link href={"/training/" + next.id} className="bd-training-next">
+        <span className="bd-kicker"><Copy text={next.startedAt ? "LAUFENDE EINHEIT" : "NÄCHSTE EINHEIT"}/></span>
+        <strong><Copy text={displayWorkoutTitle(next.title)}/></strong>
+        <span className="bd-text-link"><Copy text={next.startedAt ? "Training fortsetzen" : "Einheit öffnen"}/></span>
+      </Link>}
     </header>
-    <section className="bd-train-hero">
-      <div className="bd-train-hero-main">
-        <span className="eyebrow"><Copy text={"01 / TRAINING"}/></span>
-        <h1><Copy text={"DEIN PLAN."}/><br/><em><Copy text={"DEIN ANTRIEB."}/></em></h1>
-        <p><Copy text="Jede Einheit bringt dich weiter. Entscheidend sind dein Rhythmus, deine Technik und deine Entwicklung."/></p>
-        <div className="bd-train-shortcuts">
-          <Link href="/plans"><Copy text="TRAININGSPLÄNE"/> <span aria-hidden="true">↗</span></Link>
-          <Link href="/library"><Copy text="ÜBUNGSBIBLIOTHEK"/> <span aria-hidden="true">↗</span></Link>
-        </div>
+    {journey && <section className="bd-training-journey">
+      <JourneyOverview initial={journey} embedded/>
+      <div className="bd-field-links">
+        {journey.legacy.transitionAvailable && <Link href="/journey"><Copy text="Trainingsweg wählen"/></Link>}
+        {journey.intake && <Link href="/journey"><Copy text="Dein Einstieg"/></Link>}
+        {journey.testsEnabled && !journey.enrollments.length && <Link href="/journey/tests"><Copy text="Tests und Rückmeldungen"/></Link>}
       </div>
-      <div className="bd-train-hero-numbers">
-        <div><span><Copy text="BEREIT"/></span><strong>{upcoming.length.toString().padStart(2,"0")}</strong><small><Copy text="Kommende Einheiten"/></small></div>
-        <div><span><Copy text="ERLEDIGT"/></span><strong>{history.length.toString().padStart(2,"0")}</strong><small><Copy text={user.subscriptionTier==="FREE"?"Letzte 30 Tage":"Dein Verlauf"}/></small></div>
-        <div className="bd-train-hero-mark" aria-hidden="true">BD<span>↗</span></div>
-      </div>
-    </section>
-    <section className="bd-train-week" aria-label="Trainingswoche">
-      <div className="bd-train-section-heading"><div><span className="eyebrow"><Copy text="DEINE TRAININGSWOCHE"/></span><h2><Copy text="WOCHE IM FOKUS."/></h2></div><small><Copy text="Die nächsten sieben Tage"/></small></div>
-      <div className="bd-train-days">
-        {days.map((day,i)=>{
-          const first=day.workouts[0];
-          const className="bd-train-day"+(i===0?" is-today":"")+(first?" has-workout":"");
-          const contents=<><span className="bd-train-day-label">{dayKey(day.date)}</span><strong>{dayNumber(day.date)}</strong><span className="bd-train-day-count">{first?<Copy text={day.workouts.length===1?"1 EINHEIT":day.workouts.length+" EINHEITEN"}/>:<Copy text="PAUSE"/>}</span><small>{first?.title||<Copy text="Erholung zählt"/>}</small>{first&&<b aria-hidden="true">↗</b>}</>;
-          return first
-            ?<Link href={`/training/${first.id}`} className={className} key={day.date.toISOString()}>{contents}</Link>
-            :<div className={className} key={day.date.toISOString()}>{contents}</div>;
-        })}
-      </div>
-    </section>
-    <section className="bd-train-grid">
-      <article className="bd-train-next">
-        <div className="bd-train-section-heading"><div><span className="eyebrow"><Copy text="KOMMENDE EINHEITEN"/></span><h2><Copy text="NÄCHSTE MOVES."/></h2></div><span className="bd-train-count">{upcoming.length} <Copy text="BEREIT"/></span></div>
-        <div className="bd-train-workouts">
-          {upcoming.length?upcoming.map((w,i)=><Link className="bd-train-workout" href={`/training/${w.id}`} key={w.id}>
-            <span className="bd-train-workout-index">{String(i+1).padStart(2,"0")}</span>
-            <div className="bd-train-workout-info"><strong><Copy text={w.title}/></strong><small>{w.scheduledAt?<LocalizedValue value={w.scheduledAt}/>:<Copy text="Ohne Termin"/>}</small></div>
-            <span className="bd-train-workout-meta">{w.exercises.length} <Copy text="Übungen"/></span>
-            <span className="bd-train-workout-state"><Copy text={w.startedAt?"GESTARTET":"BEREIT"}/></span>
-            <b aria-hidden="true">↗</b>
-          </Link>):<div className="bd-train-empty"><strong><Copy text="NOCH KEINE EINHEIT GEPLANT."/></strong><p><Copy text="Entdecke Trainingspläne oder lass dir von deinem Trainer einen Plan zuweisen."/></p><Link href="/plans"><Copy text="PLÄNE ANSEHEN"/> ↗</Link></div>}
-        </div>
-      </article>
-      <aside className="bd-train-aside">
-        <article className="bd-train-history">
-          <div className="bd-train-section-heading"><div><span className="eyebrow"><Copy text="DEINE SPUREN"/></span><h2><Copy text="VERLAUF."/></h2></div><span className="bd-train-count"><Copy text={user.subscriptionTier==="FREE"?"30 TAGE":"UNBEGRENZT"}/></span></div>
-          {history.length?history.slice(0,user.subscriptionTier==="FREE"?30:100).map((w,i)=><div className="bd-train-history-row" key={w.id}><span>{String(i+1).padStart(2,"0")}</span><div><strong><Copy text={w.title}/></strong><small><LocalizedValue value={w.completedAt} format="toLocaleDateString"/> · RPE <Copy text={w.rpe??"Keine Angabe"}/></small></div></div>):<p className="bd-train-history-empty"><Copy text="Deine abgeschlossenen Einheiten erscheinen hier."/></p>}
-        </article>
-        <article className="bd-train-recovery"><span className="eyebrow"><Copy text="REGENERATION"/></span><strong><Copy text={"PAUSE IST"}/><br/><Copy text={"FORTSCHRITT."}/></strong><p><Copy text="Erholung ist Teil deines Plans. Gib deinem Körper die Zeit, die er braucht."/></p></article>
-      </aside>
-    </section>
+    </section>}
+    <div className="bd-training-log">
+      <section>
+        <h2><Copy text="Deine Einheiten"/></h2>
+        {upcoming.length ? <ol className="bd-session-list">
+          {upcoming.map(w => <li key={w.id}><Link href={"/training/" + w.id}>
+            <span className="bd-kicker">{w.startedAt ? <Copy text="GESTARTET"/> : w.scheduledAt
+              ? <LocalizedValue value={w.scheduledAt} format="toLocaleDateString" options={{weekday:"short", day:"numeric", month:"numeric"}}/>
+              : <Copy text="Ohne Termin"/>}</span>
+            <strong><Copy text={displayWorkoutTitle(w.title)}/></strong><span>{w._count.exercises} <Copy text="Übungen"/></span>
+          </Link></li>)}
+        </ol> : <p><Copy text="Keine Einheit geplant."/></p>}
+        <div className="bd-field-links"><Link href="/plans"><Copy text="Trainingspläne"/></Link><Link href="/library"><Copy text="Übungsbibliothek"/></Link></div>
+      </section>
+      <section>
+        <h2><Copy text="Trainingsverlauf"/></h2>
+        {user.subscriptionTier === "FREE" && <span className="bd-kicker"><Copy text="Letzte 30 Tage"/></span>}
+        {history.length ? <ol className="bd-session-list bd-session-history">
+          {history.map(w => <li key={w.id}>
+            <time><LocalizedValue value={w.completedAt} format="toLocaleDateString" options={{day:"numeric", month:"numeric"}}/></time>
+            <strong><Copy text={displayWorkoutTitle(w.title)}/></strong>
+            {w.rpe != null && <span>RPE {w.rpe}</span>}
+          </li>)}
+        </ol> : <p><Copy text="Hier erscheinen deine abgeschlossenen Einheiten."/></p>}
+      </section>
+    </div>
   </main>;
 }

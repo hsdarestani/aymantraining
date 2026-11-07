@@ -29,6 +29,8 @@ test -d /opt/a-esthetic-mobile && test -d /opt/aesthetic-book
 test -L "$APP/current" && test -s "$ENVFILE"
 test -s "$REL/server.js" && test -x "$REL/bin/node"
 test "$(cat "$REL/.source-sha")" = "$EXPECTED_SHA"
+test "$(cat "$REL/.next/BUILD_ID")" = "$EXPECTED_SHA"
+test -s "$REL/pwa/worker.js"
 OLD="$(readlink -f "$APP/current")"
 case "$OLD" in "$APP"/releases/*) ;; *) echo "UNEXPECTED_CURRENT_RELEASE" >&2; false;; esac
 for svc in a-esthetic-mobile aesthetic-book postgresql nginx "$SERVICE"; do systemctl is-active --quiet "$svc"; done
@@ -77,6 +79,21 @@ for key in JOURNEY_ONBOARDING_ENABLED JOURNEY_EDITOR_ENABLED JOURNEY_TESTS_ENABL
 done
 chown root:bedifferenttemp "$ENVFILE"
 chmod 0640 "$ENVFILE"
+phase=assets
+# Preserve the prior release's immutable chunks for tabs still using its runtime.
+# Record this build's own files before adding anything to avoid unbounded retention.
+find "$REL/.next/static" -type f -printf '%P\0' > "$REL/.next/bd-static-manifest"
+if [ -f "$OLD/.next/bd-static-manifest" ]; then
+  old_static() { cat "$OLD/.next/bd-static-manifest"; }
+else
+  old_static() { find "$OLD/.next/static" -type f -printf '%P\0'; }
+fi
+while IFS= read -r -d '' chunk; do
+  if [ ! -e "$REL/.next/static/$chunk" ] && [ -f "$OLD/.next/static/$chunk" ]; then
+    install -d -m 0750 -o root -g bedifferenttemp "$(dirname "$REL/.next/static/$chunk")"
+    ln "$OLD/.next/static/$chunk" "$REL/.next/static/$chunk"
+  fi
+done < <(old_static)
 phase=switch
 ln -sfn "$REL" "$APP/current.next"
 mv -Tf "$APP/current.next" "$APP/current"
@@ -85,7 +102,8 @@ phase=verify
 ready=0
 for attempt in $(seq 1 35); do
  if curl -fsS --max-time 5 http://127.0.0.1:3100/api/ready > "$BACKUP/ready.json" 2>/dev/null; then
-  if grep -q '"daily":true' "$BACKUP/ready.json" &&
+  if grep -qF "\"release\":\"$EXPECTED_SHA\"" "$BACKUP/ready.json" &&
+    grep -q '"daily":true' "$BACKUP/ready.json" &&
     grep -q '"overview":true' "$BACKUP/ready.json" &&
     grep -q '"tests":true' "$BACKUP/ready.json" &&
     grep -q '"editor":true' "$BACKUP/ready.json" &&

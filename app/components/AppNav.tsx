@@ -5,7 +5,7 @@ import {Copy,LocalizedElement,useLocale} from "./Locale";
 
 
 import Link from "next/link";
-import {usePathname,useRouter} from "next/navigation";
+import {usePathname} from "next/navigation";
 import {useEffect,useRef,useState} from "react";
 
 type IconName="home"|"training"|"progress"|"coach"|"athlete"|"menu"|"close"|"back";
@@ -24,9 +24,9 @@ function Icon({name}:{name:IconName}){
 const items=[
   ["/dashboard","START","home"],
   ["/training","TRAINING","training"],
-  ["/progress","SCORE","progress"],
-  ["/coach","COACH","coach"],
-  ["/athlete","ATHLET","athlete"]
+  ["/progress","FORTSCHRITT","progress"],
+  ["/athlete","ATHLET","athlete"],
+  ["/coach","COACH","coach"]
 ] as const;
 
 const more=[
@@ -50,15 +50,9 @@ const more=[
 
 export default function AppNav(){
   const path=usePathname();
-  const router=useRouter();
   const locale=useLocale();
   const [open,setOpen]=useState(false);
   const drawer=useRef<HTMLElement>(null);
-  useEffect(()=>{
-    const routes=["/dashboard","/training","/progress","/coach","/athlete","/focus","/lifestyle","/fuel","/community","/wearables"];
-    const id=window.setTimeout(()=>routes.forEach(route=>router.prefetch(route)),120);
-    return()=>window.clearTimeout(id);
-  },[router]);
   useEffect(()=>{
     if(!open)return;
     const previous=document.activeElement as HTMLElement|null;
@@ -85,7 +79,7 @@ export default function AppNav(){
         {workout&&<Link href="/training" className="desktop-back"><Icon name="back"/><Copy text={"ZURÜCK ZUM TRAINING"}/></Link>}
         <LocalizedElement as="nav" aria-label="Hauptnavigation">
           {items.map(([href,label,icon])=>{
-            const active=path===href||(href!=="/dashboard"&&path.startsWith(href+"/"));
+            const active=path===href||(href!=="/dashboard"&&path.startsWith(href+"/"))||(href==="/training"&&path.startsWith("/journey"));
             return <Link href={href} className={active?"active":""} aria-current={active?"page":undefined} key={href}><Icon name={icon}/><span><Copy text={label==="START"&&locale==="en"?"HOME":label}/></span></Link>;
           })}
         </LocalizedElement>
@@ -100,7 +94,7 @@ export default function AppNav(){
 
     <LocalizedElement as="nav" className="app-bottom-nav" aria-label="Hauptnavigation">
       {items.map(([href,label,icon])=>{
-        const active=path===href||(href!=="/dashboard"&&path.startsWith(href+"/"));
+        const active=path===href||(href!=="/dashboard"&&path.startsWith(href+"/"))||(href==="/training"&&path.startsWith("/journey"));
         return <Link href={href} className={active?"active":""} aria-current={active?"page":undefined} key={href}><span className="nav-icon"><Icon name={icon}/></span><small><Copy text={label==="START"&&locale==="en"?"HOME":label}/></small></Link>;
       })}
     </LocalizedElement>
@@ -113,7 +107,7 @@ export default function AppNav(){
         <div className="drawer-primary">
           {items.map(([href,label,icon])=><Link href={href} onClick={()=>setOpen(false)} key={href}><Icon name={icon}/><span><Copy text={label==="START"&&locale==="en"?"HOME":label}/></span></Link>)}
         </div>
-        <div className="drawer-links">{more.map(([href,label])=><Link href={href} onClick={()=>setOpen(false)} key={href}><Copy text={label}/><b>→</b></Link>)}</div>
+        <div className="drawer-links">{more.map(([href,label])=><Link href={href} onClick={()=>setOpen(false)} key={href}><Copy text={label}/></Link>)}</div>
         <p><Copy text={"Normal ist langweilig."}/></p>
       </aside>
     </div>

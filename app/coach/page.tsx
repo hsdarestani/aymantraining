@@ -1,3 +1,85 @@
+import Link from "next/link";
+import {requireUser} from "../../lib/auth";
+import {prisma} from "../../lib/db";
+import {hasFeature} from "../../lib/entitlements";
+import {currentCoach, publishedCoachBrief} from "../../lib/coach-context";
+import {Copy, LocalizedValue} from "../components/Locale";
+import CoachClient from "./CoachClient";
 
-import {Copy} from "../components/Locale";
-import Link from "next/link";import {requireUser} from "../../lib/auth";import {prisma} from "../../lib/db";import {hasFeature} from "../../lib/entitlements";import CoachClient from "./CoachClient";export const dynamic="force-dynamic";export default async function CoachPage(){const user=await requireUser();const allowed=await hasFeature(user.subscriptionTier,"coach_chat");const messages=allowed?await prisma.message.findMany({where:{athleteId:user.id},orderBy:{createdAt:"asc"},take:300}):[];return <main className="sub-shell">{(user.role==="COACH"||user.role==="ADMIN")&&process.env.MILESTONES_ENABLED==="true"&&<section className="panel" style={{padding:18,marginTop:14}}><strong><Copy text="MEILENSTEINE FÜR ATHLETEN"/></strong><p><Copy text="Persönliche Ziele und Erholung im Voraus planen."/></p><Link href="/coach/milestones" className="secondary"><Copy text={"MEILENSTEINE KONFIGURIEREN →"}/></Link></section>}<header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard"><Copy text={"BEGINN"}/></Link><Link href="/training"><Copy text={"TRAINING"}/></Link><Link href="/progress"><Copy text={"FORTSCHRITT"}/></Link><Link className="active" href="/coach"><Copy text={"TRAINER"}/></Link><Link href="/athlete"><Copy text={"ATHLET"}/></Link></nav></header>{allowed?<section className="coach-layout"><aside className="panel coach-profile"><div className="coach-pic large">A</div><span className="eyebrow"><Copy text={"DEIN TRAINER"}/></span><h1>Ayman</h1><span className="online"><Copy text={"PERSÖNLICHE BETREUUNG"}/></span><p><Copy text={"Text, Sprachnachrichten und Technikvideo bleiben nur für dich und berechtigte Trainern sichtbar."}/></p></aside><CoachClient userId={user.id} initial={messages}/></section>:<section className="locked-feature panel"><span className="eyebrow"><Copy text={"PRO FUNKTION"}/></span><h1><Copy text={"Dein direkter Draht zum Trainer."}/></h1><p><Copy text={"Chat, Sprachnachrichten, Technikvideo und Wochencheck gehören zum persönlichen PRO Betreuung."}/></p><Link className="primary compact" href="/pricing"><Copy text={"PRO 7 TAGE TESTEN"}/></Link></section>}<article className="panel checkin"><div><span className="eyebrow"><Copy text={"WOCHENCHECK"}/></span><h2><Copy text={"Gewicht, Fotos, Befinden, Fragen"}/></h2><p className="muted"><Copy text={"Deine Daten aus dem Wochencheck fließen in Trends und Trainer Radar ein."}/></p></div><Link className="secondary" href="/checkin"><Copy text={"WOCHENCHECK ÖFFNEN"}/></Link></article></main>;}
+export const dynamic = "force-dynamic";
+
+export default async function CoachPage() {
+  const user = await requireUser();
+  const [allowed, assignment, brief, review] = await Promise.all([
+    hasFeature(user.subscriptionTier, "coach_chat"),
+    currentCoach(user.id),
+    publishedCoachBrief(user.subscriptionTier),
+    prisma.videoFeedback.findFirst({
+      where:{athleteId:user.id,status:"REVIEWED",reviewedAt:{not:null}},
+      orderBy:{reviewedAt:"desc"},select:{reviewedAt:true,annotations:true},
+    }),
+  ]);
+  const recent = allowed ? await prisma.message.findMany({
+    where:{athleteId:user.id},orderBy:[{createdAt:"desc"},{id:"desc"}],take:41,
+  }) : [];
+  const messages = recent.slice(0,40).reverse();
+  const canWrite = user.role === "ATHLETE";
+  const feedback = review?.annotations as {coachNote?:string;nextSession?:{focus?:string;advice?:string}} | null;
+  const hasFeedback = Boolean(feedback?.coachNote || feedback?.nextSession?.focus || feedback?.nextSession?.advice);
+  const canSeeDay = canWrite && process.env.JOURNEY_DAILY_ENABLED === "true";
+  const coachName = assignment?.coach.name;
+
+  return <main className="bd-field bd-coaching" data-bd-screen="coach">
+    <header className="bd-coach-intro">
+      <span className="bd-kicker"><span className="bd-signal"/><Copy text="COACH"/></span>
+      <h1>{coachName || <Copy text="Dein Coach"/>}</h1>
+      <div className="bd-coach-intro-links">
+        {allowed && canWrite && <a href="#coach-dialogue" className="bd-text-link"><Copy text="Zum Gespräch"/></a>}
+        <Link href="/checkin" className="bd-text-link"><Copy text="Wochencheck öffnen"/></Link>
+      </div>
+    </header>
+    <div className="bd-coach-columns">
+      <section className="bd-coach-letter">
+        {hasFeedback ? <>
+          <div className="bd-letter-kicker"><span className="bd-kicker"><Copy text="TECHNIKFEEDBACK"/></span>
+            {review?.reviewedAt && <time><LocalizedValue value={review.reviewedAt} format="toLocaleDateString"/></time>}</div>
+          <h2><Copy text="Für deine nächste Einheit"/></h2>
+          {feedback?.coachNote && <blockquote>{feedback.coachNote}</blockquote>}
+          {feedback?.nextSession?.focus && <strong>{feedback.nextSession.focus}</strong>}
+          {feedback?.nextSession?.advice && <p>{feedback.nextSession.advice}</p>}
+          {canSeeDay && <Link href="/journey/today" className="bd-text-link"><Copy text="Tagesplan ansehen"/></Link>}
+        </> : brief ? <>
+          <div className="bd-letter-kicker"><span className="bd-kicker"><Copy text="VOM COACH"/></span>
+            <time><LocalizedValue value={brief.publishAt} format="toLocaleDateString"/></time></div>
+          <h2><Copy text={brief.title}/></h2>
+          {brief.body && <p><Copy text={brief.body}/></p>}
+          {brief.mediaId && <audio controls preload="none" src={"/api/media/"+brief.mediaId} aria-label="Sprachnachricht"/>}
+          {brief.coach.name && <span className="bd-coach-signature">{brief.coach.name}</span>}
+        </> : <>
+          <span className="bd-kicker"><Copy text="DEIN WOCHENCHECK"/></span>
+          <h2><Copy text="Wie läuft dein Training?"/></h2>
+          <p><Copy text="Halte fest, was gut lief und was du beim nächsten Mal ändern möchtest."/></p>
+          <Link href="/checkin" className="bd-text-link"><Copy text="Wochencheck starten"/></Link>
+        </>}
+      </section>
+      <aside className="bd-coach-side">
+        <span className="bd-kicker"><Copy text="VORBEREITUNG"/></span>
+        <h2><Copy text="Vor der nächsten Einheit"/></h2>
+        <p><Copy text="Bring eine konkrete Frage oder ein kurzes Technikvideo mit."/></p>
+        <Link className="bd-text-link" href={canSeeDay ? "/journey/today" : "/training"}><Copy text="Deinen Plan ansehen"/></Link>
+        {hasFeedback && brief && <details><summary><Copy text="Aktuelle Mitteilung vom Coach"/></summary>
+          <strong><Copy text={brief.title}/></strong>{brief.body && <p><Copy text={brief.body}/></p>}
+          {brief.mediaId && <audio controls preload="none" src={"/api/media/"+brief.mediaId} aria-label="Sprachnachricht"/>}
+        </details>}
+      </aside>
+    </div>
+    {allowed ? <CoachClient userId={user.id} initial={messages} initialCursor={recent.length > 40 ? messages[0].id : null} canWrite={canWrite}/> :
+      <section className="bd-coach-locked" id="coach-dialogue">
+        <div><span className="bd-kicker">PRO</span><h2><Copy text="Persönlicher Austausch"/></h2><p><Copy text="Schick deinem Coach eine Frage, eine Sprachnachricht oder ein Technikvideo."/></p></div>
+        <Link href="/pricing" className="bd-action"><Copy text="PRO ansehen"/><span className="bd-action-mark" aria-hidden="true"/></Link>
+      </section>}
+    {!canWrite && process.env.MILESTONES_ENABLED==="true" && <footer className="bd-field-links">
+      <Link href="/coach/milestones"><Copy text="Meilensteine für Athleten planen"/></Link>
+    </footer>}
+  </main>;
+}

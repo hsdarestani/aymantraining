@@ -1,93 +1,93 @@
-
-import {Copy,LocalizedValue} from "../components/Locale";
-
-
-
-
 import Link from "next/link";
 import {requireUser} from "../../lib/auth";
 import {prisma} from "../../lib/db";
 import {hasFeature} from "../../lib/entitlements";
 import {getDailyProfile} from "../../lib/daily-profile-service";
+import {Copy, LocalizedValue} from "../components/Locale";
 import ProgressClient from "./ProgressClient";
 import BeforeAfter from "./BeforeAfter";
-export const dynamic="force-dynamic";
+import ScoreTrace from "./ScoreTrace";
 
-export default async function ProgressPage(){
-  const user=await requireUser();
-  const dailyProfile=await getDailyProfile(user.id);
-  const [scores,metrics,tests,photos,details,timeline]=await Promise.all([
-    prisma.scoreSnapshot.findMany({where:{userId:user.id,completeness:{gt:0}},orderBy:{date:"desc"},take:30}),
-    prisma.bodyMetric.findMany({where:{userId:user.id},orderBy:{date:"desc"},take:30}),
-    prisma.performanceTest.findMany({where:{userId:user.id},include:{results:true},orderBy:{completedAt:"desc"},take:30}),
-    prisma.mediaAsset.findMany({where:{relatedUserId:user.id,kind:"PROGRESS_PHOTO"},orderBy:{createdAt:"desc"},take:user.subscriptionTier==="FREE"?3:60}),
+export const dynamic = "force-dynamic";
+
+export default async function ProgressPage() {
+  const user = await requireUser();
+  const milestones = process.env.MILESTONES_ENABLED === "true";
+  const [daily, metrics, photos, details, timeline, completed, awards] = await Promise.all([
+    getDailyProfile(user.id),
+    prisma.bodyMetric.findMany({where:{userId:user.id},orderBy:[{date:"desc"},{createdAt:"desc"}],take:30}),
+    prisma.mediaAsset.findMany({
+      where:{relatedUserId:user.id,kind:"PROGRESS_PHOTO"},orderBy:{createdAt:"desc"},take:user.subscriptionTier==="FREE"?3:60,select:{id:true},
+    }),
     hasFeature(user.subscriptionTier,"score_details"),
-    hasFeature(user.subscriptionTier,"performance_timeline")
+    hasFeature(user.subscriptionTier,"performance_timeline"),
+    prisma.workout.count({where:{userId:user.id,completedAt:{not:null}}}),
+    milestones ? prisma.milestoneAward.findMany({where:{userId:user.id},orderBy:{achievedAt:"desc"},take:4}) : Promise.resolve([]),
   ]);
-  const current=scores[0];
-  const series=scores.slice().reverse();
-  const chartPoints=series.map((s,i)=>({
-    x:series.length===1?400:40+(i/(series.length-1))*720,
-    y:234-Math.max(0,Math.min(100,s.total??0))*1.85,
-    value:s.total??0,
-    date:s.date
-  }));
-  const chartPolyline=chartPoints.map(p=>p.x.toFixed(2)+","+p.y.toFixed(2)).join(" ");
-  const change=scores.length>=2?(scores[0].total??0)-(scores[scores.length-1].total??0):null;
-  return <main className="sub-shell bd-progress">
-    <header className="sub-top"><Link href="/dashboard" className="brand">BE <span>DIFFERENT</span></Link><nav><Link href="/dashboard"><Copy text="BEGINN"/></Link><Link href="/training"><Copy text={"TRAINING"}/></Link><Link className="active" href="/progress"><Copy text="FORTSCHRITT"/></Link><Link href="/coach"><Copy text="TRAINER"/></Link><Link href="/athlete"><Copy text="ATHLET"/></Link></nav></header>
-    <section className="bd-progress-hero">
-      <div className="bd-progress-hero-main">
-        <span className="bd-section-serial">03 / <Copy text="DEINE ENTWICKLUNG"/></span>
-        <h1><Copy text={"DEIN GRIND."}/><br/><em><Copy text="DEINE SPUREN."/></em></h1>
-        <p><Copy text="Hier zählt, was du wirklich erreicht hast. Messwerte, Tests und Entwicklung im eigenen Tempo."/></p>
-      </div>
-      <div className="bd-progress-score">
-        <span><Copy text="AKTUELLER LEISTUNGSWERT"/></span>
-        <div><strong>{dailyProfile.profile.value??"—"}</strong><small>{current?" / 100":""}</small></div>
-        <p><Copy text={"MESSSTAND "}/>{dailyProfile.profile.recordedDate??"FEHLT"}<Copy text={" · DATENABDECKUNG "}/>{dailyProfile.profile.completeness}%</p>
-      </div>
-    </section>
-    <section className="bd-progress-record"><p><Copy text="Der Leistungswert beschreibt dein längerfristiges Profil, nicht die Tagesform oder eine bestätigte Stufe."/></p><p><Copy text={"HEUTE: "}/><Copy text={dailyProfile.plan.scheduled?dailyProfile.plan.completed+" / "+dailyProfile.plan.scheduled+" Einheiten":"Keine Einheit geplant"}/><Copy text={" · BESTÄTIGTE STUFE: "}/><Copy text={dailyProfile.journey.confirmedLevel??"Noch nicht bestätigt"}/></p>
-      <header className="bd-progress-record-head"><div><span className="bd-section-serial">01 / <Copy text="DEIN VERLAUF"/></span><h2><Copy text="NICHT GESCHÄTZT. GEMESSEN."/></h2></div>
-        {details&&change!==null&&<div className="bd-progress-delta"><span><Copy text="VERÄNDERUNG"/></span><strong>{change>0?"+":""}{change}</strong></div>}
-      </header>
-      {details&&series.length>0?<div className="bd-progress-chart">
-        <svg viewBox="0 0 800 260" preserveAspectRatio="none" role="img" aria-label="Tatsächlich gemessene Leistungswerte im zeitlichen Verlauf">
-          <defs><linearGradient id="bd-progress-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#d4ff00" stopOpacity=".23"/><stop offset="1" stopColor="#d4ff00" stopOpacity="0"/></linearGradient></defs>
-          {[0,25,50,75,100].map((level)=><g key={level}><line x1="38" y1={234-level*1.85} x2="766" y2={234-level*1.85} stroke="#344039" strokeWidth=".8" strokeDasharray="2 7"/><text x="0" y={238-level*1.85} fill="#8c9e93" fontSize="11">{level}</text></g>)}
-          {chartPoints.length>1&&<polygon points={`40,239 ${chartPolyline} 760,239`} fill="url(#bd-progress-fill)"/>}
-          {chartPoints.length>1&&<polyline fill="none" stroke="#d4ff00" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" points={chartPolyline}/>}
-          {chartPoints.map((pt,i)=><circle key={i} cx={pt.x} cy={pt.y} r={i===chartPoints.length-1?7:3} fill={i===chartPoints.length-1?"#d4ff00":"#101817"} stroke="#d4ff00" strokeWidth="2"/>)}
-        </svg>
-        <div className="bd-progress-chart-footer">
-          <span>{series[0]?.date.toLocaleDateString("de-DE")}</span><span><Copy text="ECHTE MESSPUNKTE"/></span><span>{series[series.length-1]?.date.toLocaleDateString("de-DE")}</span>
-        </div>
-      </div>:details?<div className="bd-progress-no-data"><Copy text="Noch keine Messwerte vorhanden. Dein Verlauf startet mit dem ersten gespeicherten Wert."/></div>:<div className="bd-progress-locked">
-        <span aria-hidden="true">↗</span><strong><Copy text="DEIN VERLAUF WARTET."/></strong><p><Copy text="Deinen Gesamtwert siehst du bereits. Detailverlauf und Erklärungen gibt es mit PRO."/></p><Link href="/pricing"><Copy text="DETAILS ANSEHEN"/> ↗</Link>
-      </div>}
-    </section>
-    <section className="bd-progress-measurements">
-      <div className="bd-progress-section-title"><span className="bd-section-serial">02 / <Copy text="KÖRPERDATEN"/></span><h2><Copy text="FAKTEN STATT GEFÜHL."/></h2></div>
-      <div className="bd-progress-facts">
-        <div><span><Copy text="GEWICHT"/></span><strong>{metrics[0]?.weightKg??"—"}<small>{metrics[0]?.weightKg==null?"":" kg"}</small></strong><p><Copy text={metrics[0]?.date.toLocaleDateString("de-DE")??"Keine Angabe"}/></p></div>
-        <div><span><Copy text="TAILLE"/></span><strong>{metrics[0]?.waistCm??"—"}<small>{metrics[0]?.waistCm==null?"":" cm"}</small></strong><p><Copy text="LETZTER WERT"/></p></div>
-        <div><span><Copy text="FOTOS"/></span><strong>{photos.length.toString().padStart(2,"0")}</strong><p><Copy text={user.subscriptionTier==="FREE"?"MAXIMAL 3":"PRIVAT"}/></p></div>
-      </div>
-    </section>
-    <section className="bd-progress-tests">
-      <div className="bd-progress-section-title"><span className="bd-section-serial">03 / BE DIFFERENT TEST</span><h2><Copy text={timeline?"DEINE TESTHISTORIE.":"DEIN STARTPUNKT."}/></h2><Link href="/tests"><Copy text="TESTS ÖFFNEN"/> ↗</Link></div>
-      {timeline?<div className="bd-progress-test-list">{tests.length?tests.map((t,i)=><div key={t.id} className="bd-progress-test-row">
-        <span className="bd-progress-test-index">{String(tests.length-i).padStart(2,"0")}</span>
-        <div><span><Copy text={t.name}/></span><strong><Copy text={t.results[0]?.value??"Keine Angabe"}/>{t.results[0]?.unit?" "+t.results[0].unit:""}</strong><small>{t.results[0]?.metric??<Copy text="LEISTUNGSTEST"/>}</small></div>
-        <time><LocalizedValue value={t.completedAt} format="toLocaleDateString"/></time>
-      </div>):<p className="bd-progress-no-data"><Copy text="Noch kein Leistungstest gespeichert."/></p>}</div>:<div className="bd-progress-locked compact">
-        <strong><Copy text="DEIN ERSTER TEST ZÄHLT."/></strong><p><Copy text={tests[0]?"Dein Starttest ist gespeichert. Weitere Tests und Verlauf sind mit PRO verfügbar.":"Dein Starttest erscheint nach dem Onboarding hier."}/></p><Link href="/pricing"><Copy text="VERLAUF ANSEHEN"/> ↗</Link>
-      </div>}
-    </section>
+  const [scores, tests] = await Promise.all([
+    details ? prisma.scoreSnapshot.findMany({
+      where:{userId:user.id,completeness:{gt:0}},orderBy:{date:"desc"},take:120,select:{date:true,total:true},
+    }) : Promise.resolve([]),
+    timeline ? prisma.performanceTest.findMany({where:{userId:user.id},include:{results:true},orderBy:{completedAt:"desc"},take:30}) : Promise.resolve([]),
+  ]);
+  const profile = daily.profile;
+  const measurements = [
+    {label:"Gewicht",unit:"kg",entry:metrics.find(m=>m.weightKg!=null),key:"weightKg"},
+    {label:"Taille",unit:"cm",entry:metrics.find(m=>m.waistCm!=null),key:"waistCm"},
+    {label:"Brust",unit:"cm",entry:metrics.find(m=>m.chestCm!=null),key:"chestCm"},
+  ] as const;
 
-    {user.subscriptionTier!=="FREE"&&photos.length>=2&&<BeforeAfter beforeId={photos[photos.length-1].id} afterId={photos[0].id}/>}
-    {process.env.MILESTONES_ENABLED==="true"&&<section className="bd-progress-record"><h2><Copy text="DEINE MEILENSTEINE."/></h2><p><Copy text="Nachgewiesenes Training und zuvor geplante Erholung zählen für deine Serie."/></p><Link href="/milestones" className="primary compact"><Copy text={"ERFOLGE ANSEHEN →"}/></Link></section>}
-    <ProgressClient/>
+  return <main className="bd-field bd-progress-wall" data-bd-screen="progress">
+    <section className="bd-performance-board">
+      <header>
+        <span className="bd-kicker"><Copy text="FORTSCHRITT"/></span>
+        <h1><Copy text="Deine Entwicklung"/></h1>
+      </header>
+      <div className="bd-scoreboard">
+        <div className="bd-scoreboard-value">
+          <span className="bd-kicker"><Copy text="BD SCORE"/></span>
+          <div><strong>{profile.value ?? "—"}</strong>{profile.value != null && <span>/ 100</span>}</div>
+          <p><Copy text={profile.value == null ? "Noch kein Messwert" : "Langfristiges Leistungsprofil"}/></p>
+          {profile.recordedDate && <span className="bd-kicker"><Copy text="Messstand"/> <LocalizedValue value={new Date(profile.recordedDate+"T00:00:00Z")} format="toLocaleDateString" options={{timeZone:"UTC"}}/></span>}
+          {profile.freshness === "OLD" && <span className="bd-kicker"><Copy text="Älterer Messwert"/></span>}
+        </div>
+        {details && scores.length ? <ScoreTrace points={scores.slice().reverse()} today={new Date(daily.date+"T00:00:00Z")}/> :
+          <div className="bd-scoreboard-note">
+            <span className="bd-kicker"><Copy text="MESSREIHE"/></span>
+            <h2><Copy text={details ? "Dein erster Messpunkt" : "Verlauf mit PRO"}/></h2>
+            <p><Copy text={details ? "Sobald ein Messwert vorliegt, beginnt hier dein Verlauf." : "Mit PRO kannst du deine Messwerte im Zeitverlauf vergleichen."}/></p>
+            <Link href={details ? "/tests" : "/pricing"} className="bd-text-link"><Copy text={details ? "Zu den Leistungstests" : "PRO ansehen"}/></Link>
+          </div>}
+      </div>
+    </section>
+    <section className="bd-evidence-wall">
+      <header className="bd-evidence-head"><h2><Copy text="Deine Nachweise"/></h2><span><strong>{completed}</strong> <Copy text="Einheiten abgeschlossen"/></span></header>
+      <dl className="bd-measure-strip">
+        {measurements.map(({label,unit,entry,key})=><div key={key}>
+          <dt><Copy text={label}/></dt>
+          <dd>{entry?<><LocalizedValue value={entry[key]} options={{maximumFractionDigits:1}}/> <small>{unit}</small></>:"—"}</dd>
+          {entry&&<time><LocalizedValue value={entry.date} format="toLocaleDateString" options={{timeZone:"UTC"}}/></time>}
+        </div>)}
+      </dl>
+      {milestones && <section className="bd-achievement-log">
+        <div><h3><Copy text="Meilensteine"/></h3><Link className="bd-text-link" href="/milestones"><Copy text="Alle Meilensteine"/></Link></div>
+        {awards.length ? <ol>{awards.map(award => <li key={award.id}>
+          <time><LocalizedValue value={award.achievedAt} format="toLocaleDateString" options={{day:"numeric",month:"short",timeZone:daily.timeZone}}/></time><strong><Copy text={award.title}/></strong>
+        </li>)}</ol> : <p><Copy text="Deine verdienten Meilensteine erscheinen hier."/></p>}
+      </section>}
+      <section className="bd-test-ledger">
+        <div><h3><Copy text="Leistungstests"/></h3><Link className="bd-text-link" href="/tests"><Copy text="Zu den Leistungstests"/></Link></div>
+        {timeline && tests.length ? <ol>{tests.map(test=><li key={test.id}>
+          <time><LocalizedValue value={test.completedAt} format="toLocaleDateString" options={{timeZone:daily.timeZone}}/></time>
+          <div><strong><Copy text={test.name}/></strong>
+            <p>{test.results.map(result=><span key={result.id}><Copy text={result.metric}/> <b><LocalizedValue value={result.value}/> {result.unit}</b></span>)}</p></div>
+        </li>)}</ol> : <p><Copy text={timeline ? "Noch kein Leistungstest gespeichert." : "Den vollständigen Testverlauf siehst du mit PRO."}/></p>}
+      </section>
+      {user.subscriptionTier !== "FREE" && photos.length >= 2 && <BeforeAfter beforeId={photos[photos.length-1].id} afterId={photos[0].id}/>}
+      <details className="bd-record-tools">
+        <summary><Copy text="Maße oder Fortschrittsfoto hinzufügen"/></summary>
+        <ProgressClient/>
+      </details>
+    </section>
   </main>;
 }

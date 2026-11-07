@@ -1,1 +1,13 @@
-{"name":"BE DIFFERENT","short_name":"BE DIFFERENT","description":"Build Your Athlete","start_url":"/dashboard","display":"standalone","background_color":"#0A0A0B","theme_color":"#0A0A0B","lang":"de","icons":[]}
+{
+  "id": "/",
+  "name": "BE DIFFERENT",
+  "short_name": "BE DIFFERENT",
+  "description": "Dein Training, deine Leistung und deine Erholung.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#151713",
+  "theme_color": "#151713",
+  "lang": "de",
+  "icons": [{"src":"/favicon.png","sizes":"1254x1254","type":"image/png","purpose":"any"}]
+}

@@ -41,6 +41,6 @@ export function initialExperienceForLevel(level:(typeof JOURNEY_LEVELS)[number])
   return "ADVANCED";
 }
 
-export function displayJourneyLevel(level:(typeof JOURNEY_LEVELS)[number]){
+export function displayJourneyLevel(level:string){
   return level.replaceAll("_"," ");
 }

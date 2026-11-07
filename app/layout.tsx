@@ -24,6 +24,7 @@ import "./web-athlete-2026.css";
 import "./admin-mobile-polish.css";
 import "./athlete-experience.css";
 import "./bd-art-direction.css";
+import "./field-manual.css";
 import {cookies} from "next/headers";
 import {LocaleProvider} from "./components/Locale";
 import {getCurrentUser} from "../lib/auth";
@@ -33,7 +34,8 @@ import ServiceWorker from "./ServiceWorker";
 export const metadata: Metadata = {
   title: "BE DIFFERENT",
   description: "Training, Leistung und Regeneration in einem persönlichen System.",
-  icons: { icon: "/favicon.png", apple: "/favicon.png" }
+  icons: { icon: "/favicon.png", apple: "/favicon.png" },
+  manifest: "/manifest.webmanifest"
 };
 
 export const viewport: Viewport = {
@@ -47,6 +49,8 @@ export default async function RootLayout({children}:{children:React.ReactNode}) 
   const preferred=(await cookies()).get("bd_locale")?.value;
   const user=await getCurrentUser();
   const locale=language(preferred??user?.locale);
+  let timeZone=user?.timezone || "Europe/Berlin";
+  try { new Intl.DateTimeFormat(locale,{timeZone}); } catch { timeZone="Europe/Berlin"; }
   const demo=user?.email==="admin@bedifferent.smarbiz.sbs" && user?.name==="Ayman";
-  return <html lang={locale}><body><LocaleProvider initialLocale={locale}><ServiceWorker/>{demo&&<div role="status" style={{background:"#263014",color:"#dbff73",textAlign:"center",padding:"7px 12px",fontSize:11,fontWeight:800,letterSpacing:".04em",borderBottom:"1px solid #4a5d27"}}><Copy text={"DEMO ANSICHT · Beispieldaten, keine bestätigten persönlichen Messwerte oder echten Geräteverbindungen"}/></div>}{children}</LocaleProvider></body></html>;
+  return <html lang={locale}><body><LocaleProvider initialLocale={locale} timeZone={timeZone}><ServiceWorker signedIn={Boolean(user)}/>{demo&&<div role="status" style={{background:"#263014",color:"#dbff73",textAlign:"center",padding:"7px 12px",fontSize:11,fontWeight:800,letterSpacing:".04em",borderBottom:"1px solid #4a5d27"}}><Copy text={"DEMO ANSICHT · Beispieldaten, keine bestätigten persönlichen Messwerte oder echten Geräteverbindungen"}/></div>}{children}</LocaleProvider></body></html>;
 }
