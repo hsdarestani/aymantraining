@@ -6,6 +6,22 @@ async function login(page,user){await page.goto('/login');await page.getByRole('
 test.beforeAll(async()=>{if(!process.env.DATABASE_URL?.includes('bedifferent_test'))throw Error('Browser acceptance requires isolated test database');const passwordHash=await bcrypt.hash(password,10);admin=await db.user.create({data:{email:`ui-admin-${stamp}@example.invalid`,name:'UI Admin',passwordHash,role:'ADMIN',onboardingCompleted:true,locale:'en'}});athlete=await db.user.create({data:{email:`ui-athlete-${stamp}@example.invalid`,name:'UI Athlete',passwordHash,role:'ATHLETE',subscriptionTier:'PRO',onboardingCompleted:true,locale:'en'}});await db.coachAssignment.create({data:{athleteId:athlete.id,coachId:admin.id}});plan=await db.trainingPlan.create({data:{name:'UI Acceptance Plan',active:true,isTemplate:true}})});
 test.afterAll(async()=>{await db.message.deleteMany({where:{athleteId:athlete?.id}});await db.coachAssignment.deleteMany({where:{athleteId:athlete?.id}});await db.user.deleteMany({where:{id:{in:[admin?.id,athlete?.id].filter(Boolean)}}});await db.trainingPlanItem.deleteMany({where:{planId:plan?.id}});await db.trainingPlan.deleteMany({where:{id:plan?.id}});await db.exercise.deleteMany({where:{id:exerciseId}});await db.$disconnect()});
 test('public forms switch languages, persist and keep input values',async({page})=>{await page.goto('/login');await page.locator('input[name="email"]').fill('draft@example.invalid');await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('en');await expect(page.getByText('Password',{exact:true})).toBeVisible();await expect(page.locator('input[name="email"]')).toHaveValue('draft@example.invalid');await page.reload();await expect(page.getByText('Password',{exact:true})).toBeVisible();await expect(page.locator('html')).toHaveAttribute('lang','en');await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('de');await expect(page.getByText('Passwort',{exact:true})).toBeVisible()});
+test('sign-in submits passwords in a POST body with JavaScript disabled',async({browser})=>{
+ const ctx=await browser.newContext({javaScriptEnabled:false});
+ try {
+  const page=await ctx.newPage();
+  await page.goto('/login');
+  await page.locator('input[name="email"]').fill(athlete.email);
+  await page.locator('input[name="password"]').fill(password);
+  const submitted=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/auth/login');
+  await page.locator('form button[type="submit"]').click();
+  const response=await submitted;
+  expect(response.request().method()).toBe('POST');
+  expect(new URL(response.url()).search).toBe('');
+  expect(response.status()).toBe(303);
+  await expect(page).toHaveURL(/\/dashboard$/);
+ }finally{await ctx.close()}
+});
 test('authenticated athlete pages switch language immediately and persist across navigation',async({page})=>{
  await login(page,athlete);
  await expect(page.getByRole('link',{name:'Open coaching',exact:true})).toBeVisible();

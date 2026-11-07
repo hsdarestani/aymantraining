@@ -19,14 +19,17 @@ async function request(url: string, options?: RequestInit) {
   return data;
 }
 
-export default function CoachClient({userId, initial, initialCursor, canWrite}:{
-  userId:string; initial:Message[]; initialCursor:string|null; canWrite:boolean;
+export default function CoachClient({userId, initial, initialCursor, canWrite, initialVideoConsent}:{
+  userId:string; initial:Message[]; initialCursor:string|null; canWrite:boolean; initialVideoConsent:boolean;
 }) {
   const t = useT();
   const [messages, setMessages] = useState(initial);
   const [cursor, setCursor] = useState(initialCursor);
   const [text, setText] = useState("");
   const [attachment, setAttachment] = useState<{file:File;kind:"VOICE"|"VIDEO";durationSec?:number}|null>(null);
+  const [videoConsent, setVideoConsent] = useState(initialVideoConsent);
+  const [allowVideo, setAllowVideo] = useState(false);
+  const needsVideoConsent = attachment?.kind === "VIDEO" && !videoConsent;
   const [recording, setRecording] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -92,7 +95,7 @@ export default function CoachClient({userId, initial, initialCursor, canWrite}:{
   async function send(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const body = text.trim();
-    if (busy || recording || (!body && !attachment)) return;
+    if (busy || recording || (!body && !attachment) || (needsVideoConsent && !allowVideo)) return;
     setBusy(true);
     setNotice("");
     setError("");
@@ -102,6 +105,14 @@ export default function CoachClient({userId, initial, initialCursor, canWrite}:{
     }
     const draft = pending.current;
     try {
+      if (needsVideoConsent) {
+        await request("/api/consent",{
+          method:"POST",headers:{"content-type":"application/json"},
+          body:JSON.stringify({type:"media_processing",version:"1.0",granted:true}),
+        });
+        setVideoConsent(true);
+        setAllowVideo(false);
+      }
       if (attachment && !draft.mediaId) {
         const upload = new FormData();
         upload.set("file", attachment.file);
@@ -123,6 +134,10 @@ export default function CoachClient({userId, initial, initialCursor, canWrite}:{
       if (fileInput.current) fileInput.current.value = "";
       setNotice("Nachricht gesendet.");
     } catch (e) {
+      if (e instanceof Error && e.message === "Bitte bestätige zuerst die Verarbeitung privater Fotos/Videos.") {
+        setVideoConsent(false);
+        setAllowVideo(false);
+      }
       setError(e instanceof Error ? e.message : "Senden fehlgeschlagen.");
     } finally {
       setBusy(false);
@@ -198,12 +213,16 @@ export default function CoachClient({userId, initial, initialCursor, canWrite}:{
       </label>
       {attachment && <div className="bd-attachment"><span><Copy text={attachment.kind==="VOICE"?"Sprachnachricht bereit":"Technikvideo bereit"}/></span>
         <button className="bd-text-link" disabled={busy||recording} type="button" onClick={()=>{setAttachment(null);if(fileInput.current)fileInput.current.value="";}}><Copy text="Entfernen"/></button></div>}
+      {needsVideoConsent && <label className="bd-media-permission">
+        <input type="checkbox" checked={allowVideo} disabled={busy} onChange={e=>setAllowVideo(e.target.checked)}/>
+        <Copy text="Ich stimme der privaten Verarbeitung von Fotos und Videos für meine Betreuung zu."/>
+      </label>}
       <div className="bd-composer-actions">
         <button type="button" disabled={busy} className="bd-compose-option" aria-pressed={recording} onClick={record}><Copy text={recording?"Aufnahme beenden":"Sprache aufnehmen"}/></button>
         <input type="file" accept="video/mp4,video/quicktime,video/webm" ref={fileInput} hidden
           onChange={e=>{const file=e.target.files?.[0];if(file)setAttachment({file,kind:"VIDEO"});e.target.value="";}}/>
         <button type="button" className="bd-compose-option" disabled={busy||recording} onClick={()=>fileInput.current?.click()}><Copy text="Video hinzufügen"/></button>
-        <button type="submit" className="bd-action" disabled={busy||recording||(!text.trim()&&!attachment)}><Copy text={busy?"Wird gesendet …":"Senden"}/></button>
+        <button type="submit" className="bd-action" disabled={busy||recording||(!text.trim()&&!attachment)||(needsVideoConsent&&!allowVideo)}><Copy text={busy?"Wird gesendet …":"Senden"}/></button>
       </div>
     </form>}
     {notice && <p role="status"><Copy text={notice}/></p>}

@@ -1,3 +1,4 @@
+import {authRedirect,isAuthForm,readAuthPayload} from "../../../../lib/auth-form";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
@@ -15,7 +16,7 @@ const schema = z.object({
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return errorJson("Ungültige Anfrage.", 403);
 
-  const parsed = schema.safeParse(await request.json().catch(() => null));
+  const parsed = schema.safeParse(await readAuthPayload(request));
   if (!parsed.success) return errorJson("Bitte prüfe deine Angaben.", 422);
 
   try {
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
 
     const { token, expiresAt } = await createSession(user.id);
     const mobile = request.headers.get("x-bd-client") === "mobile";
-    const response = NextResponse.json({
+    const response = isAuthForm(request) ? authRedirect("/onboarding") : NextResponse.json({
       ok: true,
       user: { id: user.id, name: user.name, tier: user.subscriptionTier },
       ...(mobile ? { sessionToken: token, expiresAt: expiresAt.toISOString() } : {})

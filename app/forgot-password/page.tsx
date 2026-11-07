@@ -2,9 +2,10 @@
 import {Copy} from "../components/Locale";
 
 import Link from "next/link";
-import {FormEvent,useState} from "react";
+import {FormEvent,useEffect,useState} from "react";
 export default function Forgot(){
   const [status,setStatus]=useState("");
+  useEffect(()=>{if(new URLSearchParams(window.location.search).get("sent")==="1")setStatus("Wenn das Konto existiert, wurde ein Link zum Zurücksetzen verschickt.");},[]);
   async function submit(e:FormEvent<HTMLFormElement>){
     e.preventDefault();
     const f=new FormData(e.currentTarget);
@@ -13,7 +14,7 @@ export default function Forgot(){
   }
   return <main className="auth-shell">
     <Link className="brand" href="/login">BE <span>DIFFERENT</span></Link>
-    <form className="auth-card" onSubmit={submit}>
+    <form className="auth-card" method="post" action="/api/auth/forgot-password" onSubmit={submit}>
       <span className="eyebrow"><Copy text={"KONTO WIEDERHERSTELLEN"}/></span><h1><Copy text={"Passwort vergessen?"}/></h1>
       <p><Copy text={"Wir senden einen einmaligen Link, sobald E Mail Versand konfiguriert ist."}/></p>
       <label><Copy text={"E Mail"}/><input name="email" type="email" required/></label>

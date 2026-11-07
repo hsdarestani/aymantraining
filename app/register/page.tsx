@@ -61,7 +61,7 @@ export default function RegisterPage() {
 
   return <main className="auth-shell">
     <Link className="brand" href="/">BE <span>DIFFERENT</span></Link>
-    <form className="auth-card" onSubmit={submit}>
+    <form className="auth-card" method="post" action="/api/auth/register" onSubmit={submit}>
       <span className="eyebrow"><Copy text={"ANDERS STARTEN"}/></span>
       <h1><Copy text={"Dein Athlet beginnt hier."}/></h1>
       <p><Copy text={"Du startest im kostenlosen Tarif. PRO kann später freigeschaltet werden."}/></p>

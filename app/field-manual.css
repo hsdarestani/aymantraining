@@ -117,7 +117,7 @@ body:has(.bd-field) .app-desktop-top nav a.active { color: #fff; }
 .bd-cockpit-rail div + div { border-left: 1px solid #575e4e; padding-left: clamp(10px, 2.5vw, 32px); }
 .bd-cockpit-rail dt { color: #c1c6b4; }
 .bd-cockpit-rail dd { margin-top: 5px; font-weight: 800; line-height: 1.2; }
-.bd-cockpit-rail dd a { display: inline-flex; align-items: center; min-height: 36px; text-decoration: underline; text-underline-offset: 3px; }
+.bd-cockpit-rail dd a { display: flex; align-items: center; min-height: 44px; text-decoration: underline; text-underline-offset: 3px; }
 .bd-start-below { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(260px, 1fr); gap: clamp(22px,4vw,48px); margin-top: 32px; }
 .bd-rhythm-title { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .bd-rhythm-title .bd-kicker { color: var(--quiet); }
@@ -299,6 +299,8 @@ body:has(.bd-field) .app-desktop-top nav a.active { color: #fff; }
 .bd-dialogue-log li p { white-space: pre-wrap; }
 .bd-coach-composer { display: grid; gap: 10px; margin: 16px 0; }
 .bd-coach-composer label { display: grid; gap: 5px; }
+.bd-coach-composer .bd-media-permission { display: flex; align-items: center; gap: 9px; min-height: 44px; font-size: 13px; }
+.bd-media-permission input { width: 20px; height: 20px; min-height: 0; padding: 0; flex: none; accent-color: #516337; }
 .bd-coach-composer textarea { min-height: 70px; border: 1px solid #798470; border-radius: 0; background: #f8f8ef; color: var(--carbon); font-size: 16px; resize: vertical; }
 .bd-coach-composer textarea::placeholder { color: #596154; }
 .bd-composer-actions, .bd-attachment { display: flex; flex-wrap: wrap; gap: 7px 10px; align-items: center; }

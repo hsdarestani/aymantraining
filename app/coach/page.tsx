@@ -19,11 +19,16 @@ export default async function CoachPage() {
       orderBy:{reviewedAt:"desc"},select:{reviewedAt:true,annotations:true},
     }),
   ]);
-  const recent = allowed ? await prisma.message.findMany({
-    where:{athleteId:user.id},orderBy:[{createdAt:"desc"},{id:"desc"}],take:41,
-  }) : [];
-  const messages = recent.slice(0,40).reverse();
   const canWrite = user.role === "ATHLETE";
+  const [recent, consent] = await Promise.all([
+    allowed ? prisma.message.findMany({
+      where:{athleteId:user.id},orderBy:[{createdAt:"desc"},{id:"desc"}],take:41,
+    }) : Promise.resolve([]),
+    allowed && canWrite ? prisma.consentRecord.findFirst({
+      where:{userId:user.id,type:"media_processing"},orderBy:[{grantedAt:"desc"},{id:"desc"}],select:{granted:true},
+    }) : Promise.resolve(null),
+  ]);
+  const messages = recent.slice(0,40).reverse();
   const feedback = review?.annotations as {coachNote?:string;nextSession?:{focus?:string;advice?:string}} | null;
   const hasFeedback = Boolean(feedback?.coachNote || feedback?.nextSession?.focus || feedback?.nextSession?.advice);
   const canSeeDay = canWrite && process.env.JOURNEY_DAILY_ENABLED === "true";
@@ -73,7 +78,7 @@ export default async function CoachPage() {
         </details>}
       </aside>
     </div>
-    {allowed ? <CoachClient userId={user.id} initial={messages} initialCursor={recent.length > 40 ? messages[0].id : null} canWrite={canWrite}/> :
+    {allowed ? <CoachClient userId={user.id} initial={messages} initialCursor={recent.length > 40 ? messages[0].id : null} canWrite={canWrite} initialVideoConsent={consent?.granted??false}/> :
       <section className="bd-coach-locked" id="coach-dialogue">
         <div><span className="bd-kicker">PRO</span><h2><Copy text="Persönlicher Austausch"/></h2><p><Copy text="Schick deinem Coach eine Frage, eine Sprachnachricht oder ein Technikvideo."/></p></div>
         <Link href="/pricing" className="bd-action"><Copy text="PRO ansehen"/><span className="bd-action-mark" aria-hidden="true"/></Link>
