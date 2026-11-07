@@ -43,8 +43,8 @@ export default function ScoreTrace({points, today}: {points: Point[]; today: Dat
         {coords.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={i === index ? 5 : 3} className={i === index ? "is-reading" : undefined}/>)}
       </svg>
       <div className="bd-trace-dates">
-        <LocalizedValue value={first.date} format="toLocaleDateString" options={{day:"numeric",month:"short",timeZone:"UTC"}}/>
-        {span > 0 && <LocalizedValue value={last!.date} format="toLocaleDateString" options={{day:"numeric",month:"short",timeZone:"UTC"}}/>}
+        <time><LocalizedValue value={first.date} format="toLocaleDateString" options={{day:"numeric",month:"short",timeZone:"UTC"}}/></time>
+        {span > 0 && <time><LocalizedValue value={last!.date} format="toLocaleDateString" options={{day:"numeric",month:"short",timeZone:"UTC"}}/></time>}
       </div>
       {visible.length > 1 && <label className="bd-trace-range">
         <span className="bd-kicker"><Copy text="Messpunkt wählen"/></span>
