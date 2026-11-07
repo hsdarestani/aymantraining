@@ -38,5 +38,7 @@ export function ExerciseName({exercise}:{exercise:{nameDe:string;nameEn?:string|
 export function LocalizedValue({value,format='toLocaleString',options}:{value:any;format?:string;options?:any}){
  const {locale,timeZone}=useContext(Context);
  const formatting=value instanceof Date?{timeZone,...options}:options;
- return <>{value?.[format]?.(locale==='en'?'en-GB':'de-DE',formatting)??''}</>;
+ const text=value?.[format]?.(locale==='en'?'en-GB':'de-DE',formatting)??'';
+ // Intl can use different punctuation for the same value on the server and in the browser.
+ return <span suppressHydrationWarning>{text}</span>;
 }
