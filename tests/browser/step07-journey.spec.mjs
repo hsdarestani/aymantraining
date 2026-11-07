@@ -41,10 +41,15 @@ test("athlete sees five-stage plan previews but can open only earned chapter",as
  await page.goto(base+"/journey");
  await expect(page.getByRole("heading",{name:"Dein Weg. Dein Fortschritt."})).toBeVisible();
  await expect(page.getByText("Athletik mit Fußball")).toBeVisible();
- await expect(page.locator(".j7-chapter")).toHaveCount(3);
- await expect(page.locator(".j7-locked")).toHaveCount(2);
+ const levels=page.getByRole("group",{name:"Trainingsstufe auswählen"});
+ await expect(levels.getByRole("button")).toHaveCount(5);
+ await expect(levels.getByRole("button",{name:/READY/})).toHaveAttribute("aria-pressed","true");
+ await expect(page.getByRole("button",{name:/Gesperrter Abschnitt/})).toBeDisabled();
+ await levels.getByRole("button",{name:/AWAKE/}).click();
+ await expect(page.getByRole("button",{name:/Aufbau/})).toBeDisabled();
  await expect(page.getByText("Versteckte nächste Übung")).toHaveCount(0);
- await page.locator(".j7-unlocked").first().click();
+ await levels.getByRole("button",{name:/READY/}).click();
+ await page.getByRole("button",{name:/Freier Abschnitt/}).click();
  await expect(page.getByText("Kniebeugen Technik")).toBeVisible();
  await expect(page.getByText("Nur innerhalb eines verdienten Kapitels")).toBeVisible();
  const forbidden=await page.evaluate(async({id,enrollmentId})=>{

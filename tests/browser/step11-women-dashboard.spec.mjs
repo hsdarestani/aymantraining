@@ -33,9 +33,11 @@ test("onboarding-selected women layout remains voluntary and no cycle tracking i
  await expect(page.getByRole("heading",{name:"STARK IN DEINEM TEMPO."})).toBeVisible();
  await expect(page.getByText(/Alle Sportarten stehen dir offen/)).toBeVisible();
  const localDay=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',day:'2-digit'}).format(new Date());
- await expect(page.getByRole('group',{name:'Trainingstag auswählen'}).getByRole('button',{name:new RegExp('HEUTE '+localDay+' ')})).toHaveAttribute('aria-pressed','true');
+ const today=page.getByRole('group',{name:'Trainingstag auswählen'}).getByRole('button',{name:/^HEUTE/});
+ await expect(today).toHaveAttribute('aria-pressed','true');
+ await expect(today).toContainText(localDay);
  await expect(page.getByText('ERHOLUNG IM PLAN',{exact:true})).toHaveCount(0);
- await expect(page.getByText('OHNE PLANUNG KEIN BESTÄTIGTER ERHOLUNGSTAG',{exact:true})).toBeVisible();
+ await expect(page.locator('#bd-rhythm-schedule')).toContainText('Keine Einheit eingetragen.');
  await ctx.close();
 });
 test("preferences persist for one athlete without changing other users or earned progress",async({browser})=>{
@@ -83,8 +85,10 @@ test("FREE dashboard cannot reveal PRO component scores",async({browser})=>{
  await db.scoreSnapshot.upsert({where:{userId_date:{userId:athleteB.id,date}},create:{userId:athleteB.id,date,total:73,strength:91,completeness:80},update:{total:73,strength:91,completeness:80}});
  const {ctx,page}=await login(browser,"b");
  await page.goto(host+"/dashboard");
- await expect(page.locator('.bd-pillar-row').first().locator('b')).toHaveText('PRO');
- await expect(page.locator('.bd-radar-stage')).not.toContainText('91');
- await expect(page.getByText(/KOSTENLOS zeigt deinen Gesamtwert/)).toBeVisible();
+ await expect(page.locator('.bd-cockpit-rail').getByRole('link',{name:'73',exact:true})).toBeVisible();
+ await expect(page.locator('main').getByText('91',{exact:true})).toHaveCount(0);
+ await page.goto(host+"/athlete");
+ await expect(page.getByRole('link',{name:'Leistungsdetails mit PRO',exact:true})).toBeVisible();
+ await expect(page.locator('main').getByText('91',{exact:true})).toHaveCount(0);
  await ctx.close();
 });
