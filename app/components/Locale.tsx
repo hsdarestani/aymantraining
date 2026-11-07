@@ -16,7 +16,18 @@ export function LocaleProvider({initialLocale,timeZone,children}:{initialLocale:
   fetch('/api/profile',{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({locale:value})}).catch(()=>{});
   startTransition(()=>router.refresh());
  }
- return <Context.Provider value={{locale,timeZone,setLocale}}>{children}<label className="language-picker" aria-label="Language"><select aria-label="Language" value={locale} onChange={e=>setLocale(e.target.value as Locale)}><option value="de">Deutsch</option><option value="en">English</option></select></label></Context.Provider>;
+ return <Context.Provider value={{locale,timeZone,setLocale}}>{children}<LanguagePicker/></Context.Provider>;
+}
+export function LanguagePicker({inDrawer=false}:{inDrawer?:boolean}){
+ const {locale,setLocale}=useContext(Context);
+ const label=locale==='de'?'Sprache':'Language';
+ return <label className={inDrawer?"language-picker drawer-language":"language-picker language-picker--page"}>
+  {inDrawer&&<span>{label}</span>}
+  <select aria-label={label} value={locale} onChange={e=>setLocale(e.target.value as Locale)}>
+   <option value="de" lang="de">Deutsch</option>
+   <option value="en" lang="en">English</option>
+  </select>
+ </label>;
 }
 export function useLocale(){return useContext(Context).locale}
 export function useT(){const locale=useLocale();return (text:string)=>translate(text,locale)}

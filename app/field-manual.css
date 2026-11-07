@@ -92,7 +92,7 @@ body:has(.bd-field) .app-desktop-top, body:has(.bd-field) .app-mobile-top {
   background: var(--field-deep); backdrop-filter: none; border-color: var(--field-line);
 }
 body:has(.bd-field) .app-drawer:not(.open) { visibility: hidden; }
-body:has(.bd-field) .app-desktop-inner { max-width: 1220px; padding-right: 115px; }
+body:has(.bd-field) .app-desktop-inner { max-width: 1220px; }
 body:has(.bd-field) .app-desktop-top nav a { color: var(--field-muted); }
 body:has(.bd-field) .app-desktop-top nav a.active { color: var(--field-ink); }
 
@@ -317,11 +317,9 @@ body:has(.bd-field) .app-desktop-top nav a.active { color: var(--field-ink); }
   .bd-start, .bd-progress-wall { padding-top: calc(68px + env(safe-area-inset-top,0px)); }
   body:has(.bd-field) .app-mobile-top {
     height: calc(68px + env(safe-area-inset-top,0px)) !important; min-height: 0 !important; max-height: none !important;
-    padding: env(safe-area-inset-top,0px) 104px 0 15px !important;
+    padding: env(safe-area-inset-top,0px) max(15px,env(safe-area-inset-right,0px)) 0 max(15px,env(safe-area-inset-left,0px)) !important;
   }
   body:has(.bd-field) .app-mobile-top button { width: 44px; height: 44px; border-radius: 0; border: 0; background: transparent; }
-  body:has(.bd-field) .language-picker { top: calc(11px + env(safe-area-inset-top,0px)); }
-  body:has(.bd-field) .language-picker select { font-size: 12px; border-radius: 0; background: var(--field-raised); color: var(--field-ink); }
   body:has(.bd-field) .app-bottom-nav {
     inset: auto 0 0 !important; height: auto !important; min-height: 0 !important; max-height: none !important;
     padding: 0 6px env(safe-area-inset-bottom,0px) !important; border: 0; border-top: 1px solid var(--field-line);

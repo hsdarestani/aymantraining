@@ -1,12 +1,8 @@
 "use client";
-import {Copy,LocalizedElement,useLocale} from "./Locale";
-
-
-
-
+import {Copy,LanguagePicker,LocalizedElement,useLocale} from "./Locale";
 import Link from "next/link";
 import {usePathname} from "next/navigation";
-import {useEffect,useRef,useState} from "react";
+import {useEffect,useId,useRef,useState,type MouseEvent} from "react";
 
 type IconName="home"|"training"|"progress"|"coach"|"athlete"|"menu"|"close"|"back";
 function Icon({name}:{name:IconName}){
@@ -53,14 +49,25 @@ export default function AppNav(){
   const locale=useLocale();
   const [open,setOpen]=useState(false);
   const drawer=useRef<HTMLElement>(null);
+  const drawerContent=useRef<HTMLDivElement>(null);
+  const trigger=useRef<HTMLElement>(null);
+  const drawerId=useId();
+
+  function openMenu(event:MouseEvent<HTMLElement>){
+    trigger.current=event.currentTarget;
+    setOpen(true);
+  }
+
   useEffect(()=>{
     if(!open)return;
-    const previous=document.activeElement as HTMLElement|null;
+    const opener=trigger.current;
     const overflow=document.body.style.overflow;
     document.body.style.overflow="hidden";
-    const focusable=()=>Array.from(drawer.current?.querySelectorAll<HTMLElement>('a[href],button:not([disabled])')||[]);
+    if(drawerContent.current)drawerContent.current.scrollTop=0;
+    const focusable=()=>Array.from(drawer.current?.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),select:not([disabled])')||[]);
     focusable()[0]?.focus();
     function keyboard(event:KeyboardEvent){
+      if(event.defaultPrevented)return;
       if(event.key==="Escape"){event.preventDefault();setOpen(false)}
       if(event.key!=="Tab")return;
       const items=focusable(),first=items[0],last=items[items.length-1];
@@ -68,7 +75,7 @@ export default function AppNav(){
       else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus()}
     }
     document.addEventListener("keydown",keyboard);
-    return()=>{document.body.style.overflow=overflow;document.removeEventListener("keydown",keyboard);previous?.focus()};
+    return()=>{document.body.style.overflow=overflow;document.removeEventListener("keydown",keyboard);opener?.focus({preventScroll:true})};
   },[open]);
   const workout=/^\/training\/[^/]+$/.test(path);
 
@@ -83,13 +90,13 @@ export default function AppNav(){
             return <Link prefetch={false} href={href} className={active?"active":""} aria-current={active?"page":undefined} key={href}><Icon name={icon}/><span><Copy text={label==="START"&&locale==="en"?"HOME":label}/></span></Link>;
           })}
         </LocalizedElement>
-        <LocalizedElement as="button" className="desktop-menu" aria-label="Menü öffnen" aria-expanded={open} onClick={()=>setOpen(true)}><Icon name="menu"/><span><Copy text={"MENÜ"}/></span></LocalizedElement>
+        <LocalizedElement as="button" type="button" className="desktop-menu" aria-label="Menü öffnen" aria-expanded={open} aria-controls={drawerId} onClick={openMenu}><Icon name="menu"/><span><Copy text={"MENÜ"}/></span></LocalizedElement>
       </div>
     </header>
 
     <div className="app-mobile-top">
       {workout?<Link prefetch={false} href="/training" className="mobile-back"><Icon name="back"/><span><Copy text="TRAINING"/></span></Link>:<Link prefetch={false} href="/dashboard" className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></Link>}
-      <LocalizedElement as="button" aria-label="Menü öffnen" aria-expanded={open} onClick={()=>setOpen(true)}><Icon name="menu"/></LocalizedElement>
+      <LocalizedElement as="button" type="button" aria-label="Menü öffnen" aria-expanded={open} aria-controls={drawerId} onClick={openMenu}><Icon name="menu"/></LocalizedElement>
     </div>
 
     <LocalizedElement as="nav" className="app-bottom-nav" aria-label="Hauptnavigation">
@@ -100,14 +107,20 @@ export default function AppNav(){
     </LocalizedElement>
 
     <div className={open?"app-drawer open":"app-drawer"} aria-hidden={!open} inert={!open}>
-      <LocalizedElement as="button" className="drawer-backdrop" aria-label="Menü schließen" onClick={()=>setOpen(false)}/>
-      <aside ref={drawer} role="dialog" aria-modal="true" aria-label="BE DIFFERENT">
-        <div className="drawer-head"><span className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></span><LocalizedElement as="button" aria-label="Menü schließen" onClick={()=>setOpen(false)}><Icon name="close"/></LocalizedElement></div>
-        <div className="drawer-identity"><span><Copy text={"DEINE ENTWICKLUNG"}/></span><strong><Copy text={"DEIN ATHLET."}/></strong></div>
-        <div className="drawer-primary">
-          {items.map(([href,label,icon])=><Link prefetch={false} href={href} onClick={()=>setOpen(false)} key={href}><Icon name={icon}/><span><Copy text={label==="START"&&locale==="en"?"HOME":label}/></span></Link>)}
+      <button type="button" className="drawer-backdrop" tabIndex={-1} aria-hidden="true" onClick={()=>setOpen(false)}/>
+      <aside id={drawerId} ref={drawer} role="dialog" aria-modal="true" aria-label="BE DIFFERENT">
+        <div className="drawer-head">
+          <span className="app-wordmark"><img src="/green logo.png" alt="BE DIFFERENT"/></span>
+          <LocalizedElement as="button" type="button" aria-label="Menü schließen" onClick={()=>setOpen(false)}><Icon name="close"/></LocalizedElement>
         </div>
-        <div className="drawer-links">{more.map(([href,label])=><Link prefetch={false} href={href} onClick={()=>setOpen(false)} key={href}><Copy text={label}/></Link>)}</div>
+        <LanguagePicker inDrawer/>
+        <div className="drawer-content" ref={drawerContent}>
+          <div className="drawer-identity"><span><Copy text={"DEINE ENTWICKLUNG"}/></span><strong><Copy text={"DEIN ATHLET."}/></strong></div>
+          <div className="drawer-primary">
+            {items.map(([href,label,icon])=><Link prefetch={false} href={href} onClick={()=>setOpen(false)} key={href}><Icon name={icon}/><span><Copy text={label==="START"&&locale==="en"?"HOME":label}/></span></Link>)}
+          </div>
+          <div className="drawer-links">{more.map(([href,label])=><Link prefetch={false} href={href} onClick={()=>setOpen(false)} key={href}><Copy text={label}/></Link>)}</div>
+        </div>
         <p><Copy text={"Normal ist langweilig."}/></p>
       </aside>
     </div>
