@@ -238,14 +238,14 @@ body:has(.bd-field) .app-desktop-top nav a.active { color: #fff; }
 .bd-athlete-portrait span { font: 800 clamp(25px,5vw,55px)/1 Archivo,system-ui,sans-serif; }
 .bd-twin-console { display: grid; grid-template-columns: minmax(0,1fr) minmax(210px,.8fr); align-items: start; max-width: 940px; margin: 20px auto 34px; }
 .bd-twin-figure { position: relative; aspect-ratio: 5 / 6; min-width: 0; background: #d8ddcb; }
-.bd-twin-figure svg { display: block; width: 100%; height: 100%; }
+.bd-twin-figure svg { display: block; width: 100%; height: 100%; pointer-events: none; }
 .bd-twin-stamp { position: absolute; z-index: 1; top: 10px; left: 10px; font: 800 12px/1.1 Archivo,system-ui,sans-serif; text-transform: uppercase; }
 .bd-twin-gridline { stroke: #aab49b; stroke-width: .6; }
 .bd-twin-orbit-line { stroke: #79836c; stroke-dasharray: 2 4; }
 .bd-twin-runner { fill: #98a589; stroke: #353d2c; stroke-width: 1.1; }
 .bd-twin-axis { stroke: #404b34; stroke-width: .85; }
 .bd-twin-pin {
-  position: absolute; display: grid; place-items: center; transform: translate(-50%,-50%);
+  position: absolute; z-index: 2; display: grid; place-items: center; transform: translate(-50%,-50%);
   width: 46px; height: 46px; padding: 0; border-radius: 50%; border: 0; color: var(--carbon); background: transparent;
 }
 .bd-twin-pin span { display: grid; place-items: center; width: 27px; height: 27px; border: 1px solid currentColor; border-radius: 50%; background: #eef1e6; font-size: 10px; font-weight: 800; transition: background-color .17s; }
