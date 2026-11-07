@@ -46,6 +46,13 @@ try{
   await expect("/api/daily-check",{method:"POST",headers:{origin:"https://untrusted.invalid","x-bd-client":"mobile"},body:{energy:7,soreness:3,mood:8,stress:4}},403);
   await expect("/api/athlete-context",{method:"POST",body:{stepTarget:12000,waterTargetMl:3000,proteinTargetG:150}},200);
   const dashboard=await expect("/api/mobile/dashboard");assert(dashboard.activity.stepTarget===12000&&dashboard.activity.waterTargetMl===3000&&dashboard.activity.proteinTargetG===150,"custom activity targets ignored");
+  await expect("/api/profile",{method:"PATCH",body:{timezone:"Asia/Tokyo"}});
+  const tokyo=await expect("/api/mobile/dashboard");
+  const midnight=Date.parse(tokyo.dailyProfile.date+"T00:00:00Z");
+  const acrossMidnight=await prisma.workout.create({data:{userId:me0.user.id,title:"Calendar QA",scheduledAt:new Date(midnight-1800000)}});
+  const rhythm=await expect("/api/mobile/dashboard");
+  assert(rhythm.dayStrip.find(day=>day.offset===0)?.workouts.some(item=>item.id===acrossMidnight.id),"workout filed under UTC day instead of athlete day");
+  assert(rhythm.goals.includes("Athletik"),"active goal missing from mobile dashboard");
 
   const freeHealth=await expect("/api/wearables/import",{method:"POST",body:{source:"manual_import",date:new Date().toISOString().slice(0,10),steps:9000,activeCalories:500,hrv:72,restingHr:51,sleepMinutes:470,vo2max:46}},200);
   assert(freeHealth.item.hrv==null && freeHealth.item.sleepMinutes==null,"FREE advanced health leaked");

@@ -18,8 +18,8 @@ for(const [name,source] of [["ATHLET",athlete],["Settings",settings],["Profile",
   assert(source.includes("signOut()"),name+" must use central sign-out");
 }
 assert(login.includes("useFocusEffect"),"Login must recheck credentials on focus");
-assert(login.includes("(await getSession())!==token"),"Late auth calls must not resurrect signed-out sessions");
-assert(tabs.includes("authorized===false")&&tabs.includes('<Redirect href="/"/>'),"Tabs require a valid session");
+assert.match(login,/\(await getSession\(\)\)\s*!==\s*token/,"Late auth calls must not resurrect signed-out sessions");
+assert.match(tabs,/authorized\s*===\s*false.*<Redirect href="\/"\/>/,"Tabs require a valid session");
 assert(root.includes("useSafeAreaInsets")&&root.includes("topInset"),"Root must respect Android top inset");
 assert(root.includes("<LanguagePicker inline/>"),"Language control must be in a reserved header");
 assert(dock.includes("s.dock")&&!dock.includes('chrome:{position:"absolute"'),"Internal navigation must have reserved layout space");

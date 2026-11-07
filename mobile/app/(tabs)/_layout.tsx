@@ -21,7 +21,7 @@ export default function TabsLayout() {
   const locale = useLocale();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const insets = useSafeAreaInsets();
-  const bottom = Platform.OS === "android" ? Math.max(insets.bottom, 24) : insets.bottom;
+  const bottom = Platform.OS === "android" ? Math.max(insets.bottom, 32) : Math.max(insets.bottom,12);
   useFocusEffect(useCallback(() => {
     let active = true;
     getSession().then(token => { if (active) setAuthorized(Boolean(token)); })
