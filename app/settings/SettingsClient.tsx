@@ -29,7 +29,14 @@ export default function SettingsClient({initialPrefs}:{initialPrefs:Pref[]}){
  }
  async function toggle(i:number){await persist(i,{...prefs[i],enabled:!prefs[i].enabled})}
  async function logout(){await fetch("/api/auth/logout",{method:"POST"});location.href="/login"}
- async function deleteAccount(){if(!confirm(t("Konto und persönliche Daten endgültig löschen?")))return;const r=await fetch("/api/privacy/delete",{method:"DELETE"});if(r.ok)location.href="/register"}
+ async function deleteAccount(){
+   if(!confirm(t("Konto und persönliche Daten endgültig löschen?")))return;
+   try{
+     const response=await fetch("/api/privacy/delete",{method:"DELETE"});
+     if(response.ok){location.href="/register";return;}
+   }catch{}
+   setStatus("Löschen fehlgeschlagen");
+ }
 
  return <div className="settings-stack">
   <DashboardPreference/>
@@ -55,6 +62,6 @@ export default function SettingsClient({initialPrefs}:{initialPrefs:Pref[]}){
    </div>})}
   </article>
   <article className="panel privacy-box"><span className="eyebrow"><Copy text={"DATENSCHUTZ"}/></span><h2><Copy text={"Deine Daten"}/></h2><p className="muted"><Copy text={"Du kannst deine gespeicherten Daten als JSON exportieren oder dein Konto endgültig löschen."}/></p><div className="privacy-actions"><a className="secondary" href="/api/privacy/export"><Copy text={"DATEN EXPORTIEREN"}/></a><button className="danger-button" onClick={deleteAccount}><Copy text={"KONTO LÖSCHEN"}/></button><button className="secondary" onClick={logout}><Copy text={"ABMELDEN"}/></button></div></article>
-  {status&&<div className="save-toast"><Copy text={status}/></div>}
+  {status&&<div role="status" className="save-toast"><Copy text={status}/></div>}
  </div>;
 }

@@ -7,7 +7,17 @@ export async function DELETE(request:Request){
   const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
   const id=user.id;
   const assets=await prisma.mediaAsset.findMany({where:{OR:[{ownerId:id},{relatedUserId:id}]},select:{storageKey:true}});
+  const ownEnrollment={enrollment:{userId:id}};
   await prisma.$transaction([
+    // Published training data is restricted by foreign keys. Delete only the
+    // authenticated athlete's records, leaving shared course content intact.
+    prisma.journeyChapterUnlock.deleteMany({where:ownEnrollment}),
+    prisma.journeyChapterCompletion.deleteMany({where:ownEnrollment}),
+    prisma.journeyLevelAward.deleteMany({where:ownEnrollment}),
+    prisma.journeyActivityCompletion.deleteMany({where:ownEnrollment}),
+    prisma.journeyTestAttempt.deleteMany({where:ownEnrollment}),
+    prisma.journeyEnrollment.deleteMany({where:{userId:id}}),
+    prisma.journeyIntake.deleteMany({where:{userId:id}}),
     prisma.message.deleteMany({where:{OR:[{athleteId:id},{coachId:id},{senderId:id}]}}),
     prisma.videoFeedback.deleteMany({where:{OR:[{athleteId:id},{coachId:id}]}}),
     prisma.mediaAsset.deleteMany({where:{OR:[{ownerId:id},{relatedUserId:id}]}}),

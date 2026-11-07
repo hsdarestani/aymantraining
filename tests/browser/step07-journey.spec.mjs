@@ -83,3 +83,17 @@ test("private chapter details never leak across users",async({browser})=>{
  expect(response).toBe(404);
  await ctx.close();
 });
+
+test("account deletion removes the enrolled athlete's private journey while preserving course content",async({browser})=>{
+ await db.journeyIntake.create({data:{userId:athlete.id,selectedGoalSlugs:["athleticism","football"],selfLevel:"READY",status:"CONFIRMED",matchedVersionId:enrollment.versionId}});
+ const {ctx,page}=await asUser(browser,"athlete");
+ try{
+  await page.goto(base+"/journey");
+  const code=await page.evaluate(async()=> (await fetch("/api/privacy/delete",{method:"DELETE"})).status);
+  expect(code).toBe(200);
+  expect(await db.user.count({where:{id:athlete.id}})).toBe(0);
+  expect(await db.journeyEnrollment.count({where:{id:enrollment.id}})).toBe(0);
+  expect(await db.journeyChapter.count({where:{id:openChapter.id}})).toBe(1);
+  expect(await db.user.count({where:{id:outsider.id}})).toBe(1);
+ }finally{await ctx.close();}
+});
