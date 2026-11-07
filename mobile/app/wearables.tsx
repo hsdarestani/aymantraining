@@ -2,7 +2,7 @@
 import {Copy} from "../components/Locale";
 
 
-import {useCallback,useEffect,useState} from "react";
+import {useCallback,useState} from "react";
 import {Linking,Platform,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from "react-native";
 import {router,useFocusEffect} from "expo-router";
 import Brand from "../components/Brand";
@@ -20,7 +20,7 @@ export default function Wearables(){
   const [connections,dashboard]=await Promise.all([api<any>("/api/wearables/connections"),api<any>("/api/mobile/dashboard").catch(()=>null)]);
   setD(connections);
   const measurement=dashboard?.wearable;
-  if(measurement&&[measurement.steps,measurement.sleepMinutes,measurement.restingHr,measurement.hrv,measurement.activeCalories].some(x=>x!=null))setLastReading(measurement);
+  if(dashboard)setLastReading(measurement&&[measurement.steps,measurement.sleepMinutes,measurement.restingHr,measurement.hrv,measurement.activeCalories].some(x=>x!=null)?measurement:null);
  }
  useFocusEffect(useCallback(()=>{load().catch(e=>setStatus(e.message))},[]));
  async function device(){if(busy)return;setBusy(true);setStatus("SYNCHRONISIERE");try{

@@ -1,31 +1,96 @@
+import {useCallback, useRef, useState} from "react";
+import {KeyboardAvoidingView, Linking, Platform, StyleSheet, Text, View} from "react-native";
+import {router, useFocusEffect} from "expo-router";
+import {F, FieldAction, FieldLink, FieldMast, FieldPage, FieldState, field} from "../components/FieldKit";
+import {Copy, LocalizedTextInput} from "../components/Locale";
+import {API, ApiError, api} from "../lib/api";
+import {getSession, setSession} from "../lib/session";
 
-import {Copy,LocalizedTextInput} from "../components/Locale";
-import {useCallback,useState} from "react";import {ActivityIndicator,KeyboardAvoidingView,Platform,Pressable,StyleSheet,Text,View,Linking,ScrollView} from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
-import {ApiError} from "../lib/api";
-import {clearSession} from "../lib/session";
-import {BrandInput as TextInput} from "../components/BrandInput";import {router,useFocusEffect} from "expo-router";import Brand from "../components/Brand";import {API,api} from "../lib/api";import {getSession,setSession} from "../lib/session";import {C,radius} from "../theme";
-export default function Login(){const [register,setRegister]=useState(false),[name,setName]=useState(""),[checking,setChecking]=useState(true),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[error,setError]=useState(""),[busy,setBusy]=useState(false);useFocusEffect(useCallback(()=>{
-  let active=true;
-  setChecking(true);
-  void getSession().then(async token=>{
-    if(!active)return;
-    if(token){
-      try{
-        const d:any=await api("/api/mobile/dashboard");
-        // A pending authenticated request must never put the user back into
-        // their private dashboard after logout clears that token.
-        if(!active)return;
-        if((await getSession())!==token){setChecking(false);return}
-        await setSession(token,d.user.id);
-        router.replace(d.user?.onboardingCompleted?"/(tabs)":"/onboarding");
-        return;
-      }catch(e){
-        if(e instanceof ApiError&&e.status===401)await clearSession();
-      }
+type User = {id: string; onboardingCompleted: boolean};
+const destination = (user: User) => user.onboardingCompleted ? "/(tabs)" : "/onboarding";
+
+export default function Login() {
+  const [register, setRegister] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [resume, setResume] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const pending = useRef(false);
+  const check = useCallback(async (isActive: () => boolean = () => true) => {
+    setChecking(true); setError("");
+    try {
+      const token = await getSession();
+      if (!token) { if (isActive()) setResume(false); return; }
+      const result = await api<{user: User}>("/api/auth/me");
+      if ((await getSession()) !== token || !isActive()) return;
+      await setSession(token, result.user.id);
+      if (isActive()) router.replace(destination(result.user));
+    } catch (e) {
+      if (!isActive()) return;
+      if (e instanceof ApiError && e.status === 401) setResume(false);
+      else { setResume(true); setError("Deine Sitzung konnte nicht geprüft werden. Prüfe deine Verbindung."); }
+    } finally { if (isActive()) setChecking(false); }
+  }, []);
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    void check(() => active);
+    return () => { active = false; };
+  }, [check]));
+
+  async function submit() {
+    if (pending.current || !email.trim() || !password) return;
+    if (register && (name.trim().length < 2 || password.length < 10)) {
+      setError("Gib deinen Namen und ein Passwort mit mindestens 10 Zeichen ein."); return;
     }
-    if(active)setChecking(false);
-  }).catch(()=>{if(active)setChecking(false)});
-  return()=>{active=false};
-},[]));async function login(){setBusy(true);setError("");try{const j:any=await api(register?"/api/auth/register":"/api/auth/login",{method:"POST",headers:{"content-type":"application/json","x-bd-client":"mobile"},body:JSON.stringify({email,password,...(register?{name}: {})})});await setSession(j.sessionToken,j.user.id);let destination:"/(tabs)"|"/onboarding"="/(tabs)";try{const d:any=await api("/api/mobile/dashboard");destination=d.user?.onboardingCompleted?"/(tabs)":"/onboarding"}catch(e){if(e instanceof ApiError&&e.status===401){await clearSession();throw e;}}router.replace(destination)}catch(e:any){setError(e.message||"Login fehlgeschlagen.")}finally{setBusy(false)}}if(checking)return <SafeAreaView style={s.safe}><ActivityIndicator color={C.volt}/></SafeAreaView>;return <SafeAreaView style={s.safe}><KeyboardAvoidingView style={s.flex} behavior={Platform.OS==="ios"?"padding":undefined}><ScrollView contentContainerStyle={s.wrap} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag"><Brand/><View style={s.hero}><Text style={s.kicker}><Copy text={"NORMAL IST LANGWEILIG."}/></Text><Text style={s.title}><Copy text="BUILD YOUR"/>{"\n"}<Text style={{color:C.volt}}><Copy text="ATHLETE."/></Text></Text><Text style={s.copy}><Copy text={"Training. Regeneration. Betreuung. Ein System für deine Entwicklung."}/></Text></View><View style={s.form}>{register?<TextInput style={s.input} value={name} onChangeText={setName} placeholder="Name" placeholderTextColor={C.dim}/>:null}<LocalizedTextInput style={s.input} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" placeholder="E Mail" placeholderTextColor={C.dim}/><LocalizedTextInput style={s.input} value={password} onChangeText={setPassword} secureTextEntry placeholder="Passwort" placeholderTextColor={C.dim} onSubmitEditing={login} returnKeyType="go"/>{error?<Text style={s.error}><Copy text={error}/></Text>:null}<Pressable style={({pressed})=>[s.primary,pressed&&s.pressed]} onPress={login} disabled={busy||!email.trim()||!password}><Text style={s.primaryText}><Copy text={busy?"WIRD GESPEICHERT…":register?"KONTO ERSTELLEN →":"SYSTEM ÖFFNEN →"}/></Text></Pressable><Pressable onPress={()=>{setRegister(!register);setError("")}} disabled={busy}><Text style={s.link}><Copy text={register?"BEREITS EIN KONTO? ANMELDEN":"NEU HIER? KONTO ERSTELLEN"}/></Text></Pressable>{!register?<Pressable onPress={()=>Linking.openURL(API+"/forgot-password")}><Text style={s.link}><Copy text={"PASSWORT VERGESSEN?"}/></Text></Pressable>:null}</View></ScrollView></KeyboardAvoidingView></SafeAreaView>}
-const s=StyleSheet.create({link:{color:C.volt,textAlign:"center",fontFamily:"ManropeSemiBold",fontSize:11,paddingVertical:5},safe:{flex:1,backgroundColor:C.bg},flex:{flex:1},wrap:{flexGrow:1,paddingHorizontal:22,paddingTop:28,paddingBottom:40,gap:22,justifyContent:"flex-start"},hero:{paddingTop:28,paddingBottom:8},kicker:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:2.2},title:{color:C.ink,fontFamily:"Archivo",fontSize:44,lineHeight:46,letterSpacing:-.8,marginTop:14},copy:{color:C.dim,fontFamily:"Manrope",fontSize:13,lineHeight:20,maxWidth:320,marginTop:16},form:{gap:14,padding:18,backgroundColor:C.panel,borderWidth:1,borderColor:C.line,borderRadius:radius.lg,paddingBottom:18},input:{backgroundColor:C.panel2,borderWidth:1,borderColor:C.line,borderRadius:radius.md,paddingHorizontal:16,height:56,color:C.ink,fontFamily:"Manrope",fontSize:15},primary:{height:58,borderRadius:radius.md,backgroundColor:C.volt,alignItems:"center",justifyContent:"center",marginTop:4},primaryText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:12,letterSpacing:1.2},pressed:{transform:[{scale:.985}]},error:{color:C.red,fontFamily:"Manrope",fontSize:12}});
+    pending.current = true; setBusy(true); setError("");
+    try {
+      const result = await api<{sessionToken: string; user: Partial<User> & {id: string}}>(
+        register ? "/api/auth/register" : "/api/auth/login", {
+          method: "POST", body: JSON.stringify({email: email.trim(), password, ...(register && {name: name.trim()})}),
+        });
+      await setSession(result.sessionToken, result.user.id);
+      if (register) router.replace("/onboarding");
+      else if (typeof result.user.onboardingCompleted === "boolean") router.replace(result.user.onboardingCompleted ? "/(tabs)" : "/onboarding");
+      else await check();
+    } catch (e) { setError(e instanceof ApiError ? e.message : "Anmelden fehlgeschlagen. Bitte versuche es erneut."); }
+    finally { pending.current = false; setBusy(false); }
+  }
+  return <KeyboardAvoidingView style={s.screen} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <FieldPage>
+      <FieldMast section=""/>
+      <FieldState loading={checking}/>
+      {!checking && <View style={s.body}>
+        <Text style={s.title}><Copy text="BUILD YOUR ATHLETE."/></Text>
+        {resume ? <FieldState error={error} retry={() => void check()}/> : <>
+          <Text accessibilityRole="header" style={field.heading}><Copy text={register ? "Konto erstellen" : "Anmelden"}/></Text>
+          {register && <LocalizedTextInput style={s.input} value={name} onChangeText={setName}
+            placeholder="Name" accessibilityLabel="Name" autoComplete="name" editable={!busy}/>}
+          <LocalizedTextInput style={s.input} value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false}
+            keyboardType="email-address" placeholder="Deine E-Mail-Adresse" accessibilityLabel="E-Mail" autoComplete="email" editable={!busy}/>
+          <LocalizedTextInput style={s.input} value={password} onChangeText={setPassword} secureTextEntry placeholder="Passwort"
+            accessibilityLabel="Passwort" onSubmitEditing={() => void submit()} returnKeyType="go"
+            autoComplete={register ? "new-password" : "current-password"} editable={!busy}/>
+          {error ? <Text accessibilityRole="alert" style={s.error}><Copy text={error}/></Text> : null}
+          <FieldAction label={busy ? "Einen Moment …" : register ? "Konto erstellen" : "Anmelden"} onPress={() => void submit()}
+            disabled={busy || !email.trim() || !password}/>
+          {!busy && <FieldLink label={register ? "Ich habe schon ein Konto" : "Neues Konto erstellen"}
+            onPress={() => {setRegister(!register); setError("");}}/>}
+          {!register && !busy && <FieldLink label="Passwort vergessen?" onPress={() => {
+            void Linking.openURL(API + "/forgot-password").catch(() => setError("Die Seite konnte nicht geöffnet werden."));
+          }}/>}
+        </>}
+      </View>}
+    </FieldPage>
+  </KeyboardAvoidingView>;
+}
+
+const s = StyleSheet.create({
+  screen: {flex: 1, backgroundColor: F.bg},
+  body: {marginHorizontal: 20, marginTop: 28, gap: 12},
+  title: {fontFamily: "Archivo", fontSize: 48, lineHeight: 50, letterSpacing: -2.2, color: F.chalk, marginBottom: 10},
+  input: {minHeight: 54, color: F.chalk, fontSize: 16, borderRadius: 3},
+  error: {...field.body, color: F.red},
+});

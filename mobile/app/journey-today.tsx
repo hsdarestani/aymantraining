@@ -4,8 +4,7 @@ import {ActivityIndicator,Pressable,ScrollView,StyleSheet,Text,TextInput,View} f
 import {useFocusEffect,router} from "expo-router";
 import {SafeAreaView} from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
-import {api,API} from "../lib/api";
-import {getSession} from "../lib/session";
+import {api} from "../lib/api";
 import {C} from "../theme";
 
 type Workout={id:string;title:string;scheduledAt:string};
@@ -29,14 +28,11 @@ export default function Today(){
    const pick=await ImagePicker.launchImageLibraryAsync({mediaTypes:["videos"],allowsEditing:false,quality:1});
    if(pick.canceled||!pick.assets[0])return;
    const clip=pick.assets[0];
-   const token=await getSession();if(!token)throw Error("Bitte erneut anmelden.");
    const form=new FormData();
    const name=clip.fileName||"technikvideo.mp4";
    form.append("kind","TECHNIQUE_VIDEO");
    form.append("file",{uri:clip.uri,name,type:clip.mimeType||"video/mp4"} as unknown as Blob);
-   const upload=await fetch(API+"/api/media",{method:"POST",headers:{Authorization:"Bearer "+token},body:form});
-   const up=await upload.json();
-   if(!upload.ok)throw Error(up.error||"Video konnte nicht übertragen werden.");
+   const up=await api<{asset:{id:string}}>("/api/media",{method:"POST",body:form});
    await api("/api/journey/videos",{method:"POST",body:JSON.stringify({mediaId:up.asset.id,message:question})});
    setNotice("Dein Video wurde deinem Trainer übermittelt.");setQuestion("");await load();
   }catch(e){setError(e instanceof Error?e.message:"Upload fehlgeschlagen.");}finally{setBusy(false);}

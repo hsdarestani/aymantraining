@@ -16,7 +16,8 @@ export async function getJourneyOverview(userId:string){
     version:{include:{pathway:{select:{titleDe:true}},levels:{orderBy:{position:"asc"},include:{
      chapters:{orderBy:{position:"asc"},select:{
       id:true,titleDe:true,position:true,plannedDurationDays:true,
-      items:{select:{id:true,mandatory:true}}
+      items:{select:{id:true,mandatory:true}},
+      assessments:{where:{kind:"CHAPTER_FINAL",approvedAt:{not:null}},select:{id:true},take:1}
      }}
     }}}},
     unlocks:{select:{chapterId:true}},
@@ -56,6 +57,7 @@ export async function getJourneyOverview(userId:string){
      const completed=accessible?mandatory.filter(i=>activity.has(i.id)).length:0;
      return {
       id:c.id,titleDe:c.titleDe,position:c.position,unlocked:accessible,
+      testAvailable:accessible&&c.assessments.length>0,
       finished:done.has(c.id)&&accessible,
       // No private lesson data from locked chapters, including progress counts.
       mandatoryDone:accessible?completed:null,

@@ -1,27 +1,28 @@
 import {NextResponse} from "next/server";
 import {prisma} from "../../../../lib/db";
-import {errorJson,requireApiUser,dateOnly} from "../../../../lib/http";
+import {errorJson,requireApiUser} from "../../../../lib/http";
 import {scoreView} from "../../../../lib/score-view";
 import {getDailyProfile} from "../../../../lib/daily-profile-service";
+import {localDateKey} from "../../../../lib/daily-profile";
 import {getDashboardPreference} from "../../../../lib/women-dashboard";
 import {privateCycle} from "../../../../lib/cycle-service";
 import {hasFeature} from "../../../../lib/entitlements";
 
 const dayMs=86400000;
-const isoDay=(d:Date)=>dateOnly(d).toISOString().slice(0,10);
+
 
 export async function GET(){
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
  const dailyProfile=await getDailyProfile(user.id);
  const dashboardPreference=await getDashboardPreference(user.id);
  const cycleOverview=await privateCycle(user.id,{includeEntries:false});
- const womenGoals=dashboardPreference.mode==="WOMEN"?await prisma.goal.findMany({where:{userId:user.id,active:true},select:{type:true},take:12}):[];
+ const goals=await prisma.goal.findMany({where:{userId:user.id,active:true},select:{type:true},orderBy:{createdAt:"asc"},take:12});
  const today=new Date(dailyProfile.date+"T00:00:00.000Z");
  const tomorrow=new Date(today.getTime()+dayMs);
  const opened=await prisma.analyticsEvent.findFirst({where:{userId:user.id,name:"app_open",createdAt:{gte:today,lt:tomorrow}},select:{id:true}});
  if(!opened)await prisma.analyticsEvent.create({data:{userId:user.id,name:"app_open",properties:{surface:"mobile_home"}}});
- const timelineStart=new Date(today.getTime()-dayMs);
- const timelineEnd=new Date(today.getTime()+2*dayMs);
+ const timelineStart=new Date(today.getTime()-2*dayMs);
+ const timelineEnd=new Date(today.getTime()+3*dayMs);
  const [score,check,wearable,nextWorkout,recommendations,nutrition,radarFull,scoreDetails,advancedWearable,context,timelineWorkouts,lineSetting,heroPhoto]=await Promise.all([
   prisma.scoreSnapshot.findFirst({where:{userId:user.id},orderBy:{date:"desc"}}),
   prisma.dailyCheck.findUnique({where:{userId_date:{userId:user.id,date:today}}}),
@@ -45,8 +46,8 @@ export async function GET(){
  const lines=Array.isArray(lineSetting?.value)?lineSetting!.value as string[]:[];
  const line=String(lines[Math.floor(Date.now()/dayMs)%Math.max(1,lines.length)]||"Heute zählt die nächste saubere Entscheidung.");
  const dayStrip=[-1,0,1].map(offset=>{
-  const date=new Date(today.getTime()+offset*dayMs),key=isoDay(date);
-  const workouts=timelineWorkouts.filter(w=>w.scheduledAt&&isoDay(w.scheduledAt)===key).map(w=>({id:w.id,title:w.title,scheduledAt:w.scheduledAt,completed:Boolean(w.completedAt)}));
+  const date=new Date(today.getTime()+offset*dayMs),key=date.toISOString().slice(0,10);
+  const workouts=timelineWorkouts.filter(w=>w.scheduledAt&&localDateKey(w.scheduledAt,dailyProfile.timeZone)===key).map(w=>({id:w.id,title:w.title,scheduledAt:w.scheduledAt,completed:Boolean(w.completedAt)}));
   return {offset,date:key,workouts};
  });
  return NextResponse.json({
@@ -55,7 +56,8 @@ export async function GET(){
   score:scoreView(score,scoreDetails,dailyProfile.journey.confirmedLevel),
   dailyProfile,
   dashboardPreference,
-  womenGoals:womenGoals.map(g=>g.type),
+  goals:goals.map(g=>g.type),
+  womenGoals:dashboardPreference.mode==="WOMEN"?goals.map(g=>g.type):[],
   pillarPreview:scoreDetails&&score?{
    strength:score.strength,endurance:score.endurance,athleticism:score.athleticism,mobility:score.mobility,
    recovery:score.recovery,fuel:score.fuel,consistency:score.consistency

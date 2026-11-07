@@ -24,7 +24,10 @@ try{
   await expect("/api/auth/register",{method:"POST",body:{email,password:"VeryStrong123!",name:"E2E Athlete",goal:"Athletik"}},200);
   const me0=await expect("/api/auth/me",{},200);assert(me0.user.email===email,"auth/me email");
 
-  await expect("/api/onboarding/complete",{method:"POST",body:{goal:"Athletik",birthDate:"1995-05-10",sex:"prefer_not_to_say",heightCm:180,weightKg:80,trainingExperience:"REGULAR",availabilityPerWeek:4,healthConsent:true,privacyConsent:true,termsConsent:true,pushups:25,plankSeconds:75}},200);
+  const setup={method:"POST",body:{goal:"Athletik",birthDate:"1995-05-10",sex:"prefer_not_to_say",heightCm:180,weightKg:80,trainingExperience:"REGULAR",availabilityPerWeek:4,healthConsent:true,privacyConsent:true,termsConsent:true,pushups:25,plankSeconds:75}};
+  await expect("/api/onboarding/complete",setup,200);
+  await expect("/api/onboarding/complete",setup,200);
+  assert(await prisma.performanceTest.count({where:{userId:me0.user.id}})===1,"onboarding retry duplicated start test");
 
   const workouts=await expect("/api/workouts?history=1",{},200);assert(workouts.workouts.length>=1,"starter workout missing");
   const workout=workouts.workouts.find(x=>x.exercises?.length)||workouts.workouts[0];

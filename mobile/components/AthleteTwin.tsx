@@ -1,58 +1,40 @@
-import {useEffect,useRef} from "react";
-import {Animated,StyleSheet,View} from "react-native";
-import Svg,{Circle,Defs,Ellipse,LinearGradient,Path,Stop} from "react-native-svg";
-import {C} from "../theme";
+import {StyleSheet, View} from "react-native";
+import Svg, {Circle, Path} from "react-native-svg";
+import {F} from "./FieldKit";
 
-/**
- * Animated, deliberately generic avatar. This is an illustration, not a body
- * scan or a representation of someone's measurements. Body metrics remain
- * exclusively in the measured score and body-data surfaces.
- */
-export default function AthleteTwin({compact=false}:{compact?:boolean}){
- const pulse=useRef(new Animated.Value(.45)).current;
- const scan=useRef(new Animated.Value(0)).current;
- useEffect(()=>{
-  const p=Animated.loop(Animated.sequence([
-   Animated.timing(pulse,{toValue:1,duration:1800,useNativeDriver:true}),
-   Animated.timing(pulse,{toValue:.45,duration:1800,useNativeDriver:true})
-  ]));
-  const s=Animated.loop(Animated.sequence([
-   Animated.timing(scan,{toValue:1,duration:3000,useNativeDriver:true}),
-   Animated.timing(scan,{toValue:0,duration:3000,useNativeDriver:true})
-  ]));
-  p.start();s.start();return()=>{p.stop();s.stop()};
- },[pulse,scan]);
- return <View accessible accessibilityLabel="Animierte schematische Athletenfigur, keine Körpermessung" style={[styles.root,compact&&styles.compact]}>
-  <Animated.View style={[styles.aura,{opacity:pulse}]}/>
-  <Svg width="100%" height="100%" viewBox="0 0 260 340">
-   <Defs>
-    <LinearGradient id="twinEdge" x1="0" y1="0" x2="1" y2="1">
-     <Stop offset="0" stopColor="#EAFF9D"/><Stop offset=".48" stopColor={C.volt}/><Stop offset="1" stopColor="#436324"/>
-    </LinearGradient>
-    <LinearGradient id="twinBody" x1="0" y1="0" x2="1" y2="1">
-     <Stop offset="0" stopColor="#385235" stopOpacity=".42"/><Stop offset="1" stopColor="#101917" stopOpacity=".08"/>
-    </LinearGradient>
-   </Defs>
-   <Ellipse cx="130" cy="168" rx="82" ry="140" fill="none" stroke="#D4FF0025" strokeWidth="1" strokeDasharray="3 9"/>
-   <Ellipse cx="130" cy="168" rx="107" ry="164" fill="none" stroke="#D4FF0014" strokeWidth="1"/>
-   <Path d="M130 28C103 28 89 47 91 75C92 97 108 110 130 110C152 110 168 97 169 75C171 47 157 28 130 28Z" stroke="url(#twinEdge)" fill="url(#twinBody)" strokeWidth="2"/>
-   <Path d="M94 105C70 111 62 127 56 151L36 217C33 230 39 238 49 236C58 234 62 222 65 213L83 166L85 206L93 238L99 300C100 317 108 325 119 321C126 319 130 311 129 301L129 244L134 244L137 301C137 314 145 322 155 321C165 320 169 310 168 299L167 240L175 206L176 166L194 213C197 225 201 234 211 236C221 238 227 230 224 217L204 151C198 127 190 111 166 105L151 117C140 123 120 123 109 117Z" stroke="url(#twinEdge)" fill="url(#twinBody)" strokeWidth="2" strokeLinejoin="round"/>
-   <Path d="M130 112V237M85 164L175 164M90 202L170 202M110 119L100 199M150 119L160 199" stroke="#D4FF0040" strokeWidth="1.3"/>
-   <Path d="M97 60Q130 76 163 60M104 88Q130 101 156 88M99 147Q130 160 161 147" stroke="#EDFFB030" strokeWidth="1"/>
-   <Circle cx="130" cy="165" r="17" fill="#D4FF0012" stroke="#D4FF0066"/>
-   <Circle cx="130" cy="165" r="4" fill={C.volt}/>
-   <Circle cx="86" cy="165" r="3" fill={C.volt}/><Circle cx="174" cy="165" r="3" fill={C.volt}/>
-   <Circle cx="129" cy="245" r="3" fill={C.volt}/>
-  </Svg>
-  <Animated.View style={[styles.scan,{transform:[{translateY:scan.interpolate({inputRange:[0,1],outputRange:[-106,112]})}]}]}/>
-  <View style={styles.cornerTop}/><View style={styles.cornerBottom}/>
- </View>;
+export type TwinFocus = "strength" | "athleticism" | "recovery";
+const points = {strength: [102, 79], athleticism: [112, 159], recovery: [134, 96]} as const;
+
+export default function AthleteTwin({compact = false, light = false, focus = "athleticism"}: {
+  compact?: boolean; light?: boolean; focus?: TwinFocus;
+}) {
+  const [x, y] = points[focus];
+  const contour = light ? "#232721" : "#B9C0AB";
+  const facet = light ? "#717667" : "#464D41";
+  const grid = light ? "#B9BCAC" : "#393F35";
+  const marker = light ? "#465821" : F.signal;
+  return <View accessible={false} importantForAccessibility="no" style={compact ? s.compact : s.full}>
+    <Svg width="100%" height="100%" viewBox="0 0 196 236">
+      <Path d="M15 209H181M15 168H181M15 127H181M15 86H181M15 45H181M55 222V22M98 222V22M141 222V22"
+        fill="none" stroke={grid} strokeWidth={.7} strokeDasharray="2 4"/>
+      <Path d="M15 37V22H30M166 22H181V37M15 207V222H30M166 222H181V207" fill="none" stroke={grid} strokeWidth={1.2}/>
+      <Path d="M153 27L167 28L175 38L169 57L157 65L144 55L143 43Z" fill={contour}/>
+      <Path d="M135 55L153 63L158 76L145 91L131 106L108 132L86 135L72 121L81 96L111 69Z" fill={contour}/>
+      <Path d="M135 55L143 70L119 83L93 111L84 131L72 121L81 96L111 69Z" fill={facet}/>
+      <Path d="M109 73L118 85L97 114L65 119L44 106L49 96L70 102L89 85Z" fill={contour}/>
+      <Path d="M147 68L164 82L174 77L181 66L190 69L186 83L168 102L145 95L138 85Z" fill={facet}/>
+      <Path d="M88 124L107 126L137 130L149 146L141 163L117 178L110 207L99 217L90 216L96 199L98 174L120 148L84 144Z" fill={contour}/>
+      <Path d="M74 118L99 134L84 155L62 171L51 197L35 209L18 207L19 201L33 195L45 165L60 145Z" fill={contour}/>
+      <Path d="M81 133L92 143L64 169L53 177L61 154ZM110 131L137 130L149 146L139 158L135 143Z" fill={facet}/>
+      <Path d="M144 43L157 50L170 39M119 83L134 96L108 132M62 171L48 177M118 176L105 180"
+        fill="none" stroke={light ? "#C5C8B8" : "#131711"} strokeWidth={1.2}/>
+      <Circle cx={x} cy={y} r={13} fill="none" stroke={marker} strokeWidth={1.2}/>
+      <Circle cx={x} cy={y} r={5} fill={F.signal} stroke={marker} strokeWidth={1.5}/>
+    </Svg>
+  </View>;
 }
-const styles=StyleSheet.create({
- root:{width:240,height:320,position:"relative",justifyContent:"center",alignItems:"center",overflow:"hidden"},
- compact:{width:156,height:232},
- aura:{position:"absolute",width:"75%",height:"70%",borderRadius:100,backgroundColor:"#3A5B20",transform:[{scaleX:.62}]},
- scan:{position:"absolute",top:"50%",left:"16%",width:"68%",height:1,backgroundColor:"#D4FF0088",shadowColor:C.volt,shadowOpacity:.6,shadowRadius:10,elevation:3},
- cornerTop:{position:"absolute",top:18,left:14,width:18,height:18,borderTopWidth:1,borderLeftWidth:1,borderColor:"#D4FF0066"},
- cornerBottom:{position:"absolute",bottom:18,right:14,width:18,height:18,borderBottomWidth:1,borderRightWidth:1,borderColor:"#D4FF0066"}
+
+const s = StyleSheet.create({
+  full: {width: 245, height: 298, maxWidth: "100%"},
+  compact: {width: "100%", height: 205},
 });

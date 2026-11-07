@@ -16,7 +16,7 @@ export async function getAthleteDay(userId:string){
   prisma.dailyCheck.findMany({where:{userId,date:{gte:new Date(Date.now()-2*86400000)}},orderBy:{date:"desc"},take:3}),
   prisma.wearableDaily.findMany({where:{userId,date:{gte:new Date(Date.now()-2*86400000)}},orderBy:{date:"desc"},take:5,
    select:{date:true,sleepMinutes:true,hrv:true,restingHr:true,source:true}}),
-  prisma.coachAssignment.findFirst({where:{athleteId:userId,active:true,OR:[{endsAt:null},{endsAt:{gt:now}}]},select:{coachId:true}}),
+  prisma.coachAssignment.findFirst({where:{athleteId:userId,active:true,OR:[{endsAt:null},{endsAt:{gt:now}}]},select:{coach:{select:{name:true}}}}),
   prisma.videoFeedback.findMany({where:{athleteId:userId,status:"OPEN"},select:{id:true,createdAt:true},orderBy:{createdAt:"desc"},take:10}),
   prisma.videoFeedback.findMany({where:{athleteId:userId,status:"REVIEWED"},select:{id:true,reviewedAt:true,annotations:true,mediaId:true},orderBy:{reviewedAt:"desc"},take:5}),
   prisma.coachBrief.findFirst({where:{publishAt:{lte:now},OR:[{expiresAt:null},{expiresAt:{gt:now}}],audienceTier:{in:user.subscriptionTier==="FREE"?["FREE"]:user.subscriptionTier==="PRO"?["FREE","PRO"]:["FREE","PRO","ELITE"]}},orderBy:{publishAt:"desc"},select:{title:true,body:true,mediaId:true}}),
@@ -49,7 +49,7 @@ export async function getAthleteDay(userId:string){
     "Du hast wenig Energie angegeben. Besprich eine Anpassung vor der nächsten intensiven Einheit mit deinem Trainer.":
     !active?"Heute ist keine weitere Trainingseinheit eingetragen. Du kannst deine Erholung dokumentieren.":
     "Berücksichtige deine Tagesform und das Feedback deines Trainers."},
-  coach:{assigned:Boolean(assigned),brief,adjustments:notes,openVideos:pending.length,
+  coach:{assigned:Boolean(assigned),name:assigned?.coach.name??null,brief,adjustments:notes,openVideos:pending.length,
    feedback:feedback.map(f=>{
     const a=f.annotations as {coachNote?:string;nextSession?:{focus?:string;advice?:string;workoutId?:string}}|null;
     return {id:f.id,reviewedAt:f.reviewedAt,coachNote:a?.coachNote??"",

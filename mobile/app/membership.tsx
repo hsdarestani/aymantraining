@@ -1,38 +1,52 @@
+import {useCallback, useState} from "react";
+import {StyleSheet, Text, View} from "react-native";
+import {router, useFocusEffect} from "expo-router";
+import {F, FieldAction, FieldLink, FieldMast, FieldPage, FieldState, field} from "../components/FieldKit";
 import {Copy} from "../components/Locale";
-import {useEffect,useState} from "react";
-import {ActivityIndicator,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from "react-native";
-import {router} from "expo-router";
 import {api} from "../lib/api";
-import {C,radius} from "../theme";
-import Brand from "../components/Brand";
 
-export default function Membership(){
- const [tier,setTier]=useState<string|null>(null);
- useEffect(()=>{api<{tier:string}>("/api/entitlements").then(d=>setTier(d.tier||"FREE")).catch(()=>setTier("FREE"))},[]);
- return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
-  <Brand/>
-  <Text style={s.kicker}><Copy text="KONTOSTATUS"/></Text>
-  <Text style={s.title}><Copy text="DEIN KONTO."/>{"\n"}<Copy text="DEIN TRAINING."/></Text>
-  <Text style={s.copy}><Copy text="Hier siehst du deinen aktuellen Zugang. Deine Trainingsdaten und Fortschritte bleiben in deinem Konto gespeichert."/></Text>
-  <View style={s.panel}>
-   <Text style={s.label}><Copy text="AKTUELLER ZUGANG"/></Text>
-   {tier===null?<ActivityIndicator color={C.volt}/>:<Text style={s.tier}>{tier==="FREE"?"STANDARD":tier}</Text>}
-   <Text style={s.note}><Copy text="Dein Kontostatus wird automatisch mit deinem Profil synchronisiert."/></Text>
-  </View>
-  <Pressable style={s.primary} onPress={()=>router.replace("/(tabs)")}>
-   <Text style={s.primaryText}><Copy text="ZUM DASHBOARD →"/></Text>
-  </Pressable>
- </ScrollView></SafeAreaView>;
+export default function Membership() {
+  const [tier, setTier] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [notice, setNotice] = useState("");
+  const load = useCallback(async () => {
+    try {
+      const result = await api<{tier: string}>("/api/entitlements");
+      setTier(result.tier); setError("");
+    } catch { setError("Dein Kontostatus konnte nicht geladen werden."); }
+    finally { setLoading(false); }
+  }, []);
+  useFocusEffect(useCallback(() => { void load(); }, [load]));
+  async function refresh() {
+    if (busy) return;
+    setBusy(true); setError(""); setNotice("");
+    try {
+      const result = await api<{tier: string}>("/api/subscription/sync", {method: "POST", body: "{}"});
+      setTier(result.tier); setNotice("Kontostatus aktualisiert.");
+    } catch { setError("Dein Kontostatus konnte nicht aktualisiert werden."); }
+    finally { setBusy(false); }
+  }
+  return <FieldPage>
+    <FieldMast section="KONTO"/>
+    <View style={s.content}>
+      <FieldLink label="Zurück" onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)/athlete")}/>
+      <Text accessibilityRole="header" style={field.heading}><Copy text="Mitgliedschaft"/></Text>
+      <FieldState loading={loading} error={error} retry={!tier ? () => void load() : undefined}/>
+      {tier && <View style={s.status}>
+        <Text style={field.type}><Copy text="AKTUELLER ZUGANG"/></Text>
+        <Text style={s.tier}>{tier === "FREE" ? "STANDARD" : tier}</Text>
+        <Text style={field.body}><Copy text={tier === "FREE" ? "Der Kauf von PRO ist in der App derzeit nicht verfügbar."
+          : "Dein erweiterter Zugang ist aktiv."}/></Text>
+        <FieldAction label={busy ? "Wird aktualisiert …" : "Kontostatus aktualisieren"} onPress={() => void refresh()} disabled={busy} tone="quiet"/>
+        {notice ? <Text accessibilityLiveRegion="polite" style={field.sub}><Copy text={notice}/></Text> : null}
+      </View>}
+    </View>
+  </FieldPage>;
 }
-const s=StyleSheet.create({
- safe:{flex:1,backgroundColor:C.bg},content:{padding:22,paddingBottom:60,gap:16},
- kicker:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:2,marginTop:44},
- title:{color:C.ink,fontFamily:"Archivo",fontSize:36,lineHeight:40,letterSpacing:-.8},
- copy:{color:C.dim,fontFamily:"Manrope",fontSize:13,lineHeight:21,marginBottom:8},
- panel:{borderWidth:1,borderColor:C.line,backgroundColor:C.panel,borderRadius:radius.md,padding:20,gap:12},
- label:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1},
- tier:{color:C.volt,fontFamily:"Archivo",fontSize:30},
- note:{color:C.dim,fontFamily:"Manrope",fontSize:11,lineHeight:17},
- primary:{minHeight:54,borderRadius:radius.md,backgroundColor:C.volt,alignItems:"center",justifyContent:"center",paddingHorizontal:12},
- primaryText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1}
+const s = StyleSheet.create({
+  content: {paddingHorizontal: 20, gap: 12},
+  status: {gap: 12, padding: 16, backgroundColor: F.surface, borderLeftWidth: 2, borderColor: F.signal},
+  tier: {fontFamily: "Archivo", color: F.chalk, fontSize: 35},
 });

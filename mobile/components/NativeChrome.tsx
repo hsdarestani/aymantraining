@@ -30,7 +30,7 @@ export default function NativeChrome(){
   useLocale();
   const segments=useSegments();
   const insets=useSafeAreaInsets();
-  const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,32):Math.max(insets.bottom,12);
+  const bottomClearance=Platform.OS==="android"?Math.max(insets.bottom,24):Math.max(insets.bottom,5);
   const [open,setOpen]=useState(false);
   const [keyboardVisible,setKeyboardVisible]=useState(false);
   useEffect(()=>{
@@ -76,10 +76,10 @@ export default function NativeChrome(){
 }
 const s=StyleSheet.create({
  dock:{paddingHorizontal:12,paddingTop:8,backgroundColor:C.bg,borderTopWidth:1,borderTopColor:C.line},
- chrome:{height:58,borderRadius:29,backgroundColor:"#101313F3",borderWidth:1,borderColor:C.line,flexDirection:"row",alignItems:"center",padding:6,gap:6,shadowColor:"#000",shadowOpacity:.38,shadowRadius:16,shadowOffset:{width:0,height:9}},
- quick:{height:46,borderRadius:23,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingHorizontal:13,backgroundColor:C.panel2,borderWidth:1,borderColor:C.line},quickText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1},
- iconQuick:{width:46,height:46,borderRadius:23,alignItems:"center",justifyContent:"center",backgroundColor:C.panel2,borderWidth:1,borderColor:C.line},
- menuPill:{flex:1,height:46,borderRadius:23,backgroundColor:C.red,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:7,paddingHorizontal:15},menuText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.2},
+ chrome:{height:58,borderRadius:3,backgroundColor:"#131515",borderWidth:1,borderColor:C.line,flexDirection:"row",alignItems:"center",padding:6,gap:6,shadowColor:"#000",shadowOpacity:.38,shadowRadius:16,shadowOffset:{width:0,height:9}},
+ quick:{height:46,borderRadius:3,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingHorizontal:13,backgroundColor:C.panel2,borderWidth:1,borderColor:C.line},quickText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1},
+ iconQuick:{width:46,height:46,borderRadius:3,alignItems:"center",justifyContent:"center",backgroundColor:C.panel2,borderWidth:1,borderColor:C.line},
+ menuPill:{flex:1,height:46,borderRadius:3,backgroundColor:C.volt,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:7,paddingHorizontal:15},menuText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.2},
  modal:{flex:1,backgroundColor:"rgba(0,0,0,.62)",justifyContent:"flex-end"},sheetWrap:{width:"100%"},
  sheet:{backgroundColor:"#090B0A",borderTopLeftRadius:30,borderTopRightRadius:30,borderWidth:1,borderColor:C.line,padding:18,paddingBottom:28},
  head:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",marginBottom:18},brand:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:20,letterSpacing:-1},volt:{color:C.volt},caption:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.5,marginTop:3},

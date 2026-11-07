@@ -2,15 +2,19 @@ import {Alert,PermissionsAndroid,Platform} from "react-native";
 import {router} from "expo-router";
 import {getApp} from "@react-native-firebase/app";
 import {
-  getMessaging,getToken,getInitialNotification,onMessage,onNotificationOpenedApp,onTokenRefresh,
+  deleteToken,getMessaging,getToken,getInitialNotification,onMessage,onNotificationOpenedApp,onTokenRefresh,
   registerDeviceForRemoteMessages,requestPermission
 } from "@react-native-firebase/messaging";
 import {api} from "./api";
+import {getSession} from "./session";
 
 let tokenUnsubscribe:(()=>void)|null=null;
 let navigationInstalled=false;
 let pushNavigationReady=false;
 let pendingPushRoute:string|null=null;
+let registration:{session:string; result:Promise<PushResult>}|null=null;
+let deviceToken:string|null=null;
+type PushResult={ok:boolean;reason?:string};
 
 export function setPushNavigationReady(ready:boolean){
   pushNavigationReady=ready;
@@ -27,9 +31,10 @@ export function setPushNavigationReady(ready:boolean){
 function nativeRoute(route?:string){
   if(!route)return null;
   if(route==="/dashboard")return "/(tabs)";
-  if(route.startsWith("/training/"))return route.replace("/training/","/workout/");
+  if(/^\/training\/[a-zA-Z0-9_-]+$/.test(route))return route.replace("/training/","/workout/");
   if(route==="/training")return "/(tabs)/training";
-  if(route==="/progress"||route==="/report")return "/(tabs)/progress";
+  if(route==="/progress")return "/(tabs)/progress";
+  if(["/report","/journey","/journey-tests","/journey-today","/milestones","/coach-brief"].includes(route))return route;
   if(route==="/coach")return "/(tabs)/coach";
   if(route==="/athlete")return "/(tabs)/athlete";
   if(route==="/fuel")return "/fuel";
@@ -54,7 +59,20 @@ function openMessage(message:any){
   }
 }
 
-export async function registerPush(){
+export async function registerPush():Promise<PushResult>{
+  if(Platform.OS!=="android"&&Platform.OS!=="ios")return {ok:false,reason:"platform"};
+  const session=await getSession();
+  if(!session)return {ok:false,reason:"session"};
+  if(registration?.session===session)return registration.result;
+  const result=registerForSession(session).catch(error=>{
+    if(registration?.result===result)registration=null;
+    throw error;
+  });
+  registration={session,result};
+  return result;
+}
+
+async function registerForSession(session:string):Promise<PushResult>{
   const messaging=getMessaging(getApp());
   if(Platform.OS==="android"&&Number(Platform.Version)>=33){
     const permission=await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
@@ -67,14 +85,31 @@ export async function registerPush(){
   await registerDeviceForRemoteMessages(messaging).catch(()=>undefined);
   const token=await getToken(messaging);
   if(!token)return {ok:false,reason:"token"};
+  if(registration?.session!==session||await getSession()!==session)return {ok:false,reason:"session"};
+  deviceToken=token;
   await api("/api/device-token",{method:"POST",body:JSON.stringify({platform:Platform.OS==="ios"?"ios":"android",token})});
 
   if(!tokenUnsubscribe){
     tokenUnsubscribe=onTokenRefresh(messaging,next=>{
+      if(!registration)return;
+      deviceToken=next;
       api("/api/device-token",{method:"POST",body:JSON.stringify({platform:Platform.OS==="ios"?"ios":"android",token:next})}).catch(()=>undefined);
     });
   }
   return {ok:true};
+}
+
+export function clearPushRegistration(){
+  tokenUnsubscribe?.();
+  tokenUnsubscribe=null;
+  pendingPushRoute=null;
+  registration=null;
+  const token=deviceToken;
+  deviceToken=null;
+  if(Platform.OS==="android"||Platform.OS==="ios"){
+    try{void deleteToken(getMessaging(getApp())).catch(()=>undefined)}catch{}
+  }
+  return token;
 }
 
 export function installPushHandlers(){
@@ -94,7 +129,9 @@ export function installPushHandlers(){
     unsubForeground=onMessage(messaging,message=>{
       const title=message.notification?.title||"BE DIFFERENT";
       const body=message.notification?.body||"";
-      Alert.alert(title,body,[{text:"OK"},{text:"ÖFFNEN",onPress:()=>openMessage(message)}]);
+      void getSession().then(session=>{
+        if(session)Alert.alert(title,body,[{text:"OK"},{text:"Öffnen",onPress:()=>openMessage(message)}]);
+      }).catch(()=>undefined);
     });
     navigationInstalled=true;
     void getInitialNotification(messaging)

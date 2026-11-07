@@ -7,3 +7,21 @@ export async function setSession(token:string,userId:string){
  await SecureStore.setItemAsync(KEY,token,{keychainAccessible:SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY});
 }
 export async function clearSession(){await SecureStore.deleteItemAsync(KEY);await SecureStore.deleteItemAsync(OWNER)}
+
+const expiryListeners = new Set<() => void>();
+let expiry: Promise<void> | null = null;
+
+export function onSessionExpired(listener: () => void) {
+ expiryListeners.add(listener);
+ return () => { expiryListeners.delete(listener); };
+}
+
+export async function expireSession(token: string) {
+ if (expiry) return expiry;
+ expiry = (async () => {
+  if (await getSession() !== token) return;
+  await clearSession();
+  expiryListeners.forEach(listener => listener());
+ })().catch(() => undefined).finally(() => { expiry = null; });
+ return expiry;
+}

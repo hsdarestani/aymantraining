@@ -2,17 +2,17 @@
 import {Copy,LocalizedTextInput} from "../components/Locale";
 
 
-import {useState} from "react";
-import {Pressable,SafeAreaView,ScrollView,StyleSheet,Switch,Text,View} from "react-native";
+import {useEffect,useRef,useState} from "react";
+import {ActivityIndicator,Pressable,SafeAreaView,ScrollView,StyleSheet,Switch,Text,View} from "react-native";
 import {BrandInput as TextInput} from "../components/BrandInput";
 import {router} from "expo-router";
 import Brand from "../components/Brand";
-import {api} from "../lib/api";
-import {syncHealth} from "../lib/health";
+import {api,ApiError} from "../lib/api";
 import {C,radius} from "../theme";
 
 const goals=["Muskelaufbau","Fettabbau","Athletik","Fußball","Calisthenics","Gesundheit"];
-const journeyEnabled=process.env.EXPO_PUBLIC_JOURNEY_ONBOARDING_ENABLED!=="false";
+import {parseDecimal} from "../lib/field-data";
+const journeyAllowed=process.env.EXPO_PUBLIC_JOURNEY_ONBOARDING_ENABLED!=="false";
 const levels=[
   {code:"READY",label:"READY",description:"Du startest gerade oder steigst wieder ein. Du baust Grundlagen auf und findest Schritt für Schritt in eine Trainingsroutine."},
   {code:"AWAKE",label:"AWAKE",description:"Du hast erste Trainingserfahrung, kennst grundlegende Übungen und möchtest regelmäßig und strukturiert trainieren."},
@@ -33,12 +33,24 @@ function birthToIso(value:string){
   return `${m[3]}-${m[2]}-${m[1]}`;
 }
 function ageFromBirth(value:string){
- const d=new Date(birthToIso(value));if(Number.isNaN(d.getTime()))return null;
- const now=new Date();let age=now.getFullYear()-d.getFullYear();const m=now.getMonth()-d.getMonth();if(m<0||(m===0&&now.getDate()<d.getDate()))age--;return age;
+ const iso=birthToIso(value);
+ const d=new Date(iso+"T00:00:00Z");
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(iso)||!Number.isFinite(d.getTime())||d.toISOString().slice(0,10)!==iso)return null;
+ const now=new Date();let age=now.getUTCFullYear()-d.getUTCFullYear();const m=now.getUTCMonth()-d.getUTCMonth();if(m<0||(m===0&&now.getUTCDate()<d.getUTCDate()))age--;return age;
 }
 
 export default function Onboarding(){
   const [step,setStep]=useState(1);
+  const [journeyEnabled,setJourneyEnabled]=useState<boolean|null>(journeyAllowed?null:false);
+  const pending=useRef(false);
+  useEffect(()=>{
+    if(!journeyAllowed)return;
+    let active=true;
+    api<{journeyOnboardingEnabled?:boolean}>("/api/auth/me")
+      .then(result=>{if(active)setJourneyEnabled(result.journeyOnboardingEnabled??true)})
+      .catch(()=>{if(active)setJourneyEnabled(true)});
+    return()=>{active=false};
+  },[]);
   const [goal,setGoal]=useState("Athletik");
   const [selectedGoals,setSelectedGoals]=useState<string[]>(["Athletik"]);
   const [selfLevel,setSelfLevel]=useState<(typeof levels)[number]["code"]|null>(null);
@@ -47,10 +59,10 @@ export default function Onboarding(){
   const healthStep=journeyEnabled?4:3;
   const testStep=journeyEnabled?5:4;
   const finalStep=journeyEnabled?6:5;
-  const [birth,setBirth]=useState("01.01.2000");
+  const [birth,setBirth]=useState("");
   const [sex,setSex]=useState("prefer_not_to_say");
-  const [height,setHeight]=useState("180");
-  const [weight,setWeight]=useState("80");
+  const [height,setHeight]=useState("");
+  const [weight,setWeight]=useState("");
   const [experience,setExperience]=useState<"STARTER"|"REGULAR"|"ADVANCED">("STARTER");
   const [availability,setAvailability]=useState(3);
   const [health,setHealth]=useState(false);
@@ -62,51 +74,62 @@ export default function Onboarding(){
   const [error,setError]=useState("");
 
   async function completeSetup(){
-    if(pushups.trim()===""||plank.trim()===""){setError("Bitte Liegestütze und Unterarmstütz eintragen.");return}
-    const age=ageFromBirth(birth);
-    if(age==null){setError("Bitte ein gültiges Geburtsdatum eintragen.");setStep(2);return}
-    if(age<16){setError("BE DIFFERENT ist zum Start ab 16 Jahren verfügbar.");setStep(2);return}
-    setBusy(true);setError("");
+    if(pending.current)return;
+    const reps=parseDecimal(pushups), seconds=parseDecimal(plank), running=parseDecimal(run5k);
+    if(!Number.isInteger(reps)||reps<0||reps>500||!Number.isInteger(seconds)||seconds<0||seconds>3600){
+      setError("Prüfe die Wiederholungen (0–500) und die Dauer (0–3600 Sekunden).");return;
+    }
+    if(run5k.trim()&&(!Number.isFinite(running)||running<10||running>180)){
+      setError("Gib für den 5-km-Lauf 10 bis 180 Minuten ein oder lass das Feld frei.");return;
+    }
+    pending.current=true;setBusy(true);setError("");
+    const base={
+      goal:journeyEnabled?selectedGoals[0]:goal,birthDate:birthToIso(birth),sex,heightCm:parseDecimal(height),
+      weightKg:parseDecimal(weight),trainingExperience:experience,availabilityPerWeek:availability,
+      healthConsent:health,privacyConsent:true,termsConsent:true,pushups:reps,plankSeconds:seconds,
+      ...(run5k.trim()&&{run5kMinutes:running})
+    };
+    const intake=journeyEnabled?{goals:selectedGoals,selfLevel,dashboard:womenDashboard&&sex==="female"?"WOMEN":"GENERAL"}:{};
     try{
-      const onboardingResult:any=await api("/api/onboarding/complete",{method:"POST",body:JSON.stringify({
-        goal:journeyEnabled?selectedGoals[0]:goal,
-        ...(journeyEnabled?{goals:selectedGoals,selfLevel,dashboard:womenDashboard&&sex==="female"?"WOMEN":"GENERAL",
-          pushups:Number(pushups),plankSeconds:Number(plank),...(Number(run5k)>0?{run5kMinutes:Number(run5k)}:{})}:{}),
-        birthDate:birthToIso(birth),sex,heightCm:Number(height),weightKg:Number(weight),
-        trainingExperience:experience,availabilityPerWeek:availability,healthConsent:health,privacyConsent:true,termsConsent:true
-      })});
-      if(!journeyEnabled)await api("/api/performance-tests",{method:"POST",body:JSON.stringify({
-        name:"STARTTEST",
-        results:[
-          {metric:"pushups",value:Number(pushups),unit:"Wdh"},
-          {metric:"plank",value:Number(plank),unit:"Sekunden"},
-          ...(Number(run5k)>0?[{metric:"5k_time",value:Number(run5k),unit:"Minuten"}]:[])
-        ]
-      })});
-      if(health)await syncHealth().catch(()=>undefined);
-      if(journeyEnabled)setJourneyStatus(onboardingResult.journey?.status??null);
-      const result:any=await api("/api/score");
-      setScore(result.score);setStep(finalStep);
-    }catch(e:any){setError(e.message||"Einrichtung fehlgeschlagen.")}
-    finally{setBusy(false)}
+      const result=await api<{score?:any;journey?:{status:"PENDING_PATHWAY"|"PENDING_PLACEMENT"}}>(
+        "/api/onboarding/complete",{method:"POST",body:JSON.stringify({...base,...intake})});
+      setJourneyStatus(result.journey?.status??null);
+      setScore(result.score??null);setStep(finalStep);
+      if(!result.score)void api("/api/score").then(value=>setScore(value.score)).catch(()=>undefined);
+    }catch(e){
+      if(e instanceof ApiError&&e.code==="JOURNEY_NOT_ENABLED"){
+        setJourneyEnabled(false);setGoal(selectedGoals[0]??goal);setStep(3);
+        setError("Dein Einstieg ist weiterhin möglich. Prüfe kurz deine Freigaben.");
+      }else setError(e instanceof Error?e.message:"Einrichtung fehlgeschlagen.");
+    }finally{pending.current=false;setBusy(false)}
   }
 
   function next(){
     setError("");
     if(journeyEnabled&&step===1&&selectedGoals.length===0){setError("Bitte mindestens ein Ziel auswählen.");return}
+    if(step===2){
+      const age=ageFromBirth(birth);
+      if(age==null||age>120){setError("Bitte gib ein gültiges Geburtsdatum ein.");return}
+      if(age<16){setError("BE DIFFERENT ist ab 16 Jahren verfügbar.");return}
+      const h=parseDecimal(height),w=parseDecimal(weight);
+      if(!Number.isFinite(h)||h<100||h>250||!Number.isFinite(w)||w<25||w>400){
+        setError("Prüfe deine Größe (100–250 cm) und dein Gewicht (25–400 kg).");return;
+      }
+    }
     if(journeyEnabled&&step===3&&!selfLevel){setError("Bitte dein Einstiegslevel wählen.");return}
     if(step===testStep){completeSetup();return}
     if(step===finalStep){router.replace("/(tabs)");return}
     setError("");setStep(step+1);
   }
 
-  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
+  if(journeyEnabled===null)return <SafeAreaView style={s.safe}><ActivityIndicator color={C.volt}/></SafeAreaView>;
+  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
     <Brand/>
     <View style={s.progress}>{Array.from({length:finalStep},(_,i)=>i+1).map(x=><View key={x} style={[s.bar,x<=step&&s.barOn]}/>)}</View>
 
     {step===1&&<><Text style={s.kicker}><Copy text={"01 · ZIEL"}/></Text><Text style={s.title}><Copy text={"WAS WILLST"}/>{"\n"}<Copy text={"DU ERREICHEN?"}/></Text><Text style={s.copy}><Copy text={journeyEnabled?"Wähle mehrere Ziele. Dein Coach erstellt daraus einen zusammenhängenden Weg.":"Wähle deinen Trainingsfokus."}/></Text>
       <View style={s.goals}>{goals.map(g=>{const selected=journeyEnabled?selectedGoals.includes(g):goal===g;return <Pressable accessibilityRole="button" accessibilityState={{selected}} key={g} onPress={()=>journeyEnabled?setSelectedGoals(old=>old.includes(g)?old.filter(x=>x!==g):[...old,g]):setGoal(g)} style={[s.goal,selected&&s.goalOn]}><Text style={[s.goalText,selected&&s.goalTextOn]}>{g}</Text><Text style={[s.arrow,selected&&s.goalTextOn]}>{selected?"✓":"+"}</Text></Pressable>})}</View>
-      {journeyEnabled&&<Text style={s.pathNote}>DEIN WEG: {selectedGoals.join(" + ")||"Bitte Ziele auswählen"}{"\n"}Nicht hinterlegte Kombinationen werden zur Zuordnung gespeichert. Keine erfundenen Trainingspläne.</Text>}{step===1&&error?<Text style={s.error}>{error}</Text>:null}</>}
+      {journeyEnabled&&<Text style={s.pathNote}>DEIN WEG: {selectedGoals.join(" + ")||"Bitte Ziele auswählen"}{"\n"}Dein Coach ordnet dir einen passenden Trainingsweg zu.</Text>}{step===1&&error?<Text style={s.error}>{error}</Text>:null}</>}
 
     {step===2&&<><Text style={s.kicker}><Copy text={"02 · AUSGANGSLAGE"}/></Text><Text style={s.title}><Copy text={"DEINE"}/>{"\n"}<Copy text={"BASIS."}/></Text>
       <TextInput style={s.input} value={birth} onChangeText={setBirth} placeholder="TT.MM.JJJJ" placeholderTextColor={C.dim}/>
@@ -127,15 +150,15 @@ export default function Onboarding(){
       <Text style={s.pathNote}><Copy text="Die konkreten Kriterien und Einstufungstests werden vom Coach festgelegt. Weder Score noch PRO bestätigen ein Level."/></Text>{step===3&&error?<Text style={s.error}>{error}</Text>:null}
     </>}
 
-    {step===healthStep&&<><Text style={s.kicker}><Copy text={journeyEnabled?"04 · DATEN":"03 · DATEN"}/></Text><Text style={s.title}><Copy text={"GESUNDHEIT"}/>{"\n"}<Copy text={"VERBINDEN."}/></Text><Text style={s.copy}><Copy text={"Auf dem iPhone kannst du Apple Health freiwillig verbinden. BE DIFFERENT liest nur die freigegebenen Schritte, Schlafdaten, Ruhepuls, HRV, Kalorien, VO2max und dein Gewicht für persönliche Trainings- und Erholungsempfehlungen. Die App schreibt keine Daten in Apple Health. Du kannst den Zugriff jederzeit in Apple Health widerrufen. Fehlende Werte werden nicht geschätzt."}/></Text><View style={s.switch}><Text style={s.switchText}><Copy text={"GESUNDHEITSDATEN ERLAUBEN"}/></Text><Switch value={health} onValueChange={setHealth} trackColor={{true:C.volt}} thumbColor={health?C.bg:"#eee"}/></View></>}
+    {step===healthStep&&<><Text style={s.kicker}><Copy text={journeyEnabled?"04 · DATEN":"03 · DATEN"}/></Text><Text style={s.title}><Copy text={"GESUNDHEIT"}/>{"\n"}<Copy text={"VERBINDEN."}/></Text><Text style={s.copy}><Copy text={"Du kannst Gesundheitsdaten später in ATHLET importieren. Die Freigabe ist freiwillig und lässt sich jederzeit widerrufen."}/></Text><View style={s.switch}><Text style={s.switchText}><Copy text={"GESUNDHEITSDATEN ERLAUBEN"}/></Text><Switch value={health} onValueChange={setHealth} trackColor={{true:C.volt}} thumbColor={health?C.bg:"#eee"}/></View>{error?<Text style={s.error}><Copy text={error}/></Text>:null}</>}
 
     {step===testStep&&<><Text style={s.kicker}><Copy text={journeyEnabled?"05 · STARTTEST":"04 · STARTTEST"}/></Text><Text style={s.title}><Copy text={"DEIN ERSTER"}/>{"\n"}<Copy text={"MESSPUNKT."}/></Text><Text style={s.copy}><Copy text={"Führe zwei einfache Tests sauber aus. Der 5 km Lauf ist optional."}/></Text><LocalizedTextInput style={s.input} value={pushups} onChangeText={setPushups} keyboardType="number-pad" placeholder="Liegestütze Wiederholungen" placeholderTextColor={C.dim}/><LocalizedTextInput style={s.input} value={plank} onChangeText={setPlank} keyboardType="number-pad" placeholder="Unterarmstütz Sekunden" placeholderTextColor={C.dim}/><LocalizedTextInput style={s.input} value={run5k} onChangeText={setRun5k} keyboardType="decimal-pad" placeholder="5 km Lauf Minuten optional" placeholderTextColor={C.dim}/>{error?<Text style={s.error}><Copy text={error}/></Text>:null}</>}
 
-    {step===finalStep&&<><Text style={s.kicker}><Copy text={journeyEnabled?"06 · DEIN ERGEBNIS":"05 · DEIN ERGEBNIS"}/></Text><Text style={s.result}>{score?.total??0}<Text style={s.resultPercent}>%</Text></Text><Text style={s.resultTitle}>{journeyEnabled?"DEIN SCORE: AUSGANGSWERT":<><Copy text={"DU BIST"}/>{score?.level||"NORMAL"}.</>}</Text>
+    {step===finalStep&&<><Text style={s.kicker}><Copy text={journeyEnabled?"06 · DEIN ERGEBNIS":"05 · DEIN ERGEBNIS"}/></Text><Text style={s.result}>{score?.completeness>0?score.total:"—"}<Text style={s.resultPercent}>%</Text></Text><Text style={s.resultTitle}>{journeyEnabled?"DEIN SCORE: AUSGANGSWERT":<><Copy text={"DU BIST"}/>{score?.level||"NORMAL"}.</>}</Text>
       {journeyEnabled&&<View style={s.dashboardChoice}><Text style={s.dashboardTitle}>SELBSTEINSCHÄTZUNG: {selfLevel?.replaceAll("_"," ")}</Text><Text style={s.dashboardDescription}>Status: {journeyStatus==="PENDING_PLACEMENT"?"EINSTUFUNG AUSSTEHEND":"TRAININGSWEG WIRD VORBEREITET"}. Noch kein Level freigeschaltet. PRO überspringt keine Prüfungen.</Text></View>}<Text style={s.copy}><Copy text={"Das ist dein erster messbarer Ausgangspunkt. Jetzt entwickeln wir ihn Schritt für Schritt weiter."}/></Text><View style={s.resultCard}><Text style={s.resultCardLabel}><Copy text={"DATENVOLLSTÄNDIGKEIT"}/></Text><Text style={s.resultCardValue}>{score?.completeness??0}%</Text></View><Text style={s.trial}><Copy text={"Dein Profil ist bereit. Entdecke jetzt dein Dashboard und deine Trainingseinheiten."}/></Text></>}
 
-    <Pressable style={[s.next,busy&&{opacity:.55}]} disabled={busy} onPress={next}><Text style={s.nextText}><Copy text={busy?"WIRD BERECHNET":step===testStep?"LEISTUNGSWERT BERECHNEN →":step===finalStep?"ZUM DASHBOARD →":"WEITER →"}/></Text></Pressable>
-    {step>1&&step<finalStep&&<Pressable onPress={()=>setStep(step-1)}><Text style={s.back}><Copy text={"← ZURÜCK"}/></Text></Pressable>}
+    <Pressable style={[s.next,busy&&{opacity:.55}]} disabled={busy} onPress={next}><Text style={s.nextText}><Copy text={busy?"WIRD BERECHNET":step===testStep?"Starttest speichern":step===finalStep?"Zu START":"Weiter"}/></Text></Pressable>
+    {step>1&&step<finalStep&&<Pressable onPress={()=>setStep(step-1)}><Text style={s.back}><Copy text={"Zurück"}/></Text></Pressable>}
   </ScrollView></SafeAreaView>;
 }
 

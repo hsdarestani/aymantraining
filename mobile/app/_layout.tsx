@@ -4,11 +4,12 @@ import {restoreLocale} from "../lib/i18n/locale";
 import {useEffect,useState} from "react";
 import {Platform,StyleSheet,View} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
-import {Stack,useSegments} from "expo-router";
+import {Stack,router,useSegments} from "expo-router";
 import {StatusBar} from "expo-status-bar";
-import {installPushHandlers,setPushNavigationReady} from "../lib/push";
+import {clearPushRegistration,installPushHandlers,setPushNavigationReady} from "../lib/push";
 import {C} from "../theme";
 import LaunchIntro from "../components/LaunchIntro";
+import {onSessionExpired} from "../lib/session";
 import NativeChrome from "../components/NativeChrome";
 
 export default function Layout(){
@@ -24,6 +25,11 @@ export default function Layout(){
   const topInset=showInnerHeader?Math.max(insets.top,Platform.OS==="android"?24:0):0;
   const [fontsLoaded,fontError]=useFonts({Manrope:require("../assets/fonts/Manrope_500Medium.ttf"),ManropeSemiBold:require("../assets/fonts/Manrope_600SemiBold.ttf"),Archivo:require("../assets/fonts/Archivo_800ExtraBold.ttf")});
   useEffect(()=>installPushHandlers(),[]);
+  useEffect(()=>onSessionExpired(()=>{
+    clearPushRegistration();
+    if(router.canDismiss())router.dismissAll();
+    router.replace("/");
+  }),[]);
   useEffect(()=>{void restoreLocale().catch(error=>console.warn("[locale] restore failed",error))},[]);
   useEffect(()=>{
     if(!ready)return;

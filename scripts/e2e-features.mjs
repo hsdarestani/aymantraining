@@ -42,6 +42,21 @@ try{
  await call(otherCoach,'/api/admin/video-feedback',{athleteId:athlete.id,mediaId:video.id,timestampSec:5,note:'Unauthorized'},403);await call(coach,'/api/admin/video-feedback',{athleteId:athlete.id,mediaId:video.id,timestampSec:5,note:'Keep your hips level.',strokes:[[{x:.2,y:.3},{x:.5,y:.6}]]});assert.equal(await db.videoFeedback.count({where:{athleteId:athlete.id,mediaId:video.id,status:'REVIEWED'}}),1);checks++;
  const voiceForm=new FormData();voiceForm.set('kind','VOICE_MESSAGE');voiceForm.set('file',new File([new Uint8Array([82,73,70,70])],'coach.wav',{type:'audio/wav'}));const voice=(await call(coach,'/api/media',voiceForm)).asset;await call(coach,'/api/admin/coach-briefs',{title:'Acceptance brief',body:'A short coach brief.',mediaId:voice.id,audienceTier:'PRO'});assert.equal((await call(athlete,'/api/coach-brief')).item.title,'Acceptance brief');checks++;
  await call(coach,'/api/messages',{athleteId:athlete.id,text:'Keep the same form each session.'});
+ const message={clientId:'native-qa-retry',text:'Same text after a dropped response'};
+ const firstMessage=await call(athlete,'/api/messages',message);
+ const replayedMessage=await call(athlete,'/api/messages',message);
+ assert.equal(firstMessage.message.id,replayedMessage.message.id);
+ const before=await db.message.findFirstOrThrow({where:{athleteId:athlete.id},orderBy:{createdAt:'asc'}});
+ await db.message.createMany({data:Array.from({length:41},(_,i)=>({
+   athleteId:athlete.id,coachId:coach.id,senderId:coach.id,text:'Feedback '+i,createdAt:new Date(Date.now()+i)
+ }))});
+ const recent=await call(athlete,'/api/messages?recent=1');
+ assert.equal(recent.items.length,40);
+ assert.equal(recent.items.at(-1).text,'Feedback 40');
+ assert(!recent.items.some(x=>x.id===before.id));
+ const older=await call(athlete,'/api/messages?recent=1&before='+encodeURIComponent(recent.nextCursor));
+ assert(older.items.some(x=>x.id===before.id));
+ await call(other,'/api/messages?recent=1&before='+encodeURIComponent(recent.nextCursor),undefined,404);
  const answer=await call(athlete,'/api/ai',{message:'How can I improve consistency?'});assert.equal(answer.source,'ai');const inspect=await(await fetch('http://127.0.0.1:3001/inspect')).json();const request=inspect.calls.find(x=>x.action==='ai').body;assert.equal(request.store,false);assert(request.instructions.includes('Respond in English'));assert(request.instructions.includes('Keep the same form each session.'));checks+=4;
  await control({aiFailure:true});assert.equal((await call(athlete,'/api/ai',{message:'What should I track?'})).source,'rules');checks++;await control({aiFailure:false,aiUnsafe:true});assert.equal((await call(athlete,'/api/ai',{message:'Any tips?'})).source,'rules');checks++;await control({aiUnsafe:false});
  const before=await db.planAssignment.findMany({where:{userId:athlete.id}}),handoff=await call(athlete,'/api/ai',{message:'Change my training plan'});assert.equal(handoff.source,'handoff');assert.equal(handoff.handoff.reason,'PLAN_CHANGE');checks+=2;

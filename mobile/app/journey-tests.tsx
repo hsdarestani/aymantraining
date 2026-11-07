@@ -1,124 +1,179 @@
-import {Copy} from "../components/Locale";
-import {useCallback,useState} from "react";
-import {ActivityIndicator,Pressable,ScrollView,StyleSheet,Text,TextInput,View} from "react-native";
-import {useFocusEffect,router} from "expo-router";
-import {SafeAreaView} from "react-native-safe-area-context";
+import {useCallback, useRef, useState} from "react";
+import {StyleSheet, Text, View} from "react-native";
+import {router, useFocusEffect, useLocalSearchParams} from "expo-router";
+import {F, FieldAction, FieldLink, FieldMast, FieldPage, FieldState, field, useFieldLocale} from "../components/FieldKit";
+import {Copy, LocalizedTextInput} from "../components/Locale";
 import {api} from "../lib/api";
-import {C} from "../theme";
+import {levelLabel, parseDecimal} from "../lib/field-data";
 
-type Metric={key:string;unit:string;min?:number;max?:number};
-type Attempt={id:string;verdict:"PENDING"|"PASSED"|"FAILED";feedback:any;submittedAt:string;reviewedAt:string|null};
-type Exam={id:string;titleDe:string;kind:string;metrics:Metric[];attempts:Attempt[];canSubmit:boolean;guidanceDe:string;nextRetestAt:string|null};
-type Chapter={id:string;titleDe:string;level:string;unlocked:boolean;finished:boolean;mandatoryTotal:number;mandatoryDone:number;
- items:{id:string;titleDe:string;description:string;mandatory:boolean;done:boolean}[];assessment:Exam|null};
-type Journey={id:string;state:string;pathway:string;selfLevel:string|null;confirmedLevel:string|null;placement:Exam|null;chapters:Chapter[]};
+type Metric = {key: string; unit: string; min?: number; max?: number};
+type Attempt = {id: string; verdict: "PENDING" | "PASSED" | "FAILED";
+  feedback?: {missing?: string[]; failed?: {key: string; actual: number | null}[]; coachFeedbackDe?: string}};
+type Exam = {id: string; titleDe: string; metrics: Metric[]; attempts: Attempt[]; canSubmit: boolean; guidanceDe: string; nextRetestAt: string | null};
+type Chapter = {id: string; titleDe: string; level: string; unlocked: boolean; finished: boolean; mandatoryTotal: number; mandatoryDone: number;
+  items: {id: string; titleDe: string; description: string; mandatory: boolean; done: boolean}[]; assessment: Exam | null};
+type Journey = {id: string; state: string; pathway: string; confirmedLevel: string | null; placement: Exam | null; chapters: Chapter[]};
 
-function ExamCard({exam,enrollmentId,ready,reload}:{exam:Exam;enrollmentId:string;ready:boolean;reload:()=>Promise<void>}){
- const [values,setValues]=useState<Record<string,string>>({});
- const [busy,setBusy]=useState(false),[err,setErr]=useState("");
- const [key,setKey]=useState<string|null>(null);
- const latest=exam.attempts[0];
- const can=ready&&exam.canSubmit&&!busy;
- async function submit(){
-  setBusy(true);setErr("");
-  try{
-   if(exam.metrics.some(m=>!values[m.key]?.trim()||!Number.isFinite(Number(values[m.key]))))
-    throw Error("Bitte alle Messwerte eintragen.");
-   const token=key??"journey-"+Date.now()+"-"+Math.floor(Math.random()*1000000);
-   setKey(token);
-   await api("/api/journey/tests/attempts",{method:"POST",body:JSON.stringify({
-    assessmentId:exam.id,enrollmentId,idempotencyKey:token,
-    results:exam.metrics.map(m=>({key:m.key,unit:m.unit,value:Number(values[m.key])}))
-   })});
-   setKey(null);setValues({});await reload();
-  }catch(e){setErr(e instanceof Error?e.message:"Bitte erneut versuchen.");}finally{setBusy(false);}
- }
- return <View style={s.exam}>
-  <Text style={s.examTitle}>{exam.titleDe}</Text>
-  {latest&&<View style={[s.feedback,latest.verdict==="FAILED"&&s.failed]}>
-   <Text style={s.accent}>{latest.verdict==="PENDING"?"TRAINER PRÜFT":latest.verdict==="PASSED"?"BESTANDEN":"NOCH NICHT BESTANDEN"}</Text>
-   {latest.verdict==="PENDING"&&<Text style={s.hint}><Copy text="Dein Trainer prüft die Messwerte."/></Text>}
-   {latest.verdict==="PASSED"&&<Text style={s.hint}><Copy text="Dein Fortschritt wurde bestätigt. Der nächste Abschnitt ist frei, sobald die Voraussetzungen erfüllt sind."/></Text>}
-   {latest.verdict==="FAILED"&&<><Text style={s.hint}><Copy text="Du kannst gezielt an diesen Punkten weiterarbeiten:"/></Text>
-    {Array.isArray(latest.feedback?.missing)&&latest.feedback.missing.map((m:string)=><Text key={m} style={s.hint}>Fehlender Messwert: {m}</Text>)}
-    {Array.isArray(latest.feedback?.failed)&&latest.feedback.failed.map((f:{key:string;expected:string;actual:number},i:number)=>
-     <Text key={i} style={s.hint}>{f.key}: {f.actual} · Ziel {f.expected}</Text>)}
-    {!!exam.guidanceDe&&<Text style={s.hint}>{exam.guidanceDe}</Text>}
-   </>}
-   {!!latest.feedback?.coachFeedbackDe&&<Text style={s.hint}>Trainer: {String(latest.feedback.coachFeedbackDe)}</Text>}
-  </View>}
-  {can&&<><View style={s.metrics}>{exam.metrics.map(metric=><View key={metric.key} style={s.metric}>
-   <Text style={s.hint}>{metric.key} ({metric.unit})</Text>
-   <Text style={s.small}>{metric.min!==undefined?"Ab "+metric.min+" ":""}{metric.max!==undefined?"Bis "+metric.max:""}</Text>
-   <TextInput style={s.input} keyboardType="numeric" placeholder="Wert" placeholderTextColor="#809084"
-    value={values[metric.key]??""} onChangeText={v=>setValues(old=>({...old,[metric.key]:v}))}/>
-  </View>)}</View><Pressable disabled={busy} accessibilityRole="button" onPress={submit} style={s.btn}>
-   <Text style={s.btnText}>{busy?"SPEICHERN …":"TEST EINREICHEN"}</Text></Pressable></>}
-  {!can&&exam.nextRetestAt&&new Date(exam.nextRetestAt)>new Date()&&
-   <Text style={s.hint}>Nächster Versuch frühestens: {new Date(exam.nextRetestAt).toLocaleString("de-DE")}</Text>}
-  {!!err&&<Text style={s.err}>{err}</Text>}
- </View>;
+const metricNames: Record<string, string> = {pushups: "Liegestütze", plank: "Unterarmstütz", plank_seconds: "Unterarmstütz", "5k_time": "5-km-Lauf"};
+const unitNames: Record<string, string> = {reps: "Wdh.", seconds: "s", minutes: "min"};
+const metricName = (key: string) => metricNames[key] ?? key.replaceAll("_", " ");
+
+function range(metric: Metric, locale: string) {
+  const unit = unitNames[metric.unit] ?? metric.unit;
+  if (metric.min != null && metric.max != null) return metric.min.toLocaleString(locale) + "–" + metric.max.toLocaleString(locale) + " " + unit;
+  if (metric.min != null) return "≥ " + metric.min.toLocaleString(locale) + " " + unit;
+  if (metric.max != null) return "≤ " + metric.max.toLocaleString(locale) + " " + unit;
+  return unit;
 }
-export default function JourneyTests(){
- const [data,setData]=useState<Journey[]>([]),[loading,setLoading]=useState(true);
- const [err,setErr]=useState(""),[busy,setBusy]=useState("");
- const enabled=process.env.EXPO_PUBLIC_JOURNEY_TESTS_ENABLED!=="false";
- const refresh=useCallback(async()=>{
-  if(!enabled){setLoading(false);return;}
-  try{const v=await api<{enrollments:Journey[]}>("/api/journey/tests");setData(v.enrollments);setErr("");}
-  catch(e){setErr(e instanceof Error?e.message:"Nicht verfügbar.");}
-  finally{setLoading(false);}
- },[enabled]);
- useFocusEffect(useCallback(()=>{void refresh()},[refresh]));
- async function finish(enrollmentId:string,itemId:string){
-  setBusy(itemId);setErr("");
-  try{await api("/api/journey/tests/items",{method:"POST",body:JSON.stringify({enrollmentId,itemId})});await refresh();}
-  catch(e){setErr(e instanceof Error?e.message:"Nicht möglich.");}
-  finally{setBusy("");}
- }
- return <SafeAreaView style={s.safe} edges={["top"]}><ScrollView contentContainerStyle={s.content}>
-  <Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text="← ZURÜCK"/></Text></Pressable>
-  <Text style={s.eyebrow}><Copy text="BE DIFFERENT · TRAININGSWEG"/></Text><Text style={s.title}><Copy text="DEIN NÄCHSTER SCHRITT."/></Text>
-  <Text style={s.hint}><Copy text="Deine Leistungsstufe wird durch Prüfungen und den Trainer bestätigt, nicht durch deine Punkte oder ein PRO Abo."/></Text>
-  {!enabled?<View style={s.card}><Text style={s.hint}><Copy text="Der neue Trainingsweg wird vorbereitet. Dein bisheriges Training bleibt unverändert."/></Text></View>:
-   loading?<ActivityIndicator color={C.volt}/>:
-   <>{!!err&&<Text style={s.err}>{err}</Text>}
-    {!data.length&&<View style={s.card}><Text style={s.hint}><Copy text="Noch kein zugeordneter Trainingsweg. Die Auswahl deiner Ziele bleibt gespeichert."/></Text></View>}
-    {data.map(e=><View key={e.id} style={s.card}>
-     <Text style={s.eyebrow}>{e.pathway}</Text><Text style={s.subtitle}>{e.confirmedLevel?.replaceAll("_"," ")??"EINSTUFUNG AUSSTEHEND"}</Text>
-     {e.state==="PENDING"&&<View style={s.chapter}><Text style={s.subtitle}><Copy text="Dein Einstieg"/></Text>
-      {e.placement?<ExamCard exam={e.placement} enrollmentId={e.id} ready reload={refresh}/>:
-       <Text style={s.hint}><Copy text="Der Trainer bestätigt dein Startlevel."/></Text>}
-     </View>}
-     {e.chapters.map(ch=><View key={ch.id} style={[s.chapter,!ch.unlocked&&s.locked]}>
-      <Text style={s.accent}>{ch.level.replaceAll("_"," ")}</Text><Text style={s.subtitle}>{ch.titleDe}</Text>
-      <Text style={s.small}>{ch.finished?"BESTANDEN":ch.unlocked?"FREIGESCHALTET":"GESPERRT"}</Text>
-      {ch.unlocked?<><Text style={s.hint}>{ch.mandatoryDone}/{ch.mandatoryTotal} Pflichtinhalte abgeschlossen</Text>
-       {ch.items.map(it=><View key={it.id} style={s.item}><Text style={s.itemTitle}>{it.titleDe}</Text>
-        {!!it.description&&<Text style={s.hint}>{it.description}</Text>}
-        <Pressable disabled={it.done||busy===it.id||ch.finished} onPress={()=>finish(e.id,it.id)} style={s.outline}>
-         <Text style={s.small}>{it.done?"ERLEDIGT":busy===it.id?"SPEICHERN …":"ALS ERLEDIGT MARKIEREN"}</Text></Pressable>
-       </View>)}
-       {ch.assessment&&<ExamCard exam={ch.assessment} enrollmentId={e.id} ready={!ch.finished&&ch.mandatoryDone===ch.mandatoryTotal} reload={refresh}/>}
-      </>:<Text style={s.hint}><Copy text="Erst die vorherigen Kapitel und Tests abschließen."/></Text>}
-     </View>)}
-    </View>)}
-   </>}
- </ScrollView></SafeAreaView>;
+
+function ExamResult({exam, enrollmentId, ready, placement, reload}: {
+  exam: Exam; enrollmentId: string; ready: boolean; placement?: boolean; reload: () => Promise<void>;
+}) {
+  const locale = useFieldLocale();
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [sentAttempt, setSentAttempt] = useState<string | null>(null);
+  const key = useRef<string | null>(null);
+  const pending = useRef(false);
+  const waiting = !!sentAttempt && !exam.attempts.some(attempt => attempt.id === sentAttempt);
+  const latest = waiting ? undefined : exam.attempts[0];
+  const canSubmit = ready && exam.canSubmit && !waiting;
+  const failed = latest?.verdict === "FAILED";
+  async function submit() {
+    if (pending.current || !canSubmit) return;
+    const results = exam.metrics.map(metric => ({key: metric.key, unit: metric.unit, value: parseDecimal(values[metric.key] ?? "")}));
+    if (results.some(result => !Number.isFinite(result.value))) {
+      setError("Trage alle Messwerte als Zahl ein."); return;
+    }
+    pending.current = true; setBusy(true); setError("");
+    key.current ??= "journey-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+    try {
+      const result = await api<{attempt: {id: string}}>("/api/journey/tests/attempts", {method: "POST",
+        body: JSON.stringify({assessmentId: exam.id, enrollmentId, idempotencyKey: key.current, results})});
+      key.current = null;
+      setValues({}); setSentAttempt(result.attempt.id);
+      await reload();
+    } catch (e) { setError(e instanceof Error ? e.message : "Dein Test konnte nicht gespeichert werden."); }
+    finally { pending.current = false; setBusy(false); }
+  }
+  return <View style={s.exam}>
+    <Text style={s.title}><Copy text={exam.titleDe}/></Text>
+    {(latest || waiting) && <View style={[s.result, failed && s.failed]}>
+      <Text style={[s.accent, failed && s.alert]}><Copy text={failed ? "NOCH NICHT BESTANDEN" :
+        latest?.verdict === "PASSED" ? "BESTANDEN" : "COACH PRÜFT"}/></Text>
+      {latest?.verdict === "PASSED" && <Text style={field.body}><Copy text={placement
+        ? "Dein Coach bestätigt jetzt deine Einstufung." : "Dein Kapitel ist abgeschlossen."}/></Text>}
+      {failed && <>
+        <Text style={s.improve}><Copy text="Daran kannst du arbeiten"/></Text>
+        {latest?.feedback?.missing?.map(metric => <Text key={metric} style={field.body}><Copy text="Fehlender Messwert"/> · <Copy text={metricName(metric)}/></Text>)}
+        {latest?.feedback?.failed?.map(result => {
+          const metric = exam.metrics.find(value => value.key === result.key);
+          return <View key={result.key} style={s.threshold}>
+            <Text style={s.improve}><Copy text={metricName(result.key)}/></Text>
+            <Text style={field.sub}><Copy text="Dein Wert"/> {result.actual?.toLocaleString(locale) ?? "—"}
+              {metric ? <> · <Copy text="Ziel"/> {range(metric, locale)}</> : null}</Text>
+          </View>;
+        })}
+        <Text style={field.body}><Copy text={latest?.feedback?.coachFeedbackDe || exam.guidanceDe ||
+          "Wiederhole die Übungen im Kapitel und arbeite zuerst an den Messwerten, die das Ziel noch nicht erreicht haben."}/></Text>
+      </>}
+      {!failed && !!latest?.feedback?.coachFeedbackDe && <Text style={field.body}>{latest.feedback.coachFeedbackDe}</Text>}
+    </View>}
+    {!canSubmit && exam.nextRetestAt && Date.parse(exam.nextRetestAt) > Date.now() &&
+      <Text style={field.sub}><Copy text="Nächster Versuch ab"/> {new Date(exam.nextRetestAt).toLocaleString(locale)}</Text>}
+    {canSubmit && <>
+      {exam.metrics.map(metric => <View key={metric.key} style={s.metric}>
+        <Text style={field.body}><Copy text={metricName(metric.key)}/></Text>
+        <Text style={field.sub}><Copy text="Ziel"/> {range(metric, locale)}</Text>
+        <LocalizedTextInput style={s.input} keyboardType="decimal-pad" placeholder="Messwert" accessibilityLabel={metricName(metric.key)}
+          editable={!busy} value={values[metric.key] ?? ""} onChangeText={value => {
+            key.current = null; setValues(old => ({...old, [metric.key]: value}));
+          }}/>
+      </View>)}
+      <FieldAction label={busy ? "Wird gespeichert …" : "Test einreichen"} disabled={busy} onPress={() => void submit()}/>
+    </>}
+    <FieldState error={error}/>
+  </View>;
 }
-const s=StyleSheet.create({
- safe:{flex:1,backgroundColor:C.bg},content:{padding:18,paddingBottom:120,gap:16},
- back:{color:C.volt,fontSize:12,fontWeight:"800"},eyebrow:{color:C.volt,fontSize:11,letterSpacing:1.4,fontWeight:"800"},
- title:{color:C.ink,fontSize:32,fontFamily:"Archivo"},subtitle:{color:C.ink,fontSize:21,fontFamily:"Archivo",marginVertical:8},
- hint:{color:"#b3bfb7",fontSize:12,lineHeight:19,marginVertical:7},small:{color:"#c7d0c5",fontSize:11},
- accent:{color:C.volt,fontSize:12,fontWeight:"900"},card:{backgroundColor:"#131d19",borderColor:"#405749",borderWidth:1,borderRadius:15,padding:18,gap:11},
- chapter:{borderWidth:1,borderColor:"#3d4d41",backgroundColor:"#1b2520",padding:13,borderRadius:11,marginTop:11},
- locked:{opacity:.58},item:{backgroundColor:"#17211b",borderRadius:8,padding:11,marginTop:8,gap:7},
- itemTitle:{color:"#eef6e9",fontSize:14,fontWeight:"700"},outline:{borderWidth:1,borderColor:"#52674f",padding:12,borderRadius:7,marginTop:8},
- exam:{marginTop:17,borderTopWidth:1,borderTopColor:"#50644c",paddingTop:14},
- examTitle:{color:C.ink,fontSize:17,fontWeight:"900"},feedback:{backgroundColor:"#203525",padding:12,borderRadius:8,marginVertical:12},
- failed:{backgroundColor:"#332b22"},metrics:{gap:8,marginVertical:11},metric:{gap:4},
- input:{height:49,borderRadius:7,borderWidth:1,borderColor:"#5a715e",backgroundColor:"#101812",color:C.ink,paddingHorizontal:12,fontSize:17},
- btn:{backgroundColor:C.volt,borderRadius:7,padding:15,alignItems:"center",marginTop:13},
- btnText:{color:"#101609",fontSize:12,fontWeight:"900"},err:{color:"#ffacb3",backgroundColor:"#371c24",padding:12,borderRadius:7}
+
+export default function JourneyTests() {
+  const {enrollmentId, chapterId} = useLocalSearchParams<{enrollmentId?: string; chapterId?: string}>();
+  const [data, setData] = useState<Journey[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState("");
+  const pending = useRef(false);
+  const enabled = process.env.EXPO_PUBLIC_JOURNEY_TESTS_ENABLED !== "false";
+  const refresh = useCallback(async () => {
+    if (!enabled) { setLoading(false); return; }
+    try {
+      const value = await api<{enrollments: Journey[]}>("/api/journey/tests");
+      setData(value.enrollments); setError("");
+    } catch (e) { setError(e instanceof Error ? e.message : "Deine Tests konnten nicht geladen werden."); }
+    finally { setLoading(false); }
+  }, [enabled]);
+  useFocusEffect(useCallback(() => { void refresh(); }, [refresh]));
+  async function finish(id: string, itemId: string) {
+    if (pending.current) return;
+    pending.current = true; setBusy(itemId); setError("");
+    try {
+      await api("/api/journey/tests/items", {method: "POST", body: JSON.stringify({enrollmentId: id, itemId})});
+      await refresh();
+    } catch (e) { setError(e instanceof Error ? e.message : "Der Inhalt konnte nicht gespeichert werden."); }
+    finally { pending.current = false; setBusy(""); }
+  }
+  const enrollments = data.filter(item => !enrollmentId || item.id === enrollmentId);
+  return <FieldPage>
+    <FieldMast section="TRAINING"/>
+    <View style={s.content}>
+      <FieldLink label="Zurück" onPress={() => router.back()}/>
+      <Text accessibilityRole="header" style={field.heading}><Copy text={chapterId ? "Dein Kapiteltest" : "Tests & Trainerfeedback"}/></Text>
+      <FieldState loading={loading} error={error} retry={() => void refresh()}/>
+      {!enabled && <Text style={field.sub}><Copy text="Die Kapiteltests werden vorbereitet."/></Text>}
+      {enabled && !loading && !error && enrollments.length === 0 && <Text style={field.sub}><Copy text="Dein Trainingsweg wird noch zugeordnet."/></Text>}
+      {enrollments.map(enrollment => {
+        const chapters = enrollment.chapters.filter(chapter => chapterId ? chapter.id === chapterId : chapter.unlocked);
+        return <View key={enrollment.id} style={s.group}>
+          <Text style={field.type}>{enrollment.pathway}</Text>
+          {enrollment.state === "PENDING" && !chapterId && (enrollment.placement ?
+            <ExamResult key={enrollment.placement.id} exam={enrollment.placement} enrollmentId={enrollment.id} ready placement reload={refresh}/>
+            : <Text style={field.body}><Copy text="Dein Coach bestätigt deine Einstufung."/></Text>)}
+          {chapters.map(chapter => <View key={chapter.id} style={s.group}>
+            <Text style={s.accent}>{levelLabel(chapter.level)}</Text>
+            <Text style={s.title}><Copy text={chapter.titleDe}/></Text>
+            {chapter.unlocked ? <>
+              <Text style={field.sub}>{chapter.mandatoryDone}/{chapter.mandatoryTotal} <Copy text="Pflichtinhalte abgeschlossen"/></Text>
+              {chapter.items.filter(item => !item.done && !chapter.finished).map(item => <View key={item.id} style={s.item}>
+                <Text style={field.body}><Copy text={item.titleDe}/></Text>
+                {item.description ? <Text style={field.sub}><Copy text={item.description}/></Text> : null}
+                <FieldAction label={busy === item.id ? "Wird gespeichert …" : "Als erledigt markieren"} tone="quiet" disabled={!!busy}
+                  onPress={() => void finish(enrollment.id, item.id)}/>
+              </View>)}
+              {chapter.assessment ? <ExamResult key={chapter.assessment.id} exam={chapter.assessment} enrollmentId={enrollment.id}
+                ready={!chapter.finished && chapter.mandatoryDone === chapter.mandatoryTotal} reload={refresh}/>
+                : <Text style={field.sub}><Copy text="Für dieses Kapitel ist noch kein Test freigegeben."/></Text>}
+              <FieldLink label="Kapitel öffnen" onPress={() => router.push({pathname: "/journey", params: {chapterId: chapter.id, enrollmentId: enrollment.id}})}/>
+            </> : <Text style={field.sub}><Copy text="Schließe zuerst die vorherigen Kapitel ab."/></Text>}
+          </View>)}
+        </View>;
+      })}
+    </View>
+  </FieldPage>;
+}
+
+const s = StyleSheet.create({
+  content: {marginHorizontal: 20, gap: 12},
+  group: {gap: 7, marginTop: 6},
+  title: {...field.heading, fontSize: 21},
+  exam: {borderTopWidth: 1, borderColor: F.line, paddingTop: 13, paddingBottom: 13, gap: 10},
+  result: {borderLeftWidth: 2, borderColor: F.signal, padding: 13, gap: 7, backgroundColor: F.surface},
+  failed: {borderColor: F.red},
+  threshold: {borderTopWidth: 1, borderColor: F.line, paddingTop: 6},
+  improve: {...field.body, fontFamily: "ManropeSemiBold"},
+  accent: {...field.type, color: F.signal},
+  alert: {color: F.red},
+  item: {gap: 5, borderTopWidth: 1, borderColor: F.line, paddingVertical: 8},
+  metric: {gap: 4},
+  input: {minHeight: 50, color: F.chalk, fontSize: 16},
 });

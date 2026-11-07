@@ -75,6 +75,12 @@ export async function POST(request:Request){
       return errorJson("Bestehende Nutzer wechseln nach Prüfung durch den Coach in den neuen Trainingsweg.",409);
   }
   const summary=await prisma.$transaction(async tx=>{
+    // Serialize legacy retries so a dropped response cannot duplicate the start test.
+    if(!modern){
+      await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+      const current=await tx.user.findUnique({where:{id:user.id},select:{onboardingCompleted:true}});
+      if(current?.onboardingCompleted)return null;
+    }
     let journey:null|{status:"PENDING_PATHWAY"|"PENDING_PLACEMENT";matchedVersionId:string|null}=null;
     if(modern){
       const candidates=await tx.journeyPathwayVersion.findMany({

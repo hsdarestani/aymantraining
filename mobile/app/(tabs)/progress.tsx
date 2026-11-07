@@ -1,121 +1,220 @@
+import {useCallback, useState} from "react";
+import {Pressable, StyleSheet, Text, View} from "react-native";
+import {router, useFocusEffect} from "expo-router";
+import Svg, {Circle, Line, Path} from "react-native-svg";
+import {F, FieldLink, FieldMast, FieldPage, FieldState, dateLabel, field, useFieldLocale} from "../../components/FieldKit";
 import {Copy} from "../../components/Locale";
-import {useCallback,useState} from "react";
-import {Pressable,StyleSheet,Text,View} from "react-native";
-import {router,useFocusEffect} from "expo-router";
-import Screen from "../../components/Screen";
-import {api} from "../../lib/api";
-import {C} from "../../theme";
+import {api, ApiError} from "../../lib/api";
+import type {Dashboard} from "../../lib/field-data";
 
-const rows=[
- ["KRAFT","strength"],["AUSDAUER","endurance"],["ATHLETIK","athleticism"],
- ["BEWEGLICHKEIT","mobility"],["REGENERATION","recovery"],["ERNÄHRUNG","fuel"],["KONSTANZ","consistency"]
+type Snapshot = {date: string; total: number; completeness?: number};
+type Body = {id: string; date: string; weightKg: number | null};
+type Test = {id: string; name: string; completedAt: string | null; results: {value: number; unit: string}[]};
+type Award = {id: string; title: string; achievedAt: string};
+type Milestones = {enabled: boolean; streak?: number; awards?: Award[]};
+type Timeline = {scores: Snapshot[]};
+const days = [30, 90, 365];
+const dayMs = 86_400_000;
+const sections = [
+  ["Kraft", "strength"], ["Ausdauer", "endurance"], ["Athletik", "athleticism"], ["Beweglichkeit", "mobility"],
+  ["Regeneration", "recovery"], ["Ernährung", "fuel"], ["Konstanz", "consistency"],
 ] as const;
 
-export default function Progress(){
- const [d,setD]=useState<any>({});
- useFocusEffect(useCallback(()=>{
-  Promise.all([api<any>("/api/mobile/dashboard"),api<any>("/api/body-metrics"),api<any>("/api/performance-tests")])
-   .then(([dash,body,tests])=>setD({dash,body:body.items,tests:tests.items})).catch(()=>{});
- },[]));
- const score=d.dash?.score,body=d.body?.[0],locked=d.dash?.scoreDetailsLocked;
- const profile=d.dash?.dailyProfile;
- const total=profile?.profile?.value??null;
- const action=(label:string,route:string)=><Pressable accessibilityRole="button" onPress={()=>router.push(route as any)} style={s.action}><Text style={s.actionText}><Copy text={label}/></Text><Text style={s.actionArrow}>↗</Text></Pressable>;
- return <Screen>
-  <View style={s.hero}>
-    <Text style={s.serial}>03 / <Copy text="FORTSCHRITT"/></Text>
-    <Text style={s.heroSolid}><Copy text="DEIN GRIND."/></Text>
-    <Text style={s.heroOutline}><Copy text="DEINE SPUREN."/></Text>
-    <Text style={s.heroNote}><Copy text="Hier zählt, was du wirklich erreicht hast. Kein Vergleich, kein erfundener Trend."/></Text>
-  </View>
-
-  <Pressable accessibilityRole="button" onPress={()=>router.push("/digital-twin")} style={s.scoreStage}>
-    <Text style={s.serial}>01 / <Copy text="LEISTUNGSWERT"/></Text>
-    <View style={s.scoreRow}><Text style={s.scoreNumber}>{total==null?"?":Math.round(total)}</Text><View style={s.scoreUnit}><Text style={s.scoreScale}>{total==null?"":" / 100"}</Text><Text style={s.scoreCaption}><Copy text="DEIN AKTUELLER WERT"/></Text></View></View>
-    <View style={s.scoreRule}><View style={[s.scoreFill,{width:`${Math.max(0,Math.min(100,Number(total??0)))}%`}]}/></View>
-    <Text style={s.scoreFoot}><Copy text="DIGITALEN ATHLETEN ÖFFNEN"/>  ↗</Text>
-  </Pressable>
-
-  <View style={s.records}><Text style={s.serial}><Copy text="LEISTUNGSWERT: LANGFRISTIGES PROFIL"/></Text><Text style={s.muted}>MESSSTAND: {profile?.profile.recordedDate??"Keine Angabe"} · DATENABDECKUNG: {profile?.profile.completeness??0}%</Text><Text style={s.muted}>HEUTE: {profile?.plan?.scheduled?profile.plan.completed+" / "+profile.plan.scheduled+" geplante Einheiten":"Keine Einheit geplant"} · BESTÄTIGTE STUFE: {profile?.journey?.confirmedLevel??"Noch nicht bestätigt"}</Text>
-   <View style={s.section}><Text style={s.serial}>02 / <Copy text="KÖRPERDATEN"/></Text><Text style={s.sectionTitle}><Copy text="FAKTEN STATT GEFÜHL."/></Text></View>
-   <View style={s.facts}>
-     <View style={s.fact}><Text style={s.factName}><Copy text="GEWICHT"/></Text><Text style={s.factNumber}>{body?.weightKg??"?"}<Text style={s.factUnit}>{body?.weightKg==null?"":" KG"}</Text></Text></View>
-     <View style={s.fact}><Text style={s.factName}><Copy text="MESSUNGEN"/></Text><Text style={s.factNumber}>{d.body?.length??0}</Text></View>
-     <View style={s.fact}><Text style={s.factName}><Copy text="TESTS"/></Text><Text style={s.factNumber}>{d.tests?.length??0}</Text></View>
-   </View>
-  </View>
-
-  <View style={s.profile}>
-   <View style={s.section}><Text style={s.serial}>03 / <Copy text="LEISTUNGSPROFIL"/></Text><Text style={s.sectionTitle}><Copy text="DEINE DISZIPLINEN."/></Text></View>
-   {locked?<View style={s.locked}>
-      <Text style={s.lockedTitle}><Copy text="MEHR TIEFE. DEIN PRO."/></Text>
-      <Text style={s.muted}><Copy text="Dein Gesamtwert ist sichtbar. Einzelwerte und die Erläuterungen gehören zu PRO."/></Text>
-      {action("DETAILS ANSEHEN","/pricing")}
-   </View>:rows.map(([label,key],i)=>{
-    const value=score?.[key];
-    return <View key={key} style={s.recordRow}>
-      <Text style={s.recordIndex}>{String(i+1).padStart(2,"0")}</Text>
-      <View style={s.recordBody}><Text style={s.recordName}><Copy text={label}/></Text>
-       <View style={s.recordTrack}><View style={[s.recordFill,{width:`${Math.max(0,Math.min(100,Number(value??0)))}%`}]}/></View>
-      </View>
-      <Text style={s.recordValue}>{value==null?"?":Math.round(Number(value))}</Text>
-    </View>;
-   })}
-  </View>
-
-  <View style={s.tests}>
-   <View style={s.section}><Text style={s.serial}>04 / BE DIFFERENT TEST</Text><Text style={s.sectionTitle}><Copy text="DEINE PRÜFSTEINE."/></Text></View>
-   {(d.tests||[]).length?(d.tests||[]).slice(0,6).map((t:any,i:number)=><View key={t.id} style={s.testRow}>
-     <Text style={s.testIndex}>{String(i+1).padStart(2,"0")}</Text>
-     <View style={s.testInfo}><Text style={s.testName}>{t.name}</Text><Text style={s.muted}>{t.completedAt?new Date(t.completedAt).toLocaleDateString("de-DE"):"GEPLANT"}</Text></View>
-     <Text style={s.testValue}>{t.results?.[0]?.value??"?"} {t.results?.[0]?.unit??""}</Text>
-   </View>):<Text style={s.noTests}><Copy text="Noch kein Test gespeichert. Dein erster Messpunkt wartet."/></Text>}
-   {action("ALLE TESTS ÖFFNEN","/tests")}
-  </View>
-  <View style={s.nav}><Text style={s.serial}>05 / <Copy text="WEITER ENTDECKEN"/></Text>
-    {action("VORHER NACHHER VERGLEICH","/progress-photos")}
-    {action("DIGITALER ATHLET","/digital-twin")}
-    {action("LEISTUNGSVERLAUF","/performance-timeline")}
-    {action("WOCHENBERICHT","/report")}
-  </View>
- </Screen>;
+function Trace({points}: {points: Snapshot[]}) {
+  const width = 320, height = 108, inset = 7;
+  const first = Date.parse(points[0].date);
+  const span = Math.max(1, Date.parse(points[points.length - 1].date) - first);
+  const plot = points.map(p => ({
+    x: points.length === 1 ? width - inset : inset + ((Date.parse(p.date) - first) / span) * (width - inset * 2),
+    y: height - inset - (Math.min(100, Math.max(0, p.total)) / 100) * (height - inset * 2),
+  }));
+  const path = plot.map(({x, y}, index) => (index ? "L" : "M") + x + " " + y).join(" ");
+  const last = plot[plot.length - 1];
+  return <Svg viewBox="0 0 320 108" width="100%" height={108} preserveAspectRatio="none" accessible={false}>
+    {[0, 25, 50, 75, 100].map(value => {
+      const y = height - inset - (value / 100) * (height - inset * 2);
+      return <Line key={value} x1={0} x2={width} y1={y} y2={y} stroke="#C6C7BA" strokeWidth={1}/>;
+    })}
+    {plot.length > 1 && <>
+      <Path d={path + "L" + last.x + " " + (height - inset) + "H" + inset + "Z"} fill="#DDEAA3"/>
+      <Path d={path} fill="none" stroke="#394521" strokeWidth={2.5} strokeLinejoin="round"/>
+    </>}
+    <Circle cx={last.x} cy={last.y} r={4.5} fill="#394521"/>
+  </Svg>;
 }
 
-const acid=C.volt;
-const s=StyleSheet.create({
- serial:{fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:1.4,color:"#A6BEAA"},
- hero:{borderTopWidth:2,borderTopColor:acid,paddingTop:25,paddingBottom:29,marginTop:12,marginBottom:16,backgroundColor:"#121913",paddingHorizontal:11},
- heroSolid:{fontFamily:"Archivo",fontSize:44,lineHeight:48,letterSpacing:-1.8,color:"#F3F6E9",marginTop:16},
- heroOutline:{fontFamily:"Archivo",fontSize:44,lineHeight:48,letterSpacing:-1.8,color:acid},
- heroNote:{fontFamily:"Manrope",fontSize:12,lineHeight:19,color:"#A4B7A7",marginTop:16,maxWidth:320},
- scoreStage:{borderBottomWidth:2,borderBottomColor:acid,paddingVertical:22,paddingHorizontal:10,backgroundColor:"#182119",marginBottom:28},
- scoreRow:{flexDirection:"row",alignItems:"flex-end",gap:13,marginTop:10},
- scoreNumber:{color:acid,fontFamily:"Archivo",fontSize:105,lineHeight:111,letterSpacing:-6},
- scoreUnit:{flex:1,paddingBottom:19},
- scoreScale:{color:"#D1E9C0",fontFamily:"ManropeSemiBold",fontSize:16},
- scoreCaption:{color:"#94A895",fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:.7,marginTop:9},
- scoreRule:{height:4,backgroundColor:"#3D4C3B"},scoreFill:{height:"100%",backgroundColor:acid},
- scoreFoot:{color:acid,fontFamily:"ManropeSemiBold",fontSize:10,marginTop:18,letterSpacing:1},
- section:{marginBottom:18},sectionTitle:{fontFamily:"Archivo",color:"#F0F4E9",fontSize:30,lineHeight:34,letterSpacing:-.8,marginTop:8},
- records:{marginBottom:33},facts:{flexDirection:"row",borderTopWidth:1,borderBottomWidth:1,borderColor:"#4A5E47"},
- fact:{flex:1,minHeight:125,paddingVertical:18,paddingLeft:8,borderRightWidth:1,borderRightColor:"#3B4B39"},
- factName:{fontFamily:"ManropeSemiBold",fontSize:8,color:"#A5B6A6",letterSpacing:.6},
- factNumber:{fontFamily:"Archivo",fontSize:35,color:"#F2F6EB",marginTop:13,letterSpacing:-1.5},
- factUnit:{fontFamily:"ManropeSemiBold",fontSize:9,color:"#9BAC9B"},
- profile:{marginBottom:35},recordRow:{flexDirection:"row",alignItems:"center",borderTopWidth:1,borderTopColor:"#364536",minHeight:78,gap:12},
- recordIndex:{fontFamily:"Archivo",fontSize:25,color:"#6B8868",width:32},
- recordBody:{flex:1},recordName:{fontFamily:"ManropeSemiBold",fontSize:11,color:"#E8F0E4",letterSpacing:.5},
- recordTrack:{height:3,backgroundColor:"#354436",marginTop:10},recordFill:{height:"100%",backgroundColor:acid},
- recordValue:{fontFamily:"Archivo",fontSize:26,color:"#E9F4D8",minWidth:36,textAlign:"right"},
- locked:{borderTopWidth:1,borderTopColor:"#718553",paddingVertical:25},
- lockedTitle:{fontFamily:"Archivo",color:acid,fontSize:27,letterSpacing:-.4},
- muted:{fontFamily:"Manrope",fontSize:10,color:"#99AC9C",lineHeight:16,marginTop:5},
- action:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",borderBottomWidth:1,borderBottomColor:"#3B4C3C",minHeight:53},
- actionText:{fontFamily:"ManropeSemiBold",fontSize:10,color:"#E4F0DE",letterSpacing:.7},actionArrow:{fontFamily:"Archivo",color:acid,fontSize:21},
- tests:{marginBottom:27},testRow:{flexDirection:"row",alignItems:"center",gap:12,borderTopWidth:1,borderTopColor:"#3B4C3C",minHeight:79},
- testIndex:{fontFamily:"Archivo",fontSize:25,color:"#618260",width:35},
- testInfo:{flex:1},testName:{color:"#E8F0E4",fontFamily:"Archivo",fontSize:14},
- testValue:{color:acid,fontFamily:"Archivo",fontSize:17},
- noTests:{fontFamily:"Manrope",fontSize:12,color:"#A5B5A6",paddingVertical:23,borderTopWidth:1,borderColor:"#3B4C3C"},
- nav:{marginBottom:30}
+export default function Progress() {
+  const locale = useFieldLocale();
+  const [dash, setDash] = useState<Dashboard | null>(null);
+  const [body, setBody] = useState<Body[]>([]);
+  const [tests, setTests] = useState<Test[]>([]);
+  const [milestones, setMilestones] = useState<Milestones | null>(null);
+  const [snapshots, setSnapshots] = useState<Snapshot[] | null>(null);
+  const [timelineLocked, setTimelineLocked] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
+  const [period, setPeriod] = useState(90);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const load = useCallback(async (isActive: () => boolean = () => true) => {
+    const [dashboard, measurements, results, awards, timeline] = await Promise.allSettled([
+      api<Dashboard>("/api/mobile/dashboard"), api<{items: Body[]}>("/api/body-metrics"),
+      api<{items: Test[]}>("/api/performance-tests"), api<Milestones>("/api/milestones"),
+      api<Timeline>("/api/performance-timeline"),
+    ]);
+    if (!isActive()) return;
+    if (dashboard.status === "fulfilled") { setDash(dashboard.value); setError(""); }
+    else setError("Dein BD Score konnte nicht geladen werden.");
+    if (measurements.status === "fulfilled") setBody(measurements.value.items);
+    if (results.status === "fulfilled") setTests(results.value.items);
+    if (awards.status === "fulfilled") setMilestones(awards.value);
+    if (timeline.status === "fulfilled") {
+      setSnapshots(timeline.value.scores);
+      setTimelineLocked(false);
+    } else if (timeline.reason instanceof ApiError && timeline.reason.status === 403) {
+      setSnapshots(null);
+      setTimelineLocked(true);
+    }
+    setUnavailable([measurements, results, awards].some(result => result.status === "rejected") ||
+      (timeline.status === "rejected" && !(timeline.reason instanceof ApiError && timeline.reason.status === 403)));
+    setLoading(false);
+  }, []);
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    void load(() => active);
+    return () => { active = false; };
+  }, [load]));
+
+  const profile = dash?.dailyProfile?.profile;
+  const score = profile?.value;
+  const points = (snapshots ?? []).filter(item => Number.isFinite(item.total) && item.completeness !== 0 &&
+    Date.parse(item.date) >= Date.now() - period * dayMs).sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+  const measurement = body.find(item => item.weightKg != null);
+  const log = [
+    ...(milestones?.awards ?? []).map(item => ({id: item.id, title: item.title, date: item.achievedAt, type: "MEILENSTEIN", value: ""})),
+    ...tests.flatMap(item => item.completedAt ? [{id: item.id, title: item.name, date: item.completedAt, type: "LEISTUNGSTEST",
+      value: item.results[0] ? item.results[0].value.toLocaleString(locale) + " " + item.results[0].unit : ""}] : []),
+    ...(measurement ? [{id: measurement.id, title: "Körpergewicht", date: measurement.date, type: "MESSUNG",
+      value: measurement.weightKg!.toLocaleString(locale) + " kg"}] : []),
+  ].sort((a, b) => Date.parse(b.date) - Date.parse(a.date)).slice(0, 8);
+  return <FieldPage>
+    <FieldMast section="FORTSCHRITT"/>
+    <FieldState loading={loading} error={error} retry={() => void load()}/>
+    {!loading && <>
+      {dash && <View style={s.wall}>
+        <View style={s.wallHeader}>
+          <View style={s.scoreGroup}>
+            <Text accessibilityRole="header" style={s.darkLabel}><Copy text="BD SCORE"/></Text>
+            <View style={s.figure}>
+              <Text style={s.score}>{score == null ? "—" : Math.round(score)}</Text>
+              {score != null && <Text style={s.scale}>/ 100</Text>}
+            </View>
+          </View>
+          <View style={s.stamp}>
+            <Text style={s.darkLabel}><Copy text="MESSSTAND"/></Text>
+            <Text style={s.stampDate}>{profile?.recordedDate ? dateLabel(profile.recordedDate, locale, {day: "2-digit", month: "short"}) : "—"}</Text>
+            {score != null && <Text style={s.darkSmall}>{profile?.completeness ?? 0}% <Copy text="erfasst"/></Text>}
+          </View>
+        </View>
+        {snapshots && <View accessibilityRole="tablist" style={s.periods}>
+          {days.map(value => <Pressable key={value} onPress={() => setPeriod(value)} accessibilityRole="tab"
+            accessibilityState={{selected: value === period}} style={[s.period, value === period && s.periodOn]}>
+            <Text style={[s.darkSmall, value === period && s.periodTextOn]}>{value} <Copy text="Tage"/></Text>
+          </Pressable>)}
+        </View>}
+        {points.length > 0 ? <>
+          <Trace points={points}/>
+          <View style={s.axis}>
+            <Text style={s.darkSmall}>{dateLabel(points[0].date, locale, {day: "numeric", month: "short"})}</Text>
+            <Text style={s.darkSmall}>{points.length > 1
+              ? dateLabel(points[points.length - 1].date, locale, {day: "numeric", month: "short"}) : <Copy text="Ein Messpunkt"/>}</Text>
+          </View>
+        </> : <View style={s.noPlot}>
+          <Text style={s.darkSmall}><Copy text={timelineLocked ? "Der Score-Verlauf ist mit PRO verfügbar."
+            : snapshots ? "Keine Messpunkte in diesem Zeitraum." : "Der Score-Verlauf ist gerade nicht verfügbar."}/></Text>
+        </View>}
+      </View>}
+      <FieldState error={unavailable ? "Einige Fortschrittsdaten konnten nicht geladen werden." : null} retry={() => void load()}/>
+      <View style={s.records}>
+        <View style={s.recordsHead}>
+          <View style={s.scoreGroup}>
+            <Text style={s.logLabel}><Copy text="DEIN LEISTUNGSARCHIV"/></Text>
+            <Text accessibilityRole="header" style={field.heading}><Copy text="Deine Spuren"/></Text>
+          </View>
+          {milestones?.enabled && <View style={s.streak}>
+            <Text style={s.streakValue}>{milestones.streak ?? 0}</Text>
+            <Text style={field.sub}><Copy text="Tage in Folge"/></Text>
+          </View>}
+        </View>
+        {log.length === 0 && !unavailable && <Text style={field.sub}><Copy text="Deine ersten Messungen und Meilensteine erscheinen hier."/></Text>}
+        {log.map(item => <View key={item.type + item.id} style={s.record}>
+          <View style={s.rail}>
+            <View style={[s.tick, item.type === "MEILENSTEIN" && s.award]}/>
+            <Text style={s.recordDate}>{dateLabel(item.date, locale, {day: "2-digit", month: "short"})}</Text>
+          </View>
+          <View style={s.recordText}>
+            <Text style={field.type}><Copy text={item.type}/></Text>
+            <Text style={field.body}><Copy text={item.title}/></Text>
+          </View>
+          {item.value ? <Text style={s.recordValue}>{item.value}</Text> : null}
+        </View>)}
+        <View style={s.recordLinks}>
+          {milestones?.enabled && <FieldLink label="Alle Meilensteine" onPress={() => router.push("/milestones")}/>}
+          <FieldLink label="Leistungstests" onPress={() => router.push("/tests")}/>
+        </View>
+      </View>
+      <View style={s.disciplines}>
+        <Text accessibilityRole="header" style={field.heading}><Copy text="Leistungsprofil"/></Text>
+        {dash?.scoreDetailsLocked ? <Text style={field.sub}><Copy text="Einzelwerte sind mit PRO verfügbar."/></Text>
+          : sections.map(([label, key]) => {
+            const value = dash?.pillarPreview?.[key];
+            return <View key={key} style={s.discipline}>
+              <Text style={s.disciplineLabel}><Copy text={label}/></Text>
+              <View style={s.meter}>{value != null && <View style={[s.meterFill, {width: Math.max(0, Math.min(value, 100)) + "%" as `${number}%`}]}/>}</View>
+              <Text style={s.disciplineValue}>{value == null ? "—" : Math.round(value)}</Text>
+            </View>;
+          })}
+        <FieldLink label={timelineLocked ? "Mitgliedschaft ansehen" : "Leistungsverlauf öffnen"} onPress={() => router.push(timelineLocked ? "/membership" : "/performance-timeline")}/>
+        <FieldLink label="Fortschrittsfotos" onPress={() => router.push("/progress-photos")}/>
+        <FieldLink label="Wochenbericht" onPress={() => router.push("/report")}/>
+      </View>
+    </>}
+  </FieldPage>;
+}
+
+const s = StyleSheet.create({
+  wall: {backgroundColor: F.chalk, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 14, borderTopWidth: 3, borderColor: F.signal},
+  wallHeader: {flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 14},
+  scoreGroup: {flex: 1},
+  darkLabel: {...field.type, color: F.darkMuted},
+  figure: {flexDirection: "row", alignItems: "baseline", flexWrap: "wrap", gap: 5},
+  score: {color: F.ink, fontFamily: "Archivo", fontSize: 89, lineHeight: 92, letterSpacing: -5, fontVariant: ["tabular-nums"]},
+  scale: {color: F.darkMuted, fontFamily: "ManropeSemiBold", fontSize: 17},
+  stamp: {borderLeftWidth: 1, borderColor: "#A7AA9F", paddingLeft: 10, gap: 3, marginTop: 3},
+  stampDate: {color: F.ink, fontFamily: "Archivo", fontSize: 18},
+  darkSmall: {color: F.darkMuted, fontFamily: "ManropeSemiBold", fontSize: 12},
+  periods: {flexDirection: "row", marginTop: 5, marginBottom: 8, borderBottomWidth: 1, borderColor: "#B9BBB0"},
+  period: {minHeight: 44, flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 3, borderBottomWidth: 2, borderColor: "transparent"},
+  periodOn: {borderColor: "#394521"},
+  periodTextOn: {color: F.ink},
+  axis: {flexDirection: "row", justifyContent: "space-between", paddingTop: 4},
+  noPlot: {minHeight: 54, justifyContent: "center", borderTopWidth: 1, borderColor: "#C6C7BA"},
+  records: {marginHorizontal: 20, marginTop: 25, gap: 5},
+  recordsHead: {flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", gap: 13, marginBottom: 10},
+  logLabel: {...field.type, color: F.signal, marginBottom: 4},
+  streak: {alignItems: "flex-end", paddingBottom: 1},
+  streakValue: {color: F.signal, fontFamily: "Archivo", fontSize: 25},
+  record: {flexDirection: "row", alignItems: "center", borderTopWidth: 1, borderColor: F.line, minHeight: 63, gap: 10, paddingVertical: 8},
+  rail: {width: 63, flexDirection: "row", alignItems: "center", gap: 6},
+  tick: {width: 4, height: 20, backgroundColor: "#6B7269"},
+  award: {backgroundColor: F.signal},
+  recordDate: {color: F.muted, fontFamily: "ManropeSemiBold", fontSize: 11, flexShrink: 1},
+  recordText: {flex: 1, gap: 2},
+  recordValue: {color: F.chalk, fontFamily: "Archivo", fontSize: 14, maxWidth: "29%"},
+  recordLinks: {flexDirection: "row", flexWrap: "wrap", columnGap: 17},
+  disciplines: {marginHorizontal: 20, borderTopWidth: 1, borderColor: F.line, paddingTop: 18, marginTop: 8, gap: 5},
+  discipline: {flexDirection: "row", gap: 10, minHeight: 38, alignItems: "center"},
+  disciplineLabel: {...field.body, width: "36%"},
+  meter: {height: 3, flex: 1, backgroundColor: F.line},
+  meterFill: {height: 3, backgroundColor: F.signal},
+  disciplineValue: {...field.body, minWidth: 27, textAlign: "right", fontVariant: ["tabular-nums"]},
 });
