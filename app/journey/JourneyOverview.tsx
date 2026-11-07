@@ -53,6 +53,7 @@ function TrainingTrack({levels,enrollment,busy,onChapter}:{levels:Overview["leve
 export default function JourneyOverview({initial,embedded=false}:{initial?:Overview;embedded?:boolean}={}){
  const t=useT();
  const [data,setData]=useState<Overview|null>(initial??null),[detail,setDetail]=useState<Detail|null>(null),[busy,setBusy]=useState(false),[loading,setLoading]=useState(!initial),[error,setError]=useState(""),[notice,setNotice]=useState("");
+ const [selectedPath,setSelectedPath]=useState("");
  const [selectedGoals,setSelectedGoals]=useState<string[]>([]),[selfLevel,setSelfLevel]=useState<Code>("READY"),[consent,setConsent]=useState(false);
  const reload=useCallback(async()=>{const v=await fetchJson("/api/journey/overview");setData(v);},[]);
  const detailHeading=useRef<HTMLHeadingElement>(null);
@@ -86,6 +87,7 @@ export default function JourneyOverview({initial,embedded=false}:{initial?:Overv
  }
  if(loading)return <p role="status"><Copy text="Trainingsweg wird geladen …"/></p>;
  if(!data)return <p role="alert" className="j7-error">{error||"Trainingsweg nicht erreichbar."}</p>;
+ const path=data.enrollments.find(e=>e.id===selectedPath)??data.enrollments.find(e=>e.state==="ACTIVE")??data.enrollments[0];
  return <div className="j7-stack">
   {error&&<p role="alert" className="j7-error"><Copy text={error}/></p>}{notice&&<p role="status" className="j7-success"><Copy text={notice}/></p>}
   {!data.enrollments.length&&<TrainingTrack levels={data.levels} busy={busy} onChapter={()=>{}}/>}
@@ -102,11 +104,19 @@ export default function JourneyOverview({initial,embedded=false}:{initial?:Overv
    <label className="j7-agree"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/><Copy text={" Ich möchte den neuen Weg beginnen. Meine bisherigen Daten werden nicht überschrieben."}/></label>
    <button className="primary compact" disabled={busy||!consent||!selectedGoals.length} onClick={optIn}><Copy text="WECHSEL VORMERKEN"/></button>
   </section>}
-  {data.enrollments.map(e=><section key={e.id} className="bd-training-path">
-   <header className="bd-path-head"><h2>{e.pathway}</h2><span>{e.completedChapters}/{e.totalChapters} <Copy text="Kapitel"/></span></header>
-   <TrainingTrack levels={data.levels} enrollment={e} busy={busy} onChapter={ch=>openChapter(e.id,ch)}/>
+  {path&&<section className="bd-training-path">
+   <header className="bd-path-head">
+    {data.enrollments.length>1 ? <label className="bd-path-selector">
+     <Copy text="DEIN WEG"/>
+     <select value={path.id} disabled={busy} onChange={e=>{setSelectedPath(e.target.value);setDetail(null);}}>
+      {data.enrollments.map(e=><option key={e.id} value={e.id}>{e.pathway}</option>)}
+     </select>
+    </label> : <h2>{path.pathway}</h2>}
+    <span>{path.completedChapters}/{path.totalChapters} <Copy text="Kapitel"/></span>
+   </header>
+   <TrainingTrack key={path.id} levels={data.levels} enrollment={path} busy={busy} onChapter={ch=>openChapter(path.id,ch)}/>
    {data.testsEnabled&&<Link className="bd-text-link" href="/journey/tests"><Copy text="Tests und Rückmeldungen"/></Link>}
-  </section>)}
+  </section>}
   {detail&&<section className="panel j7-detail" aria-live="polite"><div className="j7-head"><div><span className="eyebrow">{label(detail.level)}<Copy text={" · FREIGESCHALTET"}/></span><h2 ref={detailHeading} tabIndex={-1}>{detail.titleDe}</h2><p>{detail.description}</p></div><button className="j7-close" onClick={()=>setDetail(null)}><Copy text="Schließen"/></button></div>
    <p>{detail.mandatoryDone}<Copy text={" von "}/>{detail.mandatoryTotal}<Copy text={" Pflichtinhalten erledigt"}/></p>
    {detail.items.map(it=><article className="j7-item" key={it.id}><div className="j7-head"><div><span className="eyebrow"><Copy text={it.kind==="EXERCISE"?"ÜBUNG":it.kind==="TRAINING_PLAN"?"TRAININGSPLAN":"HINWEIS"}/></span><h3>{it.titleDe}</h3></div><small><Copy text={it.done?"ERLEDIGT":it.mandatory?"PFLICHT":"OPTIONAL"}/></small></div>

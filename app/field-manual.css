@@ -159,7 +159,7 @@ body:has(.bd-field) .app-desktop-top nav a.active { color: #fff; }
 .bd-lanes button[aria-pressed=true] { background: var(--mark,#d4ff00); color: #181b0e; border-color: transparent; }
 .bd-lanes button:focus-visible { outline: 2px solid #f0efe5; outline-offset: -4px; }
 .bd-lanes button strong { font: 800 clamp(13px,2.6vw,29px)/1.05 Archivo,system-ui,sans-serif; letter-spacing: -.025em; }
-.bd-lane-no { font: 800 24px/1 Archivo,system-ui,sans-serif; }
+.bd-lane-no { white-space: nowrap; font: 800 24px/1 Archivo,system-ui,sans-serif; }
 .bd-lane-mark { width: 10px; height: 10px; border: 1px solid currentColor; transform: rotate(45deg); }
 .bd-lane-mark[data-earned] { background: currentColor; }
 .bd-lane-program { align-self: center; min-width: 0; padding: clamp(16px,3vw,36px); }
@@ -167,6 +167,8 @@ body:has(.bd-field) .app-desktop-top nav a.active { color: #fff; }
 .bd-lane-program h3 { margin: 5px 0 11px; }
 .bd-lane-program p { color: #e2e4d9; font-size: 14px; }
 .bd-path-head { display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; align-items: baseline; padding: 0 0 12px; }
+.bd-path-selector { display: grid; gap: 4px; font-weight: 800; }
+.bd-path-selector select { min-height: 44px; background: var(--paper,#f0efe5); color: #151713; border: 1px solid #787e6a; border-radius: 0; }
 .bd-path-head h2 { font-size: clamp(21px,3vw,34px); }
 .bd-chapter-list { display: grid; margin-top: 14px; }
 .bd-chapter-list button { min-height: 52px; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; text-align: left; border: 0; border-top: 1px solid #69715e; border-radius: 0; padding: 6px 0; color: inherit; background: transparent; }
@@ -340,7 +342,7 @@ body:has(.bd-field) .app-desktop-top nav a.active { color: #fff; }
   .bd-training-next .bd-text-link { min-height: 44px; }
   .bd-training-track { grid-template-columns: minmax(0,1fr) minmax(0,.9fr); margin-inline: calc(-1 * var(--gutter)); }
   .bd-lanes { padding: 8px 6px 8px 8px; }
-  .bd-lanes button { grid-template-columns: 21px 1fr; gap: 5px; padding-inline: 5px; min-height: 50px; }
+  .bd-lanes button { grid-template-columns: 24px 1fr; gap: 5px; padding-inline: 5px; min-height: 50px; }
   .bd-lanes button:nth-child(2) { margin-left: 3px; }
   .bd-lanes button:nth-child(3) { margin-left: 6px; }
   .bd-lanes button:nth-child(4) { margin-left: 9px; }
