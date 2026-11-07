@@ -11,13 +11,14 @@ import {useVideoPlayer,VideoView} from "expo-video";
 import Brand from "../../components/Brand";
 import {Card,Eyebrow,SectionTitle} from "../../components/Card";
 import {API,api} from "../../lib/api";
-import {localMediaUri} from "../../lib/media-cache";
+import {exerciseVideoSource,localMediaUri} from "../../lib/media-cache";
+import {getSession} from "../../lib/session";
 import {C,radius} from "../../theme";
 
-function CoachVideo({uri}:{uri:string}){
-  const player=useVideoPlayer(uri);
+function CoachVideo({source}:{source:ReturnType<typeof exerciseVideoSource>}){
+  const player=useVideoPlayer(source);
   const {status}=useEvent(player,"statusChange",{status:player.status});
-  if(status==="error")return <FieldState error="Das Video konnte nicht abgespielt werden." retry={()=>void player.replaceAsync(uri).catch(()=>undefined)}/>;
+  if(status==="error")return <FieldState error="Das Video konnte nicht abgespielt werden." retry={()=>void player.replaceAsync(source).catch(()=>undefined)}/>;
   return <View style={s.videoWrap}><VideoView style={s.videoView} player={player} nativeControls contentFit="contain"/></View>;
 }
 
@@ -25,6 +26,7 @@ export default function Exercise(){
   const {id}=useLocalSearchParams<{id:string}>();
   const [x,setX]=useState<any>(null);
   const [media,setMedia]=useState<Record<string,string>>({});
+  const [mediaToken,setMediaToken]=useState<string|null>(null);
   const [frame,setFrame]=useState(0);
   const [lightbox,setLightbox]=useState<number|null>(null);
 
@@ -32,9 +34,9 @@ export default function Exercise(){
   const load=useCallback(async(isActive:()=>boolean)=>{
     setError("");setX(null);setMedia({});setFrame(0);setLightbox(null);setShowVideo(false);
     try{
-      const response=await api<any>("/api/exercises/"+encodeURIComponent(id));
+      const [response,token]=await Promise.all([api<any>("/api/exercises/"+encodeURIComponent(id)),getSession()]);
       if(!isActive())return;
-      setX(response.item);
+      setX(response.item);setMediaToken(token);
       const values=[response.item.imageStart,response.item.imageMiddle,response.item.imageEnd,response.item.videoUrl].filter(Boolean);
       const pairs=await Promise.all(values.map(async (uri:string)=>[uri,await localMediaUri(uri)] as const));
       if(isActive())setMedia(Object.fromEntries(pairs));
@@ -55,7 +57,7 @@ export default function Exercise(){
   if(!x)return <View style={s.center}><FieldState loading={!error} error={error} retry={()=>void load(()=>true)}/></View>;
   const images=[x.imageStart,x.imageMiddle,x.imageEnd];
   const mistakes=Array.isArray(x.commonMistakes)?x.commonMistakes:[];
-  const video=x.videoUrl?media[x.videoUrl]||(x.videoUrl.startsWith("http")?x.videoUrl:API+x.videoUrl):null;
+  const video=x.videoUrl?exerciseVideoSource(x.videoUrl,media[x.videoUrl],mediaToken):null;
   const labels=["START","MITTE","ENDE"];
   const width=Dimensions.get("window").width;
 
@@ -67,7 +69,7 @@ export default function Exercise(){
 
     {imageUris.length?<Pressable accessibilityRole="button" style={s.motion} onPress={()=>setLightbox(frame)}><Image source={{uri:imageUris[frame].uri}} style={s.motionImage}/><View style={s.motionLabel}><Text style={s.motionLabelText}><Copy text={labels[imageUris[frame].slot]}/><Copy text={"· BEWEGUNGSABLAUF"}/></Text></View></Pressable>:null}
     <View style={s.images}>{images.map((uri:any,i:number)=>uri?<Pressable key={i} style={s.imageButton} accessibilityRole="button" onPress={()=>{const index=imageUris.findIndex(item=>item.slot===i);setFrame(index);setLightbox(index)}}><Image source={{uri:media[uri]||(uri.startsWith("http")?uri:API+uri)}} style={s.image}/><Text style={s.imageLabel}>{labels[i]}</Text></Pressable>:<View key={i} style={s.placeholder}><Text style={s.placeholderText}>{labels[i]}</Text></View>)}</View>
-    {video&&(showVideo?<CoachVideo uri={video}/>:<FieldLink label="Video öffnen" onPress={()=>setShowVideo(true)}/>)}
+    {video&&(showVideo?<CoachVideo source={video}/>:<FieldLink label="Video öffnen" onPress={()=>setShowVideo(true)}/>)}
     <Card><Eyebrow><Copy text={"ZIELMUSKELN"}/></Eyebrow><SectionTitle>{x.primaryMuscles||"Keine Angabe"}</SectionTitle>{x.secondaryMuscles?<Text style={s.secondary}>{x.secondaryMuscles}</Text>:null}</Card>
     <Card><Eyebrow><Copy text={"TRAINERHINWEISE"}/></Eyebrow><SectionTitle><Copy text={"Sauber ausführen."}/></SectionTitle>{[x.coachCue1,x.coachCue2,x.coachCue3].filter(Boolean).map((c:string,i:number)=><View style={s.cue} key={c}><Text style={s.cueNr}>{i+1}</Text><Text style={s.cueText}>{c}</Text></View>)}</Card>
     <Card><Eyebrow><Copy text={"HÄUFIGE FEHLER"}/></Eyebrow>{mistakes.map((m:string)=><Text style={s.error} key={m}>× {m}</Text>)}</Card>

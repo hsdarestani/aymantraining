@@ -260,7 +260,6 @@ export default function Coach() {
           {access === "locked" && <View style={s.locked}>
             <Text style={field.heading}><Copy text="Persönlicher Austausch"/></Text>
             <Text style={field.sub}><Copy text="Nachrichten, Sprache und Technikvideos sind mit PRO verfügbar."/></Text>
-            <FieldLink label="Mitgliedschaft ansehen" onPress={() => router.push("/membership")}/>
           </View>}
           {access === "open" && <>
             {cursor && <FieldAction label={older ? "Wird geladen …" : "Ältere Nachrichten laden"} disabled={older} onPress={() => void loadOlder()} tone="quiet"/>}

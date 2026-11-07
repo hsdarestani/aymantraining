@@ -173,7 +173,7 @@ export default function Progress() {
               <Text style={s.disciplineValue}>{value == null ? "—" : Math.round(value)}</Text>
             </View>;
           })}
-        <FieldLink label={timelineLocked ? "Mitgliedschaft ansehen" : "Leistungsverlauf öffnen"} onPress={() => router.push(timelineLocked ? "/membership" : "/performance-timeline")}/>
+        {!timelineLocked && <FieldLink label="Leistungsverlauf öffnen" onPress={() => router.push("/performance-timeline")}/>}
         <FieldLink label="Fortschrittsfotos" onPress={() => router.push("/progress-photos")}/>
         <FieldLink label="Wochenbericht" onPress={() => router.push("/report")}/>
       </View>

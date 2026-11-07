@@ -31,6 +31,11 @@ function key(url:string){
   for(let i=0;i<url.length;i++){hash^=url.charCodeAt(i);hash=Math.imul(hash,16777619)}
   return (hash>>>0).toString(16);
 }
+export function exerciseVideoSource(url:string,cached:string|undefined,token:string|null){
+  const uri=cached||(url.startsWith("http")?url:API+url);
+  const privateMedia=uri.startsWith(API+"/api/media/");
+  return {uri,...(privateMedia&&token?{headers:{Authorization:"Bearer "+token}}:{})};
+}
 export async function localMediaUri(url:string){
   const remote=url.startsWith("http")?url:API+url;
   const s=await scope();const token=await getSession();
