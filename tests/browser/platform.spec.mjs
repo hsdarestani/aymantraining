@@ -2,10 +2,19 @@ import {test,expect} from '@playwright/test';
 import {PrismaClient} from '@prisma/client';
 import bcrypt from 'bcryptjs';
 const db=new PrismaClient(),stamp=Date.now(),password='BrowserAcceptance123!',exerciseId='BD-UI-'+String(stamp%900+100);let admin,athlete,plan;
-async function login(page,user){await page.goto('/login');await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('en');await page.locator('input[name="email"]').fill(user.email);await page.locator('input[name="password"]').fill(password);await page.getByRole('button',{name:/SIGN IN/}).click();await expect(page).toHaveURL(user.role==='ADMIN'?/\/admin$/:/\/dashboard$/)}
+const languagePicker=scope=>scope.getByRole('combobox',{name:/^(Sprache|Language)$/});
+async function login(page,user){await page.goto('/login');await languagePicker(page).selectOption('en');await page.locator('input[name="email"]').fill(user.email);await page.locator('input[name="password"]').fill(password);await page.getByRole('button',{name:/SIGN IN/}).click();await expect(page).toHaveURL(user.role==='ADMIN'?/\/admin$/:/\/dashboard$/)}
+async function switchMemberLanguage(page,locale){
+ await page.getByRole('button',{name:/^(Menü öffnen|Open menu)$/}).click();
+ const menu=page.getByRole('dialog',{name:'BE DIFFERENT',exact:true});
+ await languagePicker(menu).selectOption(locale);
+ await expect(page.locator('html')).toHaveAttribute('lang',locale);
+ await menu.getByRole('button',{name:/^(Menü schließen|Close menu)$/}).click();
+ await expect(menu).toBeHidden();
+}
 test.beforeAll(async()=>{if(!process.env.DATABASE_URL?.includes('bedifferent_test'))throw Error('Browser acceptance requires isolated test database');const passwordHash=await bcrypt.hash(password,10);admin=await db.user.create({data:{email:`ui-admin-${stamp}@example.invalid`,name:'UI Admin',passwordHash,role:'ADMIN',onboardingCompleted:true,locale:'en'}});athlete=await db.user.create({data:{email:`ui-athlete-${stamp}@example.invalid`,name:'UI Athlete',passwordHash,role:'ATHLETE',subscriptionTier:'PRO',onboardingCompleted:true,locale:'en'}});await db.coachAssignment.create({data:{athleteId:athlete.id,coachId:admin.id}});plan=await db.trainingPlan.create({data:{name:'UI Acceptance Plan',active:true,isTemplate:true}})});
 test.afterAll(async()=>{await db.message.deleteMany({where:{athleteId:athlete?.id}});await db.coachAssignment.deleteMany({where:{athleteId:athlete?.id}});await db.user.deleteMany({where:{id:{in:[admin?.id,athlete?.id].filter(Boolean)}}});await db.trainingPlanItem.deleteMany({where:{planId:plan?.id}});await db.trainingPlan.deleteMany({where:{id:plan?.id}});await db.exercise.deleteMany({where:{id:exerciseId}});await db.$disconnect()});
-test('public forms switch languages, persist and keep input values',async({page})=>{await page.goto('/login');await page.locator('input[name="email"]').fill('draft@example.invalid');await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('en');await expect(page.getByText('Password',{exact:true})).toBeVisible();await expect(page.locator('input[name="email"]')).toHaveValue('draft@example.invalid');await page.reload();await expect(page.getByText('Password',{exact:true})).toBeVisible();await expect(page.locator('html')).toHaveAttribute('lang','en');await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('de');await expect(page.getByText('Passwort',{exact:true})).toBeVisible()});
+test('public forms switch languages, persist and keep input values',async({page})=>{await page.goto('/login');await page.locator('input[name="email"]').fill('draft@example.invalid');await languagePicker(page).selectOption('en');await expect(page.getByText('Password',{exact:true})).toBeVisible();await expect(page.locator('input[name="email"]')).toHaveValue('draft@example.invalid');await page.reload();await expect(page.getByText('Password',{exact:true})).toBeVisible();await expect(page.locator('html')).toHaveAttribute('lang','en');await languagePicker(page).selectOption('de');await expect(page.getByText('Passwort',{exact:true})).toBeVisible()});
 test('sign-in submits passwords in a POST body with JavaScript disabled',async({browser})=>{
  const ctx=await browser.newContext({javaScriptEnabled:false});
  try {
@@ -23,14 +32,15 @@ test('sign-in submits passwords in a POST body with JavaScript disabled',async({
  }finally{await ctx.close()}
 });
 test('authenticated athlete pages switch language immediately and persist across navigation',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
  await login(page,athlete);
  await expect(page.getByRole('link',{name:'Open coaching',exact:true})).toBeVisible();
- await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('de');
+ await switchMemberLanguage(page,'de');
  await expect(page.getByRole('link',{name:'Zum Coach',exact:true})).toBeVisible();
  await expect(page.locator('html')).toHaveAttribute('lang','de');
  await page.goto('/settings');
  await expect(page.getByText('Deine Daten',{exact:true})).toBeVisible();
- await page.getByRole('combobox',{name:'Language',exact:true}).selectOption('en');
+ await switchMemberLanguage(page,'en');
  await expect(page.getByText('Your data',{exact:true})).toBeVisible();
  await page.goto('/dashboard');
  await expect(page.getByRole('link',{name:'Open coaching',exact:true})).toBeVisible();
