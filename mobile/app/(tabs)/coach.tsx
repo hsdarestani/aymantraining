@@ -242,7 +242,7 @@ export default function Coach() {
             <Text style={s.dispatchCopy}>{latest.coachNote}</Text>}
         </View>
         <View style={s.links}>
-          {note && <FieldLink label="Coach-Briefing öffnen" onPress={() => router.push("/coach-brief")}/>}
+          {note && <FieldLink label="Coachbriefing öffnen" onPress={() => router.push("/coach-brief")}/>}
           {daily && <FieldLink label="Tagesplan & Technikfeedback" onPress={() => router.push("/journey-today")}/>}
           <FieldLink label="Tagescheck öffnen" onPress={() => router.push("/lifestyle")}/>
           <FieldAction label="Nachrichten öffnen" onPress={() => setPane("messages")}/>
