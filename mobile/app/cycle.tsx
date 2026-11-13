@@ -46,15 +46,15 @@ export default function Cycle(){
   <Text style={s.copy}><Copy text="Schätzungen sind weder für Verhütung noch für Schwangerschaftsberatung geeignet und können stark abweichen."/></Text>
   {!!status&&<Text accessibilityRole="alert" style={s.status}>{status}</Text>}
   {!d?.available?<View style={s.card}><Text style={s.copy}><Copy text="Diese Funktion ist noch nicht freigeschaltet. Dein Training bleibt unverändert."/></Text></View>:
-   !d.enabled?<View style={s.card}><Text style={s.title}><Copy text="DEINE FREIWILLIGE ENTSCHEIDUNG"/></Text>
+   !d.enabled?<View style={s.card}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="DEINE FREIWILLIGE ENTSCHEIDUNG"/></Text>
      <Text style={s.copy}><Copy text="Das Tagebuch kann Blutung, Beschwerden, Energie und Stimmung enthalten. Niemand erhält Zugriff ohne deine getrennte Freigabe."/></Text>
      <Text style={s.copy}><Copy text="Du kannst jederzeit alle Daten und die Einwilligung endgültig löschen. Es werden keine intimen Angaben per Push versendet."/></Text>
      <View style={s.row}><Text style={[s.copy,{flex:1}]}><Copy text="ICH STIMME DER VERARBEITUNG MEINER SENSIBLEN ZYKLUSDATEN AUSDRÜCKLICH ZU"/></Text>
       <Switch value={consent} onValueChange={setConsent} trackColor={{true:C.volt}}/></View>
-     <Pressable style={[s.primary,(!consent||busy)&&s.disabled]} disabled={!consent||busy} onPress={()=>pref({action:"ENABLE",acknowledgeSensitiveData:true},"TAGEBUCH AKTIVIERT")}><Text style={s.primaryText}><Copy text="TAGEBUCH AKTIVIEREN"/></Text></Pressable>
+     <Pressable style={[s.primary,(!consent||busy)&&s.disabled]} disabled={!consent||busy} onPress={()=>pref({action:"ENABLE",acknowledgeSensitiveData:true},"TAGEBUCH AKTIVIERT")}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.primaryText}><Copy text="TAGEBUCH AKTIVIEREN"/></Text></Pressable>
     </View>:<>
      <View style={s.card}><Text style={s.kicker}><Copy text="PRIVATER KALENDER · NUR SCHÄTZUNG"/></Text>
-      <Text style={s.title}>{d.forecast?"GESCHÄTZTER TAG "+d.forecast.day:"NOCH KEINE SCHÄTZUNG"}</Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}>{d.forecast?"GESCHÄTZTER TAG "+d.forecast.day:"NOCH KEINE SCHÄTZUNG"}</Text>
       <Text style={s.copy}>{d.forecast?"Nächster geschätzter Beginn: "+d.forecast.estimatedNextStarts[0]:"Trage einen bekannten Beginn ein. Ohne aktuelle Angaben zeigen wir keine Prognose."}</Text>
       <Text style={s.copy}><Copy text="Keine Vorhersage von Eisprung, Fruchtbarkeit oder Schwangerschaft."/></Text>
       <Text style={s.kicker}><Copy text="LETZTER TATSÄCHLICHER BEGINN · JJJJ-MM-TT"/></Text>
@@ -64,10 +64,10 @@ export default function Cycle(){
       <Pressable style={[s.secondary,busy&&s.disabled]} disabled={busy} onPress={()=>{
        if((period&&!dateValid(period))||Number(length)<20||Number(length)>45){setStatus("Bitte ein gültiges Datum und 20 bis 45 Tage eingeben.");return}
        void pref({action:"UPDATE",lastPeriodStart:period||null,cycleLengthDays:Number(length)},"KALENDER GESPEICHERT");
-      }}><Text style={s.secondaryText}><Copy text="KALENDER SPEICHERN"/></Text></Pressable>
+      }}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.secondaryText}><Copy text="KALENDER SPEICHERN"/></Text></Pressable>
       {d.reminder&&<Text style={s.notice}>{d.reminder.text}</Text>}
      </View>
-     <View style={s.card}><Text style={s.kicker}><Copy text="PRIVATES TAGEBUCH"/></Text><Text style={s.title}><Copy text="DEIN BEFINDEN."/></Text>
+     <View style={s.card}><Text style={s.kicker}><Copy text="PRIVATES TAGEBUCH"/></Text><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="DEIN BEFINDEN."/></Text>
       <Text style={s.kicker}><Copy text="DATUM · JJJJ-MM-TT"/></Text>
       <TextInput style={s.input} value={entry.date} onChangeText={v=>setEntry({...entry,date:v})} keyboardType="numbers-and-punctuation" autoCapitalize="none"/>
       <Text style={s.kicker}><Copy text="BLUTUNG · OPTIONAL"/></Text>
@@ -82,20 +82,20 @@ export default function Cycle(){
       <Pressable style={[s.primary,busy&&s.disabled]} disabled={busy} onPress={()=>{
        if(!dateValid(entry.date)){setStatus("Datum im Format JJJJ-MM-TT eingeben.");return}
        void send("/api/cycle/entries","PUT",entry,"TAG PRIVAT GESPEICHERT");
-      }}><Text style={s.primaryText}><Copy text="TAG SPEICHERN"/></Text></Pressable>
+      }}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.primaryText}><Copy text="TAG SPEICHERN"/></Text></Pressable>
       {d.entries.some(x=>x.date===entry.date)&&<Pressable style={s.danger} disabled={busy} onPress={()=>Alert.alert("Tag entfernen?",entry.date,[
        {text:"ABBRECHEN",style:"cancel"},{text:"LÖSCHEN",style:"destructive",onPress:()=>{void send("/api/cycle/entries","DELETE",{date:entry.date},"TAG GELÖSCHT")}}])}><Text style={s.dangerText}><Copy text="DIESEN TAG LÖSCHEN"/></Text></Pressable>}
      </View>
      <View style={s.card}><Text style={s.kicker}><Copy text="DEINE AUFZEICHNUNGEN"/></Text>
       {d.entries.length===0?<Text style={s.copy}><Copy text="Noch keine Tage erfasst."/></Text>:d.entries.slice(0,35).map(e=><Pressable key={e.date} onPress={()=>editDay(e.date)} style={[s.history,entry.date===e.date&&s.historyOn]}><Text style={s.historyTitle}>{e.date}</Text><Text style={s.copy}>{e.planChoice==="REST"?"Ruhe gewünscht":e.planChoice==="EASIER"?"Leichtere Einheit gewünscht":"Wie geplant"} · Energie {e.energy??"—"}</Text></Pressable>)}
      </View>
-     <View style={s.card}><Text style={s.title}><Copy text="DEINE KONTROLLE."/></Text>
+     <View style={s.card}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="DEINE KONTROLLE."/></Text>
       <View style={s.row}><Text style={[s.copy,{flex:1}]}><Copy text="PRIVATE HINWEISE NUR IM TAGEBUCH"/></Text><Switch value={d.remindersEnabled} disabled={busy}
        onValueChange={v=>pref({action:"UPDATE",remindersEnabled:v},"HINWEISE GESPEICHERT")} trackColor={{true:C.volt}}/></View>
       <View style={s.row}><Text style={[s.copy,{flex:1}]}><Copy text="BEGRENZTE TRAININGSSIGNALE MIT ZUGEWIESENEM TRAINER TEILEN"/></Text>
        <Switch value={d.shareWithCoach} disabled={busy} onValueChange={v=>{if(!v){void pref({action:"SHARE",shareWithCoach:false},"FREIGABE WIDERRUFEN")}else setShareConfirm(true)}} trackColor={{true:C.volt}}/></View>
       {shareConfirm&&!d.shareWithCoach&&<View style={s.share}><Text style={s.copy}><Copy text="Es werden nur dein Trainingswunsch, Energie und Beschwerden der letzten 14 Tage geteilt, nicht Blutung, Symptome oder Schätzungen."/></Text>
-       <Pressable style={s.secondary} onPress={()=>{setShareConfirm(false);void pref({action:"SHARE",shareWithCoach:true,confirmShare:true},"FREIGABE ERTEILT")}}><Text style={s.secondaryText}>FREIGABE AUSDRÜCKLICH BESTÄTIGEN</Text></Pressable>
+       <Pressable style={s.secondary} onPress={()=>{setShareConfirm(false);void pref({action:"SHARE",shareWithCoach:true,confirmShare:true},"FREIGABE ERTEILT")}}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.secondaryText}>FREIGABE AUSDRÜCKLICH BESTÄTIGEN</Text></Pressable>
        <Pressable onPress={()=>setShareConfirm(false)}><Text style={s.link}>ABBRECHEN</Text></Pressable></View>}
       <Pressable style={s.danger} onPress={revoke} disabled={busy}><Text style={s.dangerText}>ALLE DATEN LÖSCHEN & EINWILLIGUNG WIDERRUFEN</Text></Pressable>
      </View>

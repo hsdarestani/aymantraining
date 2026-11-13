@@ -63,7 +63,7 @@ export default function Login() {
       <FieldMast section=""/>
       <FieldState loading={checking}/>
       {!checking && <View style={s.body}>
-        <Text style={s.title}><Copy text="BUILD YOUR ATHLETE."/></Text>
+        <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="BUILD YOUR ATHLETE."/></Text>
         {resume ? <FieldState error={error} retry={() => void check()}/> : <>
           <Text accessibilityRole="header" style={field.heading}><Copy text={register ? "Konto erstellen" : "Anmelden"}/></Text>
           {register && <LocalizedTextInput style={s.input} value={name} onChangeText={setName}
