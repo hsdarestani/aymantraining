@@ -137,9 +137,9 @@ export default function Home() {
           </Text>
         </View>
         {weekTitle ? <View accessible accessibilityRole="header" accessibilityLabel={title} style={s.sessionTitleGroup}>
-          <Text style={[s.sessionTitle, compact && s.sessionTitleCompact, narrow && s.sessionTitleNarrow]}><Copy text={weekTitle[1]}/></Text>
-          <Text style={s.weekTag}>{weekTitle[2]}</Text>
-        </View> : <Text accessibilityRole="header" style={[s.sessionTitle, compact && s.sessionTitleCompact, narrow && s.sessionTitleNarrow]}><Copy text={title}/></Text>}
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65} style={[s.sessionTitle, compact && s.sessionTitleCompact, narrow && s.sessionTitleNarrow]}><Copy text={weekTitle[1]}/></Text>
+          <Text numberOfLines={1} style={s.weekTag}>{weekTitle[2]}</Text>
+        </View> : <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65} style={[s.sessionTitle, compact && s.sessionTitleCompact, narrow && s.sessionTitleNarrow]}><Copy text={title}/></Text>}
         {workouts.length > 1 && <Text style={s.sessionNote}>{workouts.length} <Copy text="Einheiten an diesem Tag"/></Text>}
         {!activeWorkout && selected === 0 && dashboard.nextWorkout?.scheduledAt && today &&
           <Text style={s.sessionNote}><Copy text="Nächster Termin"/> · {dateLabel(dashboard.nextWorkout.scheduledAt, locale,
