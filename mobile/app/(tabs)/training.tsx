@@ -112,7 +112,7 @@ export default function Training() {
       <View style={s.next}>
         <Text style={s.nextLabel}><Copy text="NÄCHSTER SCHRITT"/></Text>
         {weekTitle ? <View accessible accessibilityRole="header" accessibilityLabel={title} style={s.nextHeading}>
-          <Text style={[s.nextTitle, compact && s.nextTitleCompact]}>{weekTitle[1]}</Text>
+          <Text style={[s.nextTitle, compact && s.nextTitleCompact]}><Copy text={weekTitle[1]}/></Text>
           <Text style={s.nextWeek}>{weekTitle[2]}</Text>
         </View> : <Text accessibilityRole="header" style={[s.nextTitle, compact && s.nextTitleCompact]}><Copy text={title}/></Text>}
         <FieldAction label={nextLabel} onPress={openNext} tone="ink"/>
