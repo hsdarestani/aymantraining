@@ -230,19 +230,19 @@ export default function Coach() {
             <Radio color={F.signal} size={25} strokeWidth={1.8}/>
             <Text style={s.signalLabel}><Copy text={daily?.coach.name || "DEIN COACH"}/></Text>
           </View>
-          <Text accessibilityRole="header" style={s.heroTitle}><Copy text="An deiner Seite."/></Text>
+          <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.heroTitle}><Copy text="An deiner Seite."/></Text>
           {next && <Text style={field.sub}><Copy text="Nächste Einheit"/> · <Copy text={next.title}/></Text>}
         </View>
         <FieldState error={feedbackError} retry={() => void loadFeedback()}/>
         <View style={s.dispatch}>
-          <Text style={s.dispatchLabel}><Copy text={hasPersonalFeedback ? "PERSÖNLICHES FEEDBACK" : note ? "COACH-BRIEFING" : "DEIN FOKUS"}/></Text>
-          <Text style={s.dispatchTitle}><Copy text={title}/></Text>
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.dispatchLabel}><Copy text={hasPersonalFeedback ? "PERSÖNLICHES FEEDBACK" : note ? "COACH BRIEFING" : "DEIN FOKUS"}/></Text>
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.dispatchTitle}><Copy text={title}/></Text>
           <Text style={s.dispatchCopy}><Copy text={guidance || "Halte im Tagescheck fest, wie du dich fühlst und was du im Training brauchst."}/></Text>
           {hasPersonalFeedback && latest?.coachNote && latest.coachNote !== guidance &&
             <Text style={s.dispatchCopy}>{latest.coachNote}</Text>}
         </View>
         <View style={s.links}>
-          {note && <FieldLink label="Coach-Briefing öffnen" onPress={() => router.push("/coach-brief")}/>}
+          {note && <FieldLink label="Coachbriefing öffnen" onPress={() => router.push("/coach-brief")}/>}
           {daily && <FieldLink label="Tagesplan & Technikfeedback" onPress={() => router.push("/journey-today")}/>}
           <FieldLink label="Tagescheck öffnen" onPress={() => router.push("/lifestyle")}/>
           <FieldAction label="Nachrichten öffnen" onPress={() => setPane("messages")}/>
@@ -258,7 +258,7 @@ export default function Coach() {
           <FieldState loading={access === "loading"} error={access === "failed" ? "Die Nachrichten konnten nicht geladen werden." : null}
             retry={() => void loadMessages()}/>
           {access === "locked" && <View style={s.locked}>
-            <Text style={field.heading}><Copy text="Persönlicher Austausch"/></Text>
+            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text="Persönlicher Austausch"/></Text>
             <Text style={field.sub}><Copy text="Nachrichten, Sprache und Technikvideos sind mit PRO verfügbar."/></Text>
           </View>}
           {access === "open" && <>

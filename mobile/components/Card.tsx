@@ -9,7 +9,7 @@ export function Eyebrow({children}:{children:React.ReactNode}){
   return <Animated.Text entering={FadeInUp.duration(360)} style={s.eyebrow}>{children}</Animated.Text>;
 }
 export function SectionTitle({children}:{children:React.ReactNode}){
-  return <Animated.Text entering={FadeInDown.delay(60).duration(420)} style={s.title}>{children}</Animated.Text>;
+  return <Animated.Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} entering={FadeInDown.delay(60).duration(420)} style={s.title}>{children}</Animated.Text>;
 }
 const s=StyleSheet.create({
   card:{

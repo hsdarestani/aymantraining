@@ -6,7 +6,7 @@ import {Copy} from "./Locale";
 export default function Brand({compact=false}:{compact?:boolean}){
   return <Animated.View entering={FadeIn.duration(420)} style={s.row}>
     <View>
-      <Text style={[s.wordmark,compact&&s.wordmarkCompact]}>BE DIFFERENT</Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={[s.wordmark,compact&&s.wordmarkCompact]}>BE DIFFERENT</Text>
       {!compact?<Text style={s.sub}><Copy text="ATHLETEN SYSTEM"/></Text>:null}
     </View>
   </Animated.View>;

@@ -18,15 +18,15 @@ export default function ProgressPhotos(){
  const source=(x:any)=>({uri:API+"/api/media/"+x.id,headers:{Authorization:"Bearer "+token}});
  const pan=useMemo(()=>PanResponder.create({onStartShouldSetPanResponder:()=>true,onMoveShouldSetPanResponder:()=>true,onPanResponderGrant:e=>setRatio(Math.max(.05,Math.min(.95,e.nativeEvent.locationX/width))),onPanResponderMove:e=>setRatio(Math.max(.05,Math.min(.95,e.nativeEvent.locationX/width)))}),[width]);
  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
-  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text={"ZURÜCK"}/></Text></Pressable></View>
-  <Eyebrow><Copy text={"FORTSCHRITTSBILDER"}/></Eyebrow><Text style={s.title}><Copy text={"VORHER."}/>{"\n"}<Copy text={"NACHHER."}/></Text>
+  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.back}><Copy text={"ZURÜCK"}/></Text></Pressable></View>
+  <Eyebrow><Copy text={"FORTSCHRITTSBILDER"}/></Eyebrow><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text={"VORHER."}/>{"\n"}<Copy text={"NACHHER."}/></Text>
   {first&&latest&&token?<Card><SectionTitle><Copy text={"Direkter Vergleich"}/></SectionTitle><View style={s.compare} onLayout={e=>setWidth(e.nativeEvent.layout.width)} {...pan.panHandlers}>
     <Image source={source(first)} style={StyleSheet.absoluteFillObject} resizeMode="cover"/>
     <View style={[s.reveal,{width:width*ratio}]}><Image source={source(latest)} style={{width,height:"100%"}} resizeMode="cover"/></View>
     <View style={[s.handle,{left:width*ratio-1}]}><View style={s.knob}><Text style={s.knobText}>↔</Text></View></View>
     <View style={s.labels}><Text style={s.label}><LocalizedValue value={new Date(first.createdAt)} format="toLocaleDateString"/></Text><Text style={s.label}><LocalizedValue value={new Date(latest.createdAt)} format="toLocaleDateString"/></Text></View>
   </View><Text style={s.hint}><Copy text={"Mit dem Finger verschieben, um beide Bilder direkt zu vergleichen."}/></Text></Card>:<Card><SectionTitle><Copy text={"Noch nicht genug Bilder."}/></SectionTitle><Text style={s.hint}><Copy text={"Für einen Vergleich brauchst du mindestens zwei Fortschrittsbilder."}/></Text></Card>}
-  <Pressable style={s.primary} onPress={()=>router.push("/progress-photo")}><Text style={s.primaryText}><Copy text={"NEUES BILD AUFNEHMEN"}/></Text></Pressable>
+  <Pressable style={s.primary} onPress={()=>router.push("/progress-photo")}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.primaryText}><Copy text={"NEUES BILD AUFNEHMEN"}/></Text></Pressable>
   <Card><Eyebrow><Copy text={"VERLAUF"}/></Eyebrow><View style={s.grid}>{items.map(x=><View style={s.item} key={x.id}><Image source={token?source(x):undefined} style={s.thumb}/><Text style={s.date}><LocalizedValue value={new Date(x.createdAt)} format="toLocaleDateString"/></Text></View>)}</View></Card>
  </ScrollView></SafeAreaView>;
 }

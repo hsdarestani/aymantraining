@@ -24,7 +24,7 @@ export default function Awake(){
   catch(e:any){setStatus(e.message||"Speichern fehlgeschlagen")}finally{setSaving(false)}
  }
  return <Screen>
-  <View style={s.hero}><Text style={s.eyebrow}><Copy text="MORGENROUTINE / 01"/></Text><Text style={s.title}>BE{"\n"}<Text style={s.accent}>AWAKE.</Text></Text><Text style={s.description}><Copy text="Dein Tag beginnt mit Bewusstsein. Wähle deinen nächsten Schritt."/></Text></View>
+  <View style={s.hero}><Text style={s.eyebrow}><Copy text="MORGENROUTINE / 01"/></Text><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}>BE{"\n"}<Text style={s.accent}>AWAKE.</Text></Text><Text style={s.description}><Copy text="Dein Tag beginnt mit Bewusstsein. Wähle deinen nächsten Schritt."/></Text></View>
   <View style={s.checkPanel}>
     <Text style={s.checkTitle}><Copy text="WIE IST DEINE ENERGIE HEUTE?"/></Text>
     <Text style={s.checkHint}><Copy text="Ein Wert für deinen Tagescheck. Du kannst ihn später ändern."/></Text>
@@ -33,7 +33,7 @@ export default function Awake(){
     {status?<Text style={s.checkStatus}><Copy text={status}/></Text>:null}
    </View>
   <View style={s.list}>{actions.map(a=><Pressable accessibilityRole="button" key={a.number} style={s.action} onPress={()=>router.push(a.route as any)}>
-   <Text style={s.number}>{a.number}</Text><View style={s.info}><Text style={s.name}>{a.title}</Text><Text style={s.detail}><Copy text={a.detail}/></Text></View><Text style={s.arrow}>↗</Text>
+   <Text style={s.number}>{a.number}</Text><View style={s.info}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.name}>{a.title}</Text><Text style={s.detail}><Copy text={a.detail}/></Text></View><Text style={s.arrow}>↗</Text>
   </Pressable>)}</View>
   <Text style={s.note}><Copy text="Deine Gerätewerte werden nur nach deiner Freigabe gelesen."/></Text>
  </Screen>;

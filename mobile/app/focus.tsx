@@ -87,8 +87,8 @@ export default function Focus(){
  const elapsed=DURATION-seconds,phase=Math.floor(elapsed/4)%2===0?"EINATMEN":"AUSATMEN";
  const progress=elapsed/DURATION;
  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
-  <View style={s.top}><Brand compact/><Pressable accessibilityRole="button" onPress={()=>router.back()}><Text style={s.back}><Copy text="ZURÜCK"/></Text></Pressable></View>
-  <View style={s.hero}><Text style={s.heroKicker}>BE FOCUSED / 001</Text><Text style={s.title}><Copy text="DEIN MOMENT."/>{"\n"}<Text style={s.accent}><Copy text="DEIN FOKUS."/></Text></Text><Text style={s.intro}><Copy text="120 Sekunden für dich. Ohne Leistungsdruck. Du bestimmst das Tempo."/></Text></View>
+  <View style={s.top}><Brand compact/><Pressable accessibilityRole="button" onPress={()=>router.back()}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.back}><Copy text="ZURÜCK"/></Text></Pressable></View>
+  <View style={s.hero}><Text style={s.heroKicker}>BE FOCUSED / 001</Text><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="DEIN MOMENT."/>{"\n"}<Text style={s.accent}><Copy text="DEIN FOKUS."/></Text></Text><Text style={s.intro}><Copy text="120 Sekunden für dich. Ohne Leistungsdruck. Du bestimmst das Tempo."/></Text></View>
   <View style={s.breathCard}>
    <View style={s.breathHeader}><Text style={s.exerciseTag}><Copy text="ATEMTRAINING"/></Text><Text style={s.exerciseNumber}>01 / 02 MIN</Text></View>
    <View style={s.breathStage}>
@@ -101,14 +101,14 @@ export default function Focus(){
    </View>
    <Text style={s.prompt}><Copy text={seconds===0?"Gut gemacht. Atme normal weiter.":!running?"Starte, wenn du bereit bist.":phase==="EINATMEN"?"Atme ruhig durch die Nase ein.":"Atme entspannt wieder aus."}/></Text>
    <View style={s.controls}>
-    <Pressable accessibilityRole="button" style={[s.primary,s.controlPrimary]} onPress={breathe}><Text style={s.primaryText}><Copy text={running?"PAUSIEREN":seconds===0?"ERNEUT STARTEN":seconds===DURATION?"STARTEN":"FORTSETZEN"}/></Text></Pressable>
-    <Pressable accessibilityRole="button" style={[s.secondary,s.controlSecondary]} onPress={reset}><Text style={s.secondaryText}><Copy text="ZURÜCKSETZEN"/></Text></Pressable>
+    <Pressable accessibilityRole="button" style={[s.primary,s.controlPrimary]} onPress={breathe}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.primaryText}><Copy text={running?"PAUSIEREN":seconds===0?"ERNEUT STARTEN":seconds===DURATION?"STARTEN":"FORTSETZEN"}/></Text></Pressable>
+    <Pressable accessibilityRole="button" style={[s.secondary,s.controlSecondary]} onPress={reset}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.secondaryText}><Copy text="ZURÜCKSETZEN"/></Text></Pressable>
    </View>
    <Pressable accessibilityRole="switch" accessibilityState={{checked:voiceEnabled}} onPress={toggleVoice} style={s.voiceRow}><View style={[s.voiceIndicator,voiceEnabled&&s.voiceOn]}/><View style={s.voiceCopy}><Text style={s.voiceTitle}><Copy text={voiceEnabled?"SPRACHBEGLEITUNG AKTIV":"SPRACHBEGLEITUNG EINSCHALTEN"}/></Text><Text style={s.voiceCaption}><Copy text="Aktuell Gerätestimme. Trainerstimme folgt nach Freigabe der Aufnahme."/></Text></View><Text style={s.voiceArrow}><Copy text={voiceEnabled?"AN":"AUS"}/></Text></Pressable>
    <Text style={s.safety}><Copy text="Bei Unwohlsein stoppen. Normal weiteratmen. Kein Luftanhalten notwendig."/></Text>
   </View>
   <Card style={s.lineCard}><Eyebrow><Copy text="DEINE DIFFERENT LINE"/></Eyebrow><Text style={s.line}><Copy text={d?.line||"Heute zählt die nächste saubere Entscheidung."}/></Text></Card>
-  <Card><Eyebrow><Copy text="TAGESCHECK"/></Eyebrow><SectionTitle><Copy text="Wie fühlst du dich?"/></SectionTitle><Scale label="ENERGIE" value={energy} set={setEnergy}/><Scale label="MUSKELKATER" value={soreness} set={setSoreness}/><Scale label="STIMMUNG" value={mood} set={setMood}/><Scale label="STRESS" value={stress} set={setStress}/><LocalizedTextInput style={s.sleepInput} value={sleepHours} onChangeText={setSleepHours} keyboardType="decimal-pad" placeholder="Schlafstunden optional" placeholderTextColor="#666"/><Pressable style={s.secondary} onPress={save}><Text style={s.secondaryText}><Copy text="CHECK SPEICHERN"/></Text></Pressable></Card>
+  <Card><Eyebrow><Copy text="TAGESCHECK"/></Eyebrow><SectionTitle><Copy text="Wie fühlst du dich?"/></SectionTitle><Scale label="ENERGIE" value={energy} set={setEnergy}/><Scale label="MUSKELKATER" value={soreness} set={setSoreness}/><Scale label="STIMMUNG" value={mood} set={setMood}/><Scale label="STRESS" value={stress} set={setStress}/><LocalizedTextInput style={s.sleepInput} value={sleepHours} onChangeText={setSleepHours} keyboardType="decimal-pad" placeholder="Schlafstunden optional" placeholderTextColor="#666"/><Pressable style={s.secondary} onPress={save}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.secondaryText}><Copy text="CHECK SPEICHERN"/></Text></Pressable></Card>
   {status?<Text style={s.status}><Copy text={status}/></Text>:null}
  </ScrollView></SafeAreaView>;
 }

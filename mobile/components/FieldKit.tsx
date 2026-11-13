@@ -43,9 +43,9 @@ export function FieldMast({section, language = false}: {section: string; languag
         <Svg width={23} height={21} viewBox="0 0 23 21" accessible={false}>
           <Path d="M0 20L7 1H11L4 20ZM6 20L13 1H17L10 20ZM12 20L19 1H23L16 20Z" fill={F.signal}/>
         </Svg>
-        <Text style={styles.wordmark}>BE DIFFERENT</Text>
+        <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.wordmark}>BE DIFFERENT</Text>
       </View>
-      {language ? <LanguagePicker inline/> : <Text style={field.type}><Copy text={section}/></Text>}
+      {language ? <LanguagePicker inline/> : <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={[field.type, styles.mastSection]}><Copy text={section}/></Text>}
     </View>
   );
 }
@@ -58,7 +58,7 @@ export function FieldAction({label, onPress, tone = "signal", disabled = false, 
     <Pressable accessibilityRole="button" accessibilityState={{disabled}} disabled={disabled} onPress={onPress} testID={testID}
       android_ripple={{color: quiet || tone === "ink" ? "#FFFFFF24" : "#00000022"}}
       style={({pressed}) => [styles.action, quiet && styles.quiet, tone === "ink" && styles.ink, (pressed || disabled) && styles.pressed]}>
-      <Text style={[styles.actionText, tone !== "signal" && styles.lightText]}><Copy text={label}/></Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={[styles.actionText, tone !== "signal" && styles.lightText]}><Copy text={label}/></Text>
     </Pressable>
   );
 }
@@ -76,7 +76,7 @@ export function FieldState({loading, error, retry}: {loading?: boolean; error?: 
 
 export function FieldLink({label, onPress}: {label: string; onPress: () => void}) {
   return <Pressable accessibilityRole="button" style={({pressed}) => [styles.link, pressed && styles.pressed]} onPress={onPress}>
-    <Text style={styles.linkText}><Copy text={label}/></Text>
+    <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={styles.linkText}><Copy text={label}/></Text>
   </Pressable>;
 }
 
@@ -106,13 +106,14 @@ const styles = StyleSheet.create({
   scroll: {paddingBottom: 26},
   mast: {minHeight: 62, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: F.line,
     paddingHorizontal: 20, paddingVertical: 8, flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 10},
-  brand: {flexDirection: "row", alignItems: "center", gap: 8, flexShrink: 1},
+  brand: {flexDirection: "row", alignItems: "center", gap: 8, flexShrink: 1, minWidth: 0},
+  mastSection: {flexShrink: 1, textAlign: "right"},
   wordmark: {color: F.chalk, fontFamily: "Archivo", fontSize: 17, letterSpacing: -.65, flexShrink: 1},
   action: {minHeight: 50, paddingHorizontal: 16, paddingVertical: 11, backgroundColor: F.signal,
     justifyContent: "center", alignItems: "center", borderRadius: 3},
   quiet: {backgroundColor: "transparent", borderWidth: 1, borderColor: F.line},
   ink: {backgroundColor: F.ink},
-  actionText: {color: F.ink, fontFamily: "ManropeSemiBold", fontSize: 15, textAlign: "center"},
+  actionText: {color: F.ink, fontFamily: "ManropeSemiBold", fontSize: 15, textAlign: "center", flexShrink: 1},
   lightText: {color: F.chalk},
   pressed: {opacity: .68},
   state: {paddingVertical: 48, alignItems: "center"},

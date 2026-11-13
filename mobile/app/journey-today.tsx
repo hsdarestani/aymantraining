@@ -39,7 +39,7 @@ export default function Today(){
  }
  return <SafeAreaView style={s.safe} edges={["top"]}><ScrollView contentContainerStyle={s.content}>
   <Pressable onPress={()=>router.back()}><Text style={s.link}><Copy text="← ZURÜCK"/></Text></Pressable>
-  <Text style={s.tag}><Copy text="BE DIFFERENT · HEUTE"/></Text><Text style={s.title}><Copy text="DEIN HEUTIGER WEG."/></Text>
+  <Text style={s.tag}><Copy text="BE DIFFERENT · HEUTE"/></Text><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="DEIN HEUTIGER WEG."/></Text>
   {!enabled?<View style={s.card}><Text style={s.p}><Copy text="Diese Ansicht wird vorbereitet. Dein bestehendes Training bleibt erhalten."/></Text></View>:
    loading?<ActivityIndicator color={C.volt}/>:
    <>

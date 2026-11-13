@@ -62,9 +62,9 @@ export default function Exercise(){
   const width=Dimensions.get("window").width;
 
   return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
-    <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text={"ZURÜCK"}/></Text></Pressable></View>
+    <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.back}><Copy text={"ZURÜCK"}/></Text></Pressable></View>
     <Eyebrow>{String(x.id).replaceAll("-"," ")}<Copy text={"· STUFE"}/>{x.level}</Eyebrow>
-    <Text style={s.title}><ExerciseName exercise={x}/></Text>
+    <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><ExerciseName exercise={x}/></Text>
     <Text style={s.meta}>{x.category.toUpperCase()} · {x.equipment||"OHNE GERÄTE"}</Text>
 
     {imageUris.length?<Pressable accessibilityRole="button" style={s.motion} onPress={()=>setLightbox(frame)}><Image source={{uri:imageUris[frame].uri}} style={s.motionImage}/><View style={s.motionLabel}><Text style={s.motionLabelText}><Copy text={labels[imageUris[frame].slot]}/><Copy text={"· BEWEGUNGSABLAUF"}/></Text></View></Pressable>:null}

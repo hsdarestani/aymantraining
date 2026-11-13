@@ -50,11 +50,11 @@ export default function Profile(){
  ];
  return <Screen>
   <Text style={s.eyebrow}><Copy text="DEIN KONTO / PROFIL"/></Text>
-  <Text style={s.title}><Copy text="DEIN PROFIL."/></Text>
+  <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="DEIN PROFIL."/></Text>
   {loading&&!user?<ActivityIndicator color={C.volt}/>:null}
   {user?<View style={s.identity}>
    <Text style={s.caption}><Copy text="ANGEMELDET ALS"/></Text>
-   <Text style={s.person}>{user.name||"ATHLET"}</Text>
+   <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.person}>{user.name||"ATHLET"}</Text>
    <Text style={s.membership}>{user.tier==="FREE"?"STANDARD":user.tier}</Text>
    <Text style={s.label}><Copy text="NAME BEARBEITEN"/></Text>
    <TextInput style={s.input} value={name} onChangeText={setName} autoCapitalize="words" accessibilityLabel="Name" placeholder="Dein Name" placeholderTextColor={C.dim}/>

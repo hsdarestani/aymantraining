@@ -37,10 +37,10 @@ export default function Checkin(){
    setStatus("WOCHENCHECK GESPEICHERT");await load();
   }catch(e:any){setStatus(e.message||"Fehler")}
  }
- if(locked)return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}><View style={s.top}><Brand compact/><Pressable accessibilityRole="button" onPress={()=>router.back()}><Text style={s.back}><Copy text="ZURÜCK"/></Text></Pressable></View><Eyebrow><Copy text="WOCHENCHECK"/></Eyebrow><Card><SectionTitle><Copy text="Für diesen Zugang nicht verfügbar"/></SectionTitle><Text style={s.note}><Copy text="Der persönliche Wochencheck ist mit deinem aktuellen Zugang nicht verfügbar. Es wird keine Kaufoption angeboten."/></Text></Card></ScrollView></SafeAreaView>;
+ if(locked)return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}><View style={s.top}><Brand compact/><Pressable accessibilityRole="button" onPress={()=>router.back()}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.back}><Copy text="ZURÜCK"/></Text></Pressable></View><Eyebrow><Copy text="WOCHENCHECK"/></Eyebrow><Card><SectionTitle><Copy text="Für diesen Zugang nicht verfügbar"/></SectionTitle><Text style={s.note}><Copy text="Der persönliche Wochencheck ist mit deinem aktuellen Zugang nicht verfügbar. Es wird keine Kaufoption angeboten."/></Text></Card></ScrollView></SafeAreaView>;
  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
-  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text={"ZURÜCK"}/></Text></Pressable></View>
-  <Eyebrow><Copy text={"WOCHENCHECK"}/></Eyebrow><Text style={s.title}><Copy text={"WIE LÄUFT"}/>{"\n"}<Copy text={"DEINE WOCHE?"}/></Text>
+  <View style={s.top}><Brand compact/><Pressable onPress={()=>router.back()}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.back}><Copy text={"ZURÜCK"}/></Text></Pressable></View>
+  <Eyebrow><Copy text={"WOCHENCHECK"}/></Eyebrow><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text={"WIE LÄUFT"}/>{"\n"}<Copy text={"DEINE WOCHE?"}/></Text>
   <Card><SectionTitle><Copy text={"Kurzer Check"}/></SectionTitle>
    <LocalizedTextInput style={s.input} value={v.weightKg} onChangeText={x=>setV({...v,weightKg:x})} keyboardType="decimal-pad" placeholder="Gewicht kg" placeholderTextColor="#666"/>
    {[["energy","ENERGIE"],["recovery","REGENERATION"],["training","TRAINING"]].map(([key,label])=><View key={key} style={s.scale}><Text style={s.label}><Copy text={label}/></Text><View style={s.choices}>{[1,2,3,4,5,6,7,8,9,10].map(n=><Pressable key={n} style={[s.choice,Number((v as any)[key])===n&&s.choiceOn]} onPress={()=>setV({...v,[key]:String(n)})}><Text style={[s.choiceText,Number((v as any)[key])===n&&s.choiceTextOn]}>{n}</Text></Pressable>)}</View></View>)}
@@ -48,7 +48,7 @@ export default function Checkin(){
    <LocalizedTextInput style={[s.input,s.multi]} value={v.questions} onChangeText={x=>setV({...v,questions:x})} placeholder="Fragen an den Trainer" placeholderTextColor="#666" multiline/>
    <Pressable style={s.photoButton} onPress={choosePhoto}><Text style={s.photoButtonText}><Copy text={photo?"FORTSCHRITTSBILD ÄNDERN":"FORTSCHRITTSBILD HINZUFÜGEN"}/></Text></Pressable>
    {photo?<Image source={{uri:photo.uri}} style={s.photo}/>:null}
-   <Pressable style={s.primary} onPress={save}><Text style={s.primaryText}><Copy text={"CHECK SPEICHERN"}/></Text></Pressable>{status?<Text style={s.status}><Copy text={status}/></Text>:null}
+   <Pressable style={s.primary} onPress={save}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.primaryText}><Copy text={"CHECK SPEICHERN"}/></Text></Pressable>{status?<Text style={s.status}><Copy text={status}/></Text>:null}
   </Card>
   <Card><Eyebrow><Copy text={"VERLAUF"}/></Eyebrow>{history.slice(0,8).map(x=><View style={s.history} key={x.id}><Text style={s.label}><LocalizedValue value={new Date(x.weekStart)} format="toLocaleDateString"/></Text><Text style={s.note}><Copy text={"Energie"}/>{x.energy??"Keine Angabe"}<Copy text={"· Regeneration"}/>{x.recovery??"Keine Angabe"} · Training {x.training??"Keine Angabe"}<Copy text={x.photoMediaId?" · Bild gespeichert":""}/></Text></View>)}</Card>
  </ScrollView></SafeAreaView>;
