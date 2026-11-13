@@ -153,7 +153,7 @@ export default function Training() {
         <FieldLink label={overview.legacy.transitionAvailable ? "Trainingsweg einrichten" : "Trainingsweg ansehen"} onPress={() => router.push("/journey")}/>
       </View>}
       <View style={s.links}>
-        <Text accessibilityRole="header" style={field.heading}><Copy text="Deine Einheiten"/></Text>
+        <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text="Deine Einheiten"/></Text>
         {available.length === 0 && workouts && <Text style={field.sub}><Copy text="Keine offene Einheit."/></Text>}
         {available.map(workout => <Pressable key={workout.id} accessibilityRole="button"
           onPress={() => router.push({pathname: "/workout/[id]", params: {id: workout.id}})} style={s.workout}>

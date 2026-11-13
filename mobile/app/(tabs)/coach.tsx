@@ -258,7 +258,7 @@ export default function Coach() {
           <FieldState loading={access === "loading"} error={access === "failed" ? "Die Nachrichten konnten nicht geladen werden." : null}
             retry={() => void loadMessages()}/>
           {access === "locked" && <View style={s.locked}>
-            <Text style={field.heading}><Copy text="Persönlicher Austausch"/></Text>
+            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text="Persönlicher Austausch"/></Text>
             <Text style={field.sub}><Copy text="Nachrichten, Sprache und Technikvideos sind mit PRO verfügbar."/></Text>
           </View>}
           {access === "open" && <>

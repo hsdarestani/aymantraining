@@ -148,7 +148,7 @@ export default function Progress() {
         <View style={s.recordsHead}>
           <View style={s.scoreGroup}>
             <Text style={s.logLabel}><Copy text="DEIN LEISTUNGSARCHIV"/></Text>
-            <Text accessibilityRole="header" style={field.heading}><Copy text="Deine Spuren"/></Text>
+            <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text="Deine Spuren"/></Text>
           </View>
           {milestones?.enabled && <View style={s.streak}>
             <Text style={s.streakValue}>{milestones.streak ?? 0}</Text>
@@ -173,7 +173,7 @@ export default function Progress() {
         </View>
       </View>
       <View style={s.disciplines}>
-        <Text accessibilityRole="header" style={field.heading}><Copy text="Leistungsprofil"/></Text>
+        <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text="Leistungsprofil"/></Text>
         {dash?.scoreDetailsLocked ? <Text style={field.sub}><Copy text="Einzelwerte sind mit PRO verfügbar."/></Text>
           : sections.map(([label, key]) => {
             const value = dash?.pillarPreview?.[key];

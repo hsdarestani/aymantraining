@@ -91,7 +91,7 @@ export default function Athlete() {
         <Text style={s.figureCaption}><Copy text="Illustration"/></Text>
       </View>
       <View style={s.routines}>
-        <Text accessibilityRole="header" style={field.heading}><Copy text="Deine Routinen"/></Text>
+        <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text="Deine Routinen"/></Text>
         {routines.map(({title, detail, href, Icon}, index) => <Pressable key={href} accessibilityRole="button"
           onPress={() => router.push(href)} style={({pressed}) => [s.routine, index === 1 && s.fuel, pressed && s.pressed]}>
           <Text style={[s.routineIndex, index === 1 && s.fuelMuted]}>0{index + 1}</Text>

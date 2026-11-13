@@ -34,14 +34,14 @@ export default function Cycle(){
  function revoke(){Alert.alert("Alle Daten entfernen?","Alle privaten Zykluseinträge, die Einwilligung und die Freigabe werden unwiderruflich gelöscht.",[
   {text:"ABBRECHEN",style:"cancel"},{text:"LÖSCHEN",style:"destructive",onPress:()=>{void pref({action:"DISABLE",confirmDeletion:true},"ALLE ZYKLUSDATEN GELÖSCHT")}}])}
  const choice=(on:boolean,onPress:()=>void,label:string)=> <Pressable accessibilityRole="button" accessibilityState={{selected:on,disabled:busy}} disabled={busy} style={[s.option,on&&s.optionOn]} onPress={onPress} key={label}><Text style={s.optionText}>{label}</Text></Pressable>;
- const setting=(label:string,v:number|null,key:"energy"|"mood"|"discomfort")=><View style={s.field}><Text style={s.kicker}>{label}</Text><View style={s.options}>
+ const setting=(label:string,v:number|null,key:"energy"|"mood"|"discomfort")=><View style={s.field}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}>{label}</Text><View style={s.options}>
   {choice(v===null,()=>setEntry({...entry,[key]:null}),"—")}
   {[1,3,5,7,10].map(n=>choice(v===n,()=>setEntry({...entry,[key]:n}),String(n)))}
  </View></View>;
  if(loading)return <View style={s.loading}><ActivityIndicator color={C.volt}/></View>;
  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.body} keyboardShouldPersistTaps="handled">
   <View style={s.header}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.link}><Copy text="ZURÜCK"/></Text></Pressable></View>
-  <Text style={s.kicker}><Copy text="FREIWILLIG · PRIVAT"/></Text><Text style={s.heading}>DEIN ZYKLUS.{"\n"}DEINE DATEN.</Text>
+  <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}><Copy text="FREIWILLIG · PRIVAT"/></Text><Text style={s.heading}>DEIN ZYKLUS.{"\n"}DEINE DATEN.</Text>
   <Text style={s.copy}><Copy text="Deine Aufzeichnungen bleiben privat. Du bestimmst selbst, was du speicherst. Kein Einfluss auf Trainingsstufe oder Leistungswert."/></Text>
   <Text style={s.copy}><Copy text="Schätzungen sind weder für Verhütung noch für Schwangerschaftsberatung geeignet und können stark abweichen."/></Text>
   {!!status&&<Text accessibilityRole="alert" style={s.status}>{status}</Text>}
@@ -53,13 +53,13 @@ export default function Cycle(){
       <Switch value={consent} onValueChange={setConsent} trackColor={{true:C.volt}}/></View>
      <Pressable style={[s.primary,(!consent||busy)&&s.disabled]} disabled={!consent||busy} onPress={()=>pref({action:"ENABLE",acknowledgeSensitiveData:true},"TAGEBUCH AKTIVIERT")}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.primaryText}><Copy text="TAGEBUCH AKTIVIEREN"/></Text></Pressable>
     </View>:<>
-     <View style={s.card}><Text style={s.kicker}><Copy text="PRIVATER KALENDER · NUR SCHÄTZUNG"/></Text>
+     <View style={s.card}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}><Copy text="PRIVATER KALENDER · NUR SCHÄTZUNG"/></Text>
       <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}>{d.forecast?"GESCHÄTZTER TAG "+d.forecast.day:"NOCH KEINE SCHÄTZUNG"}</Text>
       <Text style={s.copy}>{d.forecast?"Nächster geschätzter Beginn: "+d.forecast.estimatedNextStarts[0]:"Trage einen bekannten Beginn ein. Ohne aktuelle Angaben zeigen wir keine Prognose."}</Text>
       <Text style={s.copy}><Copy text="Keine Vorhersage von Eisprung, Fruchtbarkeit oder Schwangerschaft."/></Text>
-      <Text style={s.kicker}><Copy text="LETZTER TATSÄCHLICHER BEGINN · JJJJ-MM-TT"/></Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}><Copy text="LETZTER TATSÄCHLICHER BEGINN · JJJJ-MM-TT"/></Text>
       <TextInput style={s.input} value={period} placeholder="2026-10-22" placeholderTextColor={C.dim} onChangeText={setPeriod} autoCapitalize="none" keyboardType="numbers-and-punctuation" accessibilityLabel="Letzter Periodenbeginn, Jahr Monat Tag"/>
-      <Text style={s.kicker}><Copy text="ÜBLICHE LÄNGE · 20–45 TAGE"/></Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}><Copy text="ÜBLICHE LÄNGE · 20–45 TAGE"/></Text>
       <TextInput style={s.input} value={length} onChangeText={setLength} keyboardType="number-pad"/>
       <Pressable style={[s.secondary,busy&&s.disabled]} disabled={busy} onPress={()=>{
        if((period&&!dateValid(period))||Number(length)<20||Number(length)>45){setStatus("Bitte ein gültiges Datum und 20 bis 45 Tage eingeben.");return}
@@ -67,16 +67,16 @@ export default function Cycle(){
       }}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.secondaryText}><Copy text="KALENDER SPEICHERN"/></Text></Pressable>
       {d.reminder&&<Text style={s.notice}>{d.reminder.text}</Text>}
      </View>
-     <View style={s.card}><Text style={s.kicker}><Copy text="PRIVATES TAGEBUCH"/></Text><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="DEIN BEFINDEN."/></Text>
-      <Text style={s.kicker}><Copy text="DATUM · JJJJ-MM-TT"/></Text>
+     <View style={s.card}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}><Copy text="PRIVATES TAGEBUCH"/></Text><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="DEIN BEFINDEN."/></Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}><Copy text="DATUM · JJJJ-MM-TT"/></Text>
       <TextInput style={s.input} value={entry.date} onChangeText={v=>setEntry({...entry,date:v})} keyboardType="numbers-and-punctuation" autoCapitalize="none"/>
-      <Text style={s.kicker}><Copy text="BLUTUNG · OPTIONAL"/></Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}><Copy text="BLUTUNG · OPTIONAL"/></Text>
       <View style={s.options}>{choice(entry.flow===null,()=>setEntry({...entry,flow:null}),"—")}{flows.map(([key,label])=>choice(entry.flow===key,()=>setEntry({...entry,flow:key}),label))}</View>
-      <Text style={s.kicker}><Copy text="BESCHWERDEN · OPTIONAL"/></Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}><Copy text="BESCHWERDEN · OPTIONAL"/></Text>
       <View style={s.options}>{symptoms.map(([key,label])=>choice(entry.symptoms.includes(key),()=>setEntry({...entry,symptoms:entry.symptoms.includes(key)?entry.symptoms.filter(v=>v!==key):[...entry.symptoms,key]}),label))}</View>
       {setting("ENERGIE (1–10)",entry.energy,"energy")}{setting("STIMMUNG (1–10)",entry.mood,"mood")}
       {setting("BESCHWERDEN (0–10)",entry.discomfort,"discomfort")}
-      <Text style={s.kicker}><Copy text="DEIN TRAININGSWUNSCH"/></Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}><Copy text="DEIN TRAININGSWUNSCH"/></Text>
       <View style={s.options}>{plans.map(([key,label])=>choice(entry.planChoice===key,()=>setEntry({...entry,planChoice:key}),label))}</View>
       <Text style={s.copy}><Copy text="Dein Wunsch ändert weder Trainingsplan noch Level automatisch."/></Text>
       <Pressable style={[s.primary,busy&&s.disabled]} disabled={busy} onPress={()=>{
@@ -86,7 +86,7 @@ export default function Cycle(){
       {d.entries.some(x=>x.date===entry.date)&&<Pressable style={s.danger} disabled={busy} onPress={()=>Alert.alert("Tag entfernen?",entry.date,[
        {text:"ABBRECHEN",style:"cancel"},{text:"LÖSCHEN",style:"destructive",onPress:()=>{void send("/api/cycle/entries","DELETE",{date:entry.date},"TAG GELÖSCHT")}}])}><Text style={s.dangerText}><Copy text="DIESEN TAG LÖSCHEN"/></Text></Pressable>}
      </View>
-     <View style={s.card}><Text style={s.kicker}><Copy text="DEINE AUFZEICHNUNGEN"/></Text>
+     <View style={s.card}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}><Copy text="DEINE AUFZEICHNUNGEN"/></Text>
       {d.entries.length===0?<Text style={s.copy}><Copy text="Noch keine Tage erfasst."/></Text>:d.entries.slice(0,35).map(e=><Pressable key={e.date} onPress={()=>editDay(e.date)} style={[s.history,entry.date===e.date&&s.historyOn]}><Text style={s.historyTitle}>{e.date}</Text><Text style={s.copy}>{e.planChoice==="REST"?"Ruhe gewünscht":e.planChoice==="EASIER"?"Leichtere Einheit gewünscht":"Wie geplant"} · Energie {e.energy??"—"}</Text></Pressable>)}
      </View>
      <View style={s.card}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="DEINE KONTROLLE."/></Text>
