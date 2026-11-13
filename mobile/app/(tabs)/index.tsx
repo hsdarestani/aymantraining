@@ -137,7 +137,7 @@ export default function Home() {
           </Text>
         </View>
         {weekTitle ? <View accessible accessibilityRole="header" accessibilityLabel={title} style={s.sessionTitleGroup}>
-          <Text style={[s.sessionTitle, compact && s.sessionTitleCompact, narrow && s.sessionTitleNarrow]}>{weekTitle[1]}</Text>
+          <Text style={[s.sessionTitle, compact && s.sessionTitleCompact, narrow && s.sessionTitleNarrow]}><Copy text={weekTitle[1]}/></Text>
           <Text style={s.weekTag}>{weekTitle[2]}</Text>
         </View> : <Text accessibilityRole="header" style={[s.sessionTitle, compact && s.sessionTitleCompact, narrow && s.sessionTitleNarrow]}><Copy text={title}/></Text>}
         {workouts.length > 1 && <Text style={s.sessionNote}>{workouts.length} <Copy text="Einheiten an diesem Tag"/></Text>}
