@@ -11,5 +11,5 @@
   "auto_submit": true,
   "release_notes": "Die Darstellung wurde für kleine Smartphones überarbeitet. Überschriften, Schaltflächen, Trainingskarten und Navigation bleiben auch auf schmalen Displays übersichtlich. Fortschrittswerte, das Athletenprofil und Trainingsstufen sind klarer angeordnet. Verbesserte Ladehinweise erleichtern die Orientierung.",
   "source_branch": "main",
-  "request_revision": 10
+  "request_revision": 11
 }
