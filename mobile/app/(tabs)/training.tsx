@@ -100,7 +100,7 @@ export default function Training() {
     <FieldMast section="TRAINING"/>
     <View style={s.intro}>
       <Text style={s.label}><Copy text="5 LEVEL · DEIN WEG"/></Text>
-      <Text accessibilityRole="header" style={s.title}><Copy text="Dein Trainingsweg"/></Text>
+      <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="Dein Trainingsweg"/></Text>
       {enrollment && <Text style={field.sub}><Copy text={enrollment.pathway}/> · {enrollment.completedChapters}/{enrollment.totalChapters} <Copy text="Kapitel"/></Text>}
     </View>
     <FieldState loading={loading} error={!overview && !workouts ? overviewError || workoutError : ""} retry={() => void load()}/>

@@ -230,13 +230,13 @@ export default function Coach() {
             <Radio color={F.signal} size={25} strokeWidth={1.8}/>
             <Text style={s.signalLabel}><Copy text={daily?.coach.name || "DEIN COACH"}/></Text>
           </View>
-          <Text accessibilityRole="header" style={s.heroTitle}><Copy text="An deiner Seite."/></Text>
+          <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.heroTitle}><Copy text="An deiner Seite."/></Text>
           {next && <Text style={field.sub}><Copy text="Nächste Einheit"/> · <Copy text={next.title}/></Text>}
         </View>
         <FieldState error={feedbackError} retry={() => void loadFeedback()}/>
         <View style={s.dispatch}>
-          <Text style={s.dispatchLabel}><Copy text={hasPersonalFeedback ? "PERSÖNLICHES FEEDBACK" : note ? "COACH-BRIEFING" : "DEIN FOKUS"}/></Text>
-          <Text style={s.dispatchTitle}><Copy text={title}/></Text>
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.dispatchLabel}><Copy text={hasPersonalFeedback ? "PERSÖNLICHES FEEDBACK" : note ? "COACH-BRIEFING" : "DEIN FOKUS"}/></Text>
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.dispatchTitle}><Copy text={title}/></Text>
           <Text style={s.dispatchCopy}><Copy text={guidance || "Halte im Tagescheck fest, wie du dich fühlst und was du im Training brauchst."}/></Text>
           {hasPersonalFeedback && latest?.coachNote && latest.coachNote !== guidance &&
             <Text style={s.dispatchCopy}>{latest.coachNote}</Text>}
