@@ -45,3 +45,4 @@ jobs:
           cache-dependency-path: mobile/package-lock.json
       - run: npm ci --ignore-scripts
       - run: npm run typecheck
+      - run: npm run check:layout
