@@ -128,7 +128,7 @@ export default function JourneyTests() {
     <FieldMast section="TRAINING"/>
     <View style={s.content}>
       <FieldLink label="Zurück" onPress={() => router.back()}/>
-      <Text accessibilityRole="header" style={field.heading}><Copy text={chapterId ? "Dein Kapiteltest" : "Tests & Trainerfeedback"}/></Text>
+      <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text={chapterId ? "Dein Kapiteltest" : "Tests & Trainerfeedback"}/></Text>
       <FieldState loading={loading} error={error} retry={() => void refresh()}/>
       {!enabled && <Text style={field.sub}><Copy text="Die Kapiteltests werden vorbereitet."/></Text>}
       {enabled && !loading && !error && enrollments.length === 0 && <Text style={field.sub}><Copy text="Dein Trainingsweg wird noch zugeordnet."/></Text>}

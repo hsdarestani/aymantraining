@@ -65,7 +65,7 @@ export default function Login() {
       {!checking && <View style={s.body}>
         <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="BUILD YOUR ATHLETE."/></Text>
         {resume ? <FieldState error={error} retry={() => void check()}/> : <>
-          <Text accessibilityRole="header" style={field.heading}><Copy text={register ? "Konto erstellen" : "Anmelden"}/></Text>
+          <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text={register ? "Konto erstellen" : "Anmelden"}/></Text>
           {register && <LocalizedTextInput style={s.input} value={name} onChangeText={setName}
             placeholder="Name" accessibilityLabel="Name" autoComplete="name" editable={!busy}/>}
           <LocalizedTextInput style={s.input} value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false}
