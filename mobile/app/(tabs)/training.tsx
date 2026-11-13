@@ -1,5 +1,5 @@
 import {useCallback, useState} from "react";
-import {Pressable, StyleSheet, Text, View} from "react-native";
+import {Pressable, StyleSheet, Text, View, useWindowDimensions} from "react-native";
 import {router, useFocusEffect} from "expo-router";
 import {Check, Circle, LockKeyhole} from "lucide-react-native";
 import {F, FieldAction, FieldLink, FieldMast, FieldPage, FieldState, dateLabel, field, useFieldLocale} from "../../components/FieldKit";
@@ -38,6 +38,8 @@ function ChapterRow({chapter, enrollmentId}: {chapter: ChapterPreview; enrollmen
 
 export default function Training() {
   const locale = useFieldLocale();
+  const {width} = useWindowDimensions();
+  const compact = width < 380;
   const [overview, setOverview] = useState<JourneyOverview | null>(null);
   const [workouts, setWorkouts] = useState<Workout[] | null>(null);
   const [selection, setSelection] = useState<string | null>(null);
@@ -81,6 +83,7 @@ export default function Training() {
   const chapterReadyForTest = Boolean(testsEnabled && nextChapter?.testAvailable && nextChapter.mandatoryTotal != null &&
     nextChapter.mandatoryDone === nextChapter.mandatoryTotal);
   const title = needsPlacement ? "Deine Einstufung" : nextChapter?.titleDe ?? nextWorkout?.title ?? "Dein Trainingsweg";
+  const weekTitle = title.match(/^(.*?)\s*[·•]\s*((?:Woche|Week)\s+\d+)$/i);
   const nextLabel = needsPlacement ? "Einstufungstest öffnen" : chapterReadyForTest ? "Kapiteltest öffnen" :
     nextChapter ? "Kapitel öffnen" : nextWorkout ? "Einheit öffnen" : "Trainingspläne ansehen";
   function openNext() {
@@ -100,11 +103,18 @@ export default function Training() {
       <Text accessibilityRole="header" style={s.title}><Copy text="Dein Trainingsweg"/></Text>
       {enrollment && <Text style={field.sub}><Copy text={enrollment.pathway}/> · {enrollment.completedChapters}/{enrollment.totalChapters} <Copy text="Kapitel"/></Text>}
     </View>
-    <FieldState loading={loading} error={overviewError || workoutError} retry={() => void load()}/>
+    <FieldState loading={loading} error={!overview && !workouts ? overviewError || workoutError : ""} retry={() => void load()}/>
     {!loading && <>
+      {(overviewError || workoutError) && (overview || workouts) && <View style={s.partialNotice}>
+        <Text style={s.partialText}><Copy text={overviewError || workoutError}/></Text>
+        <FieldLink label="Erneut laden" onPress={() => void load()}/>
+      </View>}
       <View style={s.next}>
         <Text style={s.nextLabel}><Copy text="NÄCHSTER SCHRITT"/></Text>
-        <Text style={s.nextTitle}><Copy text={title}/></Text>
+        {weekTitle ? <View accessible accessibilityRole="header" accessibilityLabel={title} style={s.nextHeading}>
+          <Text style={[s.nextTitle, compact && s.nextTitleCompact]}>{weekTitle[1]}</Text>
+          <Text style={s.nextWeek}>{weekTitle[2]}</Text>
+        </View> : <Text accessibilityRole="header" style={[s.nextTitle, compact && s.nextTitleCompact]}><Copy text={title}/></Text>}
         <FieldAction label={nextLabel} onPress={openNext} tone="ink"/>
       </View>
       {enrollments.length > 1 && <View style={s.enrollment}>
@@ -126,8 +136,8 @@ export default function Training() {
               <View style={[s.numberWrap, selected && s.selectedNumber]}>
                 <Text style={[s.number, selected && s.selectedText]}>{String(index + 1).padStart(2, "0")}</Text>
               </View>
-              <Text style={[s.levelName, selected && s.accent]}>{levelLabel(code)}</Text>
-              <Text style={s.levelState}><Copy text={state}/></Text>
+              <Text style={[s.levelName, compact && s.levelNameCompact, selected && s.accent]}>{levelLabel(code)}</Text>
+              <Text style={[s.levelState, compact && s.levelStateCompact]}><Copy text={state}/></Text>
             </Pressable>
             {selected && <View style={s.expansion}>
               <Text style={field.sub}><Copy text={entry?.description || levelNotes[index]}/></Text>
@@ -172,12 +182,17 @@ export default function Training() {
 }
 
 const s = StyleSheet.create({
-  intro: {paddingHorizontal: 20, paddingTop: 25, paddingBottom: 21, gap: 4},
+  intro: {paddingHorizontal: 20, paddingTop: 23, paddingBottom: 18, gap: 4},
+  partialNotice: {marginHorizontal: 20, marginBottom: 14, borderLeftWidth: 2, borderColor: F.red, paddingLeft: 10, gap: 2},
+  partialText: {...field.sub, color: F.muted},
   label: {...field.type, color: F.signal},
-  title: {fontFamily: "Archivo", fontSize: 39, lineHeight: 42, letterSpacing: -1.9, color: F.chalk},
+  title: {fontFamily: "Archivo", fontSize: 36, lineHeight: 40, letterSpacing: -1.5, color: F.chalk},
   next: {backgroundColor: F.signal, marginHorizontal: 20, padding: 15, gap: 8, borderLeftWidth: 4, borderColor: "#9EBE00"},
   nextLabel: {...field.type, color: F.ink},
-  nextTitle: {fontFamily: "Archivo", fontSize: 26, lineHeight: 30, color: F.ink},
+  nextTitle: {fontFamily: "Archivo", fontSize: 26, lineHeight: 31, color: F.ink, flexShrink: 1},
+  nextTitleCompact: {fontSize: 23, lineHeight: 27},
+  nextHeading: {alignItems: "flex-start", gap: 3},
+  nextWeek: {color: F.ink, fontFamily: "ManropeSemiBold", fontSize: 14, lineHeight: 20, backgroundColor: "#D6EB56", paddingVertical: 3, paddingHorizontal: 8},
   enrollment: {paddingHorizontal: 20, marginTop: 16, flexDirection: "row", flexWrap: "wrap", gap: 10},
   enrollmentChoice: {minHeight: 44, borderBottomWidth: 1, borderColor: F.line, justifyContent: "center"},
   track: {marginHorizontal: 20, marginTop: 22, position: "relative"},
@@ -188,8 +203,10 @@ const s = StyleSheet.create({
   selectedNumber: {backgroundColor: F.chalk, borderColor: F.chalk},
   number: {fontFamily: "Archivo", fontSize: 21, color: F.muted, fontVariant: ["tabular-nums"]},
   selectedText: {color: F.ink},
-  levelName: {fontFamily: "Archivo", fontSize: 17, color: F.chalk, flex: 1, letterSpacing: -.35},
-  levelState: {color: F.muted, fontFamily: "ManropeSemiBold", fontSize: 11, maxWidth: "33%", textAlign: "right"},
+  levelName: {fontFamily: "Archivo", fontSize: 17, color: F.chalk, flex: 1, minWidth: 0, letterSpacing: -.35},
+  levelNameCompact: {fontSize: 15},
+  levelState: {color: F.muted, fontFamily: "ManropeSemiBold", fontSize: 11, maxWidth: "33%", textAlign: "right", flexShrink: 1},
+  levelStateCompact: {fontSize: 10, maxWidth: "28%"},
   accent: {color: F.signal},
   expansion: {marginLeft: 57, paddingTop: 4, paddingBottom: 11, gap: 6},
   chapter: {minHeight: 49, paddingVertical: 7, borderTopWidth: 1, borderColor: F.line, flexDirection: "row", alignItems: "center", gap: 9},
