@@ -1,6 +1,6 @@
 import {Redirect, Tabs, useFocusEffect} from "expo-router";
 import {useCallback, useState} from "react";
-import {Platform, View} from "react-native";
+import {Platform, View, useWindowDimensions} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {Activity, Crosshair, Flag, Radio, UserRound} from "lucide-react-native";
 import type {LucideIcon} from "lucide-react-native";
@@ -21,6 +21,8 @@ export default function TabsLayout() {
   const locale = useLocale();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const insets = useSafeAreaInsets();
+  const {width} = useWindowDimensions();
+  const compact = width < 380;
   const bottom = Platform.OS === "android" ? Math.max(insets.bottom, 32) : Math.max(insets.bottom,12);
   useFocusEffect(useCallback(() => {
     let active = true;
@@ -35,7 +37,8 @@ export default function TabsLayout() {
       headerShown: false, tabBarHideOnKeyboard: true, tabBarLabelPosition: "below-icon",
       tabBarActiveTintColor: F.signal, tabBarInactiveTintColor: F.muted,
       tabBarStyle: {height: 60 + bottom, backgroundColor: F.bg, borderTopColor: F.line, paddingTop: 7, paddingBottom: bottom + 5},
-      tabBarLabelStyle: {fontFamily: "ManropeSemiBold", fontSize: 9, letterSpacing: .1},
+      tabBarLabelStyle: {fontFamily: "ManropeSemiBold", fontSize: compact ? 8 : 9, letterSpacing: compact ? 0 : .1},
+      tabBarItemStyle: {paddingHorizontal: 0},
       tabBarAllowFontScaling: false,
     }}>
       <Tabs.Screen name="index" options={{title: locale === "en" ? "HOME" : "START", tabBarIcon: icon(Crosshair)}}/>
