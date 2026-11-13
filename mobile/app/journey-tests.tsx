@@ -58,7 +58,7 @@ function ExamResult({exam, enrollmentId, ready, placement, reload}: {
     finally { pending.current = false; setBusy(false); }
   }
   return <View style={s.exam}>
-    <Text style={s.title}><Copy text={exam.titleDe}/></Text>
+    <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text={exam.titleDe}/></Text>
     {(latest || waiting) && <View style={[s.result, failed && s.failed]}>
       <Text style={[s.accent, failed && s.alert]}><Copy text={failed ? "NOCH NICHT BESTANDEN" :
         latest?.verdict === "PASSED" ? "BESTANDEN" : "COACH PRÜFT"}/></Text>
@@ -141,7 +141,7 @@ export default function JourneyTests() {
             : <Text style={field.body}><Copy text="Dein Coach bestätigt deine Einstufung."/></Text>)}
           {chapters.map(chapter => <View key={chapter.id} style={s.group}>
             <Text style={s.accent}>{levelLabel(chapter.level)}</Text>
-            <Text style={s.title}><Copy text={chapter.titleDe}/></Text>
+            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text={chapter.titleDe}/></Text>
             {chapter.unlocked ? <>
               <Text style={field.sub}>{chapter.mandatoryDone}/{chapter.mandatoryTotal} <Copy text="Pflichtinhalte abgeschlossen"/></Text>
               {chapter.items.filter(item => !item.done && !chapter.finished).map(item => <View key={item.id} style={s.item}>

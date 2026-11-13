@@ -13,7 +13,7 @@ export default function Milestones(){
  useFocusEffect(useCallback(()=>{api("/api/milestones").then(setData).catch(e=>setStatus(e.message||"Nicht verfügbar"))},[]));
  if(!data)return <Screen><View style={s.loading}><ActivityIndicator color={C.volt}/><Text style={s.copy}>{status||"Fortschritt wird geladen ..."}</Text></View></Screen>;
  return <Screen><MilestoneCelebration/><View style={s.hero}><Text style={s.kicker}><Copy text="DEIN ECHTER FORTSCHRITT"/></Text>
-   <Text style={s.title}>JEDER TAG.{"\n"}EIN SCHRITT.</Text>
+   <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}>JEDER TAG.{"\n"}EIN SCHRITT.</Text>
    <Text style={s.copy}><Copy text="Nur Training, echte Tageschecks und zuvor geplante Erholung zählen. Das reine Öffnen der Anwendung zählt nicht."/></Text>
   </View>
   {!data.enabled?<Text style={s.copy}><Copy text="Deine Meilensteine werden vorbereitet. Deine Daten bleiben erhalten."/></Text>:<>
@@ -30,7 +30,7 @@ export default function Milestones(){
      <View style={s.track}><View style={[s.fill,{width:(Math.max(0,Math.min(100,n.progress/n.threshold*100))+"%") as `${number}%`}]}/></View>
     </View>)}
   </>}
-  <Pressable style={s.action} onPress={()=>router.push("/(tabs)/training")}><Text style={s.actionText}><Copy text="TRAINING ANSEHEN →"/></Text></Pressable>
+  <Pressable style={s.action} onPress={()=>router.push("/(tabs)/training")}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.actionText}><Copy text="TRAINING ANSEHEN →"/></Text></Pressable>
  </Screen>;
 }
 const s=StyleSheet.create({

@@ -70,8 +70,8 @@ export default function JourneyOverview(){
   catch(e){setError(e instanceof Error?e.message:"Wechsel nicht möglich");}finally{setBusy(false);}
  }
  return <SafeAreaView style={s.safe} edges={["top"]}><ScrollView contentContainerStyle={s.content}>
-  <Pressable onPress={()=>router.back()}><Text style={s.back}><Copy text="Zurück"/></Text></Pressable>
-  <Text style={s.eyebrow}><Copy text="BE DIFFERENT · TRAINING"/></Text><Text style={s.title}><Copy text={direct?"Dein Kapitel":"Dein Trainingsweg"}/></Text>
+  <Pressable onPress={()=>router.back()}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.back}><Copy text="Zurück"/></Text></Pressable>
+  <Text style={s.eyebrow}><Copy text="BE DIFFERENT · TRAINING"/></Text><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text={direct?"Dein Kapitel":"Dein Trainingsweg"}/></Text>
 
   {!enabled?<View style={s.card}><Text style={s.muted}><Copy text="Der neue Trainingsweg wird vorbereitet. Deine bisherigen Daten bleiben erhalten."/></Text></View>:
    loading?<ActivityIndicator color={C.volt}/>:
@@ -107,7 +107,7 @@ export default function JourneyOverview(){
      </View>)}
      {data.testsEnabled&&<Pressable style={s.btn} onPress={()=>router.push("/journey-tests")}><Text style={s.btnText}><Copy text="Kapiteltests öffnen"/></Text></Pressable>}
     </View>)}
-    {detail&&<View style={s.card}>{!direct&&<Pressable onPress={()=>setDetail(null)}><Text style={s.back}><Copy text="Übersicht öffnen"/></Text></Pressable>}
+    {detail&&<View style={s.card}>{!direct&&<Pressable onPress={()=>setDetail(null)}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.back}><Copy text="Übersicht öffnen"/></Text></Pressable>}
      <Text style={s.tag}>{detail.level.replaceAll("_"," ")} · FREIGESCHALTET</Text><Text style={s.subtitle}>{detail.titleDe}</Text>
      <Text style={s.muted}>{detail.description}</Text><Text style={s.muted}>{detail.mandatoryDone}/{detail.mandatoryTotal} Pflichtinhalte erledigt</Text>
      {detail.items.map(item=><View key={item.id} style={s.levelCard}>
