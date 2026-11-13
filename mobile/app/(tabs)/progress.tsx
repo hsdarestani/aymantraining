@@ -1,5 +1,5 @@
 import {useCallback, useState} from "react";
-import {Pressable, StyleSheet, Text, View} from "react-native";
+import {Pressable, StyleSheet, Text, View, useWindowDimensions} from "react-native";
 import {router, useFocusEffect} from "expo-router";
 import Svg, {Circle, Line, Path} from "react-native-svg";
 import {F, FieldLink, FieldMast, FieldPage, FieldState, dateLabel, field, useFieldLocale} from "../../components/FieldKit";
@@ -45,6 +45,8 @@ function Trace({points}: {points: Snapshot[]}) {
 
 export default function Progress() {
   const locale = useFieldLocale();
+  const {width} = useWindowDimensions();
+  const compact = width < 380;
   const [dash, setDash] = useState<Dashboard | null>(null);
   const [body, setBody] = useState<Body[]>([]);
   const [tests, setTests] = useState<Test[]>([]);
@@ -105,11 +107,11 @@ export default function Progress() {
           <View style={s.scoreGroup}>
             <Text accessibilityRole="header" style={s.darkLabel}><Copy text="BD SCORE"/></Text>
             <View style={s.figure}>
-              <Text style={s.score}>{score == null ? "—" : Math.round(score)}</Text>
+              <Text style={[s.score, compact && s.scoreCompact]}>{score == null ? "—" : Math.round(score)}</Text>
               {score != null && <Text style={s.scale}>/ 100</Text>}
             </View>
           </View>
-          <View style={s.stamp}>
+          <View style={[s.stamp, compact && s.stampCompact]}>
             <Text style={s.darkLabel}><Copy text="MESSSTAND"/></Text>
             <Text style={s.stampDate}>{profile?.recordedDate ? dateLabel(profile.recordedDate, locale, {day: "2-digit", month: "short"}) : "—"}</Text>
             {score != null && <Text style={s.darkSmall}>{profile?.completeness ?? 0}% <Copy text="erfasst"/></Text>}
@@ -121,19 +123,27 @@ export default function Progress() {
             <Text style={[s.darkSmall, value === period && s.periodTextOn]}>{value} <Copy text="Tage"/></Text>
           </Pressable>)}
         </View>}
-        {points.length > 0 ? <>
+        {points.length > 1 ? <>
           <Trace points={points}/>
           <View style={s.axis}>
             <Text style={s.darkSmall}>{dateLabel(points[0].date, locale, {day: "numeric", month: "short"})}</Text>
-            <Text style={s.darkSmall}>{points.length > 1
-              ? dateLabel(points[points.length - 1].date, locale, {day: "numeric", month: "short"}) : <Copy text="Ein Messpunkt"/>}</Text>
+            <Text style={s.darkSmall}>{dateLabel(points[points.length - 1].date, locale, {day: "numeric", month: "short"})}</Text>
           </View>
-        </> : <View style={s.noPlot}>
+        </> : points.length === 1 ? <View style={s.singlePoint}>
+          <View style={s.singleMarker}/>
+          <View style={s.singleCopy}>
+            <Text style={s.singleValue}>{Math.round(points[0].total)} / 100</Text>
+            <Text style={s.darkSmall}><Copy text="Ein Messpunkt"/> · {dateLabel(points[0].date, locale, {day: "numeric", month: "short"})}</Text>
+          </View>
+        </View> : <View style={s.noPlot}>
           <Text style={s.darkSmall}><Copy text={timelineLocked ? "Der Score-Verlauf ist mit PRO verfügbar."
             : snapshots ? "Keine Messpunkte in diesem Zeitraum." : "Der Score-Verlauf ist gerade nicht verfügbar."}/></Text>
         </View>}
       </View>}
-      <FieldState error={unavailable ? "Einige Fortschrittsdaten konnten nicht geladen werden." : null} retry={() => void load()}/>
+      {unavailable && <View style={s.partialNotice}>
+        <Text style={field.sub}><Copy text="Einige Fortschrittsdaten konnten nicht geladen werden."/></Text>
+        <FieldLink label="Erneut laden" onPress={() => void load()}/>
+      </View>}
       <View style={s.records}>
         <View style={s.recordsHead}>
           <View style={s.scoreGroup}>
@@ -183,13 +193,15 @@ export default function Progress() {
 
 const s = StyleSheet.create({
   wall: {backgroundColor: F.chalk, paddingHorizontal: 20, paddingTop: 22, paddingBottom: 14, borderTopWidth: 3, borderColor: F.signal},
-  wallHeader: {flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 14},
-  scoreGroup: {flex: 1},
+  wallHeader: {flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 10},
+  scoreGroup: {flex: 1, minWidth: 0},
   darkLabel: {...field.type, color: F.darkMuted},
   figure: {flexDirection: "row", alignItems: "baseline", flexWrap: "wrap", gap: 5},
-  score: {color: F.ink, fontFamily: "Archivo", fontSize: 89, lineHeight: 92, letterSpacing: -5, fontVariant: ["tabular-nums"]},
+  score: {color: F.ink, fontFamily: "Archivo", fontSize: 82, lineHeight: 86, letterSpacing: -4, fontVariant: ["tabular-nums"]},
+  scoreCompact: {fontSize: 66, lineHeight: 71, letterSpacing: -3},
   scale: {color: F.darkMuted, fontFamily: "ManropeSemiBold", fontSize: 17},
-  stamp: {borderLeftWidth: 1, borderColor: "#A7AA9F", paddingLeft: 10, gap: 3, marginTop: 3},
+  stamp: {borderLeftWidth: 1, borderColor: "#A7AA9F", paddingLeft: 10, gap: 3, marginTop: 3, maxWidth: "48%", flexShrink: 1},
+  stampCompact: {paddingLeft: 7},
   stampDate: {color: F.ink, fontFamily: "Archivo", fontSize: 18},
   darkSmall: {color: F.darkMuted, fontFamily: "ManropeSemiBold", fontSize: 12},
   periods: {flexDirection: "row", marginTop: 5, marginBottom: 8, borderBottomWidth: 1, borderColor: "#B9BBB0"},
@@ -198,6 +210,11 @@ const s = StyleSheet.create({
   periodTextOn: {color: F.ink},
   axis: {flexDirection: "row", justifyContent: "space-between", paddingTop: 4},
   noPlot: {minHeight: 54, justifyContent: "center", borderTopWidth: 1, borderColor: "#C6C7BA"},
+  singlePoint: {minHeight: 72, flexDirection: "row", alignItems: "center", gap: 13, borderTopWidth: 1, borderColor: "#C6C7BA", paddingVertical: 12},
+  singleMarker: {height: 13, width: 13, borderRadius: 7, backgroundColor: "#394521"},
+  singleCopy: {flex: 1, minWidth: 0, gap: 2},
+  singleValue: {color: F.ink, fontFamily: "Archivo", fontSize: 20},
+  partialNotice: {marginHorizontal: 20, marginTop: 16, paddingLeft: 11, borderLeftWidth: 2, borderColor: F.red, gap: 2},
   records: {marginHorizontal: 20, marginTop: 25, gap: 5},
   recordsHead: {flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", gap: 13, marginBottom: 10},
   logLabel: {...field.type, color: F.signal, marginBottom: 4},
@@ -208,12 +225,12 @@ const s = StyleSheet.create({
   tick: {width: 4, height: 20, backgroundColor: "#6B7269"},
   award: {backgroundColor: F.signal},
   recordDate: {color: F.muted, fontFamily: "ManropeSemiBold", fontSize: 11, flexShrink: 1},
-  recordText: {flex: 1, gap: 2},
-  recordValue: {color: F.chalk, fontFamily: "Archivo", fontSize: 14, maxWidth: "29%"},
+  recordText: {flex: 1, minWidth: 0, gap: 2},
+  recordValue: {color: F.chalk, fontFamily: "Archivo", fontSize: 14, maxWidth: "28%", textAlign: "right", flexShrink: 1},
   recordLinks: {flexDirection: "row", flexWrap: "wrap", columnGap: 17},
   disciplines: {marginHorizontal: 20, borderTopWidth: 1, borderColor: F.line, paddingTop: 18, marginTop: 8, gap: 5},
   discipline: {flexDirection: "row", gap: 10, minHeight: 38, alignItems: "center"},
-  disciplineLabel: {...field.body, width: "36%"},
+  disciplineLabel: {...field.body, flexBasis: "36%", flexShrink: 1, minWidth: 0},
   meter: {height: 3, flex: 1, backgroundColor: F.line},
   meterFill: {height: 3, backgroundColor: F.signal},
   disciplineValue: {...field.body, minWidth: 27, textAlign: "right", fontVariant: ["tabular-nums"]},
