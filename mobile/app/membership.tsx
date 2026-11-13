@@ -32,7 +32,7 @@ export default function Membership() {
     <FieldMast section="KONTO"/>
     <View style={s.content}>
       <FieldLink label="Zurück" onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)/athlete")}/>
-      <Text accessibilityRole="header" style={field.heading}><Copy text="Mitgliedschaft"/></Text>
+      <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text="Mitgliedschaft"/></Text>
       <FieldState loading={loading} error={error} retry={!tier ? () => void load() : undefined}/>
       {tier && <View style={s.status}>
         <Text style={field.type}><Copy text="AKTUELLER ZUGANG"/></Text>
