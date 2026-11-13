@@ -1,5 +1,5 @@
 import {useCallback, useRef, useState} from "react";
-import {RefreshControl, StyleSheet, Text, View} from "react-native";
+import {RefreshControl, StyleSheet, Text, View, useWindowDimensions} from "react-native";
 import {router, useFocusEffect} from "expo-router";
 import {Radio} from "lucide-react-native";
 import Svg, {Circle, Path} from "react-native-svg";
@@ -32,6 +32,9 @@ function TrackMark() {
 
 export default function Home() {
   const locale = useFieldLocale();
+  const {width} = useWindowDimensions();
+  const compact = width < 380;
+  const narrow = width < 350;
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [journey, setJourney] = useState<JourneyOverview | null>(null);
   const [brief, setBrief] = useState<CoachBrief | null>(null);
@@ -95,6 +98,8 @@ export default function Home() {
     else router.push(selected === 0 && !today?.today.hasCheckIn ? "/lifestyle" : "/(tabs)/training");
   };
   const title = activeWorkout?.title ?? (chosen || today ? "Keine Einheit geplant" : "Dein Trainingsplan");
+  // Keep the week number together instead of leaving a lone digit on a new line.
+  const weekTitle = title.match(/^(.*?)\s*[·•]\s*((?:Woche|Week)\s+\d+)$/i);
   const nextDate = activeWorkout?.scheduledAt
     ? new Date(activeWorkout.scheduledAt).toLocaleTimeString(locale, {hour: "2-digit", minute: "2-digit", timeZone: today?.timeZone})
     : null;
@@ -108,7 +113,8 @@ export default function Home() {
         <Text style={s.stamp}>
           {today?.date ? dateLabel(today.date, locale, {weekday: "long", day: "numeric", month: "short"}).toLocaleUpperCase(locale) : "START"}
         </Text>
-        <Text accessibilityRole="header" style={s.greeting}>
+        <Text accessibilityRole="header" numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.8}
+          style={[s.greeting, compact && s.greetingCompact]}>
           <Copy text="Hi,"/> {name || <Copy text="willkommen"/>}
         </Text>
         <View style={s.identity}>
@@ -130,7 +136,10 @@ export default function Home() {
             {activeWorkout?.completed ? <Copy text="ERLEDIGT"/> : nextDate}
           </Text>
         </View>
-        <Text style={s.sessionTitle}><Copy text={title}/></Text>
+        {weekTitle ? <View accessible accessibilityRole="header" accessibilityLabel={title} style={s.sessionTitleGroup}>
+          <Text style={[s.sessionTitle, compact && s.sessionTitleCompact, narrow && s.sessionTitleNarrow]}>{weekTitle[1]}</Text>
+          <Text style={s.weekTag}>{weekTitle[2]}</Text>
+        </View> : <Text accessibilityRole="header" style={[s.sessionTitle, compact && s.sessionTitleCompact, narrow && s.sessionTitleNarrow]}><Copy text={title}/></Text>}
         {workouts.length > 1 && <Text style={s.sessionNote}>{workouts.length} <Copy text="Einheiten an diesem Tag"/></Text>}
         {!activeWorkout && selected === 0 && dashboard.nextWorkout?.scheduledAt && today &&
           <Text style={s.sessionNote}><Copy text="Nächster Termin"/> · {dateLabel(dashboard.nextWorkout.scheduledAt, locale,
@@ -165,17 +174,22 @@ const s = StyleSheet.create({
   track: {position: "absolute", width: "100%", height: 230, right: 0, top: 0, opacity: .72},
   stamp: {...field.type, color: F.signal, marginBottom: 8},
   greeting: {fontFamily: "Archivo", color: F.chalk, fontSize: 55, lineHeight: 57, letterSpacing: -2.7},
+  greetingCompact: {fontSize: 45, lineHeight: 49, letterSpacing: -1.9},
   identity: {flexDirection: "row", gap: 12, marginTop: 22, marginBottom: 22},
-  identityPart: {flex: 1, borderLeftWidth: 1, borderColor: "#53584D", paddingLeft: 10, gap: 4},
+  identityPart: {flex: 1, minWidth: 0, borderLeftWidth: 1, borderColor: "#53584D", paddingLeft: 10, gap: 4},
   identityValue: {color: F.chalk, fontFamily: "ManropeSemiBold", fontSize: 15},
   session: {marginTop: 1, backgroundColor: F.chalk, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 19, gap: 12},
   sessionMeta: {flexDirection: "row", justifyContent: "space-between", gap: 10},
   darkLabel: {...field.type, color: F.darkMuted},
-  sessionTitle: {color: F.ink, fontFamily: "Archivo", fontSize: 38, lineHeight: 40, letterSpacing: -1.4},
+  sessionTitle: {color: F.ink, fontFamily: "Archivo", fontSize: 34, lineHeight: 37, letterSpacing: -1.1, flexShrink: 1},
+  sessionTitleCompact: {fontSize: 30, lineHeight: 33, letterSpacing: -.85},
+  sessionTitleNarrow: {fontSize: 27, lineHeight: 30},
+  sessionTitleGroup: {gap: 5, alignItems: "flex-start"},
+  weekTag: {color: F.ink, fontFamily: "ManropeSemiBold", fontSize: 15, lineHeight: 23, backgroundColor: "#DADCCE", paddingHorizontal: 9, paddingVertical: 3, overflow: "hidden"},
   sessionNote: {color: F.darkMuted, fontFamily: "ManropeSemiBold", fontSize: 13},
   coach: {marginHorizontal: 20, marginTop: 24, flexDirection: "row", gap: 13},
   coachMark: {width: 47, height: 47, borderWidth: 1, borderColor: "#555D3C", justifyContent: "center", alignItems: "center"},
   coachContent: {flex: 1, gap: 4},
-  coachTitle: {...field.heading, fontSize: 23},
+  coachTitle: {...field.heading, fontSize: 23, flexShrink: 1},
   foot: {marginHorizontal: 20, paddingTop: 4},
 });
