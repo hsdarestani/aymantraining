@@ -235,7 +235,7 @@ export default function Coach() {
         </View>
         <FieldState error={feedbackError} retry={() => void loadFeedback()}/>
         <View style={s.dispatch}>
-          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.dispatchLabel}><Copy text={hasPersonalFeedback ? "PERSÖNLICHES FEEDBACK" : note ? "COACH-BRIEFING" : "DEIN FOKUS"}/></Text>
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.dispatchLabel}><Copy text={hasPersonalFeedback ? "PERSÖNLICHES FEEDBACK" : note ? "COACH BRIEFING" : "DEIN FOKUS"}/></Text>
           <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.dispatchTitle}><Copy text={title}/></Text>
           <Text style={s.dispatchCopy}><Copy text={guidance || "Halte im Tagescheck fest, wie du dich fühlst und was du im Training brauchst."}/></Text>
           {hasPersonalFeedback && latest?.coachNote && latest.coachNote !== guidance &&
