@@ -67,7 +67,7 @@ export default function Athlete() {
         <View style={[s.pass, compact && s.passCompact]}>
           <View style={s.passCopy}>
             <Text style={s.darkLabel}><Copy text="DEIN PROFIL"/></Text>
-            <Text accessibilityRole="header" numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}
+            <Text accessibilityRole="header" numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.85}
               style={[s.name, compact && s.nameCompact]}>{dash?.user.name?.trim() || <Copy text="Athlet"/>}</Text>
             <Text style={s.level}><Copy text={level ? levelLabel(level) : "Einstufung offen"}/></Text>
             <View style={s.data}>
@@ -81,7 +81,7 @@ export default function Athlete() {
         <View accessibilityRole="tablist" style={s.lenses}>
           {disciplines.map(item => <Pressable key={item.key} accessibilityRole="tab" accessibilityState={{selected: focus === item.key}}
             onPress={() => setFocus(item.key)} style={[s.lens, focus === item.key && s.lensSelected]}>
-            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}
+            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}
               style={[s.lensLabel, narrow && s.lensLabelNarrow]}><Copy text={item.label}/></Text>
           </Pressable>)}
         </View>
@@ -91,7 +91,7 @@ export default function Athlete() {
         <Text style={s.figureCaption}><Copy text="Illustration"/></Text>
       </View>
       <View style={s.routines}>
-        <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text="Deine Routinen"/></Text>
+        <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={field.heading}><Copy text="Deine Routinen"/></Text>
         {routines.map(({title, detail, href, Icon}, index) => <Pressable key={href} accessibilityRole="button"
           onPress={() => router.push(href)} style={({pressed}) => [s.routine, index === 1 && s.fuel, pressed && s.pressed]}>
           <Text style={[s.routineIndex, index === 1 && s.fuelMuted]}>0{index + 1}</Text>
@@ -152,14 +152,14 @@ const s = StyleSheet.create({
   lens: {flex: 1, minHeight: 47, paddingHorizontal: 4, justifyContent: "center", alignItems: "center", borderBottomWidth: 3, borderColor: "transparent"},
   lensSelected: {borderBottomColor: "#536129", backgroundColor: "#D8DEBD"},
   lensLabel: {color: F.ink, fontFamily: "ManropeSemiBold", fontSize: 13, textAlign: "center"},
-  lensLabelNarrow: {fontSize: 11},
+  lensLabelNarrow: {fontSize: 13},
   twinLink: {marginHorizontal: 20, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8},
   figureCaption: {...field.sub, textAlign: "right"},
   routines: {marginHorizontal: 20, marginTop: 16, gap: 1},
   routine: {minHeight: 64, flexDirection: "row", alignItems: "center", gap: 8, borderBottomWidth: 1, borderColor: F.line, paddingVertical: 10, paddingHorizontal: 3},
   routineStack: {flex: 1, minWidth: 0, gap: 3},
   routineSubStack: {textAlign: "left"},
-  routineIndex: {color: F.muted, fontFamily: "ManropeSemiBold", fontSize: 10, paddingRight: 3},
+  routineIndex: {color: F.muted, fontFamily: "ManropeSemiBold", fontSize: 12, paddingRight: 3},
   routineTitle: {color: F.chalk, fontFamily: "Archivo", fontSize: 17, flexShrink: 1},
   routineDetail: {flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 8},
   routineSub: {...field.sub, fontSize: 12, textAlign: "right", flexShrink: 1},
