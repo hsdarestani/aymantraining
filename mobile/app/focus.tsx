@@ -88,7 +88,7 @@ export default function Focus(){
  const progress=elapsed/DURATION;
  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.content}>
   <View style={s.top}><Brand compact/><Pressable accessibilityRole="button" onPress={()=>router.back()}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.back}><Copy text="ZURÜCK"/></Text></Pressable></View>
-  <View style={s.hero}><Text style={s.heroKicker}>BE FOCUSED / 001</Text><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.title}><Copy text="DEIN MOMENT."/>{"\n"}<Text style={s.accent}><Copy text="DEIN FOKUS."/></Text></Text><Text style={s.intro}><Copy text="120 Sekunden für dich. Ohne Leistungsdruck. Du bestimmst das Tempo."/></Text></View>
+  <View style={s.hero}><Text style={s.heroKicker}>BE FOCUSED / 001</Text><Text style={s.title}><Copy text="DEIN MOMENT."/>{"\n"}<Text style={s.accent}><Copy text="DEIN FOKUS."/></Text></Text><Text style={s.intro}><Copy text="120 Sekunden für dich. Ohne Leistungsdruck. Du bestimmst das Tempo."/></Text></View>
   <View style={s.breathCard}>
    <View style={s.breathHeader}><Text style={s.exerciseTag}><Copy text="ATEMTRAINING"/></Text><Text style={s.exerciseNumber}>01 / 02 MIN</Text></View>
    <View style={s.breathStage}>
