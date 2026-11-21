@@ -2,9 +2,12 @@ import {useCallback,useState} from "react";
 import {StyleSheet,Switch,Text,View} from "react-native";
 import {useFocusEffect} from "expo-router";
 import {api} from "../lib/api";
+import {Copy} from "./Locale";
+import {translate,useLocale} from "../lib/i18n/locale";
 import {C} from "../theme";
 type Pref={enabled:boolean;reduceMotion:boolean};
 export default function CelebrationSettings(){
+ useLocale();
  const [value,setValue]=useState<Pref>({enabled:true,reduceMotion:false}),[available,setAvailable]=useState(false),
   [busy,setBusy]=useState(false),[status,setStatus]=useState("");
  useFocusEffect(useCallback(()=>{
@@ -25,13 +28,13 @@ export default function CelebrationSettings(){
  }
  if(!available)return null;
  return <View style={s.panel}>
-  <Text style={s.heading}>DEINE ERFOLGSMOMENTE.</Text>
-  <Text style={s.copy}>Feiere echten Fortschritt auf deine Weise. Bestätigte Erfolge bleiben immer erhalten.</Text>
-  <View style={s.row}><Text style={s.label}>ERFOLGSANZEIGEN AUTOMATISCH ÖFFNEN</Text>
-   <Switch accessibilityLabel="Erfolgsanzeigen automatisch öffnen" disabled={busy} value={value.enabled} onValueChange={v=>void save({...value,enabled:v})} trackColor={{true:C.volt}}/></View>
-  <View style={s.row}><Text style={s.label}>ERFOLGE OHNE BEWEGTE EFFEKTE ANZEIGEN</Text>
-   <Switch accessibilityLabel="Erfolge ohne bewegte Effekte anzeigen" disabled={busy} value={value.reduceMotion} onValueChange={v=>void save({...value,reduceMotion:v})} trackColor={{true:C.volt}}/></View>
-  <Text style={s.copy}>Reduzierte Bewegung in deinem Gerät hat immer Vorrang.</Text>
+  <Text style={s.heading}><Copy text="DEINE ERFOLGSMOMENTE."/></Text>
+  <Text style={s.copy}><Copy text="Feiere echten Fortschritt auf deine Weise. Bestätigte Erfolge bleiben immer erhalten."/></Text>
+  <View style={s.row}><Text style={s.label}><Copy text="ERFOLGSANZEIGEN AUTOMATISCH ÖFFNEN"/></Text>
+   <Switch accessibilityLabel={translate("Erfolgsanzeigen automatisch öffnen")} disabled={busy} value={value.enabled} onValueChange={v=>void save({...value,enabled:v})} trackColor={{true:C.volt}}/></View>
+  <View style={s.row}><Text style={s.label}><Copy text="ERFOLGE OHNE BEWEGTE EFFEKTE ANZEIGEN"/></Text>
+   <Switch accessibilityLabel={translate("Erfolge ohne bewegte Effekte anzeigen")} disabled={busy} value={value.reduceMotion} onValueChange={v=>void save({...value,reduceMotion:v})} trackColor={{true:C.volt}}/></View>
+  <Text style={s.copy}><Copy text="Reduzierte Bewegung in deinem Gerät hat immer Vorrang."/></Text>
   {!!status&&<Text style={s.status} accessibilityRole="text">{status}</Text>}
  </View>;
 }
