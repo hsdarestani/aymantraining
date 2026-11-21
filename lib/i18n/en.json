@@ -2807,5 +2807,9 @@
   "Reduzierte Bewegung in deinem Gerät hat immer Vorrang.": "Your device's reduced motion setting always takes priority.",
   "EINSTELLUNG GESPEICHERT": "SETTING SAVED",
   "SPEICHERN FEHLGESCHLAGEN": "COULD NOT SAVE",
-  "BARCODE ERFASSUNG": "BARCODE SCAN"
+  "BARCODE ERFASSUNG": "BARCODE SCAN",
+  "TAGESCHECK GESPEICHERT": "DAILY CHECK-IN SAVED",
+  "Bitte ein gültiges Datum und 20 bis 45 Tage eingeben.": "Enter a valid date and a cycle length of 20 to 45 days.",
+  "Datum im Format JJJJ-MM-TT eingeben.": "Enter the date in YYYY-MM-DD format.",
+  "Tag entfernen?": "Remove this day?"
 }
