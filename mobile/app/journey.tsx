@@ -70,8 +70,8 @@ export default function JourneyOverview(){
   catch(e){setError(e instanceof Error?e.message:"Wechsel nicht möglich");}finally{setBusy(false);}
  }
  return <SafeAreaView style={s.safe} edges={["top"]}><ScrollView contentContainerStyle={s.content}>
-  <Pressable onPress={()=>router.back()}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.back}><Copy text="Zurück"/></Text></Pressable>
-  <Text style={s.eyebrow}><Copy text="BE DIFFERENT · TRAINING"/></Text><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text={direct?"Dein Kapitel":"Dein Trainingsweg"}/></Text>
+  <Pressable onPress={()=>router.back()}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.back}><Copy text="Zurück"/></Text></Pressable>
+  <Text style={s.eyebrow}><Copy text="BE DIFFERENT · TRAINING"/></Text><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.title}><Copy text={direct?"Dein Kapitel":"Dein Trainingsweg"}/></Text>
 
   {!enabled?<View style={s.card}><Text style={s.muted}><Copy text="Der neue Trainingsweg wird vorbereitet. Deine bisherigen Daten bleiben erhalten."/></Text></View>:
    loading?<ActivityIndicator color={C.volt}/>:
@@ -107,7 +107,7 @@ export default function JourneyOverview(){
      </View>)}
      {data.testsEnabled&&<Pressable style={s.btn} onPress={()=>router.push("/journey-tests")}><Text style={s.btnText}><Copy text="Kapiteltests öffnen"/></Text></Pressable>}
     </View>)}
-    {detail&&<View style={s.card}>{!direct&&<Pressable onPress={()=>setDetail(null)}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.back}><Copy text="Übersicht öffnen"/></Text></Pressable>}
+    {detail&&<View style={s.card}>{!direct&&<Pressable onPress={()=>setDetail(null)}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.back}><Copy text="Übersicht öffnen"/></Text></Pressable>}
      <Text style={s.tag}>{detail.level.replaceAll("_"," ")} · FREIGESCHALTET</Text><Text style={s.subtitle}>{detail.titleDe}</Text>
      <Text style={s.muted}>{detail.description}</Text><Text style={s.muted}>{detail.mandatoryDone}/{detail.mandatoryTotal} Pflichtinhalte erledigt</Text>
      {detail.items.map(item=><View key={item.id} style={s.levelCard}>
@@ -125,12 +125,12 @@ export default function JourneyOverview(){
 }
 const s=StyleSheet.create({
  safe:{flex:1,backgroundColor:C.bg},content:{padding:20,paddingBottom:24,gap:14},
- back:{color:C.volt,fontSize:12,fontWeight:"800"},eyebrow:{color:C.volt,letterSpacing:1.4,fontSize:11},
+ back:{color:C.volt,fontSize:12,fontWeight:"800"},eyebrow:{color:C.volt,letterSpacing:1.4,fontSize: 13},
  title:{fontFamily:"Archivo",fontSize:32,color:C.ink},subtitle:{fontFamily:"Archivo",fontSize:20,color:C.ink,marginVertical:7},
- muted:{color:"#b4c5b6",fontSize:12,lineHeight:19,marginVertical:6},small:{color:"#c2d2c0",fontSize:10},
+ muted:{color:"#b4c5b6",fontSize:12,lineHeight:19,marginVertical:6},small:{color:"#c2d2c0",fontSize: 12},
  card:{paddingVertical:13,borderTopWidth:1,borderColor:F.line,gap:11},
  levelCard:{paddingVertical:12,borderTopWidth:1,borderColor:F.line,marginTop:8},
- tag:{color:C.volt,fontSize:10,fontWeight:"800"},option:{padding:14,backgroundColor:"#1b2b20",borderRadius:8,borderWidth:1,borderColor:"#536a53",gap:7},
+ tag:{color:C.volt,fontSize: 12,fontWeight:"800"},option:{padding:14,backgroundColor:"#1b2b20",borderRadius:8,borderWidth:1,borderColor:"#536a53",gap:7},
  optionText:{color:C.ink,fontSize:13,fontWeight:"700"},disabled:{opacity:.5},btn:{backgroundColor:C.volt,padding:14,borderRadius:8,marginTop:9,alignItems:"center"},
  btnText:{color:"#111911",fontSize:12,fontWeight:"900"},error:{color:"#ffc5c5",backgroundColor:"#432025",padding:12,borderRadius:8},
  levelPills:{flexDirection:"row",flexWrap:"wrap",gap:8},pill:{borderWidth:1,borderColor:"#5b7158",borderRadius:7,padding:9},pillOn:{backgroundColor:"#3a5b2e"},

@@ -50,11 +50,11 @@ export default function Profile(){
  ];
  return <Screen>
   <Text style={s.eyebrow}><Copy text="DEIN KONTO / PROFIL"/></Text>
-  <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="DEIN PROFIL."/></Text>
+  <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.title}><Copy text="DEIN PROFIL."/></Text>
   {loading&&!user?<ActivityIndicator color={C.volt}/>:null}
   {user?<View style={s.identity}>
    <Text style={s.caption}><Copy text="ANGEMELDET ALS"/></Text>
-   <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.person}>{user.name||"ATHLET"}</Text>
+   <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.person}>{user.name||"ATHLET"}</Text>
    <Text style={s.membership}>{user.tier==="FREE"?"STANDARD":user.tier}</Text>
    <Text style={s.label}><Copy text="NAME BEARBEITEN"/></Text>
    <TextInput style={s.input} value={name} onChangeText={setName} autoCapitalize="words" accessibilityLabel="Name" placeholder="Dein Name" placeholderTextColor={C.dim}/>
@@ -72,25 +72,25 @@ export default function Profile(){
  </Screen>;
 }
 const s=StyleSheet.create({
- eyebrow:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:2},
+ eyebrow:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize: 12,letterSpacing:2},
  title:{color:C.ink,fontFamily:"Archivo",fontSize:37,lineHeight:41,letterSpacing:-1},
  identity:{padding:20,backgroundColor:"#131916",borderTopWidth:3,borderTopColor:C.volt,gap:12},
- caption:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.2},
+ caption:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize: 13,letterSpacing:1.2},
  person:{color:C.ink,fontFamily:"Archivo",fontSize:30},
  membership:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:12},
- label:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:10,marginTop:10},
+ label:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize: 12,marginTop:10},
  input:{height:52,borderRadius:radius.md,borderWidth:1,borderColor:C.line,backgroundColor:C.panel2,paddingHorizontal:14,color:C.ink,fontSize:14},
  save:{backgroundColor:C.volt,height:48,alignItems:"center",justifyContent:"center",borderRadius:radius.md},
  disabled:{opacity:.5},
- saveText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:11},
+ saveText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize: 13},
  list:{gap:0,marginTop:4},
  entry:{paddingVertical:20,flexDirection:"row",alignItems:"center",borderBottomWidth:1,borderColor:C.line},
  entryBody:{flex:1,gap:6},entryTitle:{fontFamily:"Archivo",fontSize:16,color:C.ink},
- detail:{fontFamily:"Manrope",fontSize:11,color:C.dim},
+ detail:{fontFamily:"Manrope",fontSize: 13,color:C.dim},
  arrow:{color:C.volt,fontSize:19},
  logout:{paddingVertical:18,flexDirection:"row",justifyContent:"space-between",marginTop:10},
  logoutText:{color:C.red,fontFamily:"ManropeSemiBold",fontSize:13},
  errorBox:{padding:15,borderWidth:1,borderColor:C.red},
  error:{color:C.red,fontFamily:"Manrope",fontSize:12},
- retry:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:11,marginTop:12}
+ retry:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize: 13,marginTop:12}
 });

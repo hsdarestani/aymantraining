@@ -39,7 +39,7 @@ export default function Today(){
  }
  return <SafeAreaView style={s.safe} edges={["top"]}><ScrollView contentContainerStyle={s.content}>
   <Pressable onPress={()=>router.back()}><Text style={s.link}><Copy text="← ZURÜCK"/></Text></Pressable>
-  <Text style={s.tag}><Copy text="BE DIFFERENT · HEUTE"/></Text><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="DEIN HEUTIGER WEG."/></Text>
+  <Text style={s.tag}><Copy text="BE DIFFERENT · HEUTE"/></Text><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.title}><Copy text="DEIN HEUTIGER WEG."/></Text>
   {!enabled?<View style={s.card}><Text style={s.p}><Copy text="Diese Ansicht wird vorbereitet. Dein bestehendes Training bleibt erhalten."/></Text></View>:
    loading?<ActivityIndicator color={C.volt}/>:
    <>
@@ -77,7 +77,7 @@ export default function Today(){
 }
 const s=StyleSheet.create({
  safe:{flex:1,backgroundColor:C.bg},content:{padding:17,paddingBottom:120,gap:16},
- title:{fontSize:30,color:C.ink,fontFamily:"Archivo"},tag:{color:C.volt,fontSize:11,fontWeight:"900"},
+ title:{fontSize:30,color:C.ink,fontFamily:"Archivo"},tag:{color:C.volt,fontSize: 13,fontWeight:"900"},
  heading:{fontSize:21,color:C.ink,fontFamily:"Archivo",marginVertical:9},
  card:{backgroundColor:"#16231b",padding:16,borderRadius:12,borderColor:"#526b51",borderWidth:1,gap:10},
  p:{color:"#c3d0c6",lineHeight:20,fontSize:13},
