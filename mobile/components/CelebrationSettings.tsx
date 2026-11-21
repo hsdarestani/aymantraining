@@ -42,6 +42,6 @@ const s=StyleSheet.create({
  copy:{fontSize:12,color:C.dim,lineHeight:18,fontFamily:"Manrope"},
  row:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",gap:12,minHeight:55,
   borderBottomColor:"#34503D",borderBottomWidth:1},
- label:{flex:1,fontSize:11,color:C.ink,fontFamily:"ManropeSemiBold"},
- status:{color:C.volt,fontSize:11}
+ label:{flex:1,fontSize: 13,color:C.ink,fontFamily:"ManropeSemiBold"},
+ status:{color:C.volt,fontSize: 13}
 });

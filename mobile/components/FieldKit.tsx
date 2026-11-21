@@ -43,9 +43,9 @@ export function FieldMast({section, language = false}: {section: string; languag
         <Svg width={23} height={21} viewBox="0 0 23 21" accessible={false}>
           <Path d="M0 20L7 1H11L4 20ZM6 20L13 1H17L10 20ZM12 20L19 1H23L16 20Z" fill={F.signal}/>
         </Svg>
-        <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={styles.wordmark}>BE DIFFERENT</Text>
+        <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={styles.wordmark}>BE DIFFERENT</Text>
       </View>
-      {language ? <LanguagePicker inline/> : <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={[field.type, styles.mastSection]}><Copy text={section}/></Text>}
+      {language ? <LanguagePicker inline/> : <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={[field.type, styles.mastSection]}><Copy text={section}/></Text>}
     </View>
   );
 }

@@ -137,10 +137,10 @@ const styles=StyleSheet.create({
     borderColor:"rgba(191,255,47,0.14)"},
   center:{alignItems:"center",zIndex:1,paddingHorizontal:20},
   wordmark:{color:C.ink,fontFamily:"Archivo",fontSize:25,letterSpacing:-1.2},
-  subtitle:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:2.4,marginTop:1},
+  subtitle:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize: 12,letterSpacing:2.4,marginTop:1},
   track:{flexDirection:"row",gap:6,marginTop:38,alignItems:"center"},
   segment:{width:SEGMENT_WIDTH,height:6,backgroundColor:"#283128",overflow:"hidden",
     transform:[{skewX:"-18deg"}],borderRadius:1},
   segmentFill:{width:SEGMENT_WIDTH,height:6,backgroundColor:C.volt},
-  caption:{color:"#9AA49C",fontFamily:"ManropeSemiBold",fontSize:10,letterSpacing:2.7,marginTop:21}
+  caption:{color:"#9AA49C",fontFamily:"ManropeSemiBold",fontSize: 12,letterSpacing:2.7,marginTop:21}
 });
