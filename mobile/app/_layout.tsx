@@ -1,6 +1,8 @@
 import {useFonts} from "expo-font";
 import {LanguagePicker} from "../components/Locale";
-import {restoreLocale} from "../lib/i18n/locale";
+import {restoreLocale,currentLocale,localePendingSync,markLocaleSynced,applyServerLocale} from "../lib/i18n/locale";
+import {api} from "../lib/api";
+import {getSession} from "../lib/session";
 import {useEffect,useState} from "react";
 import {Platform,StyleSheet,View} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
@@ -30,7 +32,17 @@ export default function Layout(){
     if(router.canDismiss())router.dismissAll();
     router.replace("/");
   }),[]);
-  useEffect(()=>{void restoreLocale().catch(error=>console.warn("[locale] restore failed",error))},[]);
+  useEffect(()=>{void (async()=>{
+    await restoreLocale();
+    if(!await getSession())return;
+    const response=await api<{user?:{locale?:"de"|"en"}}>("/api/auth/me");
+    if(await localePendingSync()){
+      await api("/api/profile",{method:"PATCH",body:JSON.stringify({locale:currentLocale()})});
+      await markLocaleSynced();
+    }else if(response.user?.locale==="de"||response.user?.locale==="en"){
+      await applyServerLocale(response.user.locale);
+    }
+  })().catch(error=>console.warn("[locale] account sync pending",error))},[first]);
   useEffect(()=>{
     if(!ready)return;
     // Do not route cold-start notification taps while the intro is replacing

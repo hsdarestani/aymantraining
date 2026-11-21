@@ -2,7 +2,7 @@ import {translate,useLocale} from "../lib/i18n/locale";
 
 import {Copy} from "./Locale";
 import {useEffect,useState} from "react";
-import {Keyboard,Modal,Platform,Pressable,SafeAreaView,StyleSheet,Text,View} from "react-native";
+import {Keyboard,Modal,Platform,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {router,useSegments} from "expo-router";
 import {ArrowLeft,Menu,X,House,Dumbbell,TrendingUp,MessageCircle,UserRound,BookOpen,Utensils,HeartPulse,Settings,Users} from "lucide-react-native";
@@ -53,10 +53,10 @@ export default function NativeChrome(){
         workout controls or the last rows of an internal screen. */}
     <View style={[s.dock,{paddingBottom:bottomClearance+8}]}>
     <Animated.View entering={FadeInUp.duration(420)} style={s.chrome}>
-      <Pressable accessibilityLabel={translate("Zurück")} onPress={back} style={s.quick}><ArrowLeft color={C.ink} size={18}/><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={s.quickText}><Copy text={"ZURÜCK"}/></Text></Pressable>
+      <Pressable accessibilityLabel={translate("Zurück")} onPress={back} style={s.quick}><ArrowLeft color={C.ink} size={18}/><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.88} style={s.quickText}><Copy text={"ZURÜCK"}/></Text></Pressable>
       <Pressable accessibilityLabel={translate("Start öffnen")} onPress={()=>go("/(tabs)")} style={s.iconQuick}><House color={C.ink} size={18}/></Pressable>
       <Pressable accessibilityLabel={translate("Training öffnen")} onPress={()=>go("/(tabs)/training")} style={s.iconQuick}><Dumbbell color={C.ink} size={18}/></Pressable>
-      <Pressable accessibilityLabel={translate("Menü öffnen")} onPress={()=>setOpen(true)} style={s.menuPill}><Menu color={C.bg} size={18}/><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={s.menuText}><Copy text={"MENÜ"}/></Text></Pressable>
+      <Pressable accessibilityLabel={translate("Menü öffnen")} onPress={()=>setOpen(true)} style={s.menuPill}><Menu color={C.bg} size={18}/><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.88} style={s.menuText}><Copy text={"MENÜ"}/></Text></Pressable>
     </Animated.View>
     </View>
 
@@ -66,8 +66,8 @@ export default function NativeChrome(){
         <Animated.View entering={FadeInDown.duration(340)} style={s.sheetWrap}>
           <SafeAreaView style={s.sheet}>
             <View style={s.head}><View><Text style={s.brand}>BE <Text style={s.volt}>DIFFERENT</Text></Text><Text style={s.caption}><Copy text={"DEIN BEREICH"}/></Text></View><Pressable onPress={()=>setOpen(false)} style={s.close}><X color={C.ink} size={20}/></Pressable></View>
-            <View style={s.grid}>{links.map(item=>{const Icon=item.icon;return <Pressable key={item.path} onPress={()=>go(item.path)} style={({pressed})=>[s.item,pressed&&s.pressed]}><Icon color={C.volt} size={20}/><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.70} style={s.itemText}><Copy text={item.label}/></Text></Pressable>})}</View>
-            <Text style={s.note}><Copy text={"Alles an einem Ort. Jeder Schritt zählt."}/></Text>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.menuScroll}><View style={s.grid}>{links.map(item=>{const Icon=item.icon;return <Pressable key={item.path} onPress={()=>go(item.path)} style={({pressed})=>[s.item,pressed&&s.pressed]}><Icon color={C.volt} size={24}/><Text numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.90} style={s.itemText}><Copy text={item.label}/></Text></Pressable>})}</View>
+            <Text style={s.note}><Copy text={"Alles an einem Ort. Jeder Schritt zählt."}/></Text></ScrollView>
           </SafeAreaView>
         </Animated.View>
       </View>
@@ -77,13 +77,13 @@ export default function NativeChrome(){
 const s=StyleSheet.create({
  dock:{paddingHorizontal:12,paddingTop:8,backgroundColor:C.bg,borderTopWidth:1,borderTopColor:C.line},
  chrome:{height:58,borderRadius:3,backgroundColor:"#131515",borderWidth:1,borderColor:C.line,flexDirection:"row",alignItems:"center",padding:6,gap:6,shadowColor:"#000",shadowOpacity:.38,shadowRadius:16,shadowOffset:{width:0,height:9}},
- quick:{height:46,borderRadius:3,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingHorizontal:13,backgroundColor:C.panel2,borderWidth:1,borderColor:C.line},quickText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1},
+ quick:{height:46,borderRadius:3,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingHorizontal:13,backgroundColor:C.panel2,borderWidth:1,borderColor:C.line},quickText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:13,letterSpacing:1},
  iconQuick:{width:46,height:46,borderRadius:3,alignItems:"center",justifyContent:"center",backgroundColor:C.panel2,borderWidth:1,borderColor:C.line},
- menuPill:{flex:1,height:46,borderRadius:3,backgroundColor:C.volt,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:7,paddingHorizontal:15},menuText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.2},
+ menuPill:{flex:1,height:46,borderRadius:3,backgroundColor:C.volt,flexDirection:"row",alignItems:"center",justifyContent:"center",gap:7,paddingHorizontal:15},menuText:{color:C.bg,fontFamily:"ManropeSemiBold",fontSize:13,letterSpacing:1.2},
  modal:{flex:1,backgroundColor:"rgba(0,0,0,.62)",justifyContent:"flex-end"},sheetWrap:{width:"100%"},
- sheet:{backgroundColor:"#090B0A",borderTopLeftRadius:30,borderTopRightRadius:30,borderWidth:1,borderColor:C.line,padding:18,paddingBottom:28},
- head:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",marginBottom:18},brand:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:20,letterSpacing:-1},volt:{color:C.volt},caption:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:1.5,marginTop:3},
- close:{width:42,height:42,borderRadius:21,borderWidth:1,borderColor:C.line,alignItems:"center",justifyContent:"center"},grid:{flexDirection:"row",flexWrap:"wrap",gap:8},
- item:{width:"48.5%",minHeight:72,minWidth:0,borderRadius:radius.md,borderWidth:1,borderColor:C.line,backgroundColor:C.panel,justifyContent:"center",padding:10,gap:8},itemText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:11,letterSpacing:.8},pressed:{transform:[{scale:.98}],borderColor:"rgba(215,255,0,.45)"},
- note:{color:C.dim,fontFamily:"Manrope",fontSize:11,lineHeight:16,textAlign:"center",marginTop:18}
+ sheet:{maxHeight:"90%",backgroundColor:"#090B0A",borderTopLeftRadius:30,borderTopRightRadius:30,borderWidth:1,borderColor:C.line,padding:18,paddingBottom:28},
+ head:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",marginBottom:18},brand:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:20,letterSpacing:-1},volt:{color:C.volt},caption:{color:C.dim,fontFamily:"ManropeSemiBold",fontSize:13,letterSpacing:1.5,marginTop:3},
+ close:{width:42,height:42,borderRadius:21,borderWidth:1,borderColor:C.line,alignItems:"center",justifyContent:"center"},menuScroll:{paddingBottom:14},grid:{flexDirection:"row",flexWrap:"wrap",gap:8},
+ item:{width:"48.5%",minHeight:86,minWidth:0,borderRadius:radius.md,borderWidth:1,borderColor:C.line,backgroundColor:C.panel,justifyContent:"center",padding:10,gap:8},itemText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:14,letterSpacing:.1},pressed:{transform:[{scale:.98}],borderColor:"rgba(215,255,0,.45)"},
+ note:{color:C.dim,fontFamily:"Manrope",fontSize:13,lineHeight:20,textAlign:"center",marginTop:18}
 });

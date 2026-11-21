@@ -12,8 +12,9 @@ export default function DashboardPreference(){
  const [value,setValue]=useState<Preference|null>(null),[busy,setBusy]=useState(false);
  const [status,setStatus]=useState(""),[loading,setLoading]=useState(true);
  const load=useCallback(async()=>{
+  setLoading(true);
   try{const response=await api<{preference:Preference}>("/api/dashboard-preference");setValue(response.preference);setStatus("");}
-  catch{setStatus("Ansicht derzeit nicht verfügbar.");}
+  catch(e){setStatus(e instanceof Error?e.message:"Ansicht derzeit nicht verfügbar.");}
   finally{setLoading(false)}
  },[]);
  useFocusEffect(useCallback(()=>{void load()},[load]));
@@ -27,7 +28,18 @@ export default function DashboardPreference(){
   finally{setBusy(false)}
  }
  if(loading)return <ActivityIndicator color={C.volt}/>;
- if(!value?.enabled)return null;
+ if(!value)return <View style={s.card}>
+  <Text style={s.kicker}><Copy text="DEINE TRAININGSANSICHT"/></Text>
+  <Text style={s.copy}><Copy text="Die Trainingsansicht konnte nicht geladen werden. Bitte erneut versuchen."/></Text>
+  {!!status&&<Text style={s.status}><Copy text={status}/></Text>}
+  <Pressable accessibilityRole="button" onPress={()=>void load()} style={s.choice}>
+   <Text style={s.choiceText}><Copy text="ERNEUT VERSUCHEN"/></Text>
+  </Pressable>
+ </View>;
+ if(!value.enabled)return <View style={s.card}>
+  <Text style={s.kicker}><Copy text="DEINE TRAININGSANSICHT"/></Text>
+  <Text style={s.copy}><Copy text="Die Auswahl ist derzeit serverseitig nicht freigeschaltet."/></Text>
+ </View>;
  return <View style={s.card}>
   <Text style={s.kicker}><Copy text="DEINE TRAININGSANSICHT"/></Text>
   <Text style={s.title}><Copy text="DU ENTSCHEIDEST."/></Text>
@@ -53,9 +65,9 @@ export default function DashboardPreference(){
 }
 const s=StyleSheet.create({
  card:{backgroundColor:"#18251D",padding:18,borderTopWidth:2,borderTopColor:C.volt,gap:11,borderRadius:9},
- kicker:{fontFamily:"ManropeSemiBold",color:C.volt,letterSpacing:1.1,fontSize:10},
- title:{fontFamily:"Archivo",fontSize:24,color:C.ink},copy:{fontFamily:"Manrope",color:C.dim,fontSize:12,lineHeight:19,flexShrink:1},
+ kicker:{fontFamily:"ManropeSemiBold",color:C.volt,letterSpacing:1.1,fontSize:12},
+ title:{fontFamily:"Archivo",fontSize:27,color:C.ink},copy:{fontFamily:"Manrope",color:C.dim,fontSize:14,lineHeight:21,flexShrink:1},
  row:{flexDirection:"row",gap:8},choice:{flex:1,minHeight:49,borderWidth:1,borderColor:C.line,alignItems:"center",justifyContent:"center",borderRadius:7,padding:6},
- selected:{backgroundColor:"#34482C",borderColor:C.volt},choiceText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:11,textAlign:"center"},
- toggle:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",gap:10},status:{fontSize:11,color:C.volt}
+ selected:{backgroundColor:"#34482C",borderColor:C.volt},choiceText:{color:C.ink,fontFamily:"ManropeSemiBold",fontSize:14,textAlign:"center"},
+ toggle:{flexDirection:"row",alignItems:"center",justifyContent:"space-between",gap:10},status:{fontSize:14,color:C.volt}
 });

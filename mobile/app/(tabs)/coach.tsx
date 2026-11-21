@@ -230,13 +230,13 @@ export default function Coach() {
             <Radio color={F.signal} size={25} strokeWidth={1.8}/>
             <Text style={s.signalLabel}><Copy text={daily?.coach.name || "DEIN COACH"}/></Text>
           </View>
-          <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.heroTitle}><Copy text="An deiner Seite."/></Text>
+          <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.heroTitle}><Copy text="An deiner Seite."/></Text>
           {next && <Text style={field.sub}><Copy text="Nächste Einheit"/> · <Copy text={next.title}/></Text>}
         </View>
         <FieldState error={feedbackError} retry={() => void loadFeedback()}/>
         <View style={s.dispatch}>
-          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.dispatchLabel}><Copy text={hasPersonalFeedback ? "PERSÖNLICHES FEEDBACK" : note ? "COACH BRIEFING" : "DEIN FOKUS"}/></Text>
-          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.dispatchTitle}><Copy text={title}/></Text>
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.dispatchLabel}><Copy text={hasPersonalFeedback ? "PERSÖNLICHES FEEDBACK" : note ? "COACH BRIEFING" : "DEIN FOKUS"}/></Text>
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.dispatchTitle}><Copy text={title}/></Text>
           <Text style={s.dispatchCopy}><Copy text={guidance || "Halte im Tagescheck fest, wie du dich fühlst und was du im Training brauchst."}/></Text>
           {hasPersonalFeedback && latest?.coachNote && latest.coachNote !== guidance &&
             <Text style={s.dispatchCopy}>{latest.coachNote}</Text>}
@@ -258,7 +258,7 @@ export default function Coach() {
           <FieldState loading={access === "loading"} error={access === "failed" ? "Die Nachrichten konnten nicht geladen werden." : null}
             retry={() => void loadMessages()}/>
           {access === "locked" && <View style={s.locked}>
-            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text="Persönlicher Austausch"/></Text>
+            <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={field.heading}><Copy text="Persönlicher Austausch"/></Text>
             <Text style={field.sub}><Copy text="Nachrichten, Sprache und Technikvideos sind mit PRO verfügbar."/></Text>
           </View>}
           {access === "open" && <>
@@ -332,7 +332,7 @@ const s = StyleSheet.create({
   entry: {borderLeftWidth: 2, borderColor: F.line, padding: 12, gap: 5, backgroundColor: F.surface},
   fromCoach: {borderColor: F.signal, backgroundColor: "#20251E"},
   entryHead: {flexDirection: "row", justifyContent: "space-between", gap: 10},
-  time: {...field.sub, fontSize: 11},
+  time: {...field.sub, fontSize: 13},
   video: {width: "100%", height: 210, backgroundColor: F.bg},
   composer: {borderTopWidth: 1, borderColor: F.line, paddingHorizontal: 14, paddingTop: 8, paddingBottom: 4, gap: 2},
   composeRow: {flexDirection: "row", alignItems: "flex-end", gap: 8},

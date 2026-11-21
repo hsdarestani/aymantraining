@@ -95,14 +95,14 @@ const s=StyleSheet.create({
  ringFull:{width:145,height:145,borderRadius:80},
  star:{fontSize:74,color:C.volt},piece:{position:"absolute",left:"49%",top:"49%",width:6,height:6,
   backgroundColor:"#E3FF85",borderRadius:2},
- kicker:{fontSize:10,letterSpacing:1.4,color:"#BAE3B9",fontFamily:"ManropeSemiBold",textAlign:"center"},
+ kicker:{fontSize: 12,letterSpacing:1.4,color:"#BAE3B9",fontFamily:"ManropeSemiBold",textAlign:"center"},
  title:{fontSize:27,lineHeight:32,color:C.ink,fontFamily:"Archivo",textAlign:"center"},
  message:{fontSize:14,lineHeight:21,color:"#F1F7F2",fontFamily:"Manrope",textAlign:"center"},
- note:{fontSize:11,lineHeight:18,color:"#BCD3C0",fontFamily:"Manrope",textAlign:"center"},
+ note:{fontSize: 13,lineHeight:18,color:"#BCD3C0",fontFamily:"Manrope",textAlign:"center"},
  error:{color:"#FFC5C5",fontSize:12,textAlign:"center"},
  action:{width:"100%",minHeight:51,backgroundColor:C.volt,alignItems:"center",justifyContent:"center",
   borderRadius:7,marginTop:8},actionText:{fontSize:13,color:"#132013",fontFamily:"ManropeSemiBold"},
  quiet:{minHeight:42,justifyContent:"center",alignItems:"center"},
- quietText:{fontSize:11,color:"#E0ECE0",fontFamily:"ManropeSemiBold",textDecorationLine:"underline"},
+ quietText:{fontSize: 13,color:"#E0ECE0",fontFamily:"ManropeSemiBold",textDecorationLine:"underline"},
  disabled:{opacity:.5}
 });

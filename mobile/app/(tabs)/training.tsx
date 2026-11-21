@@ -100,7 +100,7 @@ export default function Training() {
     <FieldMast section="TRAINING"/>
     <View style={s.intro}>
       <Text style={s.label}><Copy text="5 LEVEL · DEIN WEG"/></Text>
-      <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.title}><Copy text="Dein Trainingsweg"/></Text>
+      <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.title}><Copy text="Dein Trainingsweg"/></Text>
       {enrollment && <Text style={field.sub}><Copy text={enrollment.pathway}/> · {enrollment.completedChapters}/{enrollment.totalChapters} <Copy text="Kapitel"/></Text>}
     </View>
     <FieldState loading={loading} error={!overview && !workouts ? overviewError || workoutError : ""} retry={() => void load()}/>
@@ -112,9 +112,9 @@ export default function Training() {
       <View style={s.next}>
         <Text style={s.nextLabel}><Copy text="NÄCHSTER SCHRITT"/></Text>
         {weekTitle ? <View accessible accessibilityRole="header" accessibilityLabel={title} style={s.nextHeading}>
-          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65} style={[s.nextTitle, compact && s.nextTitleCompact]}><Copy text={weekTitle[1]}/></Text>
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={[s.nextTitle, compact && s.nextTitleCompact]}><Copy text={weekTitle[1]}/></Text>
           <Text numberOfLines={1} style={s.nextWeek}>{weekTitle[2]}</Text>
-        </View> : <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.65} style={[s.nextTitle, compact && s.nextTitleCompact]}><Copy text={title}/></Text>}
+        </View> : <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={[s.nextTitle, compact && s.nextTitleCompact]}><Copy text={title}/></Text>}
         <FieldAction label={nextLabel} onPress={openNext} tone="ink"/>
       </View>
       {enrollments.length > 1 && <View style={s.enrollment}>
@@ -153,7 +153,7 @@ export default function Training() {
         <FieldLink label={overview.legacy.transitionAvailable ? "Trainingsweg einrichten" : "Trainingsweg ansehen"} onPress={() => router.push("/journey")}/>
       </View>}
       <View style={s.links}>
-        <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text="Deine Einheiten"/></Text>
+        <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={field.heading}><Copy text="Deine Einheiten"/></Text>
         {available.length === 0 && workouts && <Text style={field.sub}><Copy text="Keine offene Einheit."/></Text>}
         {available.map(workout => <Pressable key={workout.id} accessibilityRole="button"
           onPress={() => router.push({pathname: "/workout/[id]", params: {id: workout.id}})} style={s.workout}>
@@ -205,8 +205,8 @@ const s = StyleSheet.create({
   selectedText: {color: F.ink},
   levelName: {fontFamily: "Archivo", fontSize: 17, color: F.chalk, flex: 1, minWidth: 0, letterSpacing: -.35},
   levelNameCompact: {fontSize: 15},
-  levelState: {color: F.muted, fontFamily: "ManropeSemiBold", fontSize: 11, maxWidth: "33%", textAlign: "right", flexShrink: 1},
-  levelStateCompact: {fontSize: 10, maxWidth: "28%"},
+  levelState: {color: F.muted, fontFamily: "ManropeSemiBold", fontSize: 13, maxWidth: "33%", textAlign: "right", flexShrink: 1},
+  levelStateCompact: {fontSize: 12, maxWidth: "28%"},
   accent: {color: F.signal},
   expansion: {marginLeft: 57, paddingTop: 4, paddingBottom: 11, gap: 6},
   chapter: {minHeight: 49, paddingVertical: 7, borderTopWidth: 1, borderColor: F.line, flexDirection: "row", alignItems: "center", gap: 9},

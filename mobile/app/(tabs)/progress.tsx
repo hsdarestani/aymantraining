@@ -148,7 +148,7 @@ export default function Progress() {
         <View style={s.recordsHead}>
           <View style={s.scoreGroup}>
             <Text style={s.logLabel}><Copy text="DEIN LEISTUNGSARCHIV"/></Text>
-            <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text="Deine Spuren"/></Text>
+            <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={field.heading}><Copy text="Deine Spuren"/></Text>
           </View>
           {milestones?.enabled && <View style={s.streak}>
             <Text style={s.streakValue}>{milestones.streak ?? 0}</Text>
@@ -173,7 +173,7 @@ export default function Progress() {
         </View>
       </View>
       <View style={s.disciplines}>
-        <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={field.heading}><Copy text="Leistungsprofil"/></Text>
+        <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={field.heading}><Copy text="Leistungsprofil"/></Text>
         {dash?.scoreDetailsLocked ? <Text style={field.sub}><Copy text="Einzelwerte sind mit PRO verfügbar."/></Text>
           : sections.map(([label, key]) => {
             const value = dash?.pillarPreview?.[key];
@@ -224,7 +224,7 @@ const s = StyleSheet.create({
   rail: {width: 63, flexDirection: "row", alignItems: "center", gap: 6},
   tick: {width: 4, height: 20, backgroundColor: "#6B7269"},
   award: {backgroundColor: F.signal},
-  recordDate: {color: F.muted, fontFamily: "ManropeSemiBold", fontSize: 11, flexShrink: 1},
+  recordDate: {color: F.muted, fontFamily: "ManropeSemiBold", fontSize: 13, flexShrink: 1},
   recordText: {flex: 1, minWidth: 0, gap: 2},
   recordValue: {color: F.chalk, fontFamily: "Archivo", fontSize: 14, maxWidth: "28%", textAlign: "right", flexShrink: 1},
   recordLinks: {flexDirection: "row", flexWrap: "wrap", columnGap: 17},

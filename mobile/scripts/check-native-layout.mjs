@@ -20,12 +20,20 @@ const important = /\bstyle=\{s\.(?:title|heroTitle|dispatchTitle|sectionTitle|ne
 const tag = /<(?:Animated\.)?Text\b[^>]*>/g;
 const issues = [];
 let fitted = 0;
+let intentionalMultiline = 0;
 for (const file of routes) {
   const source = fs.readFileSync(file, "utf8");
   const relative = path.relative(app, file);
   for (const match of source.matchAll(tag)) {
     const element = match[0];
     if (!important.test(element)) continue;
+    // A deliberately split title must retain its real line break rather than
+    // shrinking both lines into one illegible 8sp strip.
+    const nextText = source.slice(match.index + element.length, match.index + element.length + 400);
+    if (/\bstyle=\{s\.(?:title|heroTitle)\}/.test(element) && nextText.includes('{"\\n"}')) {
+      intentionalMultiline++;
+      continue;
+    }
     if (!/\bnumberOfLines=\{1\}/.test(element) || !/\badjustsFontSizeToFit\b/.test(element)) {
       const line = source.slice(0, match.index).split("\n").length;
       issues.push(relative + ":" + line + " should fit on one line");
@@ -42,5 +50,5 @@ if (issues.length) {
   console.error("Native layout contract failed:\n" + issues.join("\n"));
   process.exit(1);
 }
-console.log("Native layout source guard passed: " + routes.length + " routes; " + fitted + " headlines and controls fit one line.");
+console.log("Native layout source guard passed: " + routes.length + " routes; " + fitted + " single-line controls, " + intentionalMultiline + " deliberate multiline titles.");
 console.log("Visual QA remains required for 320, 360, 375 and 430 dp and enlarged accessibility text.");

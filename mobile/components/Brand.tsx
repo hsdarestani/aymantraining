@@ -15,5 +15,5 @@ const s=StyleSheet.create({
   row:{flexDirection:"row",alignItems:"center"},
   wordmark:{color:C.ink,fontFamily:"Archivo",fontSize:25,letterSpacing:-1.2},
   wordmarkCompact:{fontSize:19,letterSpacing:-.9},
-  sub:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize:9,letterSpacing:2.4,marginTop:1}
+  sub:{color:C.volt,fontFamily:"ManropeSemiBold",fontSize: 12,letterSpacing:2.4,marginTop:1}
 });
