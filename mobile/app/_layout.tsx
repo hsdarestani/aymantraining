@@ -42,7 +42,7 @@ export default function Layout(){
     }else if(response.user?.locale==="de"||response.user?.locale==="en"){
       await applyServerLocale(response.user.locale);
     }
-  })().catch(error=>console.warn("[locale] account sync pending",error))},[]);
+  })().catch(error=>console.warn("[locale] account sync pending",error))},[first]);
   useEffect(()=>{
     if(!ready)return;
     // Do not route cold-start notification taps while the intro is replacing
