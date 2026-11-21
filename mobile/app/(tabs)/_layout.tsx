@@ -12,7 +12,7 @@ function icon(Icon: LucideIcon) {
   return ({color, focused}: {color: string; focused: boolean}) => (
     <View style={{alignItems: "center", justifyContent: "center", minHeight: 28}}>
       {focused && <View style={{position: "absolute", top: -6, width: 17, height: 2, backgroundColor: F.signal}}/>}
-      <Icon color={color} size={20} strokeWidth={focused ? 2.2 : 1.75}/>
+      <Icon color={color} size={22} strokeWidth={focused ? 2.2 : 1.75}/>
     </View>
   );
 }
@@ -36,10 +36,10 @@ export default function TabsLayout() {
     <Tabs screenOptions={{
       headerShown: false, tabBarHideOnKeyboard: true, tabBarLabelPosition: "below-icon",
       tabBarActiveTintColor: F.signal, tabBarInactiveTintColor: F.muted,
-      tabBarStyle: {height: 60 + bottom, backgroundColor: F.bg, borderTopColor: F.line, paddingTop: 7, paddingBottom: bottom + 5},
-      tabBarLabelStyle: {fontFamily: "ManropeSemiBold", fontSize: compact ? 8 : 9, letterSpacing: compact ? 0 : .1},
+      tabBarStyle: {height: 68 + bottom, backgroundColor: F.bg, borderTopColor: F.line, paddingTop: 7, paddingBottom: bottom + 5},
+      tabBarLabelStyle: {fontFamily: "ManropeSemiBold", fontSize: compact ? 11 : 12, letterSpacing: compact ? 0 : .1},
       tabBarItemStyle: {paddingHorizontal: 0},
-      tabBarAllowFontScaling: false,
+      tabBarAllowFontScaling: true,
     }}>
       <Tabs.Screen name="index" options={{title: locale === "en" ? "HOME" : "START", tabBarIcon: icon(Crosshair)}}/>
       <Tabs.Screen name="training" options={{title: "TRAINING", tabBarIcon: icon(Flag)}}/>
