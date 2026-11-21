@@ -4,6 +4,7 @@ import {router,useFocusEffect} from "expo-router";
 import Brand from "../components/Brand";
 import {Copy} from "../components/Locale";
 import {api} from "../lib/api";
+import {translate} from "../lib/i18n/locale";
 import {C} from "../theme";
 type Entry={date:string;flow:string|null;symptoms:string[];energy:number|null;mood:number|null;discomfort:number|null;planChoice:"AS_PLANNED"|"EASIER"|"REST"};
 type State={available:boolean;enabled:boolean;shareWithCoach:boolean;remindersEnabled:boolean;lastPeriodStart:string|null;cycleLengthDays:number|null;forecast:null|{day:number;estimatedNextStarts:string[]};entries:Entry[];reminder:null|{text:string}};
@@ -31,8 +32,8 @@ export default function Cycle(){
  }
  const pref=(body:unknown,label:string)=>send("/api/cycle/preferences","POST",body,label);
  function editDay(day:string){setEntry({...empty(),...(d?.entries.find(x=>x.date===day)||{}),date:day})}
- function revoke(){Alert.alert("Alle Daten entfernen?","Alle privaten Zykluseinträge, die Einwilligung und die Freigabe werden unwiderruflich gelöscht.",[
-  {text:"ABBRECHEN",style:"cancel"},{text:"LÖSCHEN",style:"destructive",onPress:()=>{void pref({action:"DISABLE",confirmDeletion:true},"ALLE ZYKLUSDATEN GELÖSCHT")}}])}
+ function revoke(){Alert.alert(translate("Alle Daten entfernen?"),translate("Alle privaten Zykluseinträge, die Einwilligung und die Freigabe werden unwiderruflich gelöscht."),[
+  {text:translate("ABBRECHEN"),style:"cancel"},{text:translate("LÖSCHEN"),style:"destructive",onPress:()=>{void pref({action:"DISABLE",confirmDeletion:true},"ALLE ZYKLUSDATEN GELÖSCHT")}}])}
  const choice=(on:boolean,onPress:()=>void,label:string)=> <Pressable accessibilityRole="button" accessibilityState={{selected:on,disabled:busy}} disabled={busy} style={[s.option,on&&s.optionOn]} onPress={onPress} key={label}><Text style={s.optionText}>{label}</Text></Pressable>;
  const setting=(label:string,v:number|null,key:"energy"|"mood"|"discomfort")=><View style={s.field}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}>{label}</Text><View style={s.options}>
   {choice(v===null,()=>setEntry({...entry,[key]:null}),"—")}
@@ -41,7 +42,7 @@ export default function Cycle(){
  if(loading)return <View style={s.loading}><ActivityIndicator color={C.volt}/></View>;
  return <SafeAreaView style={s.safe}><ScrollView contentContainerStyle={s.body} keyboardShouldPersistTaps="handled">
   <View style={s.header}><Brand compact/><Pressable onPress={()=>router.back()}><Text style={s.link}><Copy text="ZURÜCK"/></Text></Pressable></View>
-  <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}><Copy text="FREIWILLIG · PRIVAT"/></Text><Text style={s.heading}>DEIN ZYKLUS.{"\n"}DEINE DATEN.</Text>
+  <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={s.kicker}><Copy text="FREIWILLIG · PRIVAT"/></Text><Text style={s.heading}><Copy text="DEIN ZYKLUS."/>{"\n"}<Copy text="DEINE DATEN."/></Text>
   <Text style={s.copy}><Copy text="Deine Aufzeichnungen bleiben privat. Du bestimmst selbst, was du speicherst. Kein Einfluss auf Trainingsstufe oder Leistungswert."/></Text>
   <Text style={s.copy}><Copy text="Schätzungen sind weder für Verhütung noch für Schwangerschaftsberatung geeignet und können stark abweichen."/></Text>
   {!!status&&<Text accessibilityRole="alert" style={s.status}>{status}</Text>}
@@ -95,9 +96,9 @@ export default function Cycle(){
       <View style={s.row}><Text style={[s.copy,{flex:1}]}><Copy text="BEGRENZTE TRAININGSSIGNALE MIT ZUGEWIESENEM TRAINER TEILEN"/></Text>
        <Switch value={d.shareWithCoach} disabled={busy} onValueChange={v=>{if(!v){void pref({action:"SHARE",shareWithCoach:false},"FREIGABE WIDERRUFEN")}else setShareConfirm(true)}} trackColor={{true:C.volt}}/></View>
       {shareConfirm&&!d.shareWithCoach&&<View style={s.share}><Text style={s.copy}><Copy text="Es werden nur dein Trainingswunsch, Energie und Beschwerden der letzten 14 Tage geteilt, nicht Blutung, Symptome oder Schätzungen."/></Text>
-       <Pressable style={s.secondary} onPress={()=>{setShareConfirm(false);void pref({action:"SHARE",shareWithCoach:true,confirmShare:true},"FREIGABE ERTEILT")}}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.secondaryText}>FREIGABE AUSDRÜCKLICH BESTÄTIGEN</Text></Pressable>
-       <Pressable onPress={()=>setShareConfirm(false)}><Text style={s.link}>ABBRECHEN</Text></Pressable></View>}
-      <Pressable style={s.danger} onPress={revoke} disabled={busy}><Text style={s.dangerText}>ALLE DATEN LÖSCHEN & EINWILLIGUNG WIDERRUFEN</Text></Pressable>
+       <Pressable style={s.secondary} onPress={()=>{setShareConfirm(false);void pref({action:"SHARE",shareWithCoach:true,confirmShare:true},"FREIGABE ERTEILT")}}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.68} style={s.secondaryText}><Copy text="FREIGABE AUSDRÜCKLICH BESTÄTIGEN"/></Text></Pressable>
+       <Pressable onPress={()=>setShareConfirm(false)}><Text style={s.link}><Copy text="ABBRECHEN"/></Text></Pressable></View>}
+      <Pressable style={s.danger} onPress={revoke} disabled={busy}><Text style={s.dangerText}><Copy text="ALLE DATEN LÖSCHEN & EINWILLIGUNG WIDERRUFEN"/></Text></Pressable>
      </View>
     </>}
   <Pressable onPress={()=>router.back()}><Text style={s.link}><Copy text="ZURÜCK"/></Text></Pressable>
