@@ -2799,5 +2799,13 @@
   "WO STEHST": "WHERE ARE YOU",
   "DU HEUTE?": "TODAY?",
   "LÖSCHEN": "DELETE",
-  "Aktuelle Sprache Deutsch. Zu Englisch wechseln": "Current language German. Switch to English"
+  "Aktuelle Sprache Deutsch. Zu Englisch wechseln": "Current language German. Switch to English",
+  "DEINE ERFOLGSMOMENTE.": "YOUR ACHIEVEMENTS.",
+  "Feiere echten Fortschritt auf deine Weise. Bestätigte Erfolge bleiben immer erhalten.": "Celebrate real progress your way. Confirmed achievements remain saved.",
+  "ERFOLGSANZEIGEN AUTOMATISCH ÖFFNEN": "OPEN ACHIEVEMENT CELEBRATIONS AUTOMATICALLY",
+  "ERFOLGE OHNE BEWEGTE EFFEKTE ANZEIGEN": "SHOW ACHIEVEMENTS WITHOUT ANIMATED EFFECTS",
+  "Reduzierte Bewegung in deinem Gerät hat immer Vorrang.": "Your device's reduced motion setting always takes priority.",
+  "EINSTELLUNG GESPEICHERT": "SETTING SAVED",
+  "SPEICHERN FEHLGESCHLAGEN": "COULD NOT SAVE",
+  "BARCODE ERFASSUNG": "BARCODE SCAN"
 }
