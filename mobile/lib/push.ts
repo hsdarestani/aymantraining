@@ -7,6 +7,7 @@ import {
 } from "@react-native-firebase/messaging";
 import {api} from "./api";
 import {getSession} from "./session";
+import {translate} from "./i18n/locale";
 
 let tokenUnsubscribe:(()=>void)|null=null;
 let navigationInstalled=false;
@@ -130,7 +131,7 @@ export function installPushHandlers(){
       const title=message.notification?.title||"BE DIFFERENT";
       const body=message.notification?.body||"";
       void getSession().then(session=>{
-        if(session)Alert.alert(title,body,[{text:"OK"},{text:"Öffnen",onPress:()=>openMessage(message)}]);
+        if(session)Alert.alert(translate(title),translate(body),[{text:translate("OK")},{text:translate("Öffnen"),onPress:()=>openMessage(message)}]);
       }).catch(()=>undefined);
     });
     navigationInstalled=true;
