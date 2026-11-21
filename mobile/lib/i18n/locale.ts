@@ -23,5 +23,8 @@ export function translate(text:string){if(locale==='de')return text;const trimme
 return text}
 
 export function useLocale(){return useSyncExternalStore(cb=>{listeners.add(cb);return ()=>listeners.delete(cb)},()=>locale,()=>locale)}
-export async function setLocale(value:Locale){locale=value;listeners.forEach(cb=>cb());await SecureStore.setItemAsync('bd_locale',value)}
+export async function setLocale(value:Locale){locale=value;listeners.forEach(cb=>cb());await Promise.all([SecureStore.setItemAsync('bd_locale',value),SecureStore.setItemAsync('bd_locale_pending','1')])}
+export async function localePendingSync(){return (await SecureStore.getItemAsync('bd_locale_pending'))==='1'}
+export async function markLocaleSynced(){await SecureStore.deleteItemAsync('bd_locale_pending')}
+export async function applyServerLocale(value:Locale){if(value!==locale){locale=value;listeners.forEach(cb=>cb())}await SecureStore.setItemAsync('bd_locale',value)}
 export async function restoreLocale(){const value=await SecureStore.getItemAsync('bd_locale');if(value==='en'||value==='de'){locale=value;listeners.forEach(cb=>cb())}}
