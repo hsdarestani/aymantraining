@@ -58,7 +58,7 @@ export function FieldAction({label, onPress, tone = "signal", disabled = false, 
     <Pressable accessibilityRole="button" accessibilityState={{disabled}} disabled={disabled} onPress={onPress} testID={testID}
       android_ripple={{color: quiet || tone === "ink" ? "#FFFFFF24" : "#00000022"}}
       style={({pressed}) => [styles.action, quiet && styles.quiet, tone === "ink" && styles.ink, (pressed || disabled) && styles.pressed]}>
-      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.72} style={[styles.actionText, tone !== "signal" && styles.lightText]}><Copy text={label}/></Text>
+      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.90} style={[styles.actionText, tone !== "signal" && styles.lightText]}><Copy text={label}/></Text>
     </Pressable>
   );
 }
@@ -76,7 +76,7 @@ export function FieldState({loading, error, retry}: {loading?: boolean; error?: 
 
 export function FieldLink({label, onPress}: {label: string; onPress: () => void}) {
   return <Pressable accessibilityRole="button" style={({pressed}) => [styles.link, pressed && styles.pressed]} onPress={onPress}>
-    <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={styles.linkText}><Copy text={label}/></Text>
+    <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.90} style={styles.linkText}><Copy text={label}/></Text>
   </Pressable>;
 }
 
@@ -92,7 +92,7 @@ export function dateLabel(date: string, locale: string, options: Intl.DateTimeFo
 }
 
 export const field = StyleSheet.create({
-  type: {color: F.muted, fontFamily: "ManropeSemiBold", fontSize: 11, letterSpacing: 1.4},
+  type: {color: F.muted, fontFamily: "ManropeSemiBold", fontSize: 13, letterSpacing: 1},
   heading: {color: F.chalk, fontFamily: "Archivo", fontSize: 28, letterSpacing: -.75},
   body: {color: F.chalk, fontFamily: "Manrope", fontSize: 15, lineHeight: 22},
   sub: {color: F.muted, fontFamily: "Manrope", fontSize: 13, lineHeight: 20},
