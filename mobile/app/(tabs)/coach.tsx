@@ -242,7 +242,7 @@ export default function Coach() {
             <Text style={s.dispatchCopy}>{latest.coachNote}</Text>}
         </View>
         <View style={s.links}>
-          <Text style={field.sub}><Copy text={hasPersonalFeedback ? "Persönliches Trainerfeedback" : "Allgemeiner Tagesimpuls · Persönliche Antworten über Nachrichten"}/></Text>
+          <Text style={field.sub}><Copy text={daily == null ? "Coach-Zuordnung wird geladen" : daily.coach.assigned ? "Persönlicher Coach zugewiesen · Feedback und Nachrichten" : "Digitaler Tagesimpuls · Kein persönlicher Coach zugewiesen"}/></Text>
           <FieldAction label="Tagescheck starten" onPress={() => router.push("/lifestyle")}/>
           {note && <FieldLink label="Coachbriefing öffnen" onPress={() => router.push("/coach-brief")}/>}
           {daily && <FieldLink label="Tagesplan & Technikfeedback" onPress={() => router.push("/journey-today")}/>}
