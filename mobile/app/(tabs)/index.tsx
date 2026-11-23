@@ -97,7 +97,7 @@ export default function Home() {
     if (activeWorkout) router.push({pathname: "/workout/[id]", params: {id: activeWorkout.id}});
     else router.push(selected === 0 && !today?.today.hasCheckIn ? "/lifestyle" : "/(tabs)/training");
   };
-  const title = activeWorkout?.title ?? (chosen || today ? "Keine Einheit geplant" : "Dein Trainingsplan");
+  const title = activeWorkout?.title ?? (chosen || today ? "Dein Trainingsweg startet bald" : "Dein Trainingsplan");
   // Keep the week number together instead of leaving a lone digit on a new line.
   const weekTitle = title.match(/^(.*?)\s*[·•]\s*((?:Woche|Week)\s+\d+)$/i);
   const nextDate = activeWorkout?.scheduledAt
@@ -127,6 +127,7 @@ export default function Home() {
             <Text style={s.identityValue}><Copy text={goalText ?? "Ziel festlegen"}/></Text>
           </View>
         </View>
+        {!level && <View style={{marginTop: 14}}><FieldAction label="Einstufung starten" onPress={() => router.push(process.env.EXPO_PUBLIC_JOURNEY_TESTS_ENABLED === "false" ? "/(tabs)/training" : "/journey-tests")}/></View>}
         <RhythmHorizon days={days} selected={selected} onSelect={setSelected}/>
       </View>
       <View style={s.session} accessibilityLiveRegion="polite">

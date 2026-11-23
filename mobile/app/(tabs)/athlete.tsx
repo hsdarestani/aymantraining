@@ -3,14 +3,14 @@ import {Platform, Pressable, StyleSheet, Text, View, useWindowDimensions} from "
 import {router, useFocusEffect} from "expo-router";
 import {Crosshair, Moon, Sunrise, Utensils, Watch} from "lucide-react-native";
 import AthleteTwin, {type TwinFocus} from "../../components/AthleteTwin";
-import {F, FieldLink, FieldMast, FieldPage, FieldState, dateLabel, field, useFieldLocale} from "../../components/FieldKit";
+import {F, FieldAction, FieldLink, FieldMast, FieldPage, FieldState, dateLabel, field, useFieldLocale} from "../../components/FieldKit";
 import {Copy} from "../../components/Locale";
 import {api} from "../../lib/api";
 import {levelLabel, type Dashboard} from "../../lib/field-data";
 import {signOut} from "../../lib/logout";
 
 const disciplines: {key: TwinFocus; label: string}[] = [
-  {key: "strength", label: "Kraft"}, {key: "athleticism", label: "Athletik"}, {key: "recovery", label: "Erholung"},
+  {key: "strength", label: "Kraft"}, {key: "athleticism", label: "Athletik"}, {key: "recovery", label: "Regeneration"},
 ];
 const extraLinks = [
   ["Profil bearbeiten", "/profile"], ["Einstellungen & Datenschutz", "/settings"], ["Mitgliedschaft", "/membership"],
@@ -56,7 +56,7 @@ export default function Athlete() {
   const routines = [
     {title: "BE AWAKE", detail: "Morgenroutine", href: "/awake", Icon: Sunrise},
     {title: "BE FUEL", detail: protein == null ? "Ernährung" : Math.round(protein) + " g Protein", href: "/fuel", Icon: Utensils},
-    {title: "BE RESTED", detail: sleep == null ? "Schlaf & Erholung" : sleep.toLocaleString(locale) + (locale === "en-GB" ? " h sleep" : " h Schlaf"), href: "/lifestyle", Icon: Moon},
+    {title: "BE RESTED", detail: sleep == null ? "Schlaf & Regeneration" : sleep.toLocaleString(locale) + (locale === "en-GB" ? " h sleep" : " h Schlaf"), href: "/lifestyle", Icon: Moon},
     {title: "BE FOCUSED", detail: "2 Min. Atemübung", href: "/focus", Icon: Crosshair},
   ] as const;
   return <FieldPage>
@@ -86,6 +86,7 @@ export default function Athlete() {
           </Pressable>)}
         </View>
       </View>
+      {!level && <View style={{marginHorizontal: 20, marginTop: 14}}><FieldAction label="Einstufung starten" onPress={() => router.push(process.env.EXPO_PUBLIC_JOURNEY_TESTS_ENABLED === "false" ? "/(tabs)/training" : "/journey-tests")}/></View>}
       <View style={s.twinLink}>
         <FieldLink label="Digital Twin öffnen" onPress={() => router.push("/digital-twin")}/>
         <Text style={s.figureCaption}><Copy text="Illustration"/></Text>

@@ -12,10 +12,11 @@ import {api} from "../lib/api";
 import {C,radius} from "../theme";
 
 function Chart({items}:{items:any[]}){
- const w=320,h=170,p=18;
+ const w=320,h=170,p=30;
  const pts=useMemo(()=>items.map((x,i)=>({x:p+(w-p*2)*(items.length<=1?0:i/(items.length-1)),y:h-p-(h-p*2)*Math.max(0,Math.min(100,x.total))/100,total:x.total})),[items]);
  const path=pts.map((x,i)=>(i?"L":"M")+x.x+" "+x.y).join(" ");
  return <Svg width="100%" height={190} viewBox={`0 0 ${w} 190`}>  {[0,25,50,75,100].map(v=>{const y=h-p-(h-p*2)*v/100;return <Line key={"g"+v} x1={p} x2={w-p} y1={y} y2={y} stroke="#252928" strokeWidth="1"/>})}
+  {[0,25,50,75,100].map(v=>{const y=h-p-(h-p*2)*v/100;return <SvgText key={"axis"+v} x={p-6} y={y+4} textAnchor="end" fill="#AEB2AE" fontSize={11}>{v}</SvgText>})}
   {path?<><Path d={path} fill="none" stroke="#D4FF00" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>{pts.map((x,i)=><Circle key={i} cx={x.x} cy={x.y} r="4" fill="#D4FF00"/>)}</>:null}
   <SvgText x={p} y={188} fill="#777E79" fontSize="8"><Copy text={"ÄLTER"}/></SvgText><SvgText x={w-p} y={188} fill="#777E79" fontSize="8" textAnchor="end"><Copy text={"HEUTE"}/></SvgText>
  </Svg>;
