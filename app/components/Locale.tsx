@@ -23,7 +23,7 @@ export function LanguagePicker({inDrawer=false}:{inDrawer?:boolean}){
  const label=locale==='de'?'Sprache':'Language';
  return <label className={inDrawer?"language-picker drawer-language":"language-picker language-picker--page"}>
   {inDrawer&&<span>{label}</span>}
-  <select aria-label={label} value={locale} onChange={e=>setLocale(e.target.value as Locale)}>
+  <select aria-label="Language" value={locale} onChange={e=>setLocale(e.target.value as Locale)}>
    <option value="de" lang="de">Deutsch</option>
    <option value="en" lang="en">English</option>
   </select>
