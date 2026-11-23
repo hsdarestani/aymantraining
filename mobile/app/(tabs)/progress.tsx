@@ -1,8 +1,8 @@
 import {useCallback, useState} from "react";
 import {Pressable, StyleSheet, Text, View, useWindowDimensions} from "react-native";
 import {router, useFocusEffect} from "expo-router";
-import Svg, {Circle, Line, Path} from "react-native-svg";
-import {F, FieldLink, FieldMast, FieldPage, FieldState, dateLabel, field, useFieldLocale} from "../../components/FieldKit";
+import Svg, {Circle, Line, Path, Text as SvgText} from "react-native-svg";
+import {F, FieldAction, FieldLink, FieldMast, FieldPage, FieldState, dateLabel, field, useFieldLocale} from "../../components/FieldKit";
 import {Copy} from "../../components/Locale";
 import {api, ApiError} from "../../lib/api";
 import type {Dashboard} from "../../lib/field-data";
@@ -21,22 +21,26 @@ const sections = [
 ] as const;
 
 function Trace({points}: {points: Snapshot[]}) {
-  const width = 320, height = 108, inset = 7;
+  const width = 320, height = 120, inset = 9, axisLeft = 32;
   const first = Date.parse(points[0].date);
   const span = Math.max(1, Date.parse(points[points.length - 1].date) - first);
   const plot = points.map(p => ({
-    x: points.length === 1 ? width - inset : inset + ((Date.parse(p.date) - first) / span) * (width - inset * 2),
+    x: points.length === 1 ? width - inset : axisLeft + ((Date.parse(p.date) - first) / span) * (width - inset - axisLeft),
     y: height - inset - (Math.min(100, Math.max(0, p.total)) / 100) * (height - inset * 2),
   }));
   const path = plot.map(({x, y}, index) => (index ? "L" : "M") + x + " " + y).join(" ");
   const last = plot[plot.length - 1];
-  return <Svg viewBox="0 0 320 108" width="100%" height={108} preserveAspectRatio="none" accessible={false}>
+  return <Svg viewBox="0 0 320 120" width="100%" height={120} preserveAspectRatio="none" accessible={false}>
     {[0, 25, 50, 75, 100].map(value => {
       const y = height - inset - (value / 100) * (height - inset * 2);
-      return <Line key={value} x1={0} x2={width} y1={y} y2={y} stroke="#C6C7BA" strokeWidth={1}/>;
+      return <Line key={value} x1={axisLeft} x2={width} y1={y} y2={y} stroke="#C6C7BA" strokeWidth={1}/>;
+    })}
+    {[0, 25, 50, 75, 100].map(value => {
+      const y = height - inset - (value / 100) * (height - inset * 2);
+      return <SvgText key={"score-" + value} x={axisLeft - 5} y={y + 4} textAnchor="end" fill="#50544C" fontSize={11}>{value}</SvgText>;
     })}
     {plot.length > 1 && <>
-      <Path d={path + "L" + last.x + " " + (height - inset) + "H" + inset + "Z"} fill="#DDEAA3"/>
+      <Path d={path + "L" + last.x + " " + (height - inset) + "H" + axisLeft + "Z"} fill="#DDEAA3"/>
       <Path d={path} fill="none" stroke="#394521" strokeWidth={2.5} strokeLinejoin="round"/>
     </>}
     <Circle cx={last.x} cy={last.y} r={4.5} fill="#394521"/>
@@ -115,8 +119,10 @@ export default function Progress() {
             <Text style={s.darkLabel}><Copy text="MESSSTAND"/></Text>
             <Text style={s.stampDate}>{profile?.recordedDate ? dateLabel(profile.recordedDate, locale, {day: "2-digit", month: "short"}) : "—"}</Text>
             {score != null && <Text style={s.darkSmall}>{profile?.completeness ?? 0}% <Copy text="erfasst"/></Text>}
+            {score != null && (profile?.completeness ?? 0) < 100 && <Text style={s.scoreNotice}><Copy text="Vorläufiger BD Score"/></Text>}
           </View>
         </View>
+        {score != null && <Text style={s.scoreExplainer}><Copy text="Der BD Score fasst deine erfassten Leistungs-, Regenerations- und Routinedaten zusammen. Fehlende Messwerte können das Ergebnis verändern."/></Text>}
         {snapshots && <View accessibilityRole="tablist" style={s.periods}>
           {days.map(value => <Pressable key={value} onPress={() => setPeriod(value)} accessibilityRole="tab"
             accessibilityState={{selected: value === period}} style={[s.period, value === period && s.periodOn]}>
@@ -141,7 +147,7 @@ export default function Progress() {
         </View>}
       </View>}
       {unavailable && <View style={s.partialNotice}>
-        <Text style={field.sub}><Copy text="Einige Fortschrittsdaten konnten nicht geladen werden."/></Text>
+        <Text style={field.sub}><Copy text="Einige Fortschrittsdaten sind derzeit noch nicht verfügbar."/></Text>
         <FieldLink label="Erneut laden" onPress={() => void load()}/>
       </View>}
       <View style={s.records}>
@@ -149,6 +155,7 @@ export default function Progress() {
           <View style={s.scoreGroup}>
             <Text style={s.logLabel}><Copy text="DEIN LEISTUNGSARCHIV"/></Text>
             <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={field.heading}><Copy text="Deine Spuren"/></Text>
+            <Text style={field.sub}><Copy text="Dein Archiv für Tests, Messungen und Meilensteine."/></Text>
           </View>
           {milestones?.enabled && <View style={s.streak}>
             <Text style={s.streakValue}>{milestones.streak ?? 0}</Text>
@@ -183,6 +190,11 @@ export default function Progress() {
               <Text style={s.disciplineValue}>{value == null ? "—" : Math.round(value)}</Text>
             </View>;
           })}
+        {!dash?.scoreDetailsLocked && sections.some(([, key]) => dash?.pillarPreview?.[key] == null) &&
+          <View style={s.testAction}>
+            <Text style={field.sub}><Copy text="Noch nicht alle Leistungswerte erfasst. Starte einen Test, um dein Profil zu vervollständigen."/></Text>
+            <FieldAction label="Test starten" onPress={() => router.push("/tests")}/>
+          </View>}
         {!timelineLocked && <FieldLink label="Leistungsverlauf öffnen" onPress={() => router.push("/performance-timeline")}/>}
         <FieldLink label="Fortschrittsfotos" onPress={() => router.push("/progress-photos")}/>
         <FieldLink label="Wochenbericht" onPress={() => router.push("/report")}/>
@@ -204,6 +216,8 @@ const s = StyleSheet.create({
   stampCompact: {paddingLeft: 7},
   stampDate: {color: F.ink, fontFamily: "Archivo", fontSize: 18},
   darkSmall: {color: F.darkMuted, fontFamily: "ManropeSemiBold", fontSize: 12},
+  scoreNotice: {color: "#394521", fontFamily: "ManropeSemiBold", fontSize: 13, marginTop: 4},
+  scoreExplainer: {color: F.darkMuted, fontFamily: "Manrope", fontSize: 13, lineHeight: 19, marginTop: 10, marginBottom: 6},
   periods: {flexDirection: "row", marginTop: 5, marginBottom: 8, borderBottomWidth: 1, borderColor: "#B9BBB0"},
   period: {minHeight: 44, flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 3, borderBottomWidth: 2, borderColor: "transparent"},
   periodOn: {borderColor: "#394521"},
@@ -214,7 +228,7 @@ const s = StyleSheet.create({
   singleMarker: {height: 13, width: 13, borderRadius: 7, backgroundColor: "#394521"},
   singleCopy: {flex: 1, minWidth: 0, gap: 2},
   singleValue: {color: F.ink, fontFamily: "Archivo", fontSize: 20},
-  partialNotice: {marginHorizontal: 20, marginTop: 16, paddingLeft: 11, borderLeftWidth: 2, borderColor: F.red, gap: 2},
+  partialNotice: {marginHorizontal: 20, marginTop: 16, paddingLeft: 11, borderLeftWidth: 2, borderColor: F.signal, gap: 2},
   records: {marginHorizontal: 20, marginTop: 25, gap: 5},
   recordsHead: {flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", gap: 13, marginBottom: 10},
   logLabel: {...field.type, color: F.signal, marginBottom: 4},
@@ -230,6 +244,7 @@ const s = StyleSheet.create({
   recordLinks: {flexDirection: "row", flexWrap: "wrap", columnGap: 17},
   disciplines: {marginHorizontal: 20, borderTopWidth: 1, borderColor: F.line, paddingTop: 18, marginTop: 8, gap: 5},
   discipline: {flexDirection: "row", gap: 10, minHeight: 38, alignItems: "center"},
+  testAction: {gap: 10, marginTop: 10, marginBottom: 8},
   disciplineLabel: {...field.body, flexBasis: "36%", flexShrink: 1, minWidth: 0},
   meter: {height: 3, flex: 1, backgroundColor: F.line},
   meterFill: {height: 3, backgroundColor: F.signal},
