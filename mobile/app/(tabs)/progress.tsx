@@ -193,7 +193,7 @@ export default function Progress() {
         {!dash?.scoreDetailsLocked && sections.some(([, key]) => dash?.pillarPreview?.[key] == null) &&
           <View style={s.testAction}>
             <Text style={field.sub}><Copy text="Noch nicht alle Leistungswerte erfasst. Starte einen Test, um dein Profil zu vervollständigen."/></Text>
-            <FieldAction label="Test starten" onPress={() => router.push("/tests")}/>
+            <FieldAction label="Test starten" onPress={() => router.push(tests.some(test => !test.completedAt) ? "/tests" : process.env.EXPO_PUBLIC_JOURNEY_TESTS_ENABLED === "false" ? "/(tabs)/training" : "/journey-tests")}/>
           </View>}
         {!timelineLocked && <FieldLink label="Leistungsverlauf öffnen" onPress={() => router.push("/performance-timeline")}/>}
         <FieldLink label="Fortschrittsfotos" onPress={() => router.push("/progress-photos")}/>
