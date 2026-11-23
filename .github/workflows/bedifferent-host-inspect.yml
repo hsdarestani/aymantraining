@@ -1,5 +1,5 @@
 name: BE DIFFERENT shared host inspection
-# Run a read-only inspection ahead of publishing 1.2.3 build 15.
+# Read-only inspection before safely publishing the BE DIFFERENT login copy (Nov 2026).
 
 on:
   push:
