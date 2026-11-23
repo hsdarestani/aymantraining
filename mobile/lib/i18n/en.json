@@ -2811,5 +2811,17 @@
   "TAGESCHECK GESPEICHERT": "DAILY CHECK-IN SAVED",
   "Bitte ein gültiges Datum und 20 bis 45 Tage eingeben.": "Enter a valid date and a cycle length of 20 to 45 days.",
   "Datum im Format JJJJ-MM-TT eingeben.": "Enter the date in YYYY-MM-DD format.",
-  "Tag entfernen?": "Remove this day?"
+  "Tag entfernen?": "Remove this day?",
+  "Dein Trainingsweg startet bald": "Your training journey starts soon",
+  "Einstufung starten": "Start assessment",
+  "Schlaf & Regeneration": "Sleep & recovery",
+  "Vorläufiger BD Score": "Provisional BD Score",
+  "Der BD Score fasst deine erfassten Leistungs-, Regenerations- und Routinedaten zusammen. Fehlende Messwerte können das Ergebnis verändern.": "The BD Score summarizes your recorded performance, recovery and routine data. Missing measurements may change the result.",
+  "Einige Fortschrittsdaten sind derzeit noch nicht verfügbar.": "Some progress data are not available yet.",
+  "Dein Archiv für Tests, Messungen und Meilensteine.": "Your archive of tests, measurements and milestones.",
+  "Noch nicht alle Leistungswerte erfasst. Starte einen Test, um dein Profil zu vervollständigen.": "Not all performance values have been recorded. Start a test to complete your profile.",
+  "Test starten": "Start test",
+  "Persönliches Trainerfeedback": "Personal coach feedback",
+  "Allgemeiner Tagesimpuls · Persönliche Antworten über Nachrichten": "Daily guidance · Personal replies via messages",
+  "Tagescheck starten": "Start daily check-in"
 }
