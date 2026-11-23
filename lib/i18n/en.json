@@ -2823,5 +2823,8 @@
   "Test starten": "Start test",
   "Persönliches Trainerfeedback": "Personal coach feedback",
   "Allgemeiner Tagesimpuls · Persönliche Antworten über Nachrichten": "Daily guidance · Personal replies via messages",
-  "Tagescheck starten": "Start daily check-in"
+  "Tagescheck starten": "Start daily check-in",
+  "Coach-Zuordnung wird geladen": "Loading coach assignment",
+  "Persönlicher Coach zugewiesen · Feedback und Nachrichten": "Personal coach assigned · Feedback and messages",
+  "Digitaler Tagesimpuls · Kein persönlicher Coach zugewiesen": "Digital daily guidance · No personal coach assigned"
 }
