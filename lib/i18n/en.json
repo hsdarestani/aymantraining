@@ -64,7 +64,7 @@
   "ATHLET": "ATHLETE",
   "ATHLET.": "ATHLETE.",
   "ATHLETEN": "ATHLETES",
-  "ATHLETEN.": "ATHLETES.",
+  "ATHLETEN.": "ATHLETE.",
   "ATHLETENPROFIL": "ATHLETE PROFILE",
   "ATMUNG STARTEN": "START BREATHING",
   "ATMUNG UND TAGESCHECK →": "BREATHING AND DAILY CHECK →",
@@ -2826,5 +2826,6 @@
   "Tagescheck starten": "Start daily check-in",
   "Coach-Zuordnung wird geladen": "Loading coach assignment",
   "Persönlicher Coach zugewiesen · Feedback und Nachrichten": "Personal coach assigned · Feedback and messages",
-  "Digitaler Tagesimpuls · Kein persönlicher Coach zugewiesen": "Digital daily guidance · No personal coach assigned"
+  "Digitaler Tagesimpuls · Kein persönlicher Coach zugewiesen": "Digital daily guidance · No personal coach assigned",
+  "ZUM": "AN"
 }
