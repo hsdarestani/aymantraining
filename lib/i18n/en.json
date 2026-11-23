@@ -64,7 +64,7 @@
   "ATHLET": "ATHLETE",
   "ATHLET.": "ATHLETE.",
   "ATHLETEN": "ATHLETES",
-  "ATHLETEN.": "ATHLETES.",
+  "ATHLETEN.": "ATHLETE.",
   "ATHLETENPROFIL": "ATHLETE PROFILE",
   "ATMUNG STARTEN": "START BREATHING",
   "ATMUNG UND TAGESCHECK →": "BREATHING AND DAILY CHECK →",
@@ -2774,5 +2774,6 @@
   "Basis · Einheit A": "Athlete Base · Session A",
   "Basis · Einheit B": "Athlete Base · Session B",
   "Basis · Einheit C": "Athlete Base · Session C",
-  "Ich stimme der privaten Verarbeitung von Fotos und Videos für meine Betreuung zu.": "I consent to private processing of my photos and videos for coaching."
+  "Ich stimme der privaten Verarbeitung von Fotos und Videos für meine Betreuung zu.": "I consent to private processing of my photos and videos for coaching.",
+  "ZUM": "AN"
 }
