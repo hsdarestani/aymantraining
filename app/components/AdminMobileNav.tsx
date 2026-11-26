@@ -28,7 +28,7 @@ const links=[
   ["/admin/settings","App Einstellungen"]
 ];
 
-export default function AdminMobileNav(){
+export default function AdminMobileNav({canManageAudio=false}:{canManageAudio?:boolean}){
   const path=usePathname();
   const [open,setOpen]=useState(false);
   return <>
@@ -38,7 +38,7 @@ export default function AdminMobileNav(){
       <LocalizedElement as="button" onClick={()=>setOpen(!open)} aria-label="Trainer Menü">{open?"×":"☰"}</LocalizedElement>
     </div>
     <div className={open?"admin-mobile-sheet open":"admin-mobile-sheet"}>
-      {links.map(([href,label])=><Link key={href} href={href} onClick={()=>setOpen(false)} className={path===href?"active":""}>{label}<b>↗</b></Link>)}
+      {(canManageAudio?[...links.slice(0,6),["/admin/voice-guidance","Audio Management"],...links.slice(6)]:links).map(([href,label])=><Link key={href} href={href} onClick={()=>setOpen(false)} className={path===href?"active":""}>{label}<b>↗</b></Link>)}
       <Link href="/dashboard" onClick={()=>setOpen(false)}><Copy text={"Athletenansicht"}/><b>↗</b></Link>
     </div>
   </>;
