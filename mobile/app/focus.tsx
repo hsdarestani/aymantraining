@@ -1,5 +1,5 @@
 import {Copy,LocalizedTextInput} from "../components/Locale";
-import {currentLocale,translate,useLocale} from "../lib/i18n/locale";
+import {useLocale} from "../lib/i18n/locale";
 import {useEffect,useRef,useState} from "react";
 import {Animated,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from "react-native";
 import Svg,{Circle} from "react-native-svg";
@@ -10,19 +10,6 @@ import {Card,Eyebrow,SectionTitle} from "../components/Card";
 import {api} from "../lib/api";
 import {C,radius} from "../theme";
 
-/** The 2 minute breathing guide uses on-device speech, not a cloned coach voice.
- * Replace this opt-in narrator with an authorized recorded voice in a future release.
- */
-const GUIDED_CUES=[
- "Finde eine bequeme Position. Atme ruhig durch die Nase ein und wieder aus.",
- "Finde deinen eigenen Rhythmus. Nichts muss perfekt sein.",
- "Lass mit jeder Ausatmung ein wenig Spannung los.",
- "Bleib entspannt. Du musst deinen Atem nicht anhalten.",
- "Spüre, wie du ruhiger wirst. Atme in deinem Tempo.",
- "Wenn es dir guttut, schließe für einen Moment die Augen.",
- "Noch ein paar ruhige Atemzüge. Bleib bei dir.",
- "Gleich geschafft. Nimm dieses Gefühl mit in deinen Tag."
-];
 const DURATION=120;
 const CLOCK_CIRCUMFERENCE=2*Math.PI*101;
 const clock=(seconds:number)=>Math.floor(seconds/60)+":"+String(seconds%60).padStart(2,"0");
@@ -30,6 +17,7 @@ const clock=(seconds:number)=>Math.floor(seconds/60)+":"+String(seconds%60).padS
 export default function Focus(){
  const locale=useLocale();
  const voice=useCoachVoice("MOTIVATION");
+ const voiceLabels=locale==="de"?{caption:"Trainerstimme",unavailable:"Audio momentan nicht verfügbar."}:{caption:"Coach voice",unavailable:"Audio unavailable."};
  const [d,setD]=useState<any>(null),[stress,setStress]=useState(5),[mood,setMood]=useState(7),[energy,setEnergy]=useState(7),[soreness,setSoreness]=useState(4),[sleepHours,setSleepHours]=useState("");
  const [seconds,setSeconds]=useState(DURATION),[running,setRunning]=useState(false),[status,setStatus]=useState("");
  const timer=useRef<ReturnType<typeof setInterval>|null>(null);
@@ -97,8 +85,8 @@ export default function Focus(){
     <Pressable accessibilityRole="button" style={[s.primary,s.controlPrimary]} onPress={breathe}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.primaryText}><Copy text={running?"PAUSIEREN":seconds===0?"ERNEUT STARTEN":seconds===DURATION?"STARTEN":"FORTSETZEN"}/></Text></Pressable>
     <Pressable accessibilityRole="button" style={[s.secondary,s.controlSecondary]} onPress={reset}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.secondaryText}><Copy text="ZURÜCKSETZEN"/></Text></Pressable>
    </View>
-   <Pressable accessibilityRole="switch" accessibilityState={{checked:voice.enabled}} onPress={toggleVoice} disabled={!voice.ready} style={s.voiceRow}><View style={[s.voiceIndicator,voice.enabled&&s.voiceOn]}/><View style={s.voiceCopy}><Text style={s.voiceTitle}><Copy text={voice.enabled?"SPRACHBEGLEITUNG AKTIV":"SPRACHBEGLEITUNG EINSCHALTEN"}/></Text><Text style={s.voiceCaption}>{locale==="de"?"Trainerstimme":"Coach voice"}</Text></View><Text style={s.voiceArrow}><Copy text={voice.enabled?"AN":"AUS"}/></Text></Pressable>
-   {voice.error&&<Text style={s.safety}>{locale==="de"?"Audio momentan nicht verfügbar.":"Audio unavailable."}</Text>}
+   <Pressable accessibilityRole="switch" accessibilityState={{checked:voice.enabled}} onPress={toggleVoice} disabled={!voice.ready} style={s.voiceRow}><View style={[s.voiceIndicator,voice.enabled&&s.voiceOn]}/><View style={s.voiceCopy}><Text style={s.voiceTitle}><Copy text={voice.enabled?"SPRACHBEGLEITUNG AKTIV":"SPRACHBEGLEITUNG EINSCHALTEN"}/></Text><Text style={s.voiceCaption}>{voiceLabels.caption}</Text></View><Text style={s.voiceArrow}><Copy text={voice.enabled?"AN":"AUS"}/></Text></Pressable>
+   {voice.error&&<Text style={s.safety}>{voiceLabels.unavailable}</Text>}
    <Text style={s.safety}><Copy text="Bei Unwohlsein stoppen. Normal weiteratmen. Kein Luftanhalten notwendig."/></Text>
   </View>
   <Card style={s.lineCard}><Eyebrow><Copy text="DEINE DIFFERENT LINE"/></Eyebrow><Text style={s.line}><Copy text={d?.line||"Heute zählt die nächste saubere Entscheidung."}/></Text></Card>

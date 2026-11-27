@@ -8,35 +8,14 @@ import {useLocale} from "../components/Locale";
 import {translate} from "../../lib/i18n/translate";
 
 const LENGTH=120;
-const cues=[
- "Nimm eine bequeme Position ein. Atme ruhig durch die Nase ein und wieder aus.",
- "Du gibst das Tempo vor. Kein Druck.",
- "Lass die Schultern locker und atme ruhig weiter.",
- "Bei jeder Ausatmung darfst du etwas Spannung abgeben.",
- "Spüre den Boden unter dir. Bleib in deinem Rhythmus.",
- "Noch ein paar bewusste Atemzüge.",
- "Du musst nichts leisten. Bleib einfach hier.",
- "Gleich geschafft. Komm langsam zurück in deinen Tag."
-];
 function clock(n:number){return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0")}
 export default function FocusTimer(){
  const voice=useCoachVoice("MOTIVATION");
- const locale=useLocale(),localeRef=useRef(locale);
- localeRef.current=locale;
+ const locale=useLocale();
  const t=(text:string)=>translate(text,locale);
+ const voiceLabels=locale==="de"?{unavailable:"Audio momentan nicht verfügbar."}:{unavailable:"Audio unavailable."};
  const [remaining,setRemaining]=useState(LENGTH),[running,setRunning]=useState(false);
  const end=useRef(0),interval=useRef<ReturnType<typeof setInterval>|null>(null),spoken=useRef(-1);
- const enabled=useRef(false);enabled.current=false;
-
- function say(message:string){
-  if(!enabled.current||!("speechSynthesis" in window))return;
-  window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(translate(message,localeRef.current));u.lang=localeRef.current==="en"?"en-US":"de-DE";u.rate=.88;u.pitch=1;
-  const preferred=window.speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(localeRef.current));
-  if(preferred)u.voice=preferred;
-  window.speechSynthesis.speak(u);
- }
- useEffect(()=>{window.speechSynthesis?.cancel()},[locale]);
  function stopInterval(){if(interval.current){clearInterval(interval.current);interval.current=null}}
  function tick(){
   const next=Math.max(0,Math.ceil((end.current-Date.now())/1000));
@@ -46,8 +25,7 @@ export default function FocusTimer(){
   if(step>spoken.current){spoken.current=step}
  }
  useEffect(()=>{
-  document.addEventListener("visibilitychange",tick);
-  return()=>{document.removeEventListener("visibilitychange",tick);stopInterval();window.speechSynthesis?.cancel()};
+  return()=>{stopInterval();voice.stop()};
  },[]);
  function startOrPause(){
   if(running){setRemaining(Math.max(0,Math.ceil((end.current-Date.now())/1000)));stopInterval();setRunning(false);voice.stop();return}
@@ -86,7 +64,7 @@ export default function FocusTimer(){
    <button type="button" disabled={!voice.ready} role="switch" aria-checked={voice.enabled} className={styles.narration+" "+(voice.enabled?styles.narrationActive:"")} onClick={toggleVoice}>
     <span className={styles.speakerIcon} aria-hidden="true">◖))</span><span className={styles.speakerText}><strong><Copy text={t(voice.enabled?"GUIDE AUDIO AKTIV":"GUIDE AUDIO EINSCHALTEN")}/></strong><small><Copy text={t("Trainerstimme")}/></small></span><span className={styles.switch}><Copy text={voice.enabled?"ON":"OFF"}/></span>
    </button>
-   {voice.error&&<p role="status">{locale==="de"?"Audio momentan nicht verfügbar.":"Audio unavailable."}</p>}
+   {voice.error&&<p role="status">{voiceLabels.unavailable}</p>}
    <div className={styles.sideFooter}><span><Copy text={t("4 SEK. EIN")}/></span><span className={styles.dot}/><span><Copy text={t("4 SEK. AUS")}/></span><span className={styles.dot}/><span><Copy text={t("KEIN HALTEN")}/></span></div>
   </aside>
  </section>

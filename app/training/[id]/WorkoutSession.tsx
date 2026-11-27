@@ -13,6 +13,7 @@ async function flushOffline(){const key="bd_outbox";const list=JSON.parse(localS
 export default function WorkoutSession({workoutId,exercises,existing,previous,completed=false}:{completed?:boolean;workoutId:string;exercises:Ex[];existing:S[];previous:S[]}){
   const t=useT();
   const voice=useCoachVoice("COOL_DOWN");
+  const labels=voice.locale==="de"?{title:"Abwärmen",play:"Audio abspielen",stop:"Audio stoppen",next:"WEITER",error:"Audio momentan nicht verfügbar."}:{title:"Cool-down",play:"Play audio",stop:"Stop audio",next:"CONTINUE",error:"Audio unavailable."};
   const [cooldown,setCooldown]=useState(false);
   const initial=useMemo(()=>new Map(existing.map(s=>[`${s.exerciseId}:${s.setNumber}`,s])),[existing]);
   const previousMap=useMemo(()=>new Map(previous.map(s=>[`${s.exerciseId}:${s.setNumber}`,s])),[previous]);
@@ -44,7 +45,7 @@ export default function WorkoutSession({workoutId,exercises,existing,previous,co
     }catch{setError(t("Keine Verbindung. Deine Einheit wurde noch nicht abgeschlossen."));}
     finally{setCompleteBusy(false);}
   }
-  if(cooldown)return <section className="panel" style={{padding:24}}><h2>Cool-down</h2><p>{voice.item?.title}</p><button className="secondary" onClick={()=>voice.play()}>{voice.locale==="de"?"Audio abspielen":"Play audio"}</button> <button className="secondary" onClick={voice.stop}>{voice.locale==="de"?"Audio stoppen":"Stop audio"}</button><button className="primary" onClick={()=>{voice.stop();window.location.href="/dashboard"}}>{voice.locale==="de"?"WEITER":"CONTINUE"}</button></section>;
+  if(cooldown)return <section className="panel" style={{padding:24}}><h2>{labels.title}</h2><p>{voice.item?.title}</p>{voice.error&&<p role="status">{labels.error}</p>}<button className="secondary" onClick={()=>voice.play()}>{labels.play}</button> <button className="secondary" onClick={voice.stop}>{labels.stop}</button><button className="primary" onClick={()=>{voice.stop();window.location.href="/dashboard"}}>{labels.next}</button></section>;
   return <>
     {error&&<p role="alert">{t(error)}</p>}
     {rest&&rest.seconds>0&&<div className="rest-timer"><span><Copy text={"PAUSE"}/></span><strong>{Math.floor(rest.seconds/60)}:{String(rest.seconds%60).padStart(2,"0")}</strong><button onClick={()=>setRest(null)}><Copy text={"ÜBERSPRINGEN"}/></button></div>}

@@ -30,6 +30,7 @@ function TechniqueModal({item,media,token,onClose}:{item:any;media:Record<string
 export default function Workout(){
  const {id}=useLocalSearchParams<{id:string}>();
  const voice=useCoachVoice("COOL_DOWN");
+ const labels=voice.locale==="de"?{title:"Abwärmen",play:"AUDIO ABSPIELEN",stop:"STOPPEN",next:"WEITER",error:"Audio momentan nicht verfügbar."}:{title:"Cool-down",play:"PLAY AUDIO",stop:"STOP",next:"CONTINUE",error:"Audio unavailable."};
  const [cooldown,setCooldown]=useState(false);
  const [w,setW]=useState<any>(null);
  const [loadError,setLoadError]=useState("");
@@ -62,7 +63,7 @@ export default function Workout(){
    await api(`/api/workouts/${id}`,{method:"PATCH",body:JSON.stringify({action:"complete",rpe:finishRpe,notes:finishNote||undefined})}).then(()=>{Vibration.vibrate([80,50,130]);if(voice.enabled&&voice.item){setCooldown(true);void voice.play()}else router.replace("/(tabs)")}).catch(error=>{setFinishing(false);setAchievement(error.message||"Training konnte nicht abgeschlossen werden.")});
  }
 
- if(cooldown)return <SafeAreaView style={s.safe}><View style={s.content}><Text style={s.title}>Cool-down</Text><Text style={s.cue}>{voice.item?.title}</Text>{voice.error&&<Text style={s.cue}>{voice.locale==="de"?"Audio momentan nicht verfügbar.":"Audio unavailable."}</Text>}<Pressable style={s.finish} onPress={()=>void voice.play()}><Text style={s.finishText}>{voice.locale==="de"?"AUDIO ABSPIELEN":"PLAY AUDIO"}</Text></Pressable><Pressable style={s.technique} onPress={voice.stop}><Text style={s.techniqueText}>{voice.locale==="de"?"STOPPEN":"STOP"}</Text></Pressable><Pressable style={s.finish} onPress={()=>{voice.stop();router.replace("/(tabs)")}}><Text style={s.finishText}>{voice.locale==="de"?"WEITER":"CONTINUE"}</Text></Pressable></View></SafeAreaView>;
+ if(cooldown)return <SafeAreaView style={s.safe}><View style={s.content}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.title}>{labels.title}</Text><Text style={s.cue}>{voice.item?.title}</Text>{voice.error&&<Text style={s.cue}>{labels.error}</Text>}<Pressable style={s.finish} onPress={()=>void voice.play()}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.finishText}>{labels.play}</Text></Pressable><Pressable style={s.technique} onPress={voice.stop}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.techniqueText}>{labels.stop}</Text></Pressable><Pressable style={s.finish} onPress={()=>{voice.stop();router.replace("/(tabs)")}}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.finishText}>{labels.next}</Text></Pressable></View></SafeAreaView>;
  if(loadError)return <SafeAreaView style={s.center}><Text style={s.cue}>{loadError}</Text><Pressable onPress={()=>router.back()}><Text style={s.skip}><Copy text={"ZURÜCK"}/></Text></Pressable></SafeAreaView>;
  if(!w)return <View style={s.center}><ActivityIndicator color={C.volt}/></View>;
  return <SafeAreaView style={s.safe}><TechniqueModal item={technique} media={media} token={mediaToken} onClose={()=>setTechnique(null)}/>
