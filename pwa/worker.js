@@ -61,9 +61,17 @@ self.addEventListener("fetch", event => {
   const url = new URL(request.url);
   if (request.method !== "GET" || url.origin !== self.location.origin) return;
 
+  // Administration is always network-only; never replace its HTML with the offline shell.
+  if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) return;
   if (request.mode === "navigate") {
     // Keep signed-in HTML, RSC payloads and private API responses out of Cache Storage.
-    event.respondWith(fetch(request).catch(async () => (await caches.match(OFFLINE, { cacheName: STATIC })) || Response.error()));
+    event.respondWith((async () => {
+      try { return await fetch(request); } catch {
+        try { return await fetch(request, { cache: "reload" }); } catch {
+          return (await caches.match(OFFLINE, { cacheName: STATIC })) || Response.error();
+        }
+      }
+    })());
     return;
   }
   if (url.pathname.startsWith("/_next/static/")) {

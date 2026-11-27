@@ -1,5 +1,6 @@
 "use client";
 import {Copy,useT} from "../components/Locale";
+import VoicePreference from "./VoicePreference";
 import DashboardPreference from "./DashboardPreference";
 import CelebrationSettings from "../components/CelebrationSettings";
 import Link from "next/link";
@@ -41,6 +42,7 @@ export default function SettingsClient({initialPrefs}:{initialPrefs:Pref[]}){
  return <div className="settings-stack">
   <DashboardPreference/>
   <CelebrationSettings/>
+  <VoicePreference/>
   <section className="panel" style={{padding:20}}><span className="eyebrow"><Copy text="PRIVAT UND FREIWILLIG"/></span><h2><Copy text="Dein persönlicher Zykluskalender"/></h2><p><Copy text="Nur mit separater Zustimmung. Du kannst Einträge löschen und die Freigabe für deinen Trainer selbst steuern."/></p><Link href="/cycle" className="secondary"><Copy text={"PRIVATEN ZYKLUSKALENDER ÖFFNEN"}/></Link></section>
   <form className="panel mini-form wide" onSubmit={checkin}>
    <span className="eyebrow"><Copy text={"10 SEKUNDEN TAGESCHECK"}/></span><h2><Copy text={"Wie fühlst du dich heute?"}/></h2>

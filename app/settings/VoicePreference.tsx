@@ -1,0 +1,3 @@
+"use client";
+import {useCoachVoice} from "../components/useCoachVoice";
+export default function VoicePreference(){const v=useCoachVoice();const de=v.locale==="de";return <section className="panel" style={{padding:20}}><h2>{de?"Sprachbegleitung":"Coach voice"}</h2><p>{de?"Traineraufnahmen beim Training und in BE FOCUSED.":"Coach recordings during workouts and BE FOCUSED."}</p><button type="button" role="switch" aria-checked={v.enabled} disabled={!v.ready} className="secondary" onClick={()=>void v.change(!v.enabled)}>{v.enabled?(de?"AN":"ON"):(de?"AUS":"OFF")}</button>{v.error&&<p role="alert">{de?"Einstellung konnte nicht geladen oder gespeichert werden.":"Could not load or save the setting."}</p>}</section>}
