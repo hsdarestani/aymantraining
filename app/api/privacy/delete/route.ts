@@ -35,6 +35,7 @@ export async function DELETE(request:Request){
     prisma.bodyMetric.deleteMany({where:{userId:id}}),
     prisma.performanceTest.deleteMany({where:{userId:id}}),
     prisma.analyticsEvent.deleteMany({where:{userId:id}}),
+    prisma.systemSetting.deleteMany({where:{key:"voice_preference:"+id}}),
     prisma.user.delete({where:{id}})
   ]);
   await Promise.allSettled(assets.map(a=>deletePrivateObject(a.storageKey)));

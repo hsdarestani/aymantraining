@@ -42,7 +42,9 @@ function detectMime(data:Buffer){
 }
 export async function GET(request:Request){
  const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);
- const id=new URL(request.url).searchParams.get("id");
+ const params=new URL(request.url).searchParams;
+ const id=params.get("id");
+ const playback=params.get("playback")==="1";
  const canManage=isManager(user.role);
  if(id){
   if(!validId(id))return errorJson("Nicht gefunden.",404);
@@ -58,7 +60,9 @@ export async function GET(request:Request){
   }catch(e){if(e instanceof InvalidMediaRange)return new Response(null,{status:416,headers:{"content-range":"bytes */"+e.size}});return errorJson("Datei nicht verfügbar.",404);}
  }
  const rows=await prisma.systemSetting.findMany({where:{key:{startsWith:prefix}},orderBy:{updatedAt:"desc"}});
- const items=rows.map(r=>r.value as unknown as Item).filter(item=>canManage||(item.active&&isAudience(item,user.sex)));
+ const locale=params.get("locale")==="en"?"en":"de";
+ const items=rows.map(r=>r.value as unknown as Item).filter(item=>playback?(item.active&&isAudience(item,user.sex)&&item.locale===locale):canManage||(item.active&&isAudience(item,user.sex)));
+ if(playback)items.sort((a,b)=>Number(a.audience==="GENERAL")-Number(b.audience==="GENERAL"));
  return NextResponse.json({ok:true,items:items.map(view)},{headers:{"cache-control":"private, no-store"}});
 }
 export async function POST(request:Request){
