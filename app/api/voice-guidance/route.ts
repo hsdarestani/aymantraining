@@ -81,7 +81,32 @@ export async function PATCH(request:Request){
  if(!validId(id)||!metadata)return errorJson("Ungültige Angaben.",422);
  const row=await prisma.systemSetting.findUnique({where:{key:key(id)}});if(!row)return errorJson("Nicht gefunden.",404);
  const previous=row.value as unknown as Item;
- const item:Item={...previous,...metadata};
- await prisma.systemSetting.update({where:{key:key(id)},data:{value:item}});
+ const file=form.get("file");
+ let item:Item={...previous,...metadata};
+ let newKey:string|undefined;
+ if(file instanceof File&&file.size>0){
+  if(file.size>25*1024*1024)return errorJson("Datei zu groß (max. 25 MB).",422);
+  const bytes=Buffer.from(await file.arrayBuffer()),mime=detectMime(bytes);
+  if(!mime)return errorJson("Nur MP3, M4A oder MP4 ohne Videospur.",422);
+  newKey="voice-guidance/"+randomUUID();
+  await putPrivateObject(newKey,bytes,mime,true);
+  item={...item,storageKey:newKey,mime,size:file.size,originalName:file.name.slice(0,240)};
+ }
+ try{
+  const changed=await prisma.systemSetting.updateMany({where:{key:key(id),updatedAt:row.updatedAt},data:{value:item}});
+  if(changed.count!==1){if(newKey)await deletePrivateObject(newKey);return errorJson("Eintrag wurde geändert. Bitte neu laden.",409);}
+ }catch(e){if(newKey)await deletePrivateObject(newKey);throw e;}
+ if(newKey)await deletePrivateObject(previous.storageKey);
  return NextResponse.json({ok:true,item:view(item)});
+}
+
+export async function DELETE(request:Request){
+ if(!isSameOrigin(request))return errorJson("Ungültige Anfrage.",403);
+ const user=await requireApiUser();if(!user)return errorJson("Nicht angemeldet.",401);if(!isManager(user.role))return errorJson("Keine Berechtigung.",403);
+ const id=new URL(request.url).searchParams.get("id")||"";if(!validId(id))return errorJson("Nicht gefunden.",404);
+ const row=await prisma.systemSetting.findUnique({where:{key:key(id)}});if(!row)return errorJson("Nicht gefunden.",404);
+ const changed=await prisma.systemSetting.deleteMany({where:{key:key(id),updatedAt:row.updatedAt}});
+ if(changed.count!==1)return errorJson("Eintrag wurde geändert. Bitte neu laden.",409);
+ await deletePrivateObject((row.value as unknown as Item).storageKey);
+ return NextResponse.json({ok:true});
 }
