@@ -78,6 +78,21 @@ jobs:
           echo "::error::Timed out waiting for exact-source quality and native checks."
           exit 1
 
+      - name: Require compatible production coach voice backend before submission
+        if: steps.request.outputs.enabled == 'true'
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 20); do
+            status="$(curl -sS --connect-timeout 8 --max-time 15 -o /dev/null -w '%{http_code}' https://bedifferent.smarbiz.sbs/api/voice-preference || true)"
+            if [ "$status" = "401" ] && curl -fsS --max-time 15 https://bedifferent.smarbiz.sbs/api/ready | jq -e '.ok == true and .release == "749108c423ad6ac630dcb56ec20e18357b9be474"' >/dev/null; then
+              echo "Compatible coach voice production backend is active."
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "::error::Coach voice backend is not verified on production; refusing store submission."
+          exit 1
+
       - name: Queue Publisher builds
         if: steps.request.outputs.enabled == 'true'
         env:
