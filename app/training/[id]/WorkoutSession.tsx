@@ -3,6 +3,7 @@ import {Copy,ExerciseName,LocalizedElement,useT} from "../../components/Locale";
 
 
 
+import {useCoachVoice} from "../../components/useCoachVoice";
 import Link from "next/link";
 import {useEffect,useMemo,useState} from "react";
 type Ex={id:string;exerciseId:string;targetSets:number;targetReps:string|null;targetRpe:number|null;restSeconds:number;exercise:{id:string;nameDe:string;nameEn?:string|null;equipment:string|null;coachCue1:string|null;coachCue2:string|null;coachCue3:string|null;imageStart:string|null;imageMiddle:string|null;imageEnd:string|null;videoUrl:string|null}};
@@ -11,6 +12,9 @@ function queueOffline(url:string,body:unknown){const key="bd_outbox";const list=
 async function flushOffline(){const key="bd_outbox";const list=JSON.parse(localStorage.getItem(key)||"[]");const remaining=[];for(const item of list){try{const r=await fetch(item.url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(item.body)});if(!r.ok)remaining.push(item);}catch{remaining.push(item);}}localStorage.setItem(key,JSON.stringify(remaining));}
 export default function WorkoutSession({workoutId,exercises,existing,previous,completed=false}:{completed?:boolean;workoutId:string;exercises:Ex[];existing:S[];previous:S[]}){
   const t=useT();
+  const voice=useCoachVoice("COOL_DOWN");
+  const labels=voice.locale==="de"?{title:"Abwärmen",play:"Audio abspielen",stop:"Audio stoppen",next:"WEITER",error:"Audio momentan nicht verfügbar."}:{title:"Cool-down",play:"Play audio",stop:"Stop audio",next:"CONTINUE",error:"Audio unavailable."};
+  const [cooldown,setCooldown]=useState(false);
   const initial=useMemo(()=>new Map(existing.map(s=>[`${s.exerciseId}:${s.setNumber}`,s])),[existing]);
   const previousMap=useMemo(()=>new Map(previous.map(s=>[`${s.exerciseId}:${s.setNumber}`,s])),[previous]);
   const [error,setError]=useState("");
@@ -36,11 +40,12 @@ export default function WorkoutSession({workoutId,exercises,existing,previous,co
     try{
       await flushOffline();
       const response=await fetch(`/api/workouts/${workoutId}`,{method:"PATCH",headers:{"content-type":"application/json"},body:JSON.stringify({action:"complete",rpe})});
-      if(response.ok){if(navigator.vibrate)navigator.vibrate([70,50,120]);window.location.href="/dashboard";}
+      if(response.ok){if(navigator.vibrate)navigator.vibrate([70,50,120]);if(voice.enabled&&voice.item){setCooldown(true);voice.play()}else window.location.href="/dashboard";}
       else {const body=await response.json().catch(()=>({}));setError(body.error||t("Training konnte nicht abgeschlossen werden."));}
     }catch{setError(t("Keine Verbindung. Deine Einheit wurde noch nicht abgeschlossen."));}
     finally{setCompleteBusy(false);}
   }
+  if(cooldown)return <section className="panel" style={{padding:24}}><h2>{labels.title}</h2><p>{voice.item?.title}</p>{voice.error&&<p role="status">{labels.error}</p>}<button className="secondary" onClick={()=>voice.play()}>{labels.play}</button> <button className="secondary" onClick={voice.stop}>{labels.stop}</button><button className="primary" onClick={()=>{voice.stop();window.location.href="/dashboard"}}>{labels.next}</button></section>;
   return <>
     {error&&<p role="alert">{t(error)}</p>}
     {rest&&rest.seconds>0&&<div className="rest-timer"><span><Copy text={"PAUSE"}/></span><strong>{Math.floor(rest.seconds/60)}:{String(rest.seconds%60).padStart(2,"0")}</strong><button onClick={()=>setRest(null)}><Copy text={"ÜBERSPRINGEN"}/></button></div>}

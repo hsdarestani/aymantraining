@@ -1,44 +1,30 @@
 import {Copy,LocalizedTextInput} from "../components/Locale";
-import {currentLocale,translate,useLocale} from "../lib/i18n/locale";
+import {useLocale} from "../lib/i18n/locale";
 import {useEffect,useRef,useState} from "react";
 import {Animated,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from "react-native";
 import Svg,{Circle} from "react-native-svg";
-import * as Speech from "expo-speech";
+import {useCoachVoice} from "../lib/coach-voice";
 import {router} from "expo-router";
 import Brand from "../components/Brand";
 import {Card,Eyebrow,SectionTitle} from "../components/Card";
 import {api} from "../lib/api";
 import {C,radius} from "../theme";
 
-/** The 2 minute breathing guide uses on-device speech, not a cloned coach voice.
- * Replace this opt-in narrator with an authorized recorded voice in a future release.
- */
-const GUIDED_CUES=[
- "Finde eine bequeme Position. Atme ruhig durch die Nase ein und wieder aus.",
- "Finde deinen eigenen Rhythmus. Nichts muss perfekt sein.",
- "Lass mit jeder Ausatmung ein wenig Spannung los.",
- "Bleib entspannt. Du musst deinen Atem nicht anhalten.",
- "Spüre, wie du ruhiger wirst. Atme in deinem Tempo.",
- "Wenn es dir guttut, schließe für einen Moment die Augen.",
- "Noch ein paar ruhige Atemzüge. Bleib bei dir.",
- "Gleich geschafft. Nimm dieses Gefühl mit in deinen Tag."
-];
 const DURATION=120;
 const CLOCK_CIRCUMFERENCE=2*Math.PI*101;
 const clock=(seconds:number)=>Math.floor(seconds/60)+":"+String(seconds%60).padStart(2,"0");
 
 export default function Focus(){
  const locale=useLocale();
+ const voice=useCoachVoice("MOTIVATION");
+ const voiceLabels=locale==="de"?{caption:"Trainerstimme",unavailable:"Audio momentan nicht verfügbar."}:{caption:"Coach voice",unavailable:"Audio unavailable."};
  const [d,setD]=useState<any>(null),[stress,setStress]=useState(5),[mood,setMood]=useState(7),[energy,setEnergy]=useState(7),[soreness,setSoreness]=useState(4),[sleepHours,setSleepHours]=useState("");
- const [seconds,setSeconds]=useState(DURATION),[running,setRunning]=useState(false),[voiceEnabled,setVoiceEnabled]=useState(false),[status,setStatus]=useState("");
+ const [seconds,setSeconds]=useState(DURATION),[running,setRunning]=useState(false),[status,setStatus]=useState("");
  const timer=useRef<ReturnType<typeof setInterval>|null>(null);
  const deadline=useRef(0),cueIndex=useRef(-1),breath=useRef(new Animated.Value(.88)).current;
- const speaking=useRef(false);
- const voiceRef=useRef(voiceEnabled);
- voiceRef.current=voiceEnabled;
 
  useEffect(()=>{api<any>("/api/focus").then(x=>{setD(x);setStress(x.check?.stress??5);setMood(x.check?.mood??7);setEnergy(x.check?.energy??7);setSoreness(x.check?.soreness??4);setSleepHours(x.check?.sleepHours==null?"":String(x.check.sleepHours))}).catch(()=>{})},[]);
- useEffect(()=>()=>{if(timer.current)clearInterval(timer.current);Speech.stop().catch(()=>{})},[]);
+ useEffect(()=>()=>{if(timer.current)clearInterval(timer.current);voice.stop()},[]);
  useEffect(()=>{
   if(!running){breath.stopAnimation();breath.setValue(.88);return}
   const animation=Animated.loop(Animated.sequence([
@@ -49,17 +35,12 @@ export default function Focus(){
   return()=>animation.stop();
  },[breath,running]);
 
- function narrate(text:string){
-  if(!voiceRef.current)return;
-  Speech.stop().catch(()=>{});
-  Speech.speak(translate(text),{language:currentLocale()==="en"?"en-US":"de-DE",rate:.86,pitch:1,onStart:()=>{speaking.current=true},onDone:()=>{speaking.current=false},onStopped:()=>{speaking.current=false},onError:()=>{speaking.current=false}});
- }
- useEffect(()=>{Speech.stop().catch(()=>{})},[locale]);
+ useEffect(()=>{voice.stop()},[locale]);
  function clearTimer(){if(timer.current){clearInterval(timer.current);timer.current=null}}
  function breathe(){
   if(running){
    setSeconds(Math.max(0,Math.ceil((deadline.current-Date.now())/1000)));
-   clearTimer();setRunning(false);Speech.stop().catch(()=>{});
+   clearTimer();setRunning(false);voice.stop();
    return;
   }
   const duration=seconds===0?DURATION:seconds;
@@ -67,22 +48,22 @@ export default function Focus(){
   deadline.current=Date.now()+duration*1000;
   cueIndex.current=-1;
   setRunning(true);
-  if(duration===DURATION)narrate(GUIDED_CUES[0]);
+  void voice.play();
   timer.current=setInterval(()=>{
    const remaining=Math.max(0,Math.ceil((deadline.current-Date.now())/1000));
    setSeconds(remaining);
    if(remaining===0){
-    clearTimer();setRunning(false);if(voiceRef.current)narrate("Geschafft. Atme ganz normal weiter.");return;
+    clearTimer();setRunning(false);voice.stop();return;
    }
    const step=Math.floor((DURATION-remaining)/16);
    if(step>cueIndex.current){
     cueIndex.current=step;
-    if(step>0&&step<GUIDED_CUES.length)narrate(GUIDED_CUES[step]);
+    
    }
   },250);
  }
- function reset(){clearTimer();setRunning(false);setSeconds(DURATION);cueIndex.current=-1;Speech.stop().catch(()=>{})}
- function toggleVoice(){setVoiceEnabled(v=>!v);Speech.stop().catch(()=>{})}
+ function reset(){clearTimer();setRunning(false);setSeconds(DURATION);cueIndex.current=-1;voice.stop()}
+ function toggleVoice(){void voice.change(!voice.enabled)}
  async function save(){try{await api("/api/daily-check",{method:"POST",body:JSON.stringify({stress,mood,energy,soreness,sleepHours:Number(sleepHours)||undefined})});setStatus("GESPEICHERT")}catch(e:any){setStatus(e.message||"Fehler")}}
  const elapsed=DURATION-seconds,phase=Math.floor(elapsed/4)%2===0?"EINATMEN":"AUSATMEN";
  const progress=elapsed/DURATION;
@@ -104,7 +85,8 @@ export default function Focus(){
     <Pressable accessibilityRole="button" style={[s.primary,s.controlPrimary]} onPress={breathe}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.primaryText}><Copy text={running?"PAUSIEREN":seconds===0?"ERNEUT STARTEN":seconds===DURATION?"STARTEN":"FORTSETZEN"}/></Text></Pressable>
     <Pressable accessibilityRole="button" style={[s.secondary,s.controlSecondary]} onPress={reset}><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={s.secondaryText}><Copy text="ZURÜCKSETZEN"/></Text></Pressable>
    </View>
-   <Pressable accessibilityRole="switch" accessibilityState={{checked:voiceEnabled}} onPress={toggleVoice} style={s.voiceRow}><View style={[s.voiceIndicator,voiceEnabled&&s.voiceOn]}/><View style={s.voiceCopy}><Text style={s.voiceTitle}><Copy text={voiceEnabled?"SPRACHBEGLEITUNG AKTIV":"SPRACHBEGLEITUNG EINSCHALTEN"}/></Text><Text style={s.voiceCaption}><Copy text="Aktuell Gerätestimme. Trainerstimme folgt nach Freigabe der Aufnahme."/></Text></View><Text style={s.voiceArrow}><Copy text={voiceEnabled?"AN":"AUS"}/></Text></Pressable>
+   <Pressable accessibilityRole="switch" accessibilityState={{checked:voice.enabled}} onPress={toggleVoice} disabled={!voice.ready} style={s.voiceRow}><View style={[s.voiceIndicator,voice.enabled&&s.voiceOn]}/><View style={s.voiceCopy}><Text style={s.voiceTitle}><Copy text={voice.enabled?"SPRACHBEGLEITUNG AKTIV":"SPRACHBEGLEITUNG EINSCHALTEN"}/></Text><Text style={s.voiceCaption}>{voiceLabels.caption}</Text></View><Text style={s.voiceArrow}><Copy text={voice.enabled?"AN":"AUS"}/></Text></Pressable>
+   {voice.error&&<Text style={s.safety}>{voiceLabels.unavailable}</Text>}
    <Text style={s.safety}><Copy text="Bei Unwohlsein stoppen. Normal weiteratmen. Kein Luftanhalten notwendig."/></Text>
   </View>
   <Card style={s.lineCard}><Eyebrow><Copy text="DEINE DIFFERENT LINE"/></Eyebrow><Text style={s.line}><Copy text={d?.line||"Heute zählt die nächste saubere Entscheidung."}/></Text></Card>

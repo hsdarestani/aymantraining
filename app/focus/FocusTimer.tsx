@@ -2,61 +2,41 @@
 import {Copy} from "../components/Locale";
 
 import {useEffect,useRef,useState} from "react";
+import {useCoachVoice} from "../components/useCoachVoice";
 import styles from "./focus.module.css";
 import {useLocale} from "../components/Locale";
 import {translate} from "../../lib/i18n/translate";
 
 const LENGTH=120;
-const cues=[
- "Nimm eine bequeme Position ein. Atme ruhig durch die Nase ein und wieder aus.",
- "Du gibst das Tempo vor. Kein Druck.",
- "Lass die Schultern locker und atme ruhig weiter.",
- "Bei jeder Ausatmung darfst du etwas Spannung abgeben.",
- "Spüre den Boden unter dir. Bleib in deinem Rhythmus.",
- "Noch ein paar bewusste Atemzüge.",
- "Du musst nichts leisten. Bleib einfach hier.",
- "Gleich geschafft. Komm langsam zurück in deinen Tag."
-];
 function clock(n:number){return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0")}
 export default function FocusTimer(){
- const locale=useLocale(),localeRef=useRef(locale);
- localeRef.current=locale;
+ const voice=useCoachVoice("MOTIVATION");
+ const locale=useLocale();
  const t=(text:string)=>translate(text,locale);
- const [remaining,setRemaining]=useState(LENGTH),[running,setRunning]=useState(false),[narration,setNarration]=useState(false),[supported,setSupported]=useState(true);
+ const voiceLabels=locale==="de"?{unavailable:"Audio momentan nicht verfügbar."}:{unavailable:"Audio unavailable."};
+ const [remaining,setRemaining]=useState(LENGTH),[running,setRunning]=useState(false);
  const end=useRef(0),interval=useRef<ReturnType<typeof setInterval>|null>(null),spoken=useRef(-1);
- const enabled=useRef(false);enabled.current=narration;
- useEffect(()=>{setSupported(typeof window!=="undefined"&&"speechSynthesis" in window);return()=>{window.speechSynthesis?.cancel()}},[]);
- function say(message:string){
-  if(!enabled.current||!("speechSynthesis" in window))return;
-  window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(translate(message,localeRef.current));u.lang=localeRef.current==="en"?"en-US":"de-DE";u.rate=.88;u.pitch=1;
-  const preferred=window.speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(localeRef.current));
-  if(preferred)u.voice=preferred;
-  window.speechSynthesis.speak(u);
- }
- useEffect(()=>{window.speechSynthesis?.cancel()},[locale]);
  function stopInterval(){if(interval.current){clearInterval(interval.current);interval.current=null}}
  function tick(){
   const next=Math.max(0,Math.ceil((end.current-Date.now())/1000));
   setRemaining(next);
-  if(next===0){stopInterval();setRunning(false);say("Geschafft. Atme ganz normal weiter.");return}
+  if(next===0){stopInterval();setRunning(false);voice.stop();return}
   const step=Math.floor((LENGTH-next)/16);
-  if(step>spoken.current){spoken.current=step;if(step>0&&step<cues.length)say(cues[step])}
+  if(step>spoken.current){spoken.current=step}
  }
  useEffect(()=>{
-  document.addEventListener("visibilitychange",tick);
-  return()=>{document.removeEventListener("visibilitychange",tick);stopInterval();window.speechSynthesis?.cancel()};
+  return()=>{stopInterval();voice.stop()};
  },[]);
  function startOrPause(){
-  if(running){setRemaining(Math.max(0,Math.ceil((end.current-Date.now())/1000)));stopInterval();setRunning(false);window.speechSynthesis?.cancel();return}
+  if(running){setRemaining(Math.max(0,Math.ceil((end.current-Date.now())/1000)));stopInterval();setRunning(false);voice.stop();return}
   const duration=remaining===0?LENGTH:remaining;
   if(remaining===0)setRemaining(LENGTH);
   end.current=Date.now()+duration*1000;spoken.current=-1;setRunning(true);
-  if(duration===LENGTH)say(cues[0]);
+  voice.play();
   interval.current=setInterval(tick,250);
  }
- function reset(){stopInterval();setRunning(false);setRemaining(LENGTH);spoken.current=-1;window.speechSynthesis?.cancel()}
- function toggleVoice(){setNarration(!narration);window.speechSynthesis?.cancel()}
+ function reset(){stopInterval();setRunning(false);setRemaining(LENGTH);spoken.current=-1;voice.stop()}
+ function toggleVoice(){void voice.change(!voice.enabled)}
  const elapsed=LENGTH-remaining;
  const phase=Math.floor(elapsed/4)%2===0?"EINATMEN":"AUSATMEN";
  return <section className={styles.layout} aria-label={t("Zwei Minuten Atemtraining")}>
@@ -81,9 +61,10 @@ export default function FocusTimer(){
   <aside className={styles.sidebar}>
    <div className={styles.sidebarNumber}>01<span>/</span>02</div>
    <div><span className={styles.eyebrow}><Copy text={"BE DIFFERENT / MINDSET"}/></span><h2 className={styles.sideTitle}>STILLNESS<br/><em>IS STRENGTH.</em></h2><p className={styles.sideDescription}><Copy text={t("Ein Moment, der nur dir gehört. Ruhiger Atem, klarer Kopf, volle Kontrolle.")}/></p></div>
-   <button type="button" disabled={!supported} role="switch" aria-checked={narration} className={styles.narration+" "+(narration?styles.narrationActive:"")} onClick={toggleVoice}>
-    <span className={styles.speakerIcon} aria-hidden="true">◖))</span><span className={styles.speakerText}><strong><Copy text={t(!supported?"SPRACHE NICHT VERFÜGBAR":narration?"GUIDE AUDIO AKTIV":"GUIDE AUDIO EINSCHALTEN")}/></strong><small><Copy text={t("Geführte Atemübung mit Systemstimme")}/></small></span><span className={styles.switch}><Copy text={narration?"ON":"OFF"}/></span>
+   <button type="button" disabled={!voice.ready} role="switch" aria-checked={voice.enabled} className={styles.narration+" "+(voice.enabled?styles.narrationActive:"")} onClick={toggleVoice}>
+    <span className={styles.speakerIcon} aria-hidden="true">◖))</span><span className={styles.speakerText}><strong><Copy text={t(voice.enabled?"GUIDE AUDIO AKTIV":"GUIDE AUDIO EINSCHALTEN")}/></strong><small><Copy text={t("Trainerstimme")}/></small></span><span className={styles.switch}><Copy text={voice.enabled?"ON":"OFF"}/></span>
    </button>
+   {voice.error&&<p role="status">{voiceLabels.unavailable}</p>}
    <div className={styles.sideFooter}><span><Copy text={t("4 SEK. EIN")}/></span><span className={styles.dot}/><span><Copy text={t("4 SEK. AUS")}/></span><span className={styles.dot}/><span><Copy text={t("KEIN HALTEN")}/></span></div>
   </aside>
  </section>
