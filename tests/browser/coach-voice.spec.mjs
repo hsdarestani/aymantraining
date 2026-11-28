@@ -5,7 +5,7 @@ const db=new PrismaClient();
 test('recorded voice library authorization, language, audience, ranges and preference',async({request})=>{
  if(!process.env.DATABASE_URL?.includes('bedifferent_test'))throw Error('Isolated test database required');
  const stamp=Date.now(),password='IsolatedAudioAcceptance123!',passwordHash=await bcrypt.hash(password,4),users=[],items=[];
- async function member(role,sex){const u=await db.user.create({data:{email:'voice-'+role+'-'+sex+'-'+stamp+'@example.invalid',passwordHash,role,sex,onboardingCompleted:true}});users.push(u.id);const res=await request.post('/api/auth/login',{headers:{'x-bd-client':'mobile'},data:{email:u.email,password}});expect(res.status()).toBe(200);return {Authorization:'Bearer '+(await res.json()).sessionToken,'x-bd-client':'mobile'};}
+ async function member(role,sex){const u=await db.user.create({data:{email:('voice-'+role+'-'+sex+'-'+stamp+'@example.invalid').toLowerCase(),passwordHash,role,sex,onboardingCompleted:true}});users.push(u.id);const res=await request.post('/api/auth/login',{headers:{'x-bd-client':'mobile'},data:{email:u.email,password}});expect(res.status()).toBe(200);return {Authorization:'Bearer '+(await res.json()).sessionToken,'x-bd-client':'mobile'};}
  const route='/api/voice-guidance',pref='/api/voice-preference';
  const body=(audience,locale,active,id)=>({title:'Audio QA',category:'COOL_DOWN',audience,locale,active:String(active),...(id?{id}:{}),file:{name:'fixture.mp3',mimeType:'audio/mpeg',buffer:Buffer.from('ID3contract-test-fixture')}});
  let admin;
